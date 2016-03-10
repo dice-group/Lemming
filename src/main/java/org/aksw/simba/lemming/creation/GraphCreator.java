@@ -1,0 +1,257 @@
+package org.aksw.simba.lemming.creation;
+
+import java.util.Arrays;
+
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.colour.ColourPalette;
+import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+
+import com.carrotsearch.hppc.ObjectIntOpenHashMap;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+public class GraphCreator {
+
+    protected ColouredGraph graph;
+
+    public GraphCreator() {
+    }
+
+    public ColouredGraph processModel(Model model) {
+        ColourPalette vertexPalette = createVertexPalette(model);
+        ColourPalette edgePalette = createEdgePalette(model);
+        ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
+        ObjectIntOpenHashMap<Resource> resourceIdMapping = new ObjectIntOpenHashMap<Resource>();
+        StmtIterator iterator = model.listStatements();
+        Statement statement;
+        Resource subject, object;
+        Property property;
+        int subjectId, propertyId, objectId;
+        String propertyUri;
+        // Iterator over all statements
+        while (iterator.hasNext()) {
+            statement = iterator.next();
+            subject = statement.getSubject();
+            // Add the subject if it is not existing
+            if (resourceIdMapping.containsKey(subject)) {
+                subjectId = resourceIdMapping.get(subject);
+            } else {
+                subjectId = graph.addVertex();
+                resourceIdMapping.put(subject, subjectId);
+            }
+            // if this statement has a resource as object
+            if (statement.getObject().isResource()) {
+                // Add the object if it is not existing
+                object = statement.getObject().asResource();
+                if (resourceIdMapping.containsKey(object)) {
+                    objectId = resourceIdMapping.get(object);
+                } else {
+                    objectId = graph.addVertex();
+                    resourceIdMapping.put(object, objectId);
+                }
+                // Add the property if it is not existing
+                property = statement.getPredicate();
+                propertyId = graph.addEdge(subjectId, objectId);
+                // Set the colour of the edge
+                propertyUri = property.getURI();
+                if (!edgePalette.containsUri(propertyUri)) {
+                    edgePalette.addColour(propertyUri);
+                }
+                graph.setEdgeColour(propertyId, edgePalette.getColour(propertyUri));
+
+                // if this triple defines the class of the subject
+                if (property.equals(RDF.type)) {
+                    graph.setVertexColour(subjectId,
+                            vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
+                }
+            }
+        }
+        return graph;
+    }
+
+    protected ColourPalette createVertexPalette(Model model) {
+        ObjectObjectOpenHashMap<Resource, HierarchyNode> classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
+        RDFNode node;
+        Resource resource1, resource2;
+        while (nIterator.hasNext()) {
+            node = nIterator.next();
+            if (node.isResource()) {
+                resource1 = node.asResource();
+                classes.put(resource1, null);
+            }
+        }
+        StmtIterator sIterator = model.listStatements(null, RDFS.subClassOf, (RDFNode) null);
+        Statement statement;
+        HierarchyNode hNode1, hNode2;
+        // Iterate over the class hierarchy triples
+        while (sIterator.hasNext()) {
+            statement = sIterator.next();
+            resource1 = statement.getSubject();
+            node = statement.getObject();
+            if (node.isResource()) {
+                resource2 = node.asResource();
+                if (classes.containsKey(resource1)) {
+                    hNode1 = classes.get(resource1);
+                    // if the class is known but there is no hierarchy node,
+                    // create it
+                    if (hNode1 == null) {
+                        hNode1 = new HierarchyNode();
+                        classes.put(resource1, hNode1);
+                    }
+                } else {
+                    // this class is not known, add it
+                    hNode1 = new HierarchyNode();
+                    classes.put(resource1, hNode1);
+                }
+                if (classes.containsKey(resource2)) {
+                    hNode2 = classes.get(resource2);
+                    // if the class is known but there is no hierarchy node,
+                    // create it
+                    if (hNode2 == null) {
+                        hNode2 = new HierarchyNode();
+                        classes.put(resource2, hNode2);
+                    }
+                } else {
+                    // this class is not known, add it
+                    hNode2 = new HierarchyNode();
+                    classes.put(resource2, hNode2);
+                }
+                // add the hierarchy information
+                // if there is no list of child nodes
+                if (hNode1.childNodes == null) {
+                    hNode1.childNodes = new Resource[] { resource2 };
+                } else {
+                    hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
+                    hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
+                }
+                // if there is no list of parent nodes
+                if (hNode2.parentNodes == null) {
+                    hNode2.parentNodes = new Resource[] { resource1 };
+                } else {
+                    hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
+                    hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+                }
+            } else {
+                // this triple seems to be wrong
+                if (!classes.containsKey(resource1)) {
+                    classes.put(resource1, null);
+                }
+            }
+        }
+
+        // All classes have been collected
+        // The colours can be defined
+        ColourPalette palette = new InMemoryPalette();
+        for (int i = 0; i < classes.allocated.length; ++i) {
+            if (classes.allocated[i]) {
+                palette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
+            }
+        }
+
+        // The hierarchy can be used to create colour mixtures that contain the
+        // hierarchy
+        // Search for all root nodes that have child nodes
+        for (int i = 0; i < classes.allocated.length; ++i) {
+            if (classes.allocated[i]) {
+                hNode1 = (HierarchyNode) ((Object[]) classes.values)[i];
+                if ((hNode1 != null) && (hNode1.childNodes != null) && (hNode1.parentNodes == null)) {
+                    mixColours((Resource) ((Object[]) classes.keys)[i], hNode1, classes, palette);
+                }
+            }
+        }
+
+        return palette;
+    }
+
+    protected ColourPalette createEdgePalette(Model model) {
+        ObjectObjectOpenHashMap<Resource, HierarchyNode> properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        RDFNode node;
+        Resource resource1, resource2;
+        StmtIterator sIterator = model.listStatements(null, RDFS.subPropertyOf, (RDFNode) null);
+        Statement statement;
+        HierarchyNode hNode1, hNode2;
+        // Iterate over the class hierarchy triples
+        while (sIterator.hasNext()) {
+            statement = sIterator.next();
+            resource1 = statement.getSubject();
+            node = statement.getObject();
+            if (node.isResource()) {
+                resource2 = node.asResource();
+                if (properties.containsKey(resource1)) {
+                    hNode1 = properties.get(resource1);
+                } else {
+                    // this property is not known, add it
+                    hNode1 = new HierarchyNode();
+                    properties.put(resource1, hNode1);
+                }
+                if (properties.containsKey(resource2)) {
+                    hNode2 = properties.get(resource2);
+                } else {
+                    // this property is not known, add it
+                    hNode2 = new HierarchyNode();
+                    properties.put(resource2, hNode2);
+                }
+                // add the hierarchy information
+                // if there is no list of child nodes
+                if (hNode1.childNodes == null) {
+                    hNode1.childNodes = new Resource[] { resource2 };
+                } else {
+                    hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
+                    hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
+                }
+                // if there is no list of parent nodes
+                if (hNode2.parentNodes == null) {
+                    hNode2.parentNodes = new Resource[] { resource1 };
+                } else {
+                    hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
+                    hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+                }
+            }
+        }
+
+        // All properties have been collected
+        // The colours can be defined
+        ColourPalette palette = new InMemoryPalette();
+        for (int i = 0; i < properties.allocated.length; ++i) {
+            if (properties.allocated[i]) {
+                palette.addColour(((Resource) ((Object[]) properties.keys)[i]).getURI());
+            }
+        }
+
+        // The hierarchy can be used to create colour mixtures that contain the
+        // hierarchy
+        // Search for all root nodes that have child nodes
+        for (int i = 0; i < properties.allocated.length; ++i) {
+            if (properties.allocated[i]) {
+                hNode1 = (HierarchyNode) ((Object[]) properties.values)[i];
+                if ((hNode1.childNodes != null) && (hNode1.parentNodes == null)) {
+                    mixColours((Resource) ((Object[]) properties.keys)[i], hNode1, properties, palette);
+                }
+            }
+        }
+
+        return palette;
+    }
+
+    private void mixColours(Resource resource, HierarchyNode hNode,
+            ObjectObjectOpenHashMap<Resource, HierarchyNode> classes, ColourPalette palette) {
+        HierarchyNode childNode;
+        for (int i = 0; i < hNode.childNodes.length; ++i) {
+            childNode = classes.get(hNode.childNodes[i]);
+            palette.mixColour(resource.getURI(), hNode.childNodes[i].getURI());
+            // if this child has additional children
+            if (childNode.childNodes != null) {
+                mixColours(hNode.childNodes[i], childNode, classes, palette);
+            }
+        }
+    }
+}
