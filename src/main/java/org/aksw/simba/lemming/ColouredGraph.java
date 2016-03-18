@@ -7,6 +7,8 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ColouredGraph {
 
@@ -91,4 +93,22 @@ public class ColouredGraph {
     public ColourPalette getEdgePalette() {
         return edgePalette;
     }
+    
+    public int[][] getInDegreeNodeArray() {
+        return graph.getInNeighborhoods();
+    }
+
+    public int[][] getOutDegreeNodeArray() {
+        return graph.getOutNeighborhoods();
+    }
+    
+    public int getGraphSize(){
+        return graph.getSize();
+    }
+    
+    public int[] getNodeArray() {
+        return graph.getVertices().toIntArray();
+    }
+    
+      
 }

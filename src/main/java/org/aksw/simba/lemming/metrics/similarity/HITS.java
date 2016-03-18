@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import org.aksw.simba.lemming.ColouredGraph;
 
 /**
- *
+ * Implementation of Hubs and Authorities (HITS) algorithm.
  * @author jsaveta
  */
 public class HITS {
@@ -71,8 +71,8 @@ public class HITS {
         }
     }
  
-    private HITSNode getNodeWithID(ArrayList<HITSNode> G, int ID) {
-        for (HITSNode x : G) {
+    private HITSNode getNodeWithID(ArrayList<HITSNode> S, int ID) {
+        for (HITSNode x : S) {
             if (x.ID == ID) {
                 return x;
             }
