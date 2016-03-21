@@ -7,6 +7,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import java.util.ArrayList;
 
 public class ColouredGraph {
 
@@ -104,8 +105,8 @@ public class ColouredGraph {
         return graph.getSize();
     }
     
-    public int[] getNodeArray() {
-        return graph.getVertices().toIntArray();
+    public ArrayList<Integer> getNodeList() {
+        return graph.getVertices().toIntegerArrayList();
     }
     
       

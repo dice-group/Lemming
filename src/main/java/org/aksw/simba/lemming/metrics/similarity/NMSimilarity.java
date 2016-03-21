@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.metrics.similarity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
 
@@ -15,37 +17,38 @@ import org.aksw.simba.lemming.ColouredGraph;
 public class NMSimilarity {
     private ColouredGraph colouredGraphA;
     private ColouredGraph colouredGraphB;
-    private int[][] inNodeArrayA;
-    private int[][] outNodeArrayA;
-    private int[][] inNodeArrayB;
-    private int[][] outNodeArrayB;
-    private Double[][] nodeSimilarity;
-    private Double[][] inNodeSimilarity;
-    private Double[][] outNodeSimilarity;
+    private List<List<Integer>> inNodeListA;
+    private List<List<Integer>> outNodeListA;
+    private List<List<Integer>> inNodeListB;
+    private List<List<Integer>> outNodeListB;
+    
+    private List<List<Double>> nodeSimilarity;
+    private List<List<Double>> inNodeSimilarity;
+    private List<List<Double>> outNodeSimilarity;
     private Double epsilon;
     private int graphSizeA;
     private int graphSizeB;
-
+    
     public NMSimilarity(ColouredGraph colouredGraphA, ColouredGraph colouredGraphB, Double epsilon) {
         try {
             this.colouredGraphA = colouredGraphA;
             this.colouredGraphB = colouredGraphB;
             this.epsilon = epsilon;
-            this.inNodeArrayA = colouredGraphA.getInDegreeNodeArray();
-            this.outNodeArrayA = colouredGraphA.getOutDegreeNodeArray();
             
-//            System.out.println("inNodeArrayA: " + Arrays.deepToString(inNodeArrayA));
-//            System.out.println("outNodeArrayA: " + Arrays.deepToString(outNodeArrayA));
             
-            this.inNodeArrayB = colouredGraphB.getInDegreeNodeArray();
-            this.outNodeArrayB = colouredGraphB.getOutDegreeNodeArray();
+            this.inNodeListA  = twoDArrayToList(colouredGraphA.getInDegreeNodeArray());
+            this.outNodeListA = twoDArrayToList(colouredGraphA.getOutDegreeNodeArray());
+            
+            this.inNodeListB = twoDArrayToList(colouredGraphB.getInDegreeNodeArray());
+            this.outNodeListB = twoDArrayToList(colouredGraphB.getOutDegreeNodeArray());
 
             this.graphSizeA = colouredGraphA.getGraphSize();
             this.graphSizeB = colouredGraphB.getGraphSize();
 
-            this.nodeSimilarity = new Double[graphSizeA][graphSizeB];
-            this.inNodeSimilarity = new Double[graphSizeA][graphSizeB];
-            this.outNodeSimilarity = new Double[graphSizeA][graphSizeB];
+             
+            this.nodeSimilarity = new ArrayList<List<Double>>();
+            this.inNodeSimilarity = new ArrayList<List<Double>>();
+            this.outNodeSimilarity = new ArrayList<List<Double>>();
 
             initializeSimilarityMatrices();
 
@@ -55,46 +58,34 @@ public class NMSimilarity {
     }
 
     public void initializeSimilarityMatrices() {
+        
         for (int i = 0; i < graphSizeA; i++) {
+            inNodeSimilarity.add(new ArrayList<Double>());
+            outNodeSimilarity.add(new ArrayList<Double>());
+            nodeSimilarity.add(new ArrayList<Double>());
+            
             for (int j = 0; j < graphSizeB; j++) {
-                Double maxDegree = Double.valueOf(Math.max(inNodeArrayA[i].length, inNodeArrayB[j].length));
+                Double maxDegree = Double.valueOf(Math.max(inNodeListA.get(i).size(), inNodeListB.get(j).size()));
                 if (maxDegree != 0) {
-                    inNodeSimilarity[i][j] = ((Math.min(inNodeArrayA[i].length, inNodeArrayB[j].length)) / (maxDegree));
+                    inNodeSimilarity.get(i).add(j,(Math.min(inNodeListA.get(i).size(), inNodeListB.get(j).size())) / (maxDegree)); 
                 } else {
-                    inNodeSimilarity[i][j] = Double.valueOf(0);
+                    inNodeSimilarity.get(i).add(j, Double.valueOf(0));
                 }
 
-                maxDegree = Double.valueOf(Math.max(outNodeArrayA[i].length, outNodeArrayB[j].length));
+                maxDegree = Double.valueOf(Math.max(outNodeListA.get(i).size(), outNodeListB.get(j).size()));
                 if (maxDegree != 0) {
-                    outNodeSimilarity[i][j] = ((Math.min(outNodeArrayA[i].length, outNodeArrayB[j].length)) / (maxDegree));
+                    outNodeSimilarity.get(i).add(j,((Math.min(outNodeListA.get(i).size(), outNodeListB.get(j).size())) / (maxDegree)));
                 } else {
-                    outNodeSimilarity[i][j] = Double.valueOf(0);
+                    outNodeSimilarity.get(i).add(j,Double.valueOf(0));
                 }
             }
         }
 
         for (int i = 0; i < graphSizeA; i++) {
             for (int j = 0; j < graphSizeB; j++) {
-                //System.out.print(inNodeSimilarity[i][j] + " ");
-                nodeSimilarity[i][j] = (inNodeSimilarity[i][j] + outNodeSimilarity[i][j]) / 2;
+                nodeSimilarity.get(i).add(j,(inNodeSimilarity.get(i).get(j) + outNodeSimilarity.get(i).get(j)) / 2);
             }
-            //System.out.println();
         }
-//        System.out.println();
-//        for (int i = 0; i < graphSizeA; i++) {
-//            for (int j = 0; j < graphSizeB; j++) {
-//                System.out.print(outNodeSimilarity[i][j]+" ");
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
-//        for (int i = 0; i < graphSizeA; i++) {
-//            for (int j = 0; j < graphSizeB; j++) {
-//                System.out.print(nodeSimilarity[i][j]+" ");
-//            }
-//            System.out.println();
-//        }
-
     }
 
     public void measureSimilarity() {
@@ -107,36 +98,36 @@ public class NMSimilarity {
                 for (int j = 0; j < graphSizeB; j++) {
                     //calculate in-degree similarities
                     double similaritySum = 0.0;
-                    double maxDegree = Double.valueOf(Math.max(inNodeArrayA[i].length, inNodeArrayB[j].length));
-                    int minDegree = Math.min(inNodeArrayA[i].length, inNodeArrayB[j].length);
-                    if (minDegree == inNodeArrayA[i].length) {
-                        similaritySum = enumerationFunction(inNodeArrayA[i], inNodeArrayB[j], 0);
+                    double maxDegree = Double.valueOf(Math.max(inNodeListA.get(i).size(), inNodeListB.get(j).size()));
+                    int minDegree = Math.min(inNodeListA.get(i).size(), inNodeListB.get(j).size());
+                    if (minDegree == inNodeListA.get(i).size()) {
+                        similaritySum = enumerationFunction(inNodeListA.get(i), inNodeListB.get(j), 0);
                     } else {
-                        similaritySum = enumerationFunction(inNodeArrayB[j], inNodeArrayA[i], 1);
+                        similaritySum = enumerationFunction(inNodeListB.get(j), inNodeListA.get(i), 1);
                     }
                     if (maxDegree == 0.0 && similaritySum == 0.0) {
-                        inNodeSimilarity[i][j] = 1.0;
+                        inNodeSimilarity.get(i).add(j, 1.0);
                     } else if (maxDegree == 0.0) {
-                        inNodeSimilarity[i][j] = 0.0;
+                        inNodeSimilarity.get(i).add(j, 0.0);
                     } else {
-                        inNodeSimilarity[i][j] = similaritySum / maxDegree;
+                        inNodeSimilarity.get(i).add(j, similaritySum / maxDegree);
                     }
 
                     //calculate out-degree similarities
                     similaritySum = 0.0;
-                    maxDegree = Double.valueOf(Math.max(outNodeArrayA[i].length, outNodeArrayB[j].length));
-                    minDegree = Math.min(outNodeArrayA[i].length, outNodeArrayB[j].length);
-                    if (minDegree == outNodeArrayA[i].length) {
-                        similaritySum = enumerationFunction(outNodeArrayA[i], outNodeArrayB[j], 0);
+                    maxDegree = Double.valueOf(Math.max(outNodeListA.get(i).size(), outNodeListB.get(j).size()));
+                    minDegree = Math.min(outNodeListA.get(i).size(), outNodeListB.get(j).size());
+                    if (minDegree == outNodeListA.get(i).size()) {
+                        similaritySum = enumerationFunction(outNodeListA.get(i), outNodeListB.get(j), 0);
                     } else {
-                        similaritySum = enumerationFunction(outNodeArrayB[j], outNodeArrayA[i], 1);
+                        similaritySum = enumerationFunction(outNodeListB.get(j), outNodeListA.get(i), 1);
                     }
                     if (maxDegree == 0.0 && similaritySum == 0.0) {
-                        outNodeSimilarity[i][j] = 1.0;
+                        outNodeSimilarity.get(i).add(j, 1.0);
                     } else if (maxDegree == 0.0) {
-                        outNodeSimilarity[i][j] = 0.0;
+                        outNodeSimilarity.get(i).add(j, 0.0);
                     } else {
-                        outNodeSimilarity[i][j] = similaritySum / maxDegree;
+                        outNodeSimilarity.get(i).add(j, similaritySum / maxDegree);
                     }
 
                 }
@@ -144,39 +135,34 @@ public class NMSimilarity {
 
             for (int i = 0; i < graphSizeA; i++) {
                 for (int j = 0; j < graphSizeB; j++) {
-                    double temp = (inNodeSimilarity[i][j] + outNodeSimilarity[i][j]) / 2;
-                    if (Math.abs(nodeSimilarity[i][j] - temp) > maxDifference) {
-                        maxDifference = Math.abs(nodeSimilarity[i][j] - temp);
+                    double temp = (inNodeSimilarity.get(i).get(j) + outNodeSimilarity.get(i).get(j)) / 2;
+                    if (Math.abs((nodeSimilarity.get(i).get(j)) - temp) > maxDifference) {
+                        maxDifference = Math.abs(nodeSimilarity.get(i).get(j) - temp);  
                     }
-                    nodeSimilarity[i][j] = temp;
+                    nodeSimilarity.get(i).add(j, temp);
+                    
+                    //I changed place to termination condition
+                    if (maxDifference < epsilon) {
+                        terminate = true;
+                    }
                 }
             }
-
-            if (maxDifference < epsilon) {
-                terminate = true;
-            }
         }
-//        for (int i = 0; i < graphSizeA; i++) {
-//            for (int j = 0; j < graphSizeB; j++) {
-//                System.out.print(nodeSimilarity[i][j] + " ");
-//            }
-//            System.out.println("");
-//        }
     }
 
-    public double enumerationFunction(int[] neighborListMin, int[] neighborListMax, int graph) {
+    public double enumerationFunction(List<Integer> neighborListMin, List<Integer> neighborListMax, int graph) {
         double similaritySum = 0.0;
         Map<Integer, Double> valueMap = new HashMap<Integer, Double>();
         if (graph == 0) {
-            for (int i = 0; i < neighborListMin.length; i++) {
-                int node = neighborListMin[i];
+            for (int i = 0; i < neighborListMin.size(); i++) {
+                int node = neighborListMin.get(i);
                 double max = 0.0;
                 int maxIndex = -1;
-                for (int j = 0; j < neighborListMax.length; j++) {
-                    int key = neighborListMax[j];
+                for (int j = 0; j < neighborListMax.size(); j++) {
+                    int key = neighborListMax.get(j);
                     if (!valueMap.containsKey(key)) {
-                        if (max < nodeSimilarity[node][key]) {
-                            max = nodeSimilarity[node][key];
+                        if (max < nodeSimilarity.get(node).get(key)) {
+                            max = nodeSimilarity.get(node).get(key);
                             maxIndex = key;
                         }
                     }
@@ -184,15 +170,15 @@ public class NMSimilarity {
                 valueMap.put(maxIndex, max);
             }
         } else {
-            for (int i = 0; i < neighborListMin.length; i++) {
-                int node = neighborListMin[i];
+            for (int i = 0; i < neighborListMin.size(); i++) {
+                int node = neighborListMin.get(i);
                 double max = 0.0;
                 int maxIndex = -1;
-                for (int j = 0; j < neighborListMax.length; j++) {
-                    int key = neighborListMax[j];
+                for (int j = 0; j < neighborListMax.size(); j++) {
+                    int key = neighborListMax.get(j);
                     if (!valueMap.containsKey(key)) {
-                        if (max < nodeSimilarity[key][node]) {
-                            max = nodeSimilarity[key][node];
+                        if (max < nodeSimilarity.get(node).get(key)) {
+                            max = nodeSimilarity.get(node).get(key);
                             maxIndex = key;
                         }
                     }
@@ -212,11 +198,30 @@ public class NMSimilarity {
         measureSimilarity();
 
         if (colouredGraphA.getGraphSize() < colouredGraphB.getGraphSize()) {
-            finalGraphSimilarity = enumerationFunction(colouredGraphA.getNodeArray(), colouredGraphB.getNodeArray(), 0) / colouredGraphA.getGraphSize();
+            finalGraphSimilarity = enumerationFunction(colouredGraphA.getNodeList(), colouredGraphB.getNodeList(), 0) / colouredGraphA.getGraphSize();
         } else {
-            finalGraphSimilarity = enumerationFunction(colouredGraphB.getNodeArray(), colouredGraphA.getNodeArray(), 1) / colouredGraphB.getGraphSize();
+            finalGraphSimilarity = enumerationFunction(colouredGraphB.getNodeList(), colouredGraphA.getNodeList(), 1) / colouredGraphB.getGraphSize();
         }
         finalGraphSimilarity = finalGraphSimilarity*100;
         return finalGraphSimilarity;
     }
+    
+  
+    //move this to util package
+    public List<List<Integer>> twoDArrayToList(int[][] twoDArray) {
+    
+        List<List<Integer>> list  = new ArrayList<List<Integer>>();
+        for (int i=0; i<twoDArray.length ; i++){
+            list.add(new ArrayList<Integer>());
+        }
+        for (int i = 0; i < twoDArray.length; i++) {
+            for (int j = 0; j < twoDArray[i].length; j++) {
+                 list.get(j).add(i);
+            }
+        }
+        return list;
+    }
+
+
+    
 }
