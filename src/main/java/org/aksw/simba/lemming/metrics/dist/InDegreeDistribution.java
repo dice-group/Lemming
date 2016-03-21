@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.metrics.dist;
 import java.util.Arrays;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
@@ -15,14 +16,14 @@ import grph.Grph;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class InDegreeDistribution extends AbstractDistributionalMetric {
+public class InDegreeDistribution extends AbstractMetric implements IntDistributionMetric {
 
     public InDegreeDistribution() {
         super("inDegreeDist");
     }
 
     @Override
-    public void apply(ColouredGraph graph) {
+    public IntDistribution apply(ColouredGraph graph) {
         IntIntOpenHashMap counts = new IntIntOpenHashMap();
         Grph g = graph.getGraph();
         IntArrayList inDegrees = g.getAllInEdgeDegrees();
@@ -30,13 +31,12 @@ public class InDegreeDistribution extends AbstractDistributionalMetric {
             counts.putOrAdd(inDegrees.buffer[i], 1, 1);
         }
 
-        sampleSpace = new Object[counts.assigned];
-        distribution = new double[counts.assigned];
+        double distribution[] = new double[counts.assigned];
         int keys[] = counts.keys().toArray();
         Arrays.sort(keys);
         for (int j = 0; j < keys.length; ++j) {
-            sampleSpace[j] = counts.get(keys[j]);
-            sampleSpace[j] = keys[j];
+            distribution[j] = counts.get(keys[j]);
         }
+        return new IntDistribution(keys, distribution);
     }
 }

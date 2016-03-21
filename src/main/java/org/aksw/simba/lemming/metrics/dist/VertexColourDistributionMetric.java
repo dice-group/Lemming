@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.metrics.dist;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
@@ -13,14 +14,14 @@ import com.carrotsearch.hppc.ObjectIntOpenHashMap;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class VertexColourDistribution extends AbstractDistributionalMetric {
+public class VertexColourDistributionMetric extends AbstractMetric implements ObjectDistributionMetric<BitSet> {
 
-    public VertexColourDistribution() {
+    public VertexColourDistributionMetric() {
         super("vertexColourDist");
     }
 
     @Override
-    public void apply(ColouredGraph graph) {
+    public ObjectDistribution<BitSet> apply(ColouredGraph graph) {
         ObjectArrayList<BitSet> colours = graph.getVertexColours();
 
         ObjectIntOpenHashMap<BitSet> counts = new ObjectIntOpenHashMap<BitSet>();
@@ -28,15 +29,16 @@ public class VertexColourDistribution extends AbstractDistributionalMetric {
             counts.putOrAdd((BitSet) ((Object[]) colours.buffer)[i], 1, 1);
         }
 
-        sampleSpace = new Object[counts.assigned];
-        distribution = new double[counts.assigned];
+        BitSet sampleSpace[] = new BitSet[counts.assigned];
+        double distribution[] = new double[counts.assigned];
         int pos = 0;
         for (int i = 0; i < counts.allocated.length; ++i) {
             if (counts.allocated[i]) {
-                sampleSpace[pos] = ((Object[]) counts.keys)[i];
+                sampleSpace[pos] = (BitSet) ((Object[]) counts.keys)[i];
                 distribution[pos] = counts.values[i];
                 ++pos;
             }
         }
+        return new ObjectDistribution<>(sampleSpace, distribution);
     }
 }

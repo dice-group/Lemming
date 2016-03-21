@@ -5,7 +5,7 @@ import java.io.InputStream;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.creation.GraphCreator;
-import org.aksw.simba.lemming.metrics.dist.EdgeColourDistribution;
+import org.aksw.simba.lemming.metrics.dist.EdgeColourDistributionMetric;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -33,7 +33,7 @@ public class EdgeColourDistributionTest {
         GraphCreator creator = new GraphCreator();
         ColouredGraph graph = creator.processModel(model);
 
-        EdgeColourDistribution distribution = new EdgeColourDistribution();
+        EdgeColourDistributionMetric distribution = new EdgeColourDistributionMetric();
         distribution.apply(graph);
 
         ObjectDoubleOpenHashMap<BitSet> expectedCounts = new ObjectDoubleOpenHashMap<BitSet>();

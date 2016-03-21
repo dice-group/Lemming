@@ -1,9 +1,10 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
 
 /**
- * A metric that comprises a single double value.
+ * A metric that generates a single double value.
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
@@ -11,10 +12,11 @@ import org.aksw.simba.lemming.metrics.Metric;
 public interface SingleValueMetric extends Metric {
 
     /**
-     * Returns the value of the metric if it has been applied to a graph before
-     * using {@link #apply(org.aksw.simba.lemming.ColouredGraph)}.
+     * Applies the metric to the given graph.
      * 
-     * @return the value of the metric
+     * @param graph
+     *            the graph for which the metric should be calculated.
+     * @return the value of the metric.
      */
-    public double getValue();
+    public double apply(ColouredGraph graph);
 }

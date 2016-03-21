@@ -3,8 +3,9 @@ package org.aksw.simba.lemming.algo.prob;
 import java.util.Random;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.dist.EdgeColourDistribution;
-import org.aksw.simba.lemming.metrics.dist.VertexColourDistribution;
+import org.aksw.simba.lemming.metrics.dist.EdgeColourDistributionMetric;
+import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
+import org.aksw.simba.lemming.metrics.dist.VertexColourDistributionMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,11 +56,11 @@ public class GenModelBasedAlgo {
     private ColouringSheme sampleVertices(Random random, ColouredGraph source, ColouredGraph target,
             int numberOfVertices) {
         // Determine the colour distribution
-        VertexColourDistribution dist = new VertexColourDistribution();
-        dist.apply(source);
+        VertexColourDistributionMetric vertexColourMetric = new VertexColourDistributionMetric();
+        ObjectDistribution<BitSet> dist = vertexColourMetric.apply(source);
         Object colours[] = dist.getSampleSpace();
         ColouringSheme sheme = new ColouringSheme(colours);
-        double probs[] = dist.getDistribution();
+        double probs[] = dist.getValues();
         double sum = 0;
         for (int i = 0; i < probs.length; ++i) {
             sum += probs[i];
@@ -93,11 +94,11 @@ public class GenModelBasedAlgo {
     private ColouringSheme sampleEdgeColours(Random random, ColouredGraph source, ColouredGraph target,
             int numberOfEdges) {
         // Determine the colour distribution
-        EdgeColourDistribution dist = new EdgeColourDistribution();
-        dist.apply(source);
+        EdgeColourDistributionMetric edgeColourMetric = new EdgeColourDistributionMetric();
+        ObjectDistribution<BitSet> dist = edgeColourMetric.apply(source);
         Object colours[] = dist.getSampleSpace();
         ColouringSheme sheme = new ColouringSheme(colours);
-        double probs[] = dist.getDistribution();
+        double probs[] = dist.getValues();
         double sum = 0;
         for (int i = 0; i < probs.length; ++i) {
             sum += probs[i];

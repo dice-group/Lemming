@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
  * This metric is the number of vertices of the graph.
@@ -8,15 +9,15 @@ import org.aksw.simba.lemming.ColouredGraph;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class NumberOfVertices extends AbstractSingleValueMetric implements SingleValueMetric {
+public class NumberOfVertices extends AbstractMetric implements SingleValueMetric {
 
     public NumberOfVertices() {
         super("#vertices");
     }
 
     @Override
-    public void apply(ColouredGraph graph) {
-        value = graph.getGraph().getNumberOfVertices();
+    public double apply(ColouredGraph graph) {
+        return graph.getGraph().getNumberOfVertices();
     }
 
 }
