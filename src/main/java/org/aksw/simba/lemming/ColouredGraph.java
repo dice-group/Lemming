@@ -104,8 +104,8 @@ public class ColouredGraph {
         return graph.getSize();
     }
     
-    public int[] getNodeArray() {
-        return graph.getVertices().toIntArray();
+    public ArrayList<Integer> getNodeList() {
+        return graph.getVertices().toIntegerArrayList();
     }
     
       
