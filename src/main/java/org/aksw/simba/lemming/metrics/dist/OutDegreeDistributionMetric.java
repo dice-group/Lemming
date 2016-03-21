@@ -26,7 +26,7 @@ public class OutDegreeDistributionMetric extends AbstractMetric implements IntDi
     public IntDistribution apply(ColouredGraph graph) {
         IntIntOpenHashMap counts = new IntIntOpenHashMap();
         Grph g = graph.getGraph();
-        IntArrayList inDegrees = g.getAllInEdgeDegrees();
+        IntArrayList inDegrees = g.getAllOutEdgeDegrees();
         for (int i = 0; i < inDegrees.elementsCount; ++i) {
             counts.putOrAdd(inDegrees.buffer[i], 1, 1);
         }

@@ -9,14 +9,13 @@ import org.aksw.simba.lemming.metrics.dist.EdgeColourDistributionMetric;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import junit.framework.Assert;
-
-public class EdgeColourDistributionTest {
+public class EdgeColourDistributionMetricTest {
 
     private static final String EXPECTED_PROPERTY_URIS[] = new String[] {
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://example.org/relation1" };

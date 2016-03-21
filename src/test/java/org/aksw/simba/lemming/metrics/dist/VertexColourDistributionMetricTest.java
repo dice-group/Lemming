@@ -9,14 +9,13 @@ import org.aksw.simba.lemming.metrics.dist.VertexColourDistributionMetric;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import junit.framework.Assert;
-
-public class VertexColourDistributionTest {
+public class VertexColourDistributionMetricTest {
 
     private static final String EXPECTED_VERTEX_CLASSES[] = new String[] { "http://example.org/class1",
             "http://example.org/class1|http://example.org/class2" };
