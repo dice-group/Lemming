@@ -18,7 +18,8 @@ import junit.framework.Assert;
 
 public class VertexColourDistributionTest {
 
-    private static final String EXPECTED_VERTEX_CLASSES[] = new String[] { "http://example.org/class1", "http://example.org/class1|http://example.org/class2" };
+    private static final String EXPECTED_VERTEX_CLASSES[] = new String[] { "http://example.org/class1",
+            "http://example.org/class1|http://example.org/class2" };
     private static final int EXPECTED_VERTEX_COUNTS[] = new int[] { 1, 1 };
     private static final int EXPECTED_VERTEXES_WITHOUT_COLOURS = 3;
     private static final String GRAPH_FILE = "graph1.n3";
@@ -33,8 +34,8 @@ public class VertexColourDistributionTest {
         GraphCreator creator = new GraphCreator();
         ColouredGraph graph = creator.processModel(model);
 
-        VertexColourDistributionMetric distribution = new VertexColourDistributionMetric();
-        distribution.apply(graph);
+        VertexColourDistributionMetric metric = new VertexColourDistributionMetric();
+        ObjectDistribution<BitSet> distribution = metric.apply(graph);
 
         ObjectDoubleOpenHashMap<BitSet> expectedCounts = new ObjectDoubleOpenHashMap<BitSet>();
         ColourPalette palette = graph.getVertexPalette();
@@ -50,11 +51,10 @@ public class VertexColourDistributionTest {
         }
         expectedCounts.put(new BitSet(), EXPECTED_VERTEXES_WITHOUT_COLOURS);
 
-        Object sampleSpace[] = distribution.getSampleSpace();
-        for (int i = 0; i < sampleSpace.length; ++i) {
-            Assert.assertTrue(expectedCounts.containsKey((BitSet) sampleSpace[i]));
-            Assert.assertEquals(expectedCounts.get((BitSet) sampleSpace[i]), distribution.getDistribution()[i]);
+        for (int i = 0; i < distribution.sampleSpace.length; ++i) {
+            Assert.assertTrue(expectedCounts.containsKey(distribution.sampleSpace[i]));
+            Assert.assertEquals(expectedCounts.get(distribution.sampleSpace[i]), distribution.values[i]);
         }
-        Assert.assertEquals(expectedCounts.size(), sampleSpace.length);
+        Assert.assertEquals(expectedCounts.size(), distribution.sampleSpace.length);
     }
 }

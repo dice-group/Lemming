@@ -33,8 +33,8 @@ public class EdgeColourDistributionTest {
         GraphCreator creator = new GraphCreator();
         ColouredGraph graph = creator.processModel(model);
 
-        EdgeColourDistributionMetric distribution = new EdgeColourDistributionMetric();
-        distribution.apply(graph);
+        EdgeColourDistributionMetric metric = new EdgeColourDistributionMetric();
+        ObjectDistribution<BitSet> distribution = metric.apply(graph);
 
         ObjectDoubleOpenHashMap<BitSet> expectedCounts = new ObjectDoubleOpenHashMap<BitSet>();
         ColourPalette palette = graph.getEdgePalette();
@@ -42,11 +42,10 @@ public class EdgeColourDistributionTest {
             expectedCounts.put(palette.getColour(EXPECTED_PROPERTY_URIS[i]), EXPECTED_PROPERTY_COUNTS[i]);
         }
 
-        Object sampleSpace[] = distribution.getSampleSpace();
-        for (int i = 0; i < sampleSpace.length; ++i) {
-            Assert.assertTrue(expectedCounts.containsKey((BitSet) sampleSpace[i]));
-            Assert.assertEquals(expectedCounts.get((BitSet) sampleSpace[i]), distribution.getDistribution()[i]);
+        for (int i = 0; i < distribution.sampleSpace.length; ++i) {
+            Assert.assertTrue(expectedCounts.containsKey(distribution.sampleSpace[i]));
+            Assert.assertEquals(expectedCounts.get(distribution.sampleSpace[i]), distribution.values[i]);
         }
-        Assert.assertEquals(expectedCounts.size(), sampleSpace.length);
+        Assert.assertEquals(expectedCounts.size(), distribution.sampleSpace.length);
     }
 }

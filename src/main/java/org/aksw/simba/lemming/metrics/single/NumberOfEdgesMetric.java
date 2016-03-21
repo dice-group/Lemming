@@ -4,20 +4,20 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
- * This metric is the lowest degree of outgoing edges in the graph.
+ * This metric is the number of edges of the graph.
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MinVertexOutDegree extends AbstractMetric implements SingleValueMetric {
+public class NumberOfEdgesMetric extends AbstractMetric implements SingleValueMetric {
 
-    public MinVertexOutDegree() {
-        super("minOutDegree");
+    public NumberOfEdgesMetric() {
+        super("#edges");
     }
 
     @Override
     public double apply(ColouredGraph graph) {
-        return graph.getGraph().getMinOutVertexDegrees();
+        return  graph.getGraph().getNumberOfEdges();
     }
 
 }

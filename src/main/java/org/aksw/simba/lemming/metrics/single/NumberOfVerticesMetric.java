@@ -4,20 +4,20 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
- * This metric is the highest degree of outgoing edges in the graph.
+ * This metric is the number of vertices of the graph.
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MaxVertexOutDegree extends AbstractMetric implements SingleValueMetric {
+public class NumberOfVerticesMetric extends AbstractMetric implements SingleValueMetric {
 
-    public MaxVertexOutDegree() {
-        super("maxOutDegree");
+    public NumberOfVerticesMetric() {
+        super("#vertices");
     }
 
     @Override
     public double apply(ColouredGraph graph) {
-        return graph.getGraph().getMaxOutVertexDegrees();
+        return graph.getGraph().getNumberOfVertices();
     }
 
 }

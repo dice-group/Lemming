@@ -16,9 +16,9 @@ import grph.Grph;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class InDegreeDistribution extends AbstractMetric implements IntDistributionMetric {
+public class InDegreeDistributionMetric extends AbstractMetric implements IntDistributionMetric {
 
-    public InDegreeDistribution() {
+    public InDegreeDistributionMetric() {
         super("inDegreeDist");
     }
 
