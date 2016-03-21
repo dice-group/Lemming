@@ -6,6 +6,13 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 
+/**
+ * The distribution of vertex colours of the graph. The sample space is an array
+ * of {@link BitSet} objects.
+ * 
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
+ *
+ */
 public class VertexColourDistribution extends AbstractDistributionalMetric {
 
     public VertexColourDistribution() {

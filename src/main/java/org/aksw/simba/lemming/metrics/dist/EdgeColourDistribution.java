@@ -6,10 +6,17 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 
+/**
+ * The distribution of edge colours of the graph. The sample space is an array
+ * of {@link BitSet} objects.
+ * 
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
+ *
+ */
 public class EdgeColourDistribution extends AbstractDistributionalMetric {
 
     public EdgeColourDistribution() {
-        super("vertexColourDist");
+        super("edgeColourDist");
     }
 
     @Override

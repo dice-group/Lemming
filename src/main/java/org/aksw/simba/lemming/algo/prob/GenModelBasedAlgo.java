@@ -15,6 +15,14 @@ import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 
 import grph.Grph;
 
+/**
+ * This algorithm generates a graph based on a given source graph and a number
+ * of vertices. It is based on probability distributions that are gathered from
+ * the source graph and used to randomly generate a new graph.
+ * 
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
+ *
+ */
 public class GenModelBasedAlgo {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenModelBasedAlgo.class);
