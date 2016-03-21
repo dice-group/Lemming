@@ -21,6 +21,8 @@ import grph.Grph;
  * of vertices. It is based on probability distributions that are gathered from
  * the source graph and used to randomly generate a new graph.
  * 
+ * FIXME add the usage of colour-based in and out degree distributions.
+ * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
