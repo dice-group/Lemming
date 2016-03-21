@@ -39,6 +39,6 @@ public class VertexColourDistributionMetric extends AbstractMetric implements Ob
                 ++pos;
             }
         }
-        return new ObjectDistribution<>(sampleSpace, distribution);
+        return new ObjectDistribution<BitSet>(sampleSpace, distribution);
     }
 }

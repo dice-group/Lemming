@@ -2,6 +2,8 @@ package org.aksw.simba.lemming.metrics.dist;
 
 import java.util.Arrays;
 
+import com.carrotsearch.hppc.IntIntOpenHashMap;
+
 /**
  * <p>
  * A distribution of int values. The sample space of the distribution is
@@ -109,6 +111,16 @@ public class IntDistribution {
         }
         builder.append(']');
         return builder.toString();
+    }
+
+    public static IntDistribution fromMap(IntIntOpenHashMap counts) {
+        double values[] = new double[counts.assigned];
+        int keys[] = counts.keys().toArray();
+        Arrays.sort(keys);
+        for (int j = 0; j < keys.length; ++j) {
+            values[j] = counts.get(keys[j]);
+        }
+        return new IntDistribution(keys, values);
     }
 
 }

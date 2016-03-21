@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.metrics.dist;
 
-import java.util.Arrays;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
@@ -30,13 +28,6 @@ public class InDegreeDistributionMetric extends AbstractMetric implements IntDis
         for (int i = 0; i < inDegrees.elementsCount; ++i) {
             counts.putOrAdd(inDegrees.buffer[i], 1, 1);
         }
-
-        double distribution[] = new double[counts.assigned];
-        int keys[] = counts.keys().toArray();
-        Arrays.sort(keys);
-        for (int j = 0; j < keys.length; ++j) {
-            distribution[j] = counts.get(keys[j]);
-        }
-        return new IntDistribution(keys, distribution);
+        return IntDistribution.fromMap(counts);
     }
 }

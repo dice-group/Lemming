@@ -39,6 +39,6 @@ public class EdgeColourDistributionMetric extends AbstractMetric implements Obje
                 ++pos;
             }
         }
-        return new ObjectDistribution<>(sampleSpace, distribution);
+        return new ObjectDistribution<BitSet>(sampleSpace, distribution);
     }
 }
