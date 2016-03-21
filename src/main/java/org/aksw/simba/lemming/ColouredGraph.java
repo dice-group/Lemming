@@ -7,6 +7,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import java.util.ArrayList;
 
 public class ColouredGraph {
 
