@@ -5,33 +5,96 @@
  */
 package org.aksw.simba.lemming.algo.refinement;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.aksw.simba.lemming.algo.expression.Expression;
 
 /**
  * Node for the refinement tree. Contains an expression.
+ * 
  * @author ngonga
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  */
-public class RefinementNode implements Comparable {
-    public double fitness = -1d; 
-    public Expression expression;
-    
-    public RefinementNode(Expression expression)
-    {
-        this.expression = expression;
+public class RefinementNode implements Comparable<RefinementNode> {
+
+    public double fitness = -1d;
+    public final Expression expression;
+    public final int hash;
+    public final Set<RefinementNode> children;
+    public RefinementNode parent;
+
+    public RefinementNode(Expression expression, int hash) {
+        this(expression, hash, null);
     }
-    
+
+    public RefinementNode(Expression expression, int hash, RefinementNode parent) {
+        this.expression = expression;
+        this.hash = hash;
+        children = new HashSet<RefinementNode>();
+        this.parent = parent;
+    }
+
     /**
      * Implements comparison
-     * @param o Some object
-     * @return 0 if o is not an instance of refinement node. Else compares the fitness values.
+     * 
+     * @param o
+     *            a {@link RefinementNode} with which this object should be
+     *            compared.
+     * @return -1 if the fitness value of this object is smaller than the one of
+     *         the other value; 1 if the fitness value of this object is larger;
+     *         else 0.
      */
-    public int compareTo(Object o) {
-        if(o instanceof RefinementNode)
-        {
-            RefinementNode node = (RefinementNode)o;
-            if(fitness < node.fitness) return -1;
-            if(fitness > node.fitness) return 1;            
-        }
+    @Override
+    public int compareTo(RefinementNode o) {
+        RefinementNode node = (RefinementNode) o;
+        if (fitness < node.fitness)
+            return -1;
+        if (fitness > node.fitness)
+            return 1;
         return 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RefinementNode other = (RefinementNode) obj;
+        if (hash != other.hash)
+            return false;
+        return true;
+    }
+
+    public void setFitness(double fitness) {
+        this.fitness = fitness;
+    }
+
+    public double getFitness() {
+        return fitness;
+    }
+
+    public void setParent(RefinementNode parent) {
+        this.parent = parent;
+    }
+
+    public RefinementNode getParent() {
+        return parent;
+    }
+
+    public Set<RefinementNode> getChildren() {
+        return children;
+    }
+
+    public Expression getExpression() {
+        return expression;
     }
 }

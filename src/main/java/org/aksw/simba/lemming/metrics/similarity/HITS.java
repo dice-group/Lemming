@@ -1,11 +1,5 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.aksw.simba.lemming.metrics.similarity;
 
-import grph.Grph;
 import java.util.ArrayList;
 import org.aksw.simba.lemming.ColouredGraph;
 
@@ -14,25 +8,18 @@ import org.aksw.simba.lemming.ColouredGraph;
  * @author jsaveta
  */
 public class HITS {
-    private Grph graph;
    
     public HITS (ColouredGraph colouredGraph){
-        this.graph = colouredGraph.getGraph();
-        
         ArrayList<HITSNode> S = new ArrayList<HITSNode>();
                 
-        for(int i: graph.getVertices().toIntegerArrayList()){
-            ArrayList<Integer> incoming = graph.getInNeighbors(i).toIntegerArrayList();
-            ArrayList<Integer> outgoing = graph.getOutNeighbors(i).toIntegerArrayList();
+        for(int i: colouredGraph.getVertices().toIntArray()){
+            ArrayList<Integer> incoming = colouredGraph.getInNeighbors(i).toIntegerArrayList();
+            ArrayList<Integer> outgoing = colouredGraph.getOutNeighbors(i).toIntegerArrayList();
             S.add(new HITSNode(i, incoming, outgoing));
             //System.out.println("i: "+i +" incoming: "+incoming.toString() +" outgoing: " +outgoing.toString());
         }
         
         computeHITS(S,25); 
-//        for (HITSNode x : S) {
-//            System.out.println(x.toString());
-//        }
-
         
     }
    
