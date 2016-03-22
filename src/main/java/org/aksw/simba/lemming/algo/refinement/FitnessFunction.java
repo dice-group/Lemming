@@ -8,6 +8,8 @@ package org.aksw.simba.lemming.algo.refinement;
 import java.util.Map;
 import java.util.Set;
 
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
+
 /**
  * Interface for fitness functions
  * @author ngonga
@@ -21,4 +23,6 @@ public interface FitnessFunction {
      * @return 
      */
     double getFitness(RefinementTree tree, RefinementNode node, Set<Map<String, Double>> values);
+
+    public double getFitness(RefinementNode node, ObjectDoubleOpenHashMap<String>[] graphVectors);
 }
