@@ -1,10 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.aksw.simba</groupId>
-  <artifactId>lemming</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>LEMMING</name>
-  <description>LEMMING is an ExaMple MImickiNg graph Generator</description>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.aksw.simba</groupId>
+	<artifactId>lemming</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>LEMMING</name>
+	<description>LEMMING is an ExaMple MImickiNg graph Generator</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,6 +36,11 @@
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
 			<version>3.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>cc.redberry</groupId>
+			<artifactId>core</artifactId>
+			<version>1.1.10</version>
 		</dependency>
 
 		<!-- ~~~~~~~~~~~~~~~~~~~ Logging ~~~~~~~~~~~~~~~~~~~~~~ -->
