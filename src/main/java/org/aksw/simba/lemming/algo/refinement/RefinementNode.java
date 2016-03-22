@@ -9,29 +9,36 @@ import org.aksw.simba.lemming.algo.expression.Expression;
 
 /**
  * Node for the refinement tree. Contains an expression.
+ * 
  * @author ngonga
  */
-public class RefinementNode implements Comparable {
-    public double fitness = -1d; 
+public class RefinementNode implements Comparable<RefinementNode> {
+    public double fitness = -1d;
     public Expression expression;
-    
-    public RefinementNode(Expression expression)
-    {
+
+    public RefinementNode(Expression expression) {
         this.expression = expression;
     }
-    
+
     /**
      * Implements comparison
-     * @param o Some object
-     * @return 0 if o is not an instance of refinement node. Else compares the fitness values.
+     * 
+     * @param o
+     *            a {@link RefinementNode} with which this object should be
+     *            compared.
+     * @return -1 if the fitness value of this object is smaller than the one of
+     *         the other value; 1 if the fitness value of this object is larger;
+     *         else 0.
      */
-    public int compareTo(Object o) {
-        if(o instanceof RefinementNode)
-        {
-            RefinementNode node = (RefinementNode)o;
-            if(fitness < node.fitness) return -1;
-            if(fitness > node.fitness) return 1;            
-        }
+    @Override
+    public int compareTo(RefinementNode o) {
+        RefinementNode node = (RefinementNode) o;
+        if (fitness < node.fitness)
+            return -1;
+        if (fitness > node.fitness)
+            return 1;
         return 0;
     }
+
+    // FIXME Where does the fitness come from???
 }

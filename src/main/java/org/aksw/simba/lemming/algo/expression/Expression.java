@@ -5,187 +5,97 @@
  */
 package org.aksw.simba.lemming.algo.expression;
 
-import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
-import static org.aksw.simba.lemming.algo.expression.Expression.Operator.DIV;
-import static org.aksw.simba.lemming.algo.expression.Expression.Operator.MINUS;
-import static org.aksw.simba.lemming.algo.expression.Expression.Operator.PLUS;
-import static org.aksw.simba.lemming.algo.expression.Expression.Operator.TIMES;
-import org.aksw.simba.lemming.metrics.single.DiameterMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 /**
  * Models expressions that are learned by our algorithm
  *
  * @author ngonga
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  */
-public class Expression {
-
-    private double constantValue;
-    private SingleValueMetric metric;
-    private Expression left;
-    private Expression right;
-    private Operator op;
-    private boolean constant;
-    private boolean atomic;
-
-    public enum Operator {
-
-        PLUS, MINUS, TIMES, DIV
-    };
-
-    public double getConstantValue() {
-        return constantValue;
-    }
-
-    public SingleValueMetric getMetric() {
-        return metric;
-    }
-
-    public Expression getLeft() {
-        return left;
-    }
-
-    public Expression getRight() {
-        return right;
-    }
-
-    public Operator getOp() {
-        return op;
-    }
-
-    public boolean isConstant() {
-        return constant;
-    }
-
-    public boolean isAtomic() {
-        return atomic;
-    }
+public interface Expression {
 
     /**
-     * Initializes a complex expression with a right and left expression
-     *
-     * @param left Left expression
-     * @param right Right expression
-     * @param op Operator
+     * Returns the {@link SingleValueMetric} if this expression is atomic.
+     * Otherwise <code>null</code> is returned.
+     * 
+     * @return the {@link SingleValueMetric} or <code>null</code>
      */
-    public Expression(Expression left, Expression right, Operator op) {
-        this.left = left;
-        this.right = right;
-        this.op = op;
-        constant = false;
-        atomic = false;
-    }
-
-    public Expression(double value) {
-        constantValue = value;
-        constant = true;
-        atomic = false;
-    }
-
-    public Expression(SingleValueMetric metric) {
-        this.metric = metric;
-        constant = false;
-        atomic = true;
-    }
+    public SingleValueMetric getMetric();
 
     /**
-     * Get value for expression given a graph
+     * Returns the left part of the expression if it is an operation. Otherwise
+     * <code>null</code> is returned.
+     * 
+     * @return the left part of the expression or <code>null</code>
+     */
+    public Expression getLeft();
+
+    /**
+     * Returns the right part of the expression if it is an operation. Otherwise
+     * <code>null</code> is returned.
+     * 
+     * @return the right part of the expression or <code>null</code>
+     */
+    public Expression getRight();
+
+    /**
+     * Returns the operator of the expression if it is an operation. Otherwise
+     * <code>null</code> is returned.
+     * 
+     * @return the operator of the expression or <code>null</code>
+     */
+    public Operator getOperator();
+
+    /**
+     * Returns true if this expression is a constant.
+     * 
+     * @return true if this expression is a constant
+     */
+    public boolean isConstant();
+
+    /**
+     * Returns true if this expression is atomic.
+     * 
+     * @return true if this expression is atomic
+     */
+    public boolean isAtomic();
+
+    /**
+     * Returns true if this expression is an operation.
+     * 
+     * @return true if this expression is an operation
+     */
+    public boolean isOperation();
+
+    /**
+     * Get the value of this expression for the given graph.
      *
-     * @param cg Coloured Graph
+     * @param cg
+     *            Coloured Graph
      * @return Double value of expression
      */
-    public double getValue(ColouredGraph cg) {
-        //if constant return constant value
-        if (isConstant()) {
-            return constantValue;
-        } 
-        // if atomic call function
-        else if (isAtomic()) {
-            return metric.apply(cg);
-        } 
-        //else combine values
-        else {
-            double leftValue = left.getValue(cg);
-            double rightValue = right.getValue(cg);
-
-            if (op.equals(TIMES)) {
-                return leftValue * rightValue;
-            }
-            if (op.equals(DIV)) {
-                return leftValue / rightValue;
-            }
-            if (op.equals(MINUS)) {
-                return leftValue - rightValue;
-            }
-            return leftValue + rightValue;
-        }
-    }
+    public double getValue(ColouredGraph cg);
 
     /**
-     * Get value for expression given a value map. Useful when values have been
-     * precomputed
+     * Get the value of this expression for the given precomputed values of the
+     * graph metrics.
      *
-     * @param valueMap Maps expression names to values
-     * @return Double value of expression
+     * @param graphMetrics
+     *            a Map containing the values of the metrics calculated for a
+     *            certain graph.
+     * @return The value of the expression.
      */
-    public double getValue(Map<String, Double> valueMap) {
-        //if constant return constant value
-        if (isConstant()) {
-            return constantValue;
-        } 
-        //if atomic get value for function
-        else if (isAtomic()) {
-            if (valueMap.containsKey(metric.getName())) {
-                return valueMap.get(metric.getName());
-            } else {
-                return 0d;
-            }
-        //else combine values
-        } else {
-            double leftValue = left.getValue(valueMap);
-            double rightValue = right.getValue(valueMap);
+    public double getValue(ObjectDoubleOpenHashMap<String> graphMetrics);
 
-            if (op.equals(TIMES)) {
-                return leftValue * rightValue;
-            }
-            if (op.equals(DIV)) {
-                return leftValue / rightValue;
-            }
-            if (op.equals(MINUS)) {
-                return leftValue - rightValue;
-            }
-            if (op.equals(MINUS)) {
-                return leftValue + rightValue;
-            }
-            else return Double.NaN;
-        }
-    }
-    
     /**
      * String representation of an expression
-     * @return 
+     * 
+     * @return
      */
-    public String toString()
-    {
-        if(isConstant()) return constantValue+"";
-        if(isAtomic()) return metric.getName();
-        else return "("+left.toString() + " "+ op + " "+right.toString()+")";
-    }
-    
-    public static void main(String args[])
-    {
-        Expression e1 = new Expression(new DiameterMetric());
-        Expression e2 = new Expression(new NumberOfEdgesMetric());
-        Expression e3 = new Expression(e1, e2, PLUS);
-        System.out.println(e3.toString());
-        ColouredGraph g = new ColouredGraph();
-        int i = g.addVertex();
-        int j = g.addVertex();
-        g.addEdge(i, j);        
-        System.out.println(e1.getValue(g));
-        System.out.println(e2.getValue(g));
-        System.out.println(e3.getValue(g));
-    }
+    public String toString();
+
 }
