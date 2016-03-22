@@ -13,15 +13,75 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+/**
+ * Refinement operator that explores a tree of possible {@link Expression}
+ * instances and tries to refine them to get the instance with the best fitness.
+ * 
+ * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
+ *
+ */
 public class RefinementOperator {
 
+    /**
+     * List of metrics that can be used by the refinement.
+     */
     private List<SingleValueMetric> metrics;
+    /**
+     * The factory that is used to generate {@link RefinementNode}s.
+     */
     private RefinementNodeFactory factory;
+    /**
+     * The fitness function that is used to assign fitness scores to the single
+     * nodes.
+     */
     private FitnessFunction fitnessFunc;
+    /**
+     * The minimum fitness score an {@link Expression} has to achieve to be
+     * returned as solution.
+     */
     private double minFitness;
+    /**
+     * The maximal number of iterations the operator will perform.
+     */
     private int maxIterations;
 
-    public Expression findExpression(ColouredGraph graphs[]) {
+    /**
+     * Constructor.
+     * 
+     * @param metrics
+     *            List of metrics that can be used by the refinement.
+     * @param factory
+     *            The factory that is used to generate {@link RefinementNode}s.
+     * @param fitnessFunc
+     *            The fitness function that is used to assign fitness scores to
+     *            the single nodes.
+     * @param minFitness
+     *            The minimum fitness score an {@link Expression} has to achieve
+     *            to be returned as solution.
+     * @param maxIterations
+     *            The maximal number of iterations the operator will perform.
+     */
+    public RefinementOperator(List<SingleValueMetric> metrics, RefinementNodeFactory factory,
+            FitnessFunction fitnessFunc, double minFitness, int maxIterations) {
+        this.metrics = metrics;
+        this.factory = factory;
+        this.fitnessFunc = fitnessFunc;
+        this.minFitness = minFitness;
+        this.maxIterations = maxIterations;
+    }
+
+    /**
+     * Finds the {@link Expression} with the highest fitness for the given
+     * graphs.
+     * 
+     * @param graphs
+     *            an array of graphs for which the best expression is searched.
+     * @return an {@link RefinementNode} encapsulating an expression which has a
+     *         fitness value <code>&lt; {@link #minFitness}</code> or had the
+     *         best fitness value before hitting the {@link #maxIterations}
+     *         limit.
+     */
+    public RefinementNode findExpression(ColouredGraph graphs[]) {
         // precalculate the metrics values
         ObjectDoubleOpenHashMap<String> graphVectors[] = calculateGraphMetrics(graphs);
         // initialize the tree
@@ -33,22 +93,29 @@ public class RefinementOperator {
             node.setFitness(fitnessFunc.getFitness(node, graphVectors));
         }
         // start refinement
-        RefinementNode bestNode = queue.first();
+        RefinementNode firstNode = queue.first();
+        RefinementNode bestNode = firstNode;
         int iteration = 0;
         // While we haven't reached the maximum number of iterations and the
         // fitness of the best node is not good enough, refine the expression
         while ((iteration < maxIterations) && (bestNode.getFitness() < minFitness)) {
             // refine the best node
-            nodes = refine(bestNode, tree);
+            nodes = refine(firstNode, tree);
             // calculate the fitness of all new nodes and add them to the queue
             for (RefinementNode node : nodes) {
                 node.setFitness(fitnessFunc.getFitness(node, graphVectors));
             }
             // pick a new best node
-            bestNode = queue.first();
+            firstNode = queue.first();
+            // if the current node is the best node seen so far (this makes sure
+            // that we will alwas return the best node, even if we hit the
+            // maximum number of iterations)
+            if (bestNode.getFitness() < firstNode.getFitness()) {
+                bestNode = firstNode;
+            }
             ++iteration;
         }
-        return bestNode.expression;
+        return bestNode;
     }
 
     /**
