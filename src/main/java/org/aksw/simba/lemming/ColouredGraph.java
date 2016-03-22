@@ -7,7 +7,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
-import java.util.ArrayList;
+import toools.set.IntSet;
 
 public class ColouredGraph {
 
@@ -93,16 +93,24 @@ public class ColouredGraph {
         return edgePalette;
     }
     
-    public int[][] getInDegreeNodeArray() {
+    public int[][] getInNeighborhoodsArray() {
         return graph.getInNeighborhoods();
     }
 
-    public int[][] getOutDegreeNodeArray() {
+    public int[][] getOutNeighborhoodsArray() {
         return graph.getOutNeighborhoods();
     }
     
-    public ArrayList<Integer> getNodeList() {
-        return graph.getVertices().toIntegerArrayList();
+    public IntSet getInNeighbors(int v){
+        return graph.getInNeighbors(v);
+    }
+    
+    public IntSet getOutNeighbors(int v){
+        return graph.getOutNeighbors(v);
+    }
+            
+    public IntSet getVertices() {
+        return graph.getVertices();
     }
      
 }
