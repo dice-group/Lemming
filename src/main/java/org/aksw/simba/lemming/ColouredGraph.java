@@ -93,16 +93,13 @@ public class ColouredGraph {
         return edgePalette;
     }
     
+    //@TODO create classes for the methods below
     public int[][] getInDegreeNodeArray() {
         return graph.getInNeighborhoods();
     }
 
     public int[][] getOutDegreeNodeArray() {
         return graph.getOutNeighborhoods();
-    }
-    
-    public int getGraphSize(){
-        return graph.getSize();
     }
     
     public ArrayList<Integer> getNodeList() {
