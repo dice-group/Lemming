@@ -19,8 +19,8 @@ import cc.redberry.core.tensor.Tensors;
 import cc.redberry.core.transformations.Transformation;
 
 /**
- * This class uses the redberry library to check whether nodes to generate
- * unique hash values for nodes.
+ * This class uses the Redberry library (http://redberry.cc/) to check whether
+ * nodes to generate unique representations for nodes.
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
@@ -40,7 +40,7 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
         ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(new cc.redberry.core.tensor.Expression[] { exp },
                 variables, new Transformation[0]);
         exp = restoreVariableNames(rd);
-        String reducedExpression = exp.toString();
+        String reducedExpression = exp.get(0).toString();
         if (checkReducedExpression(reducedExpression)) {
             return new RefinementNode(expression, reducedExpression);
         } else {
@@ -68,7 +68,13 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
      */
     private Tensor transformToTensor(Expression expression) {
         if (expression.isConstant()) {
-            return new Complex(expression.getConstantValue());
+            double value = expression.getConstantValue();
+            int valueAsInt = (int) value;
+            if (valueAsInt == value) {
+                return new Complex(valueAsInt);
+            } else {
+                return new Complex(value);
+            }
         } else if (expression.isAtomic()) {
             String metricName = expression.getMetric().getName();
             SimpleTensor variable = Tensors.parseSimple(metricName);
@@ -79,12 +85,9 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
         } else if (expression.isOperation()) {
             switch (expression.getOperator()) {
             case DIV:
-                // Div is realized as product of the reciprocal
-                return Tensors.pow(transformToTensor(expression.getLeft()),
-                        Tensors.reciprocal(transformToTensor(expression.getRight())));
+                return Tensors.divide(transformToTensor(expression.getLeft()),
+                        transformToTensor(expression.getRight()));
             case MINUS:
-                // Minus is realized as the sum of the nodes while the second
-                // node is multiplied with -1
                 return Tensors.subtract(transformToTensor(expression.getLeft()),
                         transformToTensor(expression.getRight()));
             case PLUS:
@@ -147,12 +150,22 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
         return false;
     }
 
+    /**
+     * The {@link ReduceEngine} replaces all variables. Since we have inserted
+     * only one single expression, it is very easy to restore the original
+     * variable names.
+     * 
+     * @param rd
+     *            the {@link ReducedSystem} object created by the
+     *            {@link ReduceEngine}.
+     * @return the reduced expression but with the original variable names.
+     */
     private cc.redberry.core.tensor.Expression restoreVariableNames(ReducedSystem rd) {
         cc.redberry.core.tensor.Expression variableMappings[] = rd.getGeneralSolutions();
         cc.redberry.core.tensor.Expression invert;
         cc.redberry.core.tensor.Expression expression = rd.getEquations()[0];
         for (int i = 0; i < variableMappings.length; ++i) {
-            invert = ExpressionFactory.FACTORY.create(variableMappings[0].get(1), variableMappings[0].get(0));
+            invert = ExpressionFactory.FACTORY.create(variableMappings[i].get(1), variableMappings[i].get(0));
             expression = (cc.redberry.core.tensor.Expression) invert.transform(expression);
         }
         return expression;
