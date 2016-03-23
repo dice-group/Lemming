@@ -42,28 +42,28 @@ public class RedberryBasedFactoryTest {
         AtomicVariable y = new AtomicVariable(new TestMetric("y"));
         List<Object[]> tests = new ArrayList<Object[]>();
         
-//        // x+1 == x+1
-//        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
-//                new Operation(x, new Constant(1), Operator.PLUS), true });
-//        // x+1 == 1+x
-//        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
-//                new Operation(new Constant(1), x, Operator.PLUS), true });
-//        // x+1 != x+2
-//        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
-//                new Operation(x, new Constant(2), Operator.PLUS), false });
-//        // x+y == x+y
-//        tests.add(new Object[] { new Operation(x, y, Operator.PLUS), new Operation(x, y, Operator.PLUS), true });
-//        // x+y == y+x
-//        tests.add(new Object[] { new Operation(x, y, Operator.PLUS), new Operation(y, x, Operator.PLUS), true });
-//        // x+1 != y+1
-//        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
-//                new Operation(y, new Constant(1), Operator.PLUS), false });
-//        // 1*x == x
-//        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.TIMES), x, true });
-//        // (x*x)/x == x
-//        tests.add(new Object[] { new Operation(new Operation(x, x, Operator.TIMES), x, Operator.DIV), x, true });
-//        // x*(x/x) == x
-//        tests.add(new Object[] { new Operation(x, new Operation(x, x, Operator.DIV), Operator.TIMES), x, true });
+        // x+1 == x+1
+        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
+                new Operation(x, new Constant(1), Operator.PLUS), true });
+        // x+1 == 1+x
+        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
+                new Operation(new Constant(1), x, Operator.PLUS), true });
+        // x+1 != x+2
+        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
+                new Operation(x, new Constant(2), Operator.PLUS), false });
+        // x+y == x+y
+        tests.add(new Object[] { new Operation(x, y, Operator.PLUS), new Operation(x, y, Operator.PLUS), true });
+        // x+y == y+x
+        tests.add(new Object[] { new Operation(x, y, Operator.PLUS), new Operation(y, x, Operator.PLUS), true });
+        // x+1 != y+1
+        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
+                new Operation(y, new Constant(1), Operator.PLUS), false });
+        // 1*x == x
+        tests.add(new Object[] { new Operation(x, new Constant(1), Operator.TIMES), x, true });
+        // (x*x)/x == x
+        tests.add(new Object[] { new Operation(new Operation(x, x, Operator.TIMES), x, Operator.DIV), x, true });
+        // x*(x/x) == x
+        tests.add(new Object[] { new Operation(x, new Operation(x, x, Operator.DIV), Operator.TIMES), x, true });
         // x+x == 2*x
         tests.add(new Object[] { new Operation(x, x, Operator.PLUS), new Operation(new Constant(2), x, Operator.TIMES),
                 true });
