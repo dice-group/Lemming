@@ -41,6 +41,11 @@ public class Constant implements Expression {
     }
 
     @Override
+    public double getConstantValue() {
+        return constantValue;
+    }
+
+    @Override
     public boolean isConstant() {
         return true;
     }

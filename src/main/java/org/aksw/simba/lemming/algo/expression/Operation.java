@@ -64,6 +64,11 @@ public class Operation implements Expression {
     }
 
     @Override
+    public double getConstantValue() {
+        return Double.NaN;
+    }
+
+    @Override
     public boolean isConstant() {
         return false;
     }

@@ -20,17 +20,17 @@ public class RefinementNode implements Comparable<RefinementNode> {
 
     public double fitness = -1d;
     public final Expression expression;
-    public final int hash;
+    public final String reducedExpression;
     public final Set<RefinementNode> children;
     public RefinementNode parent;
 
-    public RefinementNode(Expression expression, int hash) {
-        this(expression, hash, null);
+    public RefinementNode(Expression expression, String reducedExpression) {
+        this(expression, reducedExpression, null);
     }
 
-    public RefinementNode(Expression expression, int hash, RefinementNode parent) {
+    public RefinementNode(Expression expression, String reducedExpression, RefinementNode parent) {
         this.expression = expression;
-        this.hash = hash;
+        this.reducedExpression = reducedExpression;
         children = new HashSet<RefinementNode>();
         this.parent = parent;
     }
@@ -57,7 +57,7 @@ public class RefinementNode implements Comparable<RefinementNode> {
 
     @Override
     public int hashCode() {
-        return hash;
+        return reducedExpression.hashCode();
     }
 
     @Override
@@ -69,7 +69,7 @@ public class RefinementNode implements Comparable<RefinementNode> {
         if (getClass() != obj.getClass())
             return false;
         RefinementNode other = (RefinementNode) obj;
-        if (hash != other.hash)
+        if (!reducedExpression.equals(other.reducedExpression))
             return false;
         return true;
     }
@@ -96,5 +96,10 @@ public class RefinementNode implements Comparable<RefinementNode> {
 
     public Expression getExpression() {
         return expression;
+    }
+
+    @Override
+    public String toString() {
+        return reducedExpression;
     }
 }

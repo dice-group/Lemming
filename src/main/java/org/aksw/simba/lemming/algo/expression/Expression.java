@@ -51,6 +51,15 @@ public interface Expression {
     public Operator getOperator();
 
     /**
+     * Returns the constant value if this is a constant. Note that it is not
+     * defined which value is returned if the {@link Expression} instance is not
+     * a constant, i.e., returns <code>true</code> for {@link #isConstant()}.
+     * 
+     * @return the constant value if this is a constant.
+     */
+    public double getConstantValue();
+
+    /**
      * Returns true if this expression is a constant.
      * 
      * @return true if this expression is a constant
