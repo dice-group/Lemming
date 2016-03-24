@@ -21,8 +21,17 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 public class GraphCreator {
 
     protected ColouredGraph graph;
-
+    protected ObjectObjectOpenHashMap<Resource, HierarchyNode> classes;
+    protected ObjectObjectOpenHashMap<Resource, HierarchyNode> properties;
+    protected ColourPalette verticesPalette;
+    protected ColourPalette edgePalette;
+        
+    
     public GraphCreator() {
+        classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        verticesPalette = new InMemoryPalette();
+        edgePalette = new InMemoryPalette();
     }
 
     public ColouredGraph processModel(Model model) {
@@ -78,7 +87,6 @@ public class GraphCreator {
     }
 
     protected ColourPalette createVertexPalette(Model model) {
-        ObjectObjectOpenHashMap<Resource, HierarchyNode> classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
         NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
         RDFNode node;
         Resource resource1, resource2;
@@ -150,10 +158,10 @@ public class GraphCreator {
 
         // All classes have been collected
         // The colours can be defined
-        ColourPalette palette = new InMemoryPalette();
+
         for (int i = 0; i < classes.allocated.length; ++i) {
             if (classes.allocated[i]) {
-                palette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
+                verticesPalette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
             }
         }
 
@@ -164,16 +172,15 @@ public class GraphCreator {
             if (classes.allocated[i]) {
                 hNode1 = (HierarchyNode) ((Object[]) classes.values)[i];
                 if ((hNode1 != null) && (hNode1.childNodes != null) && (hNode1.parentNodes == null)) {
-                    mixColours((Resource) ((Object[]) classes.keys)[i], hNode1, classes, palette);
+                    mixColours((Resource) ((Object[]) classes.keys)[i], hNode1, classes, verticesPalette);
                 }
             }
         }
 
-        return palette;
+        return verticesPalette;
     }
 
     protected ColourPalette createEdgePalette(Model model) {
-        ObjectObjectOpenHashMap<Resource, HierarchyNode> properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
         RDFNode node;
         Resource resource1, resource2;
         StmtIterator sIterator = model.listStatements(null, RDFS.subPropertyOf, (RDFNode) null);
@@ -220,10 +227,9 @@ public class GraphCreator {
 
         // All properties have been collected
         // The colours can be defined
-        ColourPalette palette = new InMemoryPalette();
         for (int i = 0; i < properties.allocated.length; ++i) {
             if (properties.allocated[i]) {
-                palette.addColour(((Resource) ((Object[]) properties.keys)[i]).getURI());
+                edgePalette.addColour(((Resource) ((Object[]) properties.keys)[i]).getURI());
             }
         }
 
@@ -234,12 +240,12 @@ public class GraphCreator {
             if (properties.allocated[i]) {
                 hNode1 = (HierarchyNode) ((Object[]) properties.values)[i];
                 if ((hNode1.childNodes != null) && (hNode1.parentNodes == null)) {
-                    mixColours((Resource) ((Object[]) properties.keys)[i], hNode1, properties, palette);
+                    mixColours((Resource) ((Object[]) properties.keys)[i], hNode1, properties, edgePalette);
                 }
             }
         }
 
-        return palette;
+        return edgePalette;
     }
 
     private void mixColours(Resource resource, HierarchyNode hNode,
@@ -254,4 +260,5 @@ public class GraphCreator {
             }
         }
     }
+    
 }
