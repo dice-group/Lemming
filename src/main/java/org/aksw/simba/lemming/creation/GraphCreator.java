@@ -23,14 +23,14 @@ public class GraphCreator {
     protected ColouredGraph graph;
     protected ObjectObjectOpenHashMap<Resource, HierarchyNode> classes;
     protected ObjectObjectOpenHashMap<Resource, HierarchyNode> properties;
-    protected ColourPalette verticesPalette;
+    protected ColourPalette vertexPalette;
     protected ColourPalette edgePalette;
         
     
     public GraphCreator() {
         classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
         properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
-        verticesPalette = new InMemoryPalette();
+        vertexPalette = new InMemoryPalette();
         edgePalette = new InMemoryPalette();
     }
 
@@ -161,7 +161,7 @@ public class GraphCreator {
 
         for (int i = 0; i < classes.allocated.length; ++i) {
             if (classes.allocated[i]) {
-                verticesPalette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
+                vertexPalette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
             }
         }
 
@@ -172,12 +172,12 @@ public class GraphCreator {
             if (classes.allocated[i]) {
                 hNode1 = (HierarchyNode) ((Object[]) classes.values)[i];
                 if ((hNode1 != null) && (hNode1.childNodes != null) && (hNode1.parentNodes == null)) {
-                    mixColours((Resource) ((Object[]) classes.keys)[i], hNode1, classes, verticesPalette);
+                    mixColours((Resource) ((Object[]) classes.keys)[i], hNode1, classes, vertexPalette);
                 }
             }
         }
 
-        return verticesPalette;
+        return vertexPalette;
     }
 
     protected ColourPalette createEdgePalette(Model model) {
