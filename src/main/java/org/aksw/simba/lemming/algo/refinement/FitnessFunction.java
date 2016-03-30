@@ -19,15 +19,6 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 public interface FitnessFunction {
     /**
      * Computes the fitness function for a given node
-     * @param tree
-     * @param node
-     * @param values
-     * @return 
-     */
-    double getFitness(RefinementTree tree, RefinementNode node, Set<Map<String, Double>> values);
-
-    /**
-     * Computes the fitness function for a given node
      * 
      * @param expression
      * @param graphVectors
