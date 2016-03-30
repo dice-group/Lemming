@@ -106,5 +106,11 @@ public interface Expression {
      * @return
      */
     public String toString();
+    
+    /**
+     * Size of an expression
+     * @return 
+     */
+    public int getSize();
 
 }

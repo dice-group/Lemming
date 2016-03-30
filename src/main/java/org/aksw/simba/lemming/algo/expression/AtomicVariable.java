@@ -106,4 +106,8 @@ public class AtomicVariable implements Expression {
         return true;
     }
 
+    public int getSize() {
+        return 0;
+    }
+
 }
