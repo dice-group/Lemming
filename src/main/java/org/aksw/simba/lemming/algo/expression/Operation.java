@@ -169,4 +169,12 @@ public class Operation implements Expression {
             return false;
         return true;
     }
+    
+    public void setLeft(Expression left) {
+        this.left = left;
+    }
+
+    public void setRight(Expression right) {
+        this.right = right;
+    }
 }
