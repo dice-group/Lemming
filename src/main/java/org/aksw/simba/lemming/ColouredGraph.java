@@ -25,6 +25,12 @@ public class ColouredGraph {
         this.edgePalette = edgePalette;
     }
 
+    public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
+        this.graph = graph;
+        this.vertexPalette = vertexPalette;
+        this.edgePalette = edgePalette;
+    }
+
     public Grph getGraph() {
         return graph;
     }

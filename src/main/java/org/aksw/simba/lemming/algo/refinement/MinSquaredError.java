@@ -19,46 +19,52 @@ public class MinSquaredError implements FitnessFunction {
 
     /**
      * Computes min squared error
-     * @param expression Expression
-     * @param graphVectors Values for given graphs
+     * 
+     * @param expression
+     *            Expression
+     * @param graphVectors
+     *            Values for given graphs
      * @return Fitness of expression
      */
     public double getFitness(Expression expression, ObjectDoubleOpenHashMap<String>[] graphVectors) {
-        List<Double> values = new ArrayList<>();
+        double values[] = new double[graphVectors.length];
         for (int i = 0; i < graphVectors.length; i++) {
-            values.add(expression.getValue(graphVectors[i]));
+            values[i] = Math.abs(expression.getValue(graphVectors[i]));
         }
 
         double max = getMax(values);
         double fitness = 0d;
-        for(int i=0; i<values.size() - 1; i++)
-        {
-            for(int j= i+1; j < values.size(); j++)
-            {
-                fitness = fitness + Math.pow((values.get(i)  - values.get(j)), 2);
+        for (int i = 0; i < values.length - 1; i++) {
+            for (int j = i + 1; j < values.length; j++) {
+                fitness = fitness + Math.pow(values[i] - values[j], 2);
             }
         }
-        fitness = fitness / (max*max); // norm to 1
-        fitness = 2*fitness/(values.size()*(values.size()-1)); //compute average
-        return (1d-fitness);
+        if (fitness == 0) {
+            return 1;
+        }
+        fitness = fitness / (max * max); // norm to 1
+        fitness = 2 * fitness / (values.length * (values.length - 1)); // compute
+                                                                       // average
+        return (1d - fitness);
     }
 
     /**
      * Get maximal value from a list of values
+     * 
      * @param list
-     * @return 
+     * @return
      */
-    public double getMax(List<Double> list) {
-        if (list == null) {
+    public double getMax(double values[]) {
+        if (values == null) {
             return Double.NaN;
         }
-        if (list.isEmpty()) {
+        if (values.length == 0) {
             return Double.NaN;
         }
-         double value = list.get(0);
-        for (int i = 1; i < list.size(); i++) {
-            if (value < list.get(i)) {
-                value = list.get(i);
+        double value = values[0];
+        for (int i = 1; i < values.length; i++) {
+            if (value < values[i]) {
+                value = values[i];
             }
         }
         return value;

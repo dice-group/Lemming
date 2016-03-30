@@ -11,6 +11,8 @@ import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
@@ -25,6 +27,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  *
  */
 public class CharactersiticExpressionSearcher {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CharactersiticExpressionSearcher.class);
 
     /**
      * List of metrics that can be used by the refinement.
@@ -59,6 +63,9 @@ public class CharactersiticExpressionSearcher {
      * 
      * @param metrics
      *            List of metrics that can be used by the refinement.
+     * @param refineOperator
+     *            The refinement operator that is used to generate new
+     *            {@link Expression} instances.
      * @param factory
      *            The factory that is used to generate {@link RefinementNode}s.
      * @param fitnessFunc
@@ -70,9 +77,10 @@ public class CharactersiticExpressionSearcher {
      * @param maxIterations
      *            The maximal number of iterations the operator will perform.
      */
-    public CharactersiticExpressionSearcher(List<SingleValueMetric> metrics, RefinementNodeFactory factory,
-            FitnessFunction fitnessFunc, double minFitness, int maxIterations) {
+    public CharactersiticExpressionSearcher(List<SingleValueMetric> metrics, RefinementOperator refineOperator,
+            RefinementNodeFactory factory, FitnessFunction fitnessFunc, double minFitness, int maxIterations) {
         this.metrics = metrics;
+        this.refineOperator = refineOperator;
         this.factory = factory;
         this.fitnessFunc = fitnessFunc;
         this.minFitness = minFitness;
@@ -100,30 +108,43 @@ public class CharactersiticExpressionSearcher {
         SortedSet<RefinementNode> queue = new TreeSet<RefinementNode>();
         for (RefinementNode node : nodes) {
             node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
+            if (Double.isNaN(node.getFitness())) {
+                LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
+            } else {
+                queue.add(node);
+            }
         }
         // start refinement
-        RefinementNode firstNode = queue.first();
-        RefinementNode bestNode = firstNode;
+        RefinementNode nextNode = queue.last();
+        queue.remove(nextNode);
+        RefinementNode bestNode = nextNode;
         int iteration = 0;
         // While we haven't reached the maximum number of iterations and the
         // fitness of the best node is not good enough, refine the expression
         while ((iteration < maxIterations) && (bestNode.getFitness() < minFitness)) {
             // refine the best node
-            nodes = refine(firstNode, tree);
+            nodes = refine(nextNode, tree);
             // calculate the fitness of all new nodes and add them to the queue
             for (RefinementNode node : nodes) {
                 node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
+                if (Double.isNaN(node.getFitness())) {
+                    LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
+                } else {
+                    queue.add(node);
+                }
             }
             // pick a new best node
-            firstNode = queue.first();
+            nextNode = queue.first();
+            queue.remove(nextNode);
             // if the current node is the best node seen so far (this makes sure
             // that we will alwas return the best node, even if we hit the
             // maximum number of iterations)
-            if (bestNode.getFitness() < firstNode.getFitness()) {
-                bestNode = firstNode;
+            if (bestNode.getFitness() < nextNode.getFitness()) {
+                bestNode = nextNode;
             }
             ++iteration;
         }
+        LOGGER.warn("Refinement Tree:\n{}\n", printTree(tree));
         return bestNode;
     }
 
@@ -206,6 +227,29 @@ public class CharactersiticExpressionSearcher {
             }
         }
         return newNodes;
+    }
+
+    private String printTree(RefinementTree tree) {
+        StringBuilder builder = new StringBuilder();
+        for (RefinementNode n : tree.getFirstStageNodes()) {
+            printNode(builder, n, 0);
+        }
+        return builder.toString();
+    }
+
+    private void printNode(StringBuilder builder, RefinementNode node, int depth) {
+        builder.append('+');
+        for (int i = 0; i < depth; ++i) {
+            builder.append(' ');
+        }
+        builder.append(String.format("%.3f", node.fitness));
+        builder.append("  ");
+        builder.append(node.reducedExpression);
+        builder.append('\n');
+
+        for (RefinementNode n : node.children) {
+            printNode(builder, n, depth + 1);
+        }
     }
 
 }
