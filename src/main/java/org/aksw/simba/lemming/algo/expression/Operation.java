@@ -169,4 +169,9 @@ public class Operation implements Expression {
             return false;
         return true;
     }
+
+    @Override
+    public int getSize() {
+        return left.getSize() + right.getSize() + 1;
+    }
 }

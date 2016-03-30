@@ -103,4 +103,9 @@ public class Constant implements Expression {
         return true;
     }
 
+    @Override
+    public int getSize() {
+        return 0;
+    }
+
 }
