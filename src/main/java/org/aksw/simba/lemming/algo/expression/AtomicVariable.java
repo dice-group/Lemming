@@ -14,7 +14,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  */
 public class AtomicVariable implements Expression {
 
-    private SingleValueMetric metric;
+    private final SingleValueMetric metric;
 
     public AtomicVariable(SingleValueMetric metric) {
         this.metric = metric;
@@ -82,6 +82,28 @@ public class AtomicVariable implements Expression {
      */
     public String toString() {
         return metric.getName();
+    }
+
+    @Override
+    public int hashCode() {
+        return (metric == null) ? 0 : metric.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        AtomicVariable other = (AtomicVariable) obj;
+        if (metric == null) {
+            if (other.metric != null)
+                return false;
+        } else if (!metric.equals(other.metric))
+            return false;
+        return true;
     }
 
 }

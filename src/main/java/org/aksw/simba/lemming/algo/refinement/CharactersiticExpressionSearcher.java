@@ -9,18 +9,22 @@ import java.util.TreeSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 /**
- * Refinement operator that explores a tree of possible {@link Expression}
- * instances and tries to refine them to get the instance with the best fitness.
+ * This searcher tries to find an {@link Expression} that is characteristic for
+ * a given set of graphs. This is achieved by using a {@link RefinementOperator}
+ * to explore a tree of possible {@link Expression} instances by iteratively
+ * refining the {@link Expression} with the best fitness based on a given
+ * {@link FitnessFunction}.
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class RefinementOperator {
+public class CharactersiticExpressionSearcher {
 
     /**
      * List of metrics that can be used by the refinement.
@@ -30,6 +34,11 @@ public class RefinementOperator {
      * The factory that is used to generate {@link RefinementNode}s.
      */
     private RefinementNodeFactory factory;
+    /**
+     * The refinement operator that is used to generate new {@link Expression}
+     * instances.
+     */
+    private RefinementOperator refineOperator;
     /**
      * The fitness function that is used to assign fitness scores to the single
      * nodes.
@@ -61,7 +70,7 @@ public class RefinementOperator {
      * @param maxIterations
      *            The maximal number of iterations the operator will perform.
      */
-    public RefinementOperator(List<SingleValueMetric> metrics, RefinementNodeFactory factory,
+    public CharactersiticExpressionSearcher(List<SingleValueMetric> metrics, RefinementNodeFactory factory,
             FitnessFunction fitnessFunc, double minFitness, int maxIterations) {
         this.metrics = metrics;
         this.factory = factory;
@@ -90,7 +99,7 @@ public class RefinementOperator {
         // initialize the queue
         SortedSet<RefinementNode> queue = new TreeSet<RefinementNode>();
         for (RefinementNode node : nodes) {
-            node.setFitness(fitnessFunc.getFitness(node, graphVectors));
+            node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
         }
         // start refinement
         RefinementNode firstNode = queue.first();
@@ -103,7 +112,7 @@ public class RefinementOperator {
             nodes = refine(firstNode, tree);
             // calculate the fitness of all new nodes and add them to the queue
             for (RefinementNode node : nodes) {
-                node.setFitness(fitnessFunc.getFitness(node, graphVectors));
+                node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
             }
             // pick a new best node
             firstNode = queue.first();
@@ -181,17 +190,20 @@ public class RefinementOperator {
      *            queue containing nodes that could be visited in the future
      */
     private Set<RefinementNode> refine(RefinementNode node, RefinementTree tree) {
+        Set<Expression> newExpressions = refineOperator.refine(node.getExpression());
+        RefinementNode newNode;
         Set<RefinementNode> newNodes = new HashSet<RefinementNode>();
-        // TODO create new expressions
-        Expression newExp = null;
-        RefinementNode newNode = factory.createNode(newExp);
-        // if this node is not already inside the tree
-        if (!tree.getNodes().contains(newNode)) {
-            // add the node to the tree
-            tree.getNodes().add(newNode);
-            // connect the new node and its parent
-            node.children.add(newNode);
-            newNode.setParent(node);
+        for (Expression newExp : newExpressions) {
+            newNode = factory.createNode(newExp);
+            // if this node is not already inside the tree
+            if ((newNode != null) && !tree.getNodes().contains(newNode)) {
+                // add the node to the tree
+                tree.getNodes().add(newNode);
+                // connect the new node and its parent
+                node.children.add(newNode);
+                newNode.setParent(node);
+                newNodes.add(newNode);
+            }
         }
         return newNodes;
     }
