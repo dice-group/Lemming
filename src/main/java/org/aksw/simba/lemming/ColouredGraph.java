@@ -113,4 +113,11 @@ public class ColouredGraph {
         return graph.getVertices();
     }
      
+    public IntSet getOutEdges(int vertexId){
+        return graph.getOutEdges(vertexId);
+    }
+    
+    public IntSet getVerticesAccessibleThrough(int vertexId, int edgeId){
+        return graph.getVerticesAccessibleThrough(vertexId, edgeId);
+    }
 }
