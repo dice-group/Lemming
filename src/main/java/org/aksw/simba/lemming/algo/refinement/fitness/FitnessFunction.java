@@ -3,10 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.aksw.simba.lemming.algo.refinement;
-
-import java.util.Map;
-import java.util.Set;
+package org.aksw.simba.lemming.algo.refinement.fitness;
 
 import org.aksw.simba.lemming.algo.expression.Expression;
 

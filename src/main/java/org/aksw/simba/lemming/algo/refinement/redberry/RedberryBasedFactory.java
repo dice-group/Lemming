@@ -9,6 +9,7 @@ import org.aksw.simba.lemming.algo.refinement.RefinementNodeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cc.redberry.core.context.OutputFormat;
 import cc.redberry.core.number.Complex;
 import cc.redberry.core.solver.ReduceEngine;
 import cc.redberry.core.solver.ReducedSystem;
@@ -40,7 +41,8 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
         ReducedSystem rd = ReduceEngine.reduceToSymbolicSystem(new cc.redberry.core.tensor.Expression[] { exp },
                 variables, new Transformation[0]);
         exp = restoreVariableNames(rd);
-        String reducedExpression = exp.get(0).toString();
+        // String reducedExpression = exp.get(0).toString(OutputFormat.LaTeX);
+        String reducedExpression = TensorPrintUtils.print(exp.get(0), OutputFormat.LaTeX);
         if (checkReducedExpression(reducedExpression)) {
             return new RefinementNode(expression, reducedExpression);
         } else {

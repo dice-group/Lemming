@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
+import org.aksw.simba.lemming.algo.expression.Constant;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.expression.ExpressionIterator;
 import org.aksw.simba.lemming.algo.expression.ExpressionUtils;
@@ -28,6 +29,8 @@ import com.carrotsearch.hppc.BitSet;
 public class LeaveNodeReplacingRefinementOperator implements RefinementOperator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeaveNodeReplacingRefinementOperator.class);
+    
+    private static final Constant ONE = new Constant(1);
 
     /**
      * List of {@link AtomicVariable} instances that can be used by the
@@ -64,38 +67,50 @@ public class LeaveNodeReplacingRefinementOperator implements RefinementOperator 
             Set<Expression> newExpressions) {
         Expression newExpression;
         for (int i = 0; i < atomicVariables.length; ++i) {
+            // v -> v + a
             newExpression = createNewExpression(new Operation(variable, atomicVariables[i], Operator.PLUS), root, route,
                     routeLength);
             if (newExpression != null) {
                 newExpressions.add(newExpression);
             }
+            // v -> v * a
             newExpression = createNewExpression(new Operation(variable, atomicVariables[i], Operator.TIMES), root,
                     route, routeLength);
             if (newExpression != null) {
                 newExpressions.add(newExpression);
             }
             if (!atomicVariables[i].equals(variable)) {
+                // v -> v - a
                 newExpression = createNewExpression(new Operation(variable, atomicVariables[i], Operator.MINUS), root,
                         route, routeLength);
                 if (newExpression != null) {
                     newExpressions.add(newExpression);
                 }
+                // v -> a - v
                 newExpression = createNewExpression(new Operation(atomicVariables[i], variable, Operator.MINUS), root,
                         route, routeLength);
                 if (newExpression != null) {
                     newExpressions.add(newExpression);
                 }
+                // v -> v / a
                 newExpression = createNewExpression(new Operation(variable, atomicVariables[i], Operator.DIV), root,
                         route, routeLength);
                 if (newExpression != null) {
                     newExpressions.add(newExpression);
                 }
+                // v -> a / v
                 newExpression = createNewExpression(new Operation(atomicVariables[i], variable, Operator.DIV), root,
                         route, routeLength);
                 if (newExpression != null) {
                     newExpressions.add(newExpression);
                 }
             }
+        }
+        // v -> v + 1
+        newExpression = createNewExpression(new Operation(variable, ONE, Operator.PLUS), root, route,
+                routeLength);
+        if (newExpression != null) {
+            newExpressions.add(newExpression);
         }
     }
 

@@ -9,6 +9,7 @@ import java.util.TreeSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.algo.refinement.fitness.FitnessFunction;
 import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;

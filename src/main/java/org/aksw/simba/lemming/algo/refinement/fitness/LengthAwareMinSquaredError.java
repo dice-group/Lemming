@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.aksw.simba.lemming.algo.refinement;
+package org.aksw.simba.lemming.algo.refinement.fitness;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import org.aksw.simba.lemming.algo.expression.Expression;

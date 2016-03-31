@@ -33,7 +33,8 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         tests.add(new Object[] { new Constant(0), new Expression[] {} });
         // a single variable "a"
         tests.add(new Object[] { VARIABLES[0],
-                new Expression[] { new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS),
+                new Expression[] { new Operation(VARIABLES[0], new Constant(1), Operator.PLUS),
+                        new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS),
                         new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),
                         new Operation(VARIABLES[0], VARIABLES[2], Operator.PLUS),
                         new Operation(VARIABLES[0], VARIABLES[0], Operator.TIMES),
@@ -49,8 +50,9 @@ public class LeaveNodeReplacingRefinementOperatorTest {
                         new Operation(VARIABLES[2], VARIABLES[0], Operator.DIV) } });
         // a single Operation "a + b"
         tests.add(new Object[] { new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),
-                new Expression[] { new Operation(new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS), VARIABLES[1],
-                        Operator.PLUS),
+                new Expression[] { new Operation(new Operation(VARIABLES[0], new Constant(1), Operator.PLUS),
+                        VARIABLES[1], Operator.PLUS),
+                new Operation(new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS), VARIABLES[1], Operator.PLUS),
                 new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS), VARIABLES[1], Operator.PLUS),
                 new Operation(new Operation(VARIABLES[0], VARIABLES[2], Operator.PLUS), VARIABLES[1], Operator.PLUS),
                 new Operation(new Operation(VARIABLES[0], VARIABLES[0], Operator.TIMES), VARIABLES[1], Operator.PLUS),
@@ -64,6 +66,7 @@ public class LeaveNodeReplacingRefinementOperatorTest {
                 new Operation(new Operation(VARIABLES[0], VARIABLES[2], Operator.DIV), VARIABLES[1], Operator.PLUS),
                 new Operation(new Operation(VARIABLES[1], VARIABLES[0], Operator.DIV), VARIABLES[1], Operator.PLUS),
                 new Operation(new Operation(VARIABLES[2], VARIABLES[0], Operator.DIV), VARIABLES[1], Operator.PLUS),
+                new Operation(VARIABLES[0], new Operation(VARIABLES[1], new Constant(1), Operator.PLUS), Operator.PLUS),
                 new Operation(VARIABLES[0], new Operation(VARIABLES[1], VARIABLES[0], Operator.PLUS), Operator.PLUS),
                 new Operation(VARIABLES[0], new Operation(VARIABLES[1], VARIABLES[1], Operator.PLUS), Operator.PLUS),
                 new Operation(VARIABLES[0], new Operation(VARIABLES[1], VARIABLES[2], Operator.PLUS), Operator.PLUS),
@@ -81,13 +84,18 @@ public class LeaveNodeReplacingRefinementOperatorTest {
                         Operator.PLUS) } });
         // a complex Operation "(a + b) + c"
         tests.add(
-                new Object[] { new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS), VARIABLES[2],
-                        Operator.PLUS), new Expression[] {
-                                new Operation(
-                                        new Operation(new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS),
-                                                VARIABLES[1], Operator.PLUS),
-                                        VARIABLES[2], Operator.PLUS),
-                                new Operation(
+                new Object[] {
+                        new Operation(
+                                new Operation(VARIABLES[0], VARIABLES[1],
+                                        Operator.PLUS),
+                                VARIABLES[2], Operator.PLUS),
+                        new Expression[] {
+                                new Operation(new Operation(new Operation(VARIABLES[0], new Constant(1), Operator.PLUS),
+                                        VARIABLES[1], Operator.PLUS), VARIABLES[2], Operator.PLUS),
+                        new Operation(
+                                new Operation(new Operation(VARIABLES[0], VARIABLES[0], Operator.PLUS), VARIABLES[1],
+                                        Operator.PLUS),
+                                VARIABLES[2], Operator.PLUS), new Operation(
                                         new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),
                                                 VARIABLES[1], Operator.PLUS),
                                         VARIABLES[2], Operator.PLUS),
@@ -127,21 +135,30 @@ public class LeaveNodeReplacingRefinementOperatorTest {
                                         new Operation(new Operation(VARIABLES[2], VARIABLES[0], Operator.DIV),
                                                 VARIABLES[1], Operator.PLUS),
                                         VARIABLES[2], Operator.PLUS),
+                                new Operation(new Operation(VARIABLES[0],
+                                        new Operation(VARIABLES[1], new Constant(1), Operator.PLUS), Operator.PLUS),
+                                        VARIABLES[2], Operator.PLUS),
                                 new Operation(
                                         new Operation(VARIABLES[0],
                                                 new Operation(VARIABLES[1], VARIABLES[0], Operator.PLUS),
                                                 Operator.PLUS),
                                         VARIABLES[2], Operator.PLUS),
-                                new Operation(new Operation(VARIABLES[0],
-                                        new Operation(VARIABLES[1], VARIABLES[1], Operator.PLUS), Operator.PLUS),
-                                VARIABLES[2], Operator.PLUS), new Operation(
+                                new Operation(
+                                        new Operation(VARIABLES[0],
+                                                new Operation(VARIABLES[1], VARIABLES[1], Operator.PLUS),
+                                                Operator.PLUS),
+                                        VARIABLES[2], Operator.PLUS),
+                                new Operation(
                                         new Operation(VARIABLES[0],
                                                 new Operation(VARIABLES[1], VARIABLES[2], Operator.PLUS),
                                                 Operator.PLUS),
                                         VARIABLES[2], Operator.PLUS),
-                                new Operation(new Operation(VARIABLES[0],
-                                        new Operation(VARIABLES[1], VARIABLES[0], Operator.TIMES), Operator.PLUS),
-                                VARIABLES[2], Operator.PLUS), new Operation(
+                                new Operation(
+                                        new Operation(VARIABLES[0],
+                                                new Operation(VARIABLES[1], VARIABLES[0], Operator.TIMES),
+                                                Operator.PLUS),
+                                        VARIABLES[2], Operator.PLUS),
+                                new Operation(
                                         new Operation(VARIABLES[0],
                                                 new Operation(VARIABLES[1], VARIABLES[1], Operator.TIMES),
                                                 Operator.PLUS),
@@ -177,6 +194,8 @@ public class LeaveNodeReplacingRefinementOperatorTest {
                                         new Operation(VARIABLES[0],
                                                 new Operation(VARIABLES[2], VARIABLES[1], Operator.DIV), Operator.PLUS),
                                         VARIABLES[2], Operator.PLUS),
+                        new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),
+                                new Operation(VARIABLES[2], new Constant(1), Operator.PLUS), Operator.PLUS),
                         new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),
                                 new Operation(VARIABLES[2], VARIABLES[0], Operator.PLUS), Operator.PLUS),
                         new Operation(new Operation(VARIABLES[0], VARIABLES[1], Operator.PLUS),

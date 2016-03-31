@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.aksw.simba.lemming.algo.refinement;
+package org.aksw.simba.lemming.algo.refinement.fitness;
+
+import org.aksw.simba.lemming.algo.expression.Expression;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import java.util.ArrayList;
-import java.util.List;
-import org.aksw.simba.lemming.algo.expression.Expression;
 
 /**
  * Implements a fitness based on mean squared error
