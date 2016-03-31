@@ -36,6 +36,7 @@ public class ConstructSubGraph {
                 } else{ 
                     newVID--; 
                 }
+                sample.addVertex((BitSet)vertices.values[i]);
                 sample.setVertexColour(vIdOldSample.get(vID), (BitSet)vertices.values[i]);
                 
                 //add out edges 
