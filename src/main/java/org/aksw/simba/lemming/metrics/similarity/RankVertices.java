@@ -33,7 +33,7 @@ public class RankVertices {
     public RankVertices(){}
     
 
-    public void compute(ColouredGraph realGraph, ColouredGraph generatedGraph){
+    public void compute(ColouredGraph realGraph, ColouredGraph generatedGraph){ //be careful with the range of the arguments
         
         sampleGVertices = new ObjectObjectOpenHashMap<Integer, BitSet>();
         sampleRVertices = new ObjectObjectOpenHashMap<Integer, BitSet>();
@@ -95,7 +95,7 @@ public class RankVertices {
         //compute here how many vertices you want to keep for the sample graph for each colour
         //@TODO find the "correct" num of vertices
         //maybe a metric based on size of the vertices for each colour and the whole graph?
-        int keep = (int) Math.ceil(size/10.0);
+        int keep = (int) Math.ceil(size/10.0); 
         return keep;
     }
  
@@ -113,7 +113,6 @@ public class RankVertices {
         for(Map.Entry<K,V> entry: entries.subList(0, numOfSampleVertices(entries.size()))){
             sortedMap.put(entry.getKey(), entry.getValue());
         }
-      
         return sortedMap;
     }
 
