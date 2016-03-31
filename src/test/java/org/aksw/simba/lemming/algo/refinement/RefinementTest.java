@@ -31,7 +31,7 @@ public class RefinementTest {
 
         FitnessFunction fitnessFunc = new MinSquaredError();
 
-        CharactersiticExpressionSearcher searcher = new CharactersiticExpressionSearcher(metrics,
+        CharacteristicExpressionSearcher searcher = new CharacteristicExpressionSearcher(metrics,
                 new LeaveNodeReplacingRefinementOperator(metrics), new RedberryBasedFactory(), fitnessFunc, MIN_FITNESS,
                 MAX_ITERATIONS);
 

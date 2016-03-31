@@ -26,9 +26,9 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class CharactersiticExpressionSearcher {
+public class CharacteristicExpressionSearcher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CharactersiticExpressionSearcher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CharacteristicExpressionSearcher.class);
 
     /**
      * List of metrics that can be used by the refinement.
@@ -77,7 +77,7 @@ public class CharactersiticExpressionSearcher {
      * @param maxIterations
      *            The maximal number of iterations the operator will perform.
      */
-    public CharactersiticExpressionSearcher(List<SingleValueMetric> metrics, RefinementOperator refineOperator,
+    public CharacteristicExpressionSearcher(List<SingleValueMetric> metrics, RefinementOperator refineOperator,
             RefinementNodeFactory factory, FitnessFunction fitnessFunc, double minFitness, int maxIterations) {
         this.metrics = metrics;
         this.refineOperator = refineOperator;
@@ -134,7 +134,7 @@ public class CharactersiticExpressionSearcher {
                 }
             }
             // pick a new best node
-            nextNode = queue.first();
+            nextNode = queue.last();
             queue.remove(nextNode);
             // if the current node is the best node seen so far (this makes sure
             // that we will alwas return the best node, even if we hit the
