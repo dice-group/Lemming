@@ -27,10 +27,14 @@ public class ConstructSubGraph {
         Map<Integer,Integer> vIdOldSample = new HashMap<Integer,Integer>(); // map ids from initial graph with ids from sample graph
         ColouredGraph sample = new ColouredGraph();
         int newVID = 0;
+        boolean in = false;
         for (int i = 0; i < vertices.allocated.length; ++i) {
             if (vertices.allocated[i]) {
                 //add coloured vertex to new coloured graph
                 int vID = (Integer)vertices.keys[i];
+//                System.out.println("vID " + vID);
+//                System.out.println("vID colour " +(BitSet)vertices.values[i]);
+                
                 if(!vIdOldSample.containsKey(vID)){ 
                     vIdOldSample.put(vID, newVID);
                 } else{ 
@@ -42,14 +46,15 @@ public class ConstructSubGraph {
                 //add out edges 
                 IntSet outEdges = colouredGraph.getOutEdges(vID);
                 for(IntCursor e: outEdges){
-                    BitSet edgeColour = colouredGraph.getEdgeColour(e.value); //check this
+                    BitSet edgeColour = colouredGraph.getEdgeColour(e.value); 
                     IntSet tail = colouredGraph.getVerticesAccessibleThrough(vID, e.value);
                     for(IntCursor v: tail){
                         if(!vIdOldSample.containsKey(v.value)){
                             newVID++;
                             vIdOldSample.put(v.value, newVID);
                         }
-                        //@TODO: check: Do I need to keep the colours of the vertices accessible through current vertex?
+                        //set colour for vertex accessible through the starting vertex
+                        sample.setVertexColour(vIdOldSample.get(v.value), colouredGraph.getVertexColour(v.value));
                         sample.addEdge(vIdOldSample.get(vID), vIdOldSample.get(v.value), edgeColour);
                     }
                 } 
