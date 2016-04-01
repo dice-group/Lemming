@@ -89,17 +89,21 @@ public class CharacteristicExpressionSearcher {
     }
 
     /**
-     * Finds the {@link Expression} with the highest fitness for the given
+     * Finds the k {@link Expression}s with the highest fitness for the given
      * graphs.
      * 
      * @param graphs
      *            an array of graphs for which the best expression is searched.
-     * @return an {@link RefinementNode} encapsulating an expression which has a
-     *         fitness value <code>&lt; {@link #minFitness}</code> or had the
-     *         best fitness value before hitting the {@link #maxIterations}
-     *         limit.
+     * @param k
+     *            the (minimum) number of {@link Expression}s that should be
+     *            returned.
+     * @return a {@link SortedSet} of {@link RefinementNode}s encapsulating
+     *         expression that have fitness values <code>&lt; 
+     *         {@link #minFitness}</code> or had the best fitness values before
+     *         hitting the {@link #maxIterations} limit.
      */
-    public RefinementNode findExpression(ColouredGraph graphs[]) {
+    public SortedSet<RefinementNode> findExpression(ColouredGraph graphs[], int k) {
+        SortedSet<RefinementNode> bestNodes = new TreeSet<RefinementNode>();
         // precalculate the metrics values
         ObjectDoubleOpenHashMap<String> graphVectors[] = calculateGraphMetrics(graphs);
         // initialize the tree
@@ -113,16 +117,18 @@ public class CharacteristicExpressionSearcher {
                 LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
             } else {
                 queue.add(node);
+                addToBestNodes(bestNodes, node, k);
             }
         }
         // start refinement
         RefinementNode nextNode = queue.last();
         queue.remove(nextNode);
-        RefinementNode bestNode = nextNode;
+        bestNodes.add(nextNode);
         int iteration = 0;
         // While we haven't reached the maximum number of iterations and the
-        // fitness of the best node is not good enough, refine the expression
-        while ((iteration < maxIterations) && (bestNode.getFitness() < minFitness)) {
+        // fitness of the worst best node is not good enough, refine the
+        // expression
+        while ((iteration < maxIterations) && (bestNodes.first().getFitness() < minFitness)) {
             // refine the best node
             nodes = refine(nextNode, tree);
             // calculate the fitness of all new nodes and add them to the queue
@@ -132,21 +138,37 @@ public class CharacteristicExpressionSearcher {
                     LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
                 } else {
                     queue.add(node);
+                    addToBestNodes(bestNodes, node, k);
                 }
             }
             // pick a new best node
             nextNode = queue.last();
             queue.remove(nextNode);
-            // if the current node is the best node seen so far (this makes sure
-            // that we will alwas return the best node, even if we hit the
-            // maximum number of iterations)
-            if (bestNode.getFitness() < nextNode.getFitness()) {
-                bestNode = nextNode;
-            }
+            addToBestNodes(bestNodes, nextNode, k);
             ++iteration;
         }
         LOGGER.warn("Refinement Tree:\n{}\n", printTree(tree));
-        return bestNode;
+        return bestNodes;
+    }
+
+    private void addToBestNodes(SortedSet<RefinementNode> bestNodes, RefinementNode node, int k) {
+        // if we have not reached the minimum number of best nodes
+        if (bestNodes.size() < k) {
+            bestNodes.add(node);
+        } else {
+            // if the current node is better (or equal) than the
+            // worst best
+            // node seen so far (this makes sure that we will always
+            // return
+            // the best node, even if we hit the maximum number of
+            // iterations)
+            if (bestNodes.first().getFitness() <= node.getFitness()) {
+                bestNodes.add(node);
+                while ((bestNodes.size() > k) && (bestNodes.first().getFitness() < bestNodes.last().getFitness())) {
+                    bestNodes.remove(bestNodes.first());
+                }
+            }
+        }
     }
 
     /**

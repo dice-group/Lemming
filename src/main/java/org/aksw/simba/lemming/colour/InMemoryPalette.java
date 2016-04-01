@@ -8,14 +8,15 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 public class InMemoryPalette implements ColourPalette {
 
     protected ObjectObjectOpenHashMap<String, BitSet> uriColourMap = new ObjectObjectOpenHashMap<String, BitSet>();
+    protected int highestColourId = 0;
 
     @Override
     public void addColour(String uri) {
         if (!uriColourMap.containsKey(uri)) {
-            int id = uriColourMap.size();
-            BitSet colour = new BitSet(id);
-            colour.set(id);
+            BitSet colour = new BitSet(highestColourId);
+            colour.set(highestColourId);
             uriColourMap.put(uri, colour);
+            ++highestColourId;
         }
     }
 
@@ -74,6 +75,11 @@ public class InMemoryPalette implements ColourPalette {
     @Override
     public boolean containsUri(String uri) {
         return uriColourMap.containsKey(uri);
+    }
+
+    @Override
+    public void setColour(String uri, BitSet colour) {
+        uriColourMap.put(uri, colour);
     }
 
 }

@@ -29,7 +29,6 @@ import com.carrotsearch.hppc.BitSet;
 public class LeaveNodeReplacingRefinementOperator implements RefinementOperator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeaveNodeReplacingRefinementOperator.class);
-    
     private static final Constant ONE = new Constant(1);
 
     /**
@@ -107,8 +106,12 @@ public class LeaveNodeReplacingRefinementOperator implements RefinementOperator 
             }
         }
         // v -> v + 1
-        newExpression = createNewExpression(new Operation(variable, ONE, Operator.PLUS), root, route,
-                routeLength);
+        newExpression = createNewExpression(new Operation(variable, ONE, Operator.PLUS), root, route, routeLength);
+        if (newExpression != null) {
+            newExpressions.add(newExpression);
+        }
+        // v -> v - 1
+        newExpression = createNewExpression(new Operation(variable, ONE, Operator.MINUS), root, route, routeLength);
         if (newExpression != null) {
             newExpressions.add(newExpression);
         }

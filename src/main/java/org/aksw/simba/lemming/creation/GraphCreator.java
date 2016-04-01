@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
@@ -25,13 +26,22 @@ public class GraphCreator {
     protected ObjectObjectOpenHashMap<Resource, HierarchyNode> properties;
     protected ColourPalette vertexPalette;
     protected ColourPalette edgePalette;
-        
-    
+
     public GraphCreator() {
+        // Initialize the classes
         classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
-        properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        classes.put(RDFS.Class, null);
+        classes.put(OWL.Class, null);
+        classes.put(RDF.Property, null);
         vertexPalette = new InMemoryPalette();
+        vertexPalette.addColour(RDFS.Class.getURI());
+        vertexPalette.setColour(OWL.Class.getURI(), vertexPalette.getColour(RDFS.Class.getURI()));
+        vertexPalette.addColour(RDF.Property.getURI());
+        // Initialize the properties
+        properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+        properties.put(RDF.type, null);
         edgePalette = new InMemoryPalette();
+        edgePalette.addColour(RDF.type.getURI());
     }
 
     public ColouredGraph processModel(Model model) {
@@ -159,9 +169,13 @@ public class GraphCreator {
         // All classes have been collected
         // The colours can be defined
 
+        String uri;
         for (int i = 0; i < classes.allocated.length; ++i) {
             if (classes.allocated[i]) {
-                vertexPalette.addColour(((Resource) ((Object[]) classes.keys)[i]).getURI());
+                uri = ((Resource) ((Object[]) classes.keys)[i]).getURI();
+                if (!vertexPalette.containsUri(uri)) {
+                    vertexPalette.addColour(uri);
+                }
             }
         }
 
@@ -260,5 +274,5 @@ public class GraphCreator {
             }
         }
     }
-    
+
 }

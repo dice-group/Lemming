@@ -107,7 +107,7 @@ public class TensorPrintUtils {
                 print(argument, sb, mode);
                 if (!TensorUtils.isMinusOne(power)) {
                     sb.append("^{");
-                    print(power, sb, mode);
+                    print(((Complex)power).abs(), sb, mode);
                     sb.append('}');
                 }
                 sb.append('}');

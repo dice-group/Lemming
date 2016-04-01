@@ -6,6 +6,7 @@ import com.carrotsearch.hppc.IntArrayList;
 
 import grph.Grph.DIRECTION;
 
+@SuppressWarnings("deprecation")
 public class StdDevVertexInDegree extends AvgVertexDegreeMetric {
 
     protected DIRECTION direction;
