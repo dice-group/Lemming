@@ -30,16 +30,16 @@ public class GraphCreator {
     public GraphCreator() {
         // Initialize the classes
         classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
-        classes.put(RDFS.Class, null);
-        classes.put(OWL.Class, null);
-        classes.put(RDF.Property, null);
+        classes.put(RDFS.Class, new HierarchyNode());
+        classes.put(OWL.Class, new HierarchyNode());
+        classes.put(RDF.Property, new HierarchyNode());
         vertexPalette = new InMemoryPalette();
         vertexPalette.addColour(RDFS.Class.getURI());
         vertexPalette.setColour(OWL.Class.getURI(), vertexPalette.getColour(RDFS.Class.getURI()));
         vertexPalette.addColour(RDF.Property.getURI());
         // Initialize the properties
         properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
-        properties.put(RDF.type, null);
+        properties.put(RDF.type, new HierarchyNode());
         edgePalette = new InMemoryPalette();
         edgePalette.addColour(RDF.type.getURI());
     }

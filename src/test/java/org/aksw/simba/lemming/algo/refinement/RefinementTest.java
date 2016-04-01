@@ -23,7 +23,7 @@ import grph.in_memory.InMemoryGrph;
 public class RefinementTest {
 
     private static final double MIN_FITNESS = 1.0;
-    private static final int MAX_ITERATIONS = 20;
+    private static final int MAX_ITERATIONS = 5;
     private static final boolean USE_SEMANTIC_DOG_FOOD = true;
 
     public static void main(String[] args) {
