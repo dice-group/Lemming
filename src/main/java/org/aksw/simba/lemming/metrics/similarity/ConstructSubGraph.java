@@ -22,19 +22,15 @@ public class ConstructSubGraph {
     }
     
     public ColouredGraph construct(){
-         //the reason I am keeping the map is to remove vertices that are not selected from ranking
-         //and not having null entries to my arrays
+         //the reason I am keeping the map is to have vertices with 
+         //sequential ids and avoid null entries to my arrays
         Map<Integer,Integer> vIdOldSample = new HashMap<Integer,Integer>(); // map ids from initial graph with ids from sample graph
         ColouredGraph sample = new ColouredGraph();
         int newVID = 0;
-        boolean in = false;
         for (int i = 0; i < vertices.allocated.length; ++i) {
             if (vertices.allocated[i]) {
                 //add coloured vertex to new coloured graph
                 int vID = (Integer)vertices.keys[i];
-//                System.out.println("vID " + vID);
-//                System.out.println("vID colour " +(BitSet)vertices.values[i]);
-                
                 if(!vIdOldSample.containsKey(vID)){ 
                     vIdOldSample.put(vID, newVID);
                 } else{ 
@@ -53,7 +49,7 @@ public class ConstructSubGraph {
                             newVID++;
                             vIdOldSample.put(v.value, newVID);
                         }
-                        //set colour for vertex accessible through the starting vertex
+                        //@TODO check if I need to keep this colour. 
                         sample.setVertexColour(vIdOldSample.get(v.value), colouredGraph.getVertexColour(v.value));
                         sample.addEdge(vIdOldSample.get(vID), vIdOldSample.get(v.value), edgeColour);
                     }
