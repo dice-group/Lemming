@@ -1,13 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.aksw.simba.lemming.metrics.similarity;
 
 import java.io.InputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Arrays;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphCreator;
 import org.apache.commons.io.IOUtils;
@@ -34,6 +28,8 @@ public class HITSTest {
         ColouredGraph graph = creator.processModel(model);
         
         //System.out.println("matrix: " +graph.getGraph().getAdjacencyMatrix());
+//        System.out.println("graph.getInNeighborhoodsArray()" +Arrays.deepToString(graph.getInNeighborhoodsArray()));
+//        System.out.println("graph.getOutNeighborhoodsArray()" +Arrays.deepToString(graph.getOutNeighborhoodsArray()));
         new HITS(graph);
         
         
