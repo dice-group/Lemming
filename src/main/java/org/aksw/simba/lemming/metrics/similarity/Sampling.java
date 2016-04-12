@@ -45,11 +45,11 @@ public class Sampling {
      * @return sample graph
      */
     public ObjectObjectOpenHashMap<Integer, BitSet> vertexSample(ColouredGraph graph){
-    
-        ColouredVerticesMetric colouredVertices = new ColouredVerticesMetric();
-        ObjectObjectOpenHashMap<BitSet,IntSet> vertices = colouredVertices.getVerticesForEachColour(graph);
-        PageRank pageRank = graph.getGraph().getPageRanking(random);
-        ObjectObjectOpenHashMap<Integer, BitSet> sampleVertices = new ObjectObjectOpenHashMap<Integer,BitSet>();
+
+    ColouredVerticesMetric colouredVertices = new ColouredVerticesMetric();
+    ObjectObjectOpenHashMap<BitSet,IntSet> vertices = colouredVertices.getVerticesForEachColour(graph);
+    PageRank pageRank = graph.getGraph().getPageRanking(random);
+    ObjectObjectOpenHashMap<Integer, BitSet> sampleVertices = new ObjectObjectOpenHashMap<Integer,BitSet>();
     
         for (ObjectCursor<BitSet> colour : vertices.keys()) {
             if(!colour.value.isEmpty()){  //change this based on the colour we have for rdf:type ...
@@ -69,33 +69,6 @@ public class Sampling {
         return sampleVertices;
     }
   
-    
-    public int numOfSampleVertices(ColouredGraph graph, BitSet colour){
-        NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
-        double gSize = metric.apply(graph);
-        
-        ObjectObjectOpenHashMap<BitSet,Double> distribution = vertexColourDistribution(graph);
-        //@TODO: define the percentage of the size we want to maintain! (now is 15%)
-        int keep = (int) Math.ceil(distribution.get(colour) * (gSize * 0.15)); 
-        System.out.println("size: " + gSize+" keep: "+ keep +" colour: "+colour+" dist: " + distribution.get(colour)+"\n");
-        
-        return keep;
-    }
-    
-    public ObjectObjectOpenHashMap<BitSet,Double> vertexColourDistribution(ColouredGraph graph){
-        ObjectObjectOpenHashMap<BitSet,Double> distribution = new ObjectObjectOpenHashMap<BitSet,Double>();
-        NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
-        double gSize = metric.apply(graph);
-        
-        ColouredVerticesMetric colouredVertices = new ColouredVerticesMetric();
-        ObjectObjectOpenHashMap<BitSet, IntSet> map = colouredVertices.getVerticesForEachColour(graph);
-        
-         for (ObjectCursor<BitSet> colour : map.keys()) {
-             distribution.put(colour.value, (map.get(colour.value).size()/gSize));
-        }
-        return distribution;
-    }
- 
     public <K extends Comparable,V extends Comparable> Map<K,V> sortByValues(Map<K,V> map,ColouredGraph graph, BitSet colour){
         List<Map.Entry<K,V>> entries = new LinkedList<Map.Entry<K,V>>(map.entrySet());
         Collections.sort(entries, new Comparator<Map.Entry<K,V>>() {
@@ -115,6 +88,33 @@ public class Sampling {
         }
         return sortedMap;
     }
+    
+    public int numOfSampleVertices(ColouredGraph graph, BitSet colour){
+        NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
+        double gSize = metric.apply(graph);
+        ObjectObjectOpenHashMap<BitSet,Double> distribution = vertexColourDistribution(graph);
+        
+        //we choose ceil and not round because we want to keep at least one vertex for each colour
+        int keep = (int) Math.ceil(distribution.get(colour) * (gSize * 0.15)); 
+        
+        return keep;
+    }
+    
+    public ObjectObjectOpenHashMap<BitSet,Double> vertexColourDistribution(ColouredGraph graph){
+        ObjectObjectOpenHashMap<BitSet,Double> distribution = new ObjectObjectOpenHashMap<BitSet,Double>();
+        NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
+        double gSize = metric.apply(graph);
+        
+        ColouredVerticesMetric colouredVertices = new ColouredVerticesMetric();
+        ObjectObjectOpenHashMap<BitSet, IntSet> map = colouredVertices.getVerticesForEachColour(graph);
+        
+        for (ObjectCursor<BitSet> colour : map.keys()) {
+             distribution.put(colour.value, (map.get(colour.value).size()/gSize));
+        }
+        return distribution;
+    }
+ 
+    
 
     
     public ObjectObjectOpenHashMap<Integer, BitSet> getSampleGeneratedVertices(){
@@ -124,5 +124,6 @@ public class Sampling {
     public ObjectObjectOpenHashMap<Integer, BitSet> getSampleRealVertices(){
         return this.sampleRealVertices;
     }
+   
 }
 

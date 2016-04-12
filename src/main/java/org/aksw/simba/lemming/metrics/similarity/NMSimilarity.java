@@ -1,9 +1,14 @@
 package org.aksw.simba.lemming.metrics.similarity;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
+import org.aksw.simba.lemming.util.ArrayUtil;
+
 
 /**
  * @author jsaveta
@@ -25,16 +30,23 @@ public class NMSimilarity {
     private double[][] inNodeSimilarity;
     private double[][] outNodeSimilarity;
     
+    private  Map<Integer,Integer> idCorrespondenceA;
+    private  Map<Integer,Integer> idCorrespondenceB;
+    
     private double epsilon;
     
     private int graphSizeA;
     private int graphSizeB;
     private NumberOfVerticesMetric size;
     
-    public NMSimilarity(ColouredGraph colouredGraphA, ColouredGraph colouredGraphB, Double epsilon) {
+   
+    
+    public NMSimilarity(ColouredGraph colouredGraphA, ColouredGraph colouredGraphB, Map<Integer,Integer> idCorrespondenceA, Map<Integer,Integer> idCorrespondenceB, Double epsilon) {
         try {
             this.colouredGraphA = colouredGraphA;
             this.colouredGraphB = colouredGraphB;
+            this.idCorrespondenceA = idCorrespondenceA;
+            this.idCorrespondenceB = idCorrespondenceB;
             
             this.size = new NumberOfVerticesMetric();
             this.graphSizeA = (int) size.apply(this.colouredGraphA);
@@ -44,15 +56,15 @@ public class NMSimilarity {
             
             this.inNodeArrayA  = colouredGraphA.getInNeighborhoodsArray();
             this.outNodeArrayA = colouredGraphA.getOutNeighborhoodsArray();
-            
+     
             this.inNodeArrayB = colouredGraphB.getInNeighborhoodsArray();
             this.outNodeArrayB = colouredGraphB.getOutNeighborhoodsArray();
 
+            
                         
             this.nodeSimilarity = new double[graphSizeA][graphSizeB];
             this.inNodeSimilarity = new double[graphSizeA][graphSizeB];
             this.outNodeSimilarity = new double[graphSizeA][graphSizeB];
-
             
             initializeSimilarityMatrices();
 
@@ -60,7 +72,8 @@ public class NMSimilarity {
             e.printStackTrace();
         }
     }
-
+    
+    
     public void initializeSimilarityMatrices() {
         for (int i = 0; i < graphSizeA; i++) {
             for (int j = 0; j < graphSizeB; j++) {
@@ -86,66 +99,92 @@ public class NMSimilarity {
             }
         }
     }
+    
+   
 
    public void measureSimilarity() {
         double maxDifference = 0.0;
         boolean terminate = false;
-
+        
+        double count = 0.0;
+        double conditionedCount = 0.0;
         while (!terminate) {
             maxDifference = 0.0;
             for (int i = 0; i < graphSizeA; i++) {
                 for (int j = 0; j < graphSizeB; j++) {
-                    //calculate in-degree similarities
-                    double similaritySum = 0.0;
-                    double maxDegree = Math.max(inNodeArrayA[i].length, inNodeArrayB[j].length);
-                    int minDegree = Math.min(inNodeArrayA[i].length, inNodeArrayB[j].length);
-                    if (minDegree == inNodeArrayA[i].length) {
-                        similaritySum = enumerationFunction(inNodeArrayA[i], inNodeArrayB[j], 0);                    
-                    } else {
-                        similaritySum = enumerationFunction(inNodeArrayB[j], inNodeArrayA[i], 1);
+                    double maxDegreeIn = Math.max(inNodeArrayA[i].length, inNodeArrayB[j].length);
+                    double maxDegreeOut = Math.max(outNodeArrayA[i].length, outNodeArrayB[j].length);  
+                    
+                    //checks if colour of vertexA and colour of vertexB intersect so the two vertices are comparable
+                    if(colouredGraphA.getVertexColour(i).intersects(colouredGraphB.getVertexColour(j))){ 
+                        //calculate in-degree similarities
+                        double similaritySum = 0.0;
+                        int minDegree = Math.min(inNodeArrayA[i].length, inNodeArrayB[j].length);
+                        
+                        
+                        if (minDegree == inNodeArrayA[i].length) {
+                            similaritySum = enumerationFunction(inNodeArrayA[i], inNodeArrayB[j], 0);                    
+                        } else {
+                            similaritySum = enumerationFunction(inNodeArrayB[j], inNodeArrayA[i], 1);
+                        }
+                        if (maxDegreeIn == 0.0 && similaritySum == 0.0) {
+                            inNodeSimilarity[i][j] = 1.0;
+                        } else if (maxDegreeIn == 0.0) {
+                            inNodeSimilarity[i][j] = 0.0;
+                        } else {
+                            inNodeSimilarity[i][j] = similaritySum / maxDegreeIn;
+                        }
+
+                        //calculate out-degree similarities
+                        similaritySum = 0.0;
+                        minDegree = Math.min(outNodeArrayA[i].length, outNodeArrayB[j].length);
+                        if (minDegree == outNodeArrayA[i].length) {
+                            similaritySum = enumerationFunction(outNodeArrayA[i], outNodeArrayB[j], 0);
+                        } else {
+                            similaritySum = enumerationFunction(outNodeArrayB[j], outNodeArrayA[i], 1);
+                        }
+                        if (maxDegreeOut == 0.0 && similaritySum == 0.0) {
+                            outNodeSimilarity[i][j] = 1.0;
+                        } else if (maxDegreeOut == 0.0) {
+                            outNodeSimilarity[i][j] = 0.0;
+                        } else {
+                            outNodeSimilarity[i][j] = similaritySum / maxDegreeOut;
+                        }
+                    conditionedCount++;
                     }
-                    if (maxDegree == 0.0 && similaritySum == 0.0) {
+                    // {} colour
+                    else if (colouredGraphA.getVertexColour(i).equals(colouredGraphB.getVertexColour(j))){
                         inNodeSimilarity[i][j] = 1.0;
-                    } else if (maxDegree == 0.0) {
-                        inNodeSimilarity[i][j] = 0.0;
-                    } else {
-                        inNodeSimilarity[i][j] = similaritySum / maxDegree;
-                    }
-
-                    //calculate out-degree similarities
-                    similaritySum = 0.0;
-                    maxDegree = Math.max(outNodeArrayA[i].length, outNodeArrayB[j].length);
-                    minDegree = Math.min(outNodeArrayA[i].length, outNodeArrayB[j].length);
-                    if (minDegree == outNodeArrayA[i].length) {
-                        similaritySum = enumerationFunction(outNodeArrayA[i], outNodeArrayB[j], 0);
-                    } else {
-                        similaritySum = enumerationFunction(outNodeArrayB[j], outNodeArrayA[i], 1);
-                    }
-                    if (maxDegree == 0.0 && similaritySum == 0.0) {
                         outNodeSimilarity[i][j] = 1.0;
-                    } else if (maxDegree == 0.0) {
-                        outNodeSimilarity[i][j] = 0.0;
-                    } else {
-                        outNodeSimilarity[i][j] = similaritySum / maxDegree;
                     }
-
+                    else{ //if are different colour the vertices are not comparable
+                        inNodeSimilarity[i][j] = 0.0;
+                        outNodeSimilarity[i][j] = 0.0;
+                    }
+                    count++;
                 }
             }
-
+             
             for (int i = 0; i < graphSizeA; i++) {
                 for (int j = 0; j < graphSizeB; j++) {
                     double temp = (inNodeSimilarity[i][j] + outNodeSimilarity[i][j]) / 2;
                     if (Math.abs(nodeSimilarity[i][j] - temp) > maxDifference) {
                         maxDifference = Math.abs(nodeSimilarity[i][j] - temp);                    
                     }
-                    nodeSimilarity[i][j] = temp;
+                    nodeSimilarity[i][j] = temp; 
                 }
             }
-
             if (maxDifference < epsilon) {
                 terminate = true;
             }
         }
+        
+        for(double[] row : nodeSimilarity) {
+             System.out.println(Arrays.toString(row));
+        }
+        //System.out.println("conditionedCount " + conditionedCount);
+        //System.out.println("count " + count);
+        
     }
 
 
@@ -192,16 +231,54 @@ public class NMSimilarity {
         return similaritySum;
     }
 
+
+    //1 node from Graph A ->n nodes from Graph B , similarity
+    public Map< Map<Integer,ArrayList<Integer>>, Double > getNodeMapping(){
+
+        Map< Map<Integer,ArrayList<Integer>>, Double > nodeMapWithSim = new HashMap< Map<Integer,ArrayList<Integer>>, Double > ();
+        Map <Integer, ArrayList<Integer>> nodeMap = new HashMap<Integer, ArrayList<Integer>> ();
+        //sample, initial
+        if(this.idCorrespondenceA != null && this.idCorrespondenceB != null){
+        for ( int i = 0; i < nodeSimilarity.length; i++ ){
+                double maxr = 0.0;
+                ArrayList<Integer> list = new ArrayList<Integer>();
+        
+                for ( int j = 0; j < nodeSimilarity[i].length; j++ ){
+                    if ( nodeSimilarity [i][j] > maxr ){
+                        maxr = nodeSimilarity[i][j];
+                        list = new ArrayList<Integer>();
+                        list.add(this.idCorrespondenceB.get(j));
+                    }
+                    else if ( nodeSimilarity [i][j] == maxr && maxr > 0.0 ){
+                        list.add(this.idCorrespondenceB.get(j));
+                    }
+                    
+                }
+                nodeMap.put(this.idCorrespondenceA.get(i), list);
+                nodeMapWithSim.put(nodeMap, maxr);
+                nodeMap = new HashMap<Integer, ArrayList<Integer>> ();
+            }
+
+            //System.out.println("nodeMapWithSim " +nodeMapWithSim.toString());
+        }
+    return nodeMapWithSim;
+    }
+
+     
     public Double getGraphSimilarity() {
         Double finalGraphSimilarity = 0.0;
         measureSimilarity();
+        getNodeMapping();
 
-        if (this.size.apply(this.colouredGraphA) < this.size.apply(this.colouredGraphB)) {
+       //I am dividing with max size of the two graphs instead of min ! 
+        if (this.size.apply(this.colouredGraphA) > this.size.apply(this.colouredGraphB)) {
             finalGraphSimilarity = enumerationFunction(this.colouredGraphA.getVertices().toIntArray(), this.colouredGraphB.getVertices().toIntArray(), 0) / this.size.apply(this.colouredGraphA);
         } else {
             finalGraphSimilarity = enumerationFunction(this.colouredGraphB.getVertices().toIntArray(), this.colouredGraphA.getVertices().toIntArray(), 1) / this.size.apply(this.colouredGraphB);
         }
-        finalGraphSimilarity = finalGraphSimilarity*100;
+        
+        
+        finalGraphSimilarity =  finalGraphSimilarity*100 ;
         return finalGraphSimilarity;
     }
       
