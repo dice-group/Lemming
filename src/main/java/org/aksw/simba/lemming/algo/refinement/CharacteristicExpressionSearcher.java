@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.refinement.fitness.FitnessFunction;
 import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
+import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,8 @@ public class CharacteristicExpressionSearcher {
      */
     private int maxIterations;
 
+    private boolean debug = false;
+
     /**
      * Constructor.
      * 
@@ -105,7 +108,10 @@ public class CharacteristicExpressionSearcher {
     public SortedSet<RefinementNode> findExpression(ColouredGraph graphs[], int k) {
         SortedSet<RefinementNode> bestNodes = new TreeSet<RefinementNode>();
         // precalculate the metrics values
-        ObjectDoubleOpenHashMap<String> graphVectors[] = calculateGraphMetrics(graphs);
+        ObjectDoubleOpenHashMap<String> graphVectors[] = MetricUtils.calculateGraphMetrics(graphs, metrics);
+        if (debug) {
+            LOGGER.warn("Refinement Tree:\n{}\n", printGraphMetrics(graphVectors));
+        }
         // initialize the tree
         Set<RefinementNode> nodes = generateMetricNodes();
         RefinementTree tree = new RefinementTree(nodes);
@@ -147,20 +153,33 @@ public class CharacteristicExpressionSearcher {
             addToBestNodes(bestNodes, nextNode, k);
             ++iteration;
         }
-        LOGGER.warn("Refinement Tree:\n{}\n", printTree(tree));
+        // if (debug) {
+        // LOGGER.warn("Refinement Tree:\n{}\n", printTree(tree));
+        // }
         return bestNodes;
     }
 
+    /**
+     * Adds the given node to the given set of best nodes. The size of the set
+     * is checked. If the size of the set is > k the set is reduced to k nodes
+     * if the node with the lowest fitness does not have the same fitness as the
+     * node with the best fitness.
+     * 
+     * @param bestNodes
+     *            the set containing the k best nodes
+     * @param node
+     *            the node that might be added to the set of best nodes
+     * @param k
+     *            the goal size of the set
+     */
     private void addToBestNodes(SortedSet<RefinementNode> bestNodes, RefinementNode node, int k) {
         // if we have not reached the minimum number of best nodes
         if (bestNodes.size() < k) {
             bestNodes.add(node);
         } else {
             // if the current node is better (or equal) than the
-            // worst best
-            // node seen so far (this makes sure that we will always
-            // return
-            // the best node, even if we hit the maximum number of
+            // worst best node seen so far (this makes sure that we will always
+            // return the best node, even if we hit the maximum number of
             // iterations)
             if (bestNodes.first().getFitness() <= node.getFitness()) {
                 bestNodes.add(node);
@@ -169,43 +188,6 @@ public class CharacteristicExpressionSearcher {
                 }
             }
         }
-    }
-
-    /**
-     * For every graph, the values of the metrics are calculated, added to a map
-     * and stored in an array. The i-th map of the result array contains the
-     * values for the i-th graph.
-     * 
-     * @param graphs
-     *            {@link ColouredGraph} for which the values should be
-     *            calculated.
-     * @return array containing the mappings from metric name to metric value
-     *         for the single graphs
-     */
-    private ObjectDoubleOpenHashMap<String>[] calculateGraphMetrics(ColouredGraph[] graphs) {
-        @SuppressWarnings("unchecked")
-        ObjectDoubleOpenHashMap<String>[] vectors = new ObjectDoubleOpenHashMap[graphs.length];
-        for (int i = 0; i < vectors.length; ++i) {
-            vectors[i] = calculateGraphMetrics(graphs[i]);
-        }
-        return vectors;
-    }
-
-    /**
-     * The values of the metrics are calculated for the given graph and put into
-     * a map.
-     * 
-     * @param graph
-     *            {@link ColouredGraph} for which the values should be
-     *            calculated.
-     * @return a mapping from metric name to metric value for the given graph
-     */
-    private ObjectDoubleOpenHashMap<String> calculateGraphMetrics(ColouredGraph graph) {
-        ObjectDoubleOpenHashMap<String> vector = new ObjectDoubleOpenHashMap<String>(2 * metrics.size());
-        for (SingleValueMetric metric : metrics) {
-            vector.put(metric.getName(), metric.apply(graph));
-        }
-        return vector;
     }
 
     /**
@@ -273,6 +255,39 @@ public class CharacteristicExpressionSearcher {
         for (RefinementNode n : node.children) {
             printNode(builder, n, depth + 1);
         }
+    }
+
+    private String printGraphMetrics(ObjectDoubleOpenHashMap<String>[] graphVectors) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Metric");
+        for (int i = 0; i < graphVectors.length; ++i) {
+            builder.append("\tgraph");
+            builder.append(i);
+        }
+        builder.append('\n');
+        String key;
+        for (int i = 0; i < graphVectors[0].allocated.length; ++i) {
+            if (graphVectors[0].allocated[i]) {
+                key = (String) ((Object[]) graphVectors[0].keys)[i];
+                builder.append(key);
+                builder.append('\t');
+                builder.append(Double.toString(graphVectors[0].values[i]));
+                for (int j = 1; j < graphVectors.length; ++j) {
+                    builder.append('\t');
+                    if (graphVectors[j].containsKey(key)) {
+                        builder.append(Double.toString(graphVectors[j].get(key)));
+                    } else {
+                        builder.append('?');
+                    }
+                }
+                builder.append('\n');
+            }
+        }
+        return builder.toString();
+    }
+
+    public void setDebug(boolean debug) {
+        this.debug = debug;
     }
 
 }

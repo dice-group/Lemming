@@ -14,11 +14,15 @@ public class SemanticWebDogFoodReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodReader.class);
 
-    private static final String DATA_FOLDER_PATH = "C:/Daten/SemanticWebDogFood/";
+    private static final String DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final int START_YEAR = 2001;
     private static final int END_YEAR = 2015;
 
     public static ColouredGraph[] readGraphsFromFile() {
+        return readGraphsFromFile(DATA_FOLDER_PATH);
+    }
+
+    public static ColouredGraph[] readGraphsFromFile(String dataFolderPath) {
         Model dogFoodModel = ModelFactory.createDefaultModel();
 
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
@@ -28,7 +32,7 @@ public class SemanticWebDogFoodReader {
         File folder;
         for (int y = START_YEAR; y <= END_YEAR; ++y) {
             LOGGER.info("Adding year {}...", y);
-            folder = new File(DATA_FOLDER_PATH + Integer.toString(y));
+            folder = new File(dataFolderPath + Integer.toString(y));
             if (folder.exists()) {
                 oldModelSize = dogFoodModel.size();
                 addToModel(folder, dogFoodModel);
