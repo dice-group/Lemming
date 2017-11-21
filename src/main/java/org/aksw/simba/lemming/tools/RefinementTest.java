@@ -52,11 +52,11 @@ public class RefinementTest {
         List<SingleValueMetric> metrics = new ArrayList<>();
         // metrics.add(new AvgClusteringCoefficientMetric());
         // metrics.add(new AvgVertexDegreeMetric());
-        // metrics.add(new NumberOfTrianglesMetric());
-        metrics.add(new MaxVertexOutDegreeMetric());
-        metrics.add(new DiameterMetric());
-        metrics.add(new NumberOfEdgesMetric());
-        metrics.add(new NumberOfVerticesMetric());
+         metrics.add(new NumberOfTrianglesMetric());
+//        metrics.add(new MaxVertexOutDegreeMetric());
+//        metrics.add(new DiameterMetric());
+//        metrics.add(new NumberOfEdgesMetric());
+//        metrics.add(new NumberOfVerticesMetric());
 
         ColouredGraph graphs[] = new ColouredGraph[20];
         // StarTopologyGenerator generator = new StarTopologyGenerator();
