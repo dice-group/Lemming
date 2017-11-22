@@ -3,11 +3,10 @@ package org.aksw.simba.lemming.metrics.similarity;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
-import org.aksw.simba.lemming.util.ArrayUtil;
 
 
 /**
