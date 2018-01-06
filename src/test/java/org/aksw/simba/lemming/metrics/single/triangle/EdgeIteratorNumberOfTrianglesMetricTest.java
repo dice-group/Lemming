@@ -1,16 +1,17 @@
-package org.aksw.simba.lemming.metrics.single;
+package org.aksw.simba.lemming.metrics.single.triangle;
 
 import java.io.InputStream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphCreator;
+import org.aksw.simba.lemming.metrics.single.triangle.EdgeIteratorNumberOfTrianglesMetric;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class NumberOfTrianglesMetricTest {
+public class EdgeIteratorNumberOfTrianglesMetricTest {
 
     private static final int EXPECTED_TRIANGLES = 1;
     private static final String GRAPH_FILE = "graph1.n3";
@@ -26,7 +27,7 @@ public class NumberOfTrianglesMetricTest {
         ColouredGraph graph = creator.processModel(model);
         Assert.assertNotNull(graph);
 
-        NumberOfTrianglesMetric metric = new NumberOfTrianglesMetric();
+        EdgeIteratorNumberOfTrianglesMetric metric = new EdgeIteratorNumberOfTrianglesMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(EXPECTED_TRIANGLES, countedTriangles, 0.000001);
