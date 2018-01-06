@@ -26,6 +26,7 @@ public class NumberOfTrianglesMetricTest {
       List<SingleValueMetric> metrics = new ArrayList<>();
       metrics.add(new EdgeIteratorNumberOfTrianglesMetric());
       metrics.add(new NodeIteratorCoreNumberOfTrianglesMetric());
+      metrics.add(new ForwardNumberOfTriangleMetric());
 
       Model model = ModelFactory.createDefaultModel();
       InputStream is = this.getClass().getClassLoader().getResourceAsStream(GRAPH_FILE);
