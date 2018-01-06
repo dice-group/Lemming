@@ -25,11 +25,13 @@
 	</repositories>
 
 	<dependencies>
+	
 		<dependency>
 			<groupId>grph</groupId>
 			<artifactId>grph</artifactId>
 			<version>1.8.0</version>
 		</dependency>
+		
 		<!-- Jena 3.0 -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -37,10 +39,18 @@
 			<type>pom</type>
 			<version>3.0.1</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>cc.redberry</groupId>
 			<artifactId>core</artifactId>
 			<version>1.1.10</version>
+		</dependency>
+
+		<!-- Guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>23.6-jre</version>
 		</dependency>
 
 		<!-- ~~~~~~~~~~~~~~~~~~~ Logging ~~~~~~~~~~~~~~~~~~~~~~ -->
@@ -101,7 +111,8 @@
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
 						<!-- We need the combined service resources of the jena framework -->
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+						<transformer
+							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
 					<filters>
 						<filter>
