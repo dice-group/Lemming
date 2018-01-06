@@ -1,9 +1,7 @@
 *.class
 .classpath
-.project
 target
 bin
-.settings
 *.log
 SemanticWebDogFood
 /.DS_Store
