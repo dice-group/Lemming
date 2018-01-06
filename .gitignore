@@ -6,3 +6,4 @@ bin
 .settings
 *.log
 SemanticWebDogFood
+/.DS_Store
