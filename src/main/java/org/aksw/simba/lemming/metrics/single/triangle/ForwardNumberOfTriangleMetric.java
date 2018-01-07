@@ -14,6 +14,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Sets;
 
 import toools.set.IntSet;
+import toools.set.IntSets;
 
 
 public class ForwardNumberOfTriangleMetric extends AbstractMetric implements SingleValueMetric {
@@ -33,10 +34,7 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
    public double apply(ColouredGraph coloredGraph) {
       initialize(coloredGraph);
       for (Integer nodeId : getOrderedNodes()) {
-         // process nodes reached by outgoing edges
-         processNeighbors(nodeId, coloredGraph.getOutNeighbors(nodeId));
-         // process nodes reached by ingoing edges
-         processNeighbors(nodeId, coloredGraph.getInNeighbors(nodeId));
+         processNeighbors(nodeId, IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId)));
       }
       return amountOfTriangles;
    }
