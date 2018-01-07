@@ -8,8 +8,8 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.triangle.EdgeIteratorNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.triangle.ForwardNumberOfTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.triangle.NodeIteratorCoreNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.triangle.forward.ForwardNumberOfTriangleMetric;
 
 
 public class EvaluationRunner {
