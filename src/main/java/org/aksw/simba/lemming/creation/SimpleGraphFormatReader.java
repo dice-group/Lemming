@@ -12,6 +12,9 @@ import org.apache.commons.io.IOUtils;
 public class SimpleGraphFormatReader {
 
 
+   private static final String COMMENT_LINE_PREFIX = "#";
+
+
    public static ColouredGraph readSimpleGraphFormatFile(String filePath) throws IOException {
       InputStream is = SimpleGraphFormatReader.class.getClassLoader().getResourceAsStream(filePath);
       List<String> lines = IOUtils.readLines(is);
@@ -19,7 +22,7 @@ public class SimpleGraphFormatReader {
       ColouredGraph graph = new ColouredGraph();
       try {
          for (String line : lines) {
-            if (line.trim().length() > 1) {
+            if (line.trim().length() > 1 && !line.startsWith(COMMENT_LINE_PREFIX)) {
                String[] splitLine = line.split("\\s");
                if (splitLine.length != 2) {
                   throw new RuntimeException(String.format("File %s contains an error in line \n %s.", filePath, line));
