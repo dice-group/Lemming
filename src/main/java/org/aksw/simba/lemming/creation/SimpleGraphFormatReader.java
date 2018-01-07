@@ -20,7 +20,7 @@ public class SimpleGraphFormatReader {
       try {
          for (String line : lines) {
             if (line.trim().length() > 1) {
-               String[] splitLine = line.split(" ");
+               String[] splitLine = line.split("\\s");
                if (splitLine.length != 2) {
                   throw new RuntimeException(String.format("File %s contains an error in line \n %s.", filePath, line));
                }
