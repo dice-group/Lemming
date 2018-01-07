@@ -67,4 +67,12 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
       Assert.assertEquals(3, countedTriangles, 0.000001);
    }
 
+
+   @Test
+   public void testOnSchankWagnerExample() throws IOException {
+      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(PATH_TO_SIMPLE_EXAMPLES + "schank_wagner_example.txt");
+      double countedTriangles = metric.apply(graph);
+      Assert.assertEquals(3, countedTriangles, 0.000001);
+   }
+
 }
