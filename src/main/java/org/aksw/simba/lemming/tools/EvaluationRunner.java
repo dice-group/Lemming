@@ -11,6 +11,8 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.creation.SimpleGraphFormatReader;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.triangle.EdgeIteratorNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.triangle.NodeIteratorCoreNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.triangle.forward.ForwardNumberOfTriangleMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +28,8 @@ public class EvaluationRunner {
 
    public static void main(String args[]) {
 
-      List<SingleValueMetric> metrics = Arrays.asList(new ForwardNumberOfTriangleMetric());
+      List<SingleValueMetric> metrics = Arrays.asList(new ForwardNumberOfTriangleMetric(), new NodeIteratorCoreNumberOfTrianglesMetric(),
+            new EdgeIteratorNumberOfTrianglesMetric());
 
       List<ColouredGraph> graphs = getSnapEvaluationGraphs();
       graphs.addAll(getSemanticDogFoodGraphs());
@@ -44,12 +47,11 @@ public class EvaluationRunner {
    public static List<ColouredGraph> getSnapEvaluationGraphs() {
       List<ColouredGraph> graphs = new ArrayList<>();
       File snapEvaluationDatasetFolderDirectory = new File(SNAP_EVALUATION_DATASETS_PATH);
-      System.out.println(snapEvaluationDatasetFolderDirectory.getAbsolutePath());
       for (File evaluationDatasetFile : snapEvaluationDatasetFolderDirectory.listFiles()) {
          if (evaluationDatasetFile.getName().endsWith(".txt")) {
-            ColouredGraph graph;
+            LOGGER.debug("Reading file {}", evaluationDatasetFile);
             try {
-               graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(evaluationDatasetFile.getAbsolutePath());
+               ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(evaluationDatasetFile.getAbsolutePath());
                graphs.add(graph);
             } catch (IOException e) {
                LOGGER.error("Could not read evaluation graph {}.", evaluationDatasetFile, e);
