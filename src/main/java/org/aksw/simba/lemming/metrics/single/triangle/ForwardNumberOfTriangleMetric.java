@@ -18,9 +18,12 @@ import toools.set.IntSets;
 
 
 public class ForwardNumberOfTriangleMetric extends AbstractMetric implements SingleValueMetric {
+   private ColouredGraph coloredGraph;
 
    private List<HashSet<Integer>> adjacencyDatastructure;
-   private ColouredGraph coloredGraph;
+
+   private List<Integer> orderedNodes;
+   private int[] nodeToOrderPositionMapping;
 
    private int amountOfTriangles;
 
@@ -33,8 +36,9 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
    @Override
    public double apply(ColouredGraph coloredGraph) {
       initialize(coloredGraph);
-      for (Integer nodeId : getOrderedNodes()) {
-         processNeighbors(nodeId, IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId)));
+      for (Integer nodeId : orderedNodes) {
+         IntSet neighborsOfNodeId = IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));
+         processNeighbors(nodeId, neighborsOfNodeId);
       }
       return amountOfTriangles;
    }
@@ -43,11 +47,25 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
    private void processNeighbors(int nodeId, IntSet neighborSet) {
       for (IntCursor adjacentNodeIdCursor : neighborSet) {
          int adjacentNodeId = adjacentNodeIdCursor.value;
-         if (nodeId < adjacentNodeId) {
+         if (isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
             amountOfTriangles += Sets.intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId)).size();
             adjacencyDatastructure.get(adjacentNodeId).add(nodeId);
          }
       }
+   }
+
+
+   /**
+    * Checks whether the first node id is smaller than the second node id with respect to the
+    * ordering on the nodes.
+    * 
+    * @param firstNodeId The first node id to check.
+    * @param secondNodeId The second node id to check.
+    * @return {@code true}, if the first node id is smaller than the second node id with respect to
+    *         the ordering on the nodes.
+    */
+   private boolean isFirstSmallerWithRespectToOrder(int firstNodeId, int secondNodeId) {
+      return nodeToOrderPositionMapping[firstNodeId] < nodeToOrderPositionMapping[secondNodeId];
    }
 
 
@@ -57,6 +75,16 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
       adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
       for (int i = 0; i < coloredGraph.getVertices().size(); i++) {
          adjacencyDatastructure.add(new HashSet<Integer>());
+      }
+      initializeNodeOrder();
+   }
+
+
+   private void initializeNodeOrder() {
+      orderedNodes = getOrderedNodes();
+      nodeToOrderPositionMapping = new int[coloredGraph.getVertices().size()];
+      for (int i = 0; i < orderedNodes.size(); i++) {
+         nodeToOrderPositionMapping[orderedNodes.get(i)] = i;
       }
    }
 
@@ -72,5 +100,6 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
    private int getTotalAmountOfNeighbors(int nodeId) {
       return coloredGraph.getInNeighbors(nodeId).size() + coloredGraph.getOutNeighbors(nodeId).size();
    }
+
 
 }
