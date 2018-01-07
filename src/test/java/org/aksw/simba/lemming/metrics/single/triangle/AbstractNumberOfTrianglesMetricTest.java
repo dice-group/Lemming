@@ -17,8 +17,8 @@ import org.junit.Test;
 
 public abstract class AbstractNumberOfTrianglesMetricTest {
 
-   private static final int EXPECTED_TRIANGLES = 1;
-   private static final String GRAPH_FILE = "graph1.n3";
+   private static final double DOUBLE_COMPARISON_DELTA = 0.000001;
+   private static final String PATH_TO_SIMPLE_EXAMPLES = "metric/triangle/";
 
    private SingleValueMetric metric;
 
@@ -31,7 +31,7 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
    @Test
    public void testOnSimpleGraph() {
       Model model = ModelFactory.createDefaultModel();
-      InputStream is = this.getClass().getClassLoader().getResourceAsStream(GRAPH_FILE);
+      InputStream is = this.getClass().getClassLoader().getResourceAsStream("graph1.n3");
       model.read(is, null, "N3");
       IOUtils.closeQuietly(is);
 
@@ -40,15 +40,31 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
       Assert.assertNotNull(graph);
 
       double countedTriangles = metric.apply(graph);
-      Assert.assertEquals(EXPECTED_TRIANGLES, countedTriangles, 0.000001);
+      Assert.assertEquals(1, countedTriangles, DOUBLE_COMPARISON_DELTA);
    }
 
 
    @Test
    public void testOnEmailEuCoreNetwork() throws IOException {
-      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile("email-Eu-core.txt");
+      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(PATH_TO_SIMPLE_EXAMPLES + "email-Eu-core.txt");
       double countedTriangles = metric.apply(graph);
-      Assert.assertEquals(105461, (int) countedTriangles);
+      Assert.assertEquals(105461, countedTriangles, DOUBLE_COMPARISON_DELTA);
+   }
+
+
+   @Test
+   public void testOnSimpleHexagonNetwork() throws IOException {
+      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(PATH_TO_SIMPLE_EXAMPLES + "simple_hexagon_graph.txt");
+      double countedTriangles = metric.apply(graph);
+      Assert.assertEquals(6, countedTriangles, DOUBLE_COMPARISON_DELTA);
+   }
+
+
+   @Test
+   public void testOnSimpleHalfHexagonNetwork() throws IOException {
+      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFile(PATH_TO_SIMPLE_EXAMPLES + "simple_half_hexagon_graph.txt");
+      double countedTriangles = metric.apply(graph);
+      Assert.assertEquals(3, countedTriangles, 0.000001);
    }
 
 }
