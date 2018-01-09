@@ -53,8 +53,18 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
 
 
    @Test
+   public void testOnSimpleSelfloopTriangle() throws IOException {
+      ColouredGraph graph = SimpleGraphFormatReader
+            .readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "simple_selfloop_triangle.txt");
+      double countedTriangles = metric.apply(graph);
+      Assert.assertEquals(1, countedTriangles, DOUBLE_COMPARISON_DELTA);
+   }
+
+
+   @Test
    public void testOnSimpleHexagonNetwork() throws IOException {
-      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "simple_hexagon_graph.txt");
+      ColouredGraph graph = SimpleGraphFormatReader
+            .readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "simple_hexagon_graph.txt");
       double countedTriangles = metric.apply(graph);
       Assert.assertEquals(6, countedTriangles, DOUBLE_COMPARISON_DELTA);
    }
@@ -62,7 +72,8 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
 
    @Test
    public void testOnSimpleHalfHexagonNetwork() throws IOException {
-      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "simple_half_hexagon_graph.txt");
+      ColouredGraph graph = SimpleGraphFormatReader
+            .readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "simple_half_hexagon_graph.txt");
       double countedTriangles = metric.apply(graph);
       Assert.assertEquals(3, countedTriangles, 0.000001);
    }
@@ -70,7 +81,8 @@ public abstract class AbstractNumberOfTrianglesMetricTest {
 
    @Test
    public void testOnSchankWagnerExample() throws IOException {
-      ColouredGraph graph = SimpleGraphFormatReader.readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "schank_wagner_example.txt");
+      ColouredGraph graph = SimpleGraphFormatReader
+            .readSimpleGraphFormatFileFromResources(PATH_TO_SIMPLE_EXAMPLES + "schank_wagner_example.txt");
       double countedTriangles = metric.apply(graph);
       Assert.assertEquals(3, countedTriangles, 0.000001);
    }
