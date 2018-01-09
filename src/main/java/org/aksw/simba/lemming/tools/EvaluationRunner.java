@@ -31,7 +31,8 @@ public class EvaluationRunner {
       List<SingleValueMetric> metrics = Arrays.asList(new ForwardNumberOfTriangleMetric(), new NodeIteratorCoreNumberOfTrianglesMetric(),
             new EdgeIteratorNumberOfTrianglesMetric());
 
-      List<ColouredGraph> graphs = getSnapEvaluationGraphs();
+      List<ColouredGraph> graphs = new ArrayList<>();
+      graphs.addAll(getSnapEvaluationGraphs());
       graphs.addAll(getSemanticDogFoodGraphs());
 
       NumberOfTriangleMetricsPerformanceEvaluation evaluation = new NumberOfTriangleMetricsPerformanceEvaluation(metrics, graphs);
