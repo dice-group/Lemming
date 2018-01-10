@@ -24,6 +24,7 @@ public class NumberOfTrianglesMetricTest {
         List<Object[]> testConfigs = new ArrayList<Object[]>();
         testConfigs.add(new Object[] { "graph1.n3", 1 });
         testConfigs.add(new Object[] { "graph_loop.n3", 2 });
+        testConfigs.add(new Object[] { "email-Eu-core.n3", 105461 });
 
         return testConfigs;
     }
