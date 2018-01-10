@@ -1,15 +1,14 @@
 package org.aksw.simba.lemming.metrics.single.triangle;
 
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 
+import grph.Grph;
+import toools.set.IntSet;
 import toools.set.IntSets;
 
 
@@ -22,37 +21,39 @@ public class NodeIteratorCoreNumberOfTrianglesMetric extends AbstractMetric impl
 
    @Override
    public double apply(ColouredGraph graph) {
-      Set<Integer> visitedVertices = new HashSet<>();
-      int numberOfTriangles = 0;
+      IntSet visitedVertices = IntSets.from(new int[] {});
+      Grph grph = graph.getGraph();
 
-      int[] degrees = new int[graph.getVertices().size()];
-      for (IntCursor vertex : graph.getVertices()) {
-         degrees[vertex.value] = IntSets.union(graph.getInNeighbors(vertex.value), graph.getOutNeighbors(vertex.value)).size();
+      int[] degrees = new int[grph.getVertices().size()];
+      for (IntCursor vertex : grph.getVertices()) {
+         degrees[vertex.value] = IntSets.union(grph.getInNeighbors(vertex.value), grph.getOutNeighbors(vertex.value)).size();
       }
 
-      int nodeWithMinimumDegree = getNodeWithMinimumDegree(degrees);
-      while (nodeWithMinimumDegree < Integer.MAX_VALUE && visitedVertices.size() < graph.getVertices().size() - 2) {
-         Set<Integer> neighbors = getNeighbors(graph, visitedVertices, nodeWithMinimumDegree);
-
-         for (Integer neighbor1 : neighbors) {
-            Set<Integer> neighbors1 = getNeighbors(graph, visitedVertices, neighbor1);
-            for (Integer neighbor2 : neighbors) {
-               if (nodeWithMinimumDegree != neighbor1 && nodeWithMinimumDegree != neighbor2 && neighbor1 < neighbor2
-                     && neighbors1.contains(neighbor2)) {
+      int numberOfTriangles = 0;
+      int vertexWithMinimumDegree = getNodeWithMinimumDegree(degrees);
+      while (vertexWithMinimumDegree < Integer.MAX_VALUE && visitedVertices.size() < grph.getVertices().size() - 2) {
+         IntSet neighbors = IntSets.difference(
+               IntSets.union(grph.getInNeighbors(vertexWithMinimumDegree), grph.getOutNeighbors(vertexWithMinimumDegree)), visitedVertices);
+         for (IntCursor neighbor1 : neighbors) {
+            IntSet neighbors1 = IntSets
+                  .difference(IntSets.union(grph.getInNeighbors(neighbor1.value), grph.getOutNeighbors(neighbor1.value)), visitedVertices);
+            for (IntCursor neighbor2 : neighbors) {
+               if (vertexWithMinimumDegree != neighbor1.value && vertexWithMinimumDegree != neighbor2.value
+                     && neighbor1.value < neighbor2.value && neighbors1.contains(neighbor2.value)) {
                   numberOfTriangles++;
                }
             }
          }
-         visitedVertices.add(nodeWithMinimumDegree);
+         visitedVertices.add(vertexWithMinimumDegree);
 
-         degrees[nodeWithMinimumDegree] = 0;
-         for (Integer neighbor : neighbors) {
-            if (degrees[neighbor] > 0) {
-               degrees[neighbor]--;
+         degrees[vertexWithMinimumDegree] = 0;
+         for (IntCursor vertex : neighbors) {
+            if (degrees[vertex.value] > 0) {
+               degrees[vertex.value]--;
             }
          }
 
-         nodeWithMinimumDegree = getNodeWithMinimumDegree(degrees);
+         vertexWithMinimumDegree = getNodeWithMinimumDegree(degrees);
       }
       return numberOfTriangles;
    }
@@ -69,23 +70,6 @@ public class NodeIteratorCoreNumberOfTrianglesMetric extends AbstractMetric impl
          }
       }
       return nodeWithMinimumDegree;
-   }
-
-
-   private Set<Integer> getNeighbors(ColouredGraph graph, Set<Integer> visitedVertices, int vertex) {
-      Set<Integer> neighbors = new HashSet<>();
-      for (IntCursor neighbor : graph.getInNeighbors(vertex)) {
-         if (!visitedVertices.contains(neighbor.value)) {
-            neighbors.add(neighbor.value);
-         }
-      }
-      for (IntCursor neighbor : graph.getOutNeighbors(vertex)) {
-         if (!visitedVertices.contains(neighbor.value)) {
-            neighbors.add(neighbor.value);
-         }
-      }
-
-      return neighbors;
    }
 
 }
