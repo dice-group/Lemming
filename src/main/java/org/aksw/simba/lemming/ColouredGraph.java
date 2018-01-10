@@ -143,6 +143,6 @@ public class ColouredGraph {
 	}
 	
 	public ColouredGraph copy() {
-   		return new ColouredGraph(graph, vertexPalette, edgePalette);
+   		return new ColouredGraph(graph.clone(), vertexPalette, edgePalette);
     }
 }
