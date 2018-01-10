@@ -52,6 +52,13 @@
 			<artifactId>guava</artifactId>
 			<version>23.6-jre</version>
 		</dependency>
+		
+		<!-- MTJ -->
+		<dependency>
+			<groupId>com.googlecode.matrix-toolkits-java</groupId>
+			<artifactId>mtj</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 
 		<!-- ~~~~~~~~~~~~~~~~~~~ Logging ~~~~~~~~~~~~~~~~~~~~~~ -->
 		<!-- slf4j: Logging API -->
