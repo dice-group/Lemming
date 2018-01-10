@@ -49,7 +49,6 @@ public class AyzNumberOfTrianglesMetric extends AbstractMetric implements Single
    private double countTrianglesViaMatrixMultiplication(ColouredGraph graph, IntSet highDegreeVertices) {
       ColouredGraph subgraph = new ColouredGraph(graph.getGraph().getSubgraphInducedByVertices(highDegreeVertices),
             graph.getVertexPalette(), graph.getEdgePalette());
-      System.out.println(subgraph.getGraph().toDot());
       MatrixMultiplicationNumberOfTrianglesMetric matrixMultiplication = new MatrixMultiplicationNumberOfTrianglesMetric();
       return matrixMultiplication.apply(subgraph);
    }
