@@ -20,8 +20,11 @@ public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric 
 
    @Override
    public double apply(ColouredGraph graph) {
-      // NOTE: This only works under the assumption that no two nodes are connected by more than one
-      // edge
+      if (graph.getVertices().size() < 3 || graph.getGraph().getEdges().size() < 3) {
+         return 0;
+      }
+      // NOTE: This implementation only works under the assumption that no two nodes are connected
+      // by more than one edge
       this.graph = graph;
 
       IntMatrix cubicAdjacencyMatrix = getCubicAdjacencyMatrix();
