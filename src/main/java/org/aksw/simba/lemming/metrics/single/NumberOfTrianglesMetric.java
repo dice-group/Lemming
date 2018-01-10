@@ -44,6 +44,9 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
 				edges[i] = grph.getOutEdges(i);
 				edges[i].addAll(grph.getInEdges(i));
 			}
+			/*
+			 * A triangle is handled by the thread which handles the node with the lowest id in that triangle.
+			 */
 			new MultiThreadProcessing(graph.getGraph().getVertices()) {
 				@Override
 				protected void run(int threadID, int sourceId) {
@@ -62,7 +65,8 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
 								if (n_2 == sourceId) {
 									n_2 = grph.getDirectedSimpleEdgeTail(sourceEdges[j]);
 								}
-								if (n_2 > sourceId) {
+								// make sure that n_2 is larger as n_1
+								if (n_2 > n_1) {
 									count += IntSets.intersection(edges[n_1], edges[n_2]).size();
 								}
 							}
