@@ -4,6 +4,7 @@ package org.aksw.simba.lemming.metrics.single.triangle;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.triangle.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 
