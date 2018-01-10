@@ -28,11 +28,11 @@ public class GraphCreatorTest {
 
         return testConfigs;
     }
-    
+
     private String graphFile;
     private int expectedVertices;
     private int expectedEdges;
-    
+
     public GraphCreatorTest(String graphFile, int expectedVertices, int expectedEdges) {
         super();
         this.graphFile = graphFile;
