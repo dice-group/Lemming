@@ -21,7 +21,10 @@ public class SimpleGraphFormatReader {
       InputStream is = SimpleGraphFormatReader.class.getClassLoader().getResourceAsStream(filePath);
       List<String> lines = IOUtils.readLines(is);
       IOUtils.closeQuietly(is);
-      return readSimpleGraphFromString(lines);
+
+      String[] splitFilePath = filePath.split("//");
+      String name = splitFilePath[splitFilePath.length - 1];
+      return readSimpleGraphFromString(name, lines);
    }
 
 
@@ -30,13 +33,13 @@ public class SimpleGraphFormatReader {
       FileReader fileReader = new FileReader(file);
       List<String> lines = IOUtils.readLines(fileReader);
       IOUtils.closeQuietly(fileReader);
-      return readSimpleGraphFromString(lines);
+      return readSimpleGraphFromString(file.getName(), lines);
    }
 
 
-   private static ColouredGraph readSimpleGraphFromString(List<String> simpleGraphDefinition) {
+   private static ColouredGraph readSimpleGraphFromString(String name, List<String> simpleGraphDefinition) {
       List<String> lines = simpleGraphDefinition;
-      ColouredGraph graph = new ColouredGraph();
+      ColouredGraph graph = new ColouredGraph(name);
       try {
          for (String line : lines) {
             if (line.trim().length() > 1 && !line.startsWith(COMMENT_LINE_PREFIX)) {
