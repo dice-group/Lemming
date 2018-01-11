@@ -22,7 +22,7 @@ public class DuolionNumberOfTrianglesMetric extends AbstractMetric implements Si
 
 
    public DuolionNumberOfTrianglesMetric(SingleValueMetric triangleCountingMetric, double edgeSurvivalProbability, long seed) {
-      super("duolion " + triangleCountingMetric.getName() + " #triangles");
+      super("duolion " + triangleCountingMetric.getName());
       this.triangleCountingAlgorithm = triangleCountingMetric;
       this.edgeSurvivalProbability = edgeSurvivalProbability;
       random = new Random(seed);

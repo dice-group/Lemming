@@ -20,7 +20,7 @@ import toools.set.IntSets;
 public class EdgeIteratorNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 
    public EdgeIteratorNumberOfTrianglesMetric() {
-      super("edge-iterator #triangles");
+      super("edge-iterator #edge triangles");
    }
 
 

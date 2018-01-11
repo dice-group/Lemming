@@ -19,7 +19,7 @@ public class NodeIteratorNumberOfTrianglesMetric extends AbstractMetric implemen
 
 
    public NodeIteratorNumberOfTrianglesMetric() {
-      super("node-iterator #triangles");
+      super("node-iterator #node triangles");
       this.highDegreeVertices = IntSets.emptySet;
    }
 

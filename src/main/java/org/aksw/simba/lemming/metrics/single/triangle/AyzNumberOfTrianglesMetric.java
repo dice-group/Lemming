@@ -18,7 +18,7 @@ public class AyzNumberOfTrianglesMetric extends AbstractMetric implements Single
 
 
    public AyzNumberOfTrianglesMetric(double delta) {
-      super("ayz #triangles");
+      super("ayz #node triangles");
       this.delta = delta;
    }
 

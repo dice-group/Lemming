@@ -15,7 +15,7 @@ import toools.set.IntSets;
 public class NodeIteratorCoreNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 
    public NodeIteratorCoreNumberOfTrianglesMetric() {
-      super("node-iterator-core #triangles");
+      super("node-iterator-core #node triangles");
    }
 
 
