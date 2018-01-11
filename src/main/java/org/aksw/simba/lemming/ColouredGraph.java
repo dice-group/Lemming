@@ -13,6 +13,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
 public class ColouredGraph {
+	private String name;
 
 	protected Grph graph;
 	protected ObjectArrayList<BitSet> vertexColours = new ObjectArrayList<BitSet>();
@@ -23,7 +24,17 @@ public class ColouredGraph {
 	protected GrphAlgorithmCache<Integer> diameterAlgorithm;
 
 	public ColouredGraph() {
-		this(null, null);
+		this(new InMemoryGrph(), null, null);
+	}
+	
+	public ColouredGraph(String name) {
+		this();
+		this.name = name;
+	}
+	
+	public ColouredGraph(Grph graph, String name) {
+		this(graph, null, null);
+		this.name = name;
 	}
 
 	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette) {
@@ -34,7 +45,11 @@ public class ColouredGraph {
 		setGraph(graph);
 		this.vertexPalette = vertexPalette;
 		this.edgePalette = edgePalette;
-
+	}
+	
+	public ColouredGraph(String name, Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
+		this(graph, vertexPalette, edgePalette);
+		this.name = name;
 	}
 
 	public Grph getGraph() {
@@ -144,5 +159,14 @@ public class ColouredGraph {
 	
 	public ColouredGraph copy() {
    		return new ColouredGraph(graph.clone(), vertexPalette, edgePalette);
+    }
+    
+    public void setName(String name){
+    	this.name = name;
+    }
+    
+    @Override
+    public String toString(){
+    	return name;
     }
 }
