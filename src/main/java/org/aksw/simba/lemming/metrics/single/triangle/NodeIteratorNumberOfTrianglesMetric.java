@@ -13,6 +13,17 @@ import toools.set.IntSet;
 import toools.set.IntSets;
 
 
+/**
+ * This class models an algoritm for counting the amount of node trianlges in a given graph. This is
+ * done using the so called node-iterator algorithm explained by Schank and Wagner in their work
+ * "Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study".
+ * 
+ * @see <a href=
+ *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>).
+ * 
+ * @author Tanja Tornede
+ *
+ */
 public class NodeIteratorNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 
    private IntSet highDegreeVertices;
