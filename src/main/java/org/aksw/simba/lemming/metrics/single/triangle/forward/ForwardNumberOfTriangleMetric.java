@@ -17,11 +17,12 @@ import toools.set.IntSets;
 
 
 /**
- * This class models an algorithm for computing the amount of triangles in a given graph. This is
- * the done using the so called forward algorithm proposed by Schank and Wagner in their work
- * "Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study" (@see
- * <a href=
- * "http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf">http://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf</a>).
+ * This class models an algorithm for computing the amount of node triangles in a given graph. This
+ * is done using the so called forward algorithm proposed by Schank and Wagner in their work
+ * "Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study" (see below).
+ * 
+ * @see <a href=
+ *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>.
  * 
  * @author Alexander Hetzer
  *
@@ -40,7 +41,7 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
     * Creates a new {@link ForwardNumberOfTriangleMetric}.
     */
    public ForwardNumberOfTriangleMetric() {
-      super("forward #triangles");
+      super("forward #node triangles");
    }
 
 
