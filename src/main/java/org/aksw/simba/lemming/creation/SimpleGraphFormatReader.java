@@ -11,6 +11,14 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.apache.commons.io.IOUtils;
 
 
+/**
+ * This class models a very simple graph reader constructing {@link ColouredGraph}s from files which
+ * are in the following format: Each line defines one edge and consists of two integers (the ids of
+ * the nodes connected by the edge) separated by whitespace.
+ * 
+ * @author Alexander Hetzer
+ *
+ */
 public class SimpleGraphFormatReader {
 
 
