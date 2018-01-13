@@ -1,8 +1,7 @@
 package org.aksw.simba.lemming.tools;
 
 
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.Callable;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
@@ -10,50 +9,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class NumberOfTriangleMetricsPerformanceEvaluation {
+public class NumberOfTriangleMetricsPerformanceEvaluation implements Callable<Long> {
 
    private static final Logger LOGGER = LoggerFactory.getLogger(NumberOfTriangleMetricsPerformanceEvaluation.class);
 
-   private List<SingleValueMetric> singleValueMetrics;
+   private SingleValueMetric metric;
 
-   private List<ColouredGraph> graphs;
-
-
-   public NumberOfTriangleMetricsPerformanceEvaluation(List<SingleValueMetric> singleValueMetrics) {
-      this(singleValueMetrics, Collections.emptyList());
-   }
+   private ColouredGraph graph;
 
 
-   public NumberOfTriangleMetricsPerformanceEvaluation(List<SingleValueMetric> singleValueMetrics, List<ColouredGraph> graphs) {
+   public NumberOfTriangleMetricsPerformanceEvaluation(SingleValueMetric metric, ColouredGraph graph) {
       super();
-      this.singleValueMetrics = singleValueMetrics;
-      this.graphs = graphs;
+      this.metric = metric;
+      this.graph = graph;
    }
 
 
-   public void evaluatePerformance() {
-      for (ColouredGraph graph : graphs) {
-         LOGGER.info("Evaluating graph {} with {} nodes and {} edges.", graph, graph.getGraph().getNumberOfVertices(),
-               graph.getGraph().getNumberOfEdges());
-         for (SingleValueMetric metric : singleValueMetrics) {
-            long startTimeInMilliseconds = System.currentTimeMillis();
-            double amountOfTriangles = metric.apply(graph);
-            long requiredTimeInMilliseconds = System.currentTimeMillis() - startTimeInMilliseconds;
-            LOGGER.info(String.format("%-30s%10d %10f", metric, (int) amountOfTriangles, requiredTimeInMilliseconds / 1000.0));
-         }
-      }
+   public long evaluatePerformance() {
+      long startTimeInMilliseconds = System.currentTimeMillis();
+      double amountOfTriangles = metric.apply(graph);
+      long requiredTimeInMilliseconds = System.currentTimeMillis() - startTimeInMilliseconds;
+      LOGGER.info(String.format("%-30s%10d %10f", metric, (int) amountOfTriangles, requiredTimeInMilliseconds / 1000.0));
+      return requiredTimeInMilliseconds;
    }
 
 
-   public void evaluatePerformance(ColouredGraph graph) {
-      LOGGER.info("Evaluating graph {} with {} nodes and {} edges.", graph, graph.getGraph().getNumberOfVertices(),
-            graph.getGraph().getNumberOfEdges());
-      for (SingleValueMetric metric : singleValueMetrics) {
-         long startTimeInMilliseconds = System.currentTimeMillis();
-         double amountOfTriangles = metric.apply(graph);
-         long requiredTimeInMilliseconds = System.currentTimeMillis() - startTimeInMilliseconds;
-         LOGGER.info(String.format("%-30s%10d %10f", metric, (int) amountOfTriangles, requiredTimeInMilliseconds / 1000.0));
-      }
+   public long evaluatePerformance(ColouredGraph graph) {
+      this.graph = graph;
+      return evaluatePerformance();
+   }
+
+
+   public void setGraph(ColouredGraph graph) {
+      this.graph = graph;
+   }
+
+
+   @Override
+   public Long call() throws Exception {
+      return evaluatePerformance();
    }
 
 }
