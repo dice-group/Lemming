@@ -26,6 +26,7 @@ import org.aksw.simba.lemming.metrics.single.triangle.NodeIteratorCoreNumberOfTr
 import org.aksw.simba.lemming.metrics.single.triangle.NodeIteratorNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.triangle.forward.ForwardNumberOfTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.triangle.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,48 +45,60 @@ public class EvaluationRunner {
    private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
    private static final String SNAP_EVALUATION_DATASETS_PATH = "evaluation_datasets/snap";
 
-   private static final int TIMEOUT_IN_SECONDS = 30;
+   private static final int TIMEOUT_IN_SECONDS = 15_000;
 
 
    public static void main(String args[]) throws InterruptedException, ExecutionException, IOException {
-      List<List<Long>> results = runEvaluationWithTimeLimit();
-      StringJoiner contentJoiner = new StringJoiner("\n");
-      for (List<Long> resultsForGraph : results) {
-         StringJoiner lineJoiner = new StringJoiner(" ");
-         resultsForGraph.stream().mapToDouble(result -> result / 1000.0).forEach(result -> lineJoiner.add(String.valueOf(result)));
-         contentJoiner.add(lineJoiner.toString());
-      }
-      writeToFileCreatingMissingDirectories(new File("results/result.txt"), contentJoiner.toString());
+      runEvaluationWithTimeLimit();
       executorService.shutdown();
    }
 
 
-   private static List<List<Long>> runEvaluationWithTimeLimit() throws InterruptedException, ExecutionException {
+   private static void printResultsToFile(String graphName, List<List<Pair<String, Long>>> resultForGraph) throws IOException {
+      StringJoiner contentJoiner = new StringJoiner("\n");
+      for (List<Pair<String, Long>> resultsForGraphVersion : resultForGraph) {
+         contentJoiner.add("#Metric: " + resultsForGraphVersion.get(0).getKey());
+         StringJoiner lineJoiner = new StringJoiner(" ");
+         resultsForGraphVersion.stream().mapToDouble(pair -> pair.getValue() / 1000.0)
+               .forEach(result -> lineJoiner.add(String.valueOf(result)));
+         contentJoiner.add(lineJoiner.toString());
+      }
+      writeToFileCreatingMissingDirectories(new File("results/" + graphName + ".txt"), contentJoiner.toString());
+   }
+
+
+   private static void runEvaluationWithTimeLimit() throws InterruptedException, ExecutionException, IOException {
       List<SingleValueMetric> metrics = Arrays.asList(new ForwardNumberOfTriangleMetric(), new NodeIteratorNumberOfTrianglesMetric(),
             new NodeIteratorCoreNumberOfTrianglesMetric(), new MatrixMultiplicationNumberOfTrianglesMetric(),
             new AyzNumberOfTrianglesMetric(5), new DuolionNumberOfTrianglesMetric(new ForwardNumberOfTriangleMetric(), 0.5, 20735378465L));
 
+
       List<ColouredGraph> graphs = new ArrayList<>();
-      graphs.addAll(getSnapEvaluationGraphs());
+      // graphs.addAll(getSnapEvaluationGraphs());
       graphs.addAll(getSemanticDogFoodGraphs());
 
-      List<List<Long>> graphResults = new ArrayList<>();
       for (ColouredGraph graph : graphs) {
+         List<List<Pair<String, Long>>> graphResults = new ArrayList<>();
          LOGGER.info("Evaluating graph {} with {} nodes and {} edges.", graph, graph.getGraph().getNumberOfVertices(),
                graph.getGraph().getNumberOfEdges());
-         List<Long> metricResults = new ArrayList<>();
          for (SingleValueMetric metric : metrics) {
-            metricResults.add(runEvaluationOnGraphWithTimeLimit(metric, graph, TIMEOUT_IN_SECONDS));
-            metricResults.add(runEvaluationOnGraphWithTimeLimit(metric, generateReferenceStarGraph(graph), TIMEOUT_IN_SECONDS));
-            metricResults.add(runEvaluationOnGraphWithTimeLimit(metric, generateReferenceGridGraph(graph), TIMEOUT_IN_SECONDS));
-            metricResults.add(runEvaluationOnGraphWithTimeLimit(metric, generateReferenceRingGraph(graph), TIMEOUT_IN_SECONDS));
-            metricResults.add(runEvaluationOnGraphWithTimeLimit(metric, generateReferenceCliqueGraph(graph), TIMEOUT_IN_SECONDS));
-            metricResults
-                  .add(runEvaluationOnGraphWithTimeLimit(metric, generateReferenceCompleteBipartiteGraph(graph), TIMEOUT_IN_SECONDS));
+            String metricName = metric.getName();
+            List<Pair<String, Long>> metricResults = new ArrayList<>();
+            metricResults.add(Pair.of(metricName, runEvaluationOnGraphWithTimeLimit(metric, graph, TIMEOUT_IN_SECONDS)));
+            metricResults.add(
+                  Pair.of(metricName, runEvaluationOnGraphWithTimeLimit(metric, generateReferenceStarGraph(graph), TIMEOUT_IN_SECONDS)));
+            metricResults.add(
+                  Pair.of(metricName, runEvaluationOnGraphWithTimeLimit(metric, generateReferenceGridGraph(graph), TIMEOUT_IN_SECONDS)));
+            metricResults.add(
+                  Pair.of(metricName, runEvaluationOnGraphWithTimeLimit(metric, generateReferenceRingGraph(graph), TIMEOUT_IN_SECONDS)));
+            metricResults.add(
+                  Pair.of(metricName, runEvaluationOnGraphWithTimeLimit(metric, generateReferenceCliqueGraph(graph), TIMEOUT_IN_SECONDS)));
+            metricResults.add(Pair.of(metricName,
+                  runEvaluationOnGraphWithTimeLimit(metric, generateReferenceCompleteBipartiteGraph(graph), TIMEOUT_IN_SECONDS)));
+            graphResults.add(metricResults);
          }
-         graphResults.add(metricResults);
+         printResultsToFile(graph.toString(), graphResults);
       }
-      return graphResults;
    }
 
 
