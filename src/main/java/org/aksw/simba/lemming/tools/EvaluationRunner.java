@@ -45,7 +45,7 @@ public class EvaluationRunner {
    private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
    private static final String SNAP_EVALUATION_DATASETS_PATH = "evaluation_datasets/snap";
 
-   private static final int TIMEOUT_IN_SECONDS = 15_000;
+   private static final int TIMEOUT_IN_SECONDS = 60;
 
 
    public static void main(String args[]) throws InterruptedException, ExecutionException, IOException {
@@ -74,7 +74,7 @@ public class EvaluationRunner {
 
 
       List<ColouredGraph> graphs = new ArrayList<>();
-      // graphs.addAll(getSnapEvaluationGraphs());
+      graphs.addAll(getSnapEvaluationGraphs());
       graphs.addAll(getSemanticDogFoodGraphs());
 
       for (ColouredGraph graph : graphs) {
