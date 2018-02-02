@@ -13,9 +13,9 @@ import toools.set.IntSets;
 
 
 /**
- * This class models an algoritm for counting the amount of node trianlges in a given graph. This is
- * done using the so called ayz algorithm proposed by Alon, Yuster and Zwick in their work "Finding
- * and Counting Given Length Cycles".
+ * This class models an algorithm for counting the amount of node triangles in a given graph. This
+ * is done using the so called ayz algorithm proposed by Alon, Yuster and Zwick in their work
+ * "Finding and Counting Given Length Cycles".
  * 
  * @see <a href=
  *      "https://www.researchgate.net/publication/225621879_Finding_and_Counting_Given_Length_Cycles">https://www.researchgate.net/publication/225621879_Finding_and_Counting_Given_Length_Cycles</a>).
