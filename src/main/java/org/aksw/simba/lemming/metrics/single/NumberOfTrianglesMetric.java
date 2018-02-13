@@ -44,6 +44,9 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
 				edges[i] = grph.getOutEdges(i);
 				edges[i].addAll(grph.getInEdges(i));
 			}
+			/*
+			 * A triangle is handled by the thread which handles the node with the lowest id in that triangle.
+			 */
 			new MultiThreadProcessing(graph.getGraph().getVertices()) {
 				@Override
 				protected void run(int threadID, int sourceId) {
@@ -62,58 +65,10 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
 								if (n_2 == sourceId) {
 									n_2 = grph.getDirectedSimpleEdgeTail(sourceEdges[j]);
 								}
-								if (n_2 > sourceId) {
+								// make sure that n_2 is larger as n_1
+								if (n_2 > n_1) {
 									count += IntSets.intersection(edges[n_1], edges[n_2]).size();
 								}
-							}
-						}
-					}
-					addCount(count);
-				}
-			};
-			return trianglesSum;
-		}
-
-		private synchronized void addCount(int count) {
-			trianglesSum += count;
-		}
-	}
-
-	private static class MultiThreadedTriangleCountingProcess_OLD {
-
-		private ColouredGraph graph;
-		private int trianglesSum = 0;
-
-		public MultiThreadedTriangleCountingProcess_OLD(ColouredGraph graph) {
-			this.graph = graph;
-		}
-
-		protected double calculate() {
-			new MultiThreadProcessing(graph.getGraph().getVertices()) {
-				@Override
-				protected void run(int threadID, int sourceId) {
-					int count = 0;
-					Grph grph = graph.getGraph();
-					IntSet edgeSet = grph.getOutEdges(sourceId);
-					edgeSet.addAll(grph.getInEdges(sourceId));
-					int edges[] = edgeSet.toIntArray();
-					int n_1, n_2;
-					for (int i = 0; i < edges.length; ++i) {
-						n_1 = grph.getDirectedSimpleEdgeHead(edges[i]);
-						if (n_1 == sourceId) {
-							n_1 = grph.getDirectedSimpleEdgeTail(edges[i]);
-						}
-						// If this edge is not handled by another thread
-						if (n_1 > sourceId) {
-							for (int j = 0; j < edges.length; ++j) {
-								n_2 = grph.getDirectedSimpleEdgeHead(edges[j]);
-								if (n_2 == sourceId) {
-									n_2 = grph.getDirectedSimpleEdgeTail(edges[j]);
-								}
-								if (n_2 > sourceId) {
-									count += grph.getEdgesConnecting(n_1, n_2).size();
-								}
-								// getOutEdges(src), getInEdges(dest)
 							}
 						}
 					}
