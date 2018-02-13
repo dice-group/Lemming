@@ -1,15 +1,11 @@
 package org.aksw.simba.lemming.creation;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphCreator;
-import org.apache.commons.io.IOUtils;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.aksw.simba.lemming.util.IOHelper;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,13 +38,7 @@ public class GraphCreatorTest {
 
     @Test
     public void test() {
-        Model model = ModelFactory.createDefaultModel();
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(graphFile);
-        model.read(is, null, "N3");
-        IOUtils.closeQuietly(is);
-
-        GraphCreator creator = new GraphCreator();
-        ColouredGraph graph = creator.processModel(model);
+        ColouredGraph graph = IOHelper.readGraphFromResource(this.getClass().getClassLoader(), graphFile, "N3");
         Assert.assertNotNull(graph);
         Assert.assertEquals(expectedVertices, graph.getVertices().size());
         Assert.assertEquals(expectedVertices, graph.getVertexColours().size());
