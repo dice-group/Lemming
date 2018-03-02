@@ -1,6 +1,8 @@
 # Lemming
 LEMMING is an ExaMple MImickiNg graph Generator
 
+[![Build Status](https://travis-ci.org/dice-group/Lemming.svg?branch=master)](https://travis-ci.org/dice-group/Lemming)
+
 
 ### Used data and software
 

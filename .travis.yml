@@ -11,8 +11,6 @@ addons:
 jdk:  
   - oraclejdk8
 
-before_install:
-  - cp src/main/properties/log4j.properties src/test/resources/log4j.properties
 install:
   - mvn clean compile -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
