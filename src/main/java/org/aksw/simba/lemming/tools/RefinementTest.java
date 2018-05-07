@@ -53,7 +53,7 @@ public class RefinementTest {
         // metrics.add(new AvgClusteringCoefficientMetric());
         // metrics.add(new AvgVertexDegreeMetric());
          metrics.add(new NumberOfTrianglesMetric());
-//        metrics.add(new MaxVertexOutDegreeMetric());
+         metrics.add(new MaxVertexOutDegreeMetric());
 //        metrics.add(new DiameterMetric());
 //        metrics.add(new NumberOfEdgesMetric());
 //        metrics.add(new NumberOfVerticesMetric());

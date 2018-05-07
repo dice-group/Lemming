@@ -2,7 +2,10 @@ package org.aksw.simba.lemming;
 
 import grph.Grph;
 import grph.GrphAlgorithmCache;
+import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
+
+import java.io.Serializable;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
@@ -12,7 +15,7 @@ import toools.set.IntSet;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
-public class ColouredGraph {
+public class ColouredGraph implements Serializable{
 
 	protected Grph graph;
 	protected ObjectArrayList<BitSet> vertexColours = new ObjectArrayList<BitSet>();
@@ -30,6 +33,10 @@ public class ColouredGraph {
 		this(new InMemoryGrph(), vertexPalette, edgePalette);
 	}
 
+	public IntSet getVerticesIncidentToEdge(int edgeId){
+		return graph.getVerticesIncidentToEdge(edgeId);
+	}
+	
 	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
 		setGraph(graph);
 		this.vertexPalette = vertexPalette;
@@ -37,6 +44,14 @@ public class ColouredGraph {
 
 	}
 
+	public void removeEdge(int edgeId){
+		edgeColours.set(edgeId, null);
+		IntSet edgeIDs = graph.getEdges();
+		if(edgeIDs.contains(edgeId)){
+			graph.removeEdge(edgeId);
+		}
+	}
+	
 	public Grph getGraph() {
 		return graph;
 	}
@@ -69,9 +84,15 @@ public class ColouredGraph {
 	}
 
 	public int addEdge(int tail, int head, BitSet colour) {
-		int id = graph.addDirectedSimpleEdge(tail, head);
-		edgeColours.add(new BitSet());
-		return id;
+		int edgeId = graph.addDirectedSimpleEdge(tail, head);
+
+		if(edgeColours.elementsCount > edgeId){
+			edgeColours.set(edgeId, colour);
+		}else{
+			edgeColours.add(colour);
+		}
+		
+		return edgeId;
 	}
 
 	public void setVertexColour(int vertexId, BitSet colour) {
@@ -95,10 +116,11 @@ public class ColouredGraph {
 	}
 
 	public BitSet getEdgeColour(int edgeId) {
-		if (edgeId < vertexColours.elementsCount) {
-			return (BitSet) ((Object[]) vertexColours.buffer)[edgeId];
+		if (edgeId < edgeColours.elementsCount) {
+			return (BitSet) ((Object[]) edgeColours.buffer)[edgeId];
 		} else {
-			return new BitSet();
+			//return new BitSet();
+			return null;
 		}
 	}
 
@@ -130,10 +152,18 @@ public class ColouredGraph {
 		return graph.getVertices();
 	}
 
+	public IntSet getEdges(){
+		return graph.getEdges();
+	}
+	
 	public IntSet getOutEdges(int vertexId) {
 		return graph.getOutEdges(vertexId);
 	}
 
+	public IntSet getInEdges(int vertexId){
+		return graph.getInEdges(vertexId);
+	}
+	
 	public IntSet getVerticesAccessibleThrough(int vertexId, int edgeId) {
 		return graph.getVerticesAccessibleThrough(vertexId, edgeId);
 	}
@@ -142,4 +172,87 @@ public class ColouredGraph {
 		return diameterAlgorithm.compute(graph);
 	}
 
+	/**
+	 * get edges connecting two specific vertices
+	 * 
+	 * @param tailId
+	 * @param headId
+	 * @return
+	 */
+	public IntSet getEdgesConnecting(int tailId, int headId){
+		return graph.getEdgesConnecting(tailId, headId);
+	}
+	
+	/**
+	 * for testing graph with visualization
+	 * 
+	 */
+	public void visualizeGraph(){
+		graph.display();
+	}
+	
+	public void setVertexColours(ObjectArrayList<BitSet> inVertexColours){
+		vertexColours = new ObjectArrayList<BitSet>();
+		for(int i = 0 ; i < inVertexColours.size() ; ++i){
+			vertexColours.add(inVertexColours.get(i));
+		}
+	}
+	public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours){
+		edgeColours = new ObjectArrayList<BitSet>();
+		for(int i = 0 ; i < inEdgeColours.size() ; ++i){
+			edgeColours.add( inEdgeColours.get(i));
+		}
+	}
+	
+	@Override
+	public ColouredGraph clone(){
+		Grph rawClonedGrph = new InMemoryGrph();
+		rawClonedGrph.addVertices(graph.getVertices());		
+		new MultiThreadProcessing(graph.getEdges()) {
+			
+			@Override
+			protected void run(int threadID, int edgeID) {
+				synchronized(rawClonedGrph){
+					IntSet vertexIDs = graph.getVerticesIncidentToEdge(edgeID);
+					int[] arrVertIDs = vertexIDs.toIntArray();
+					if(arrVertIDs.length == 2){
+						rawClonedGrph.addDirectedSimpleEdge(arrVertIDs[0], edgeID, arrVertIDs[1]);
+					}else{
+						if(arrVertIDs.length == 1){
+							rawClonedGrph.addDirectedSimpleEdge(arrVertIDs[0], edgeID, arrVertIDs[0]);
+						}else{
+							System.out.println(" -- edge id : "+ edgeID +" has only " + arrVertIDs.length+ "");
+						}
+					}
+				}
+			}
+		};
+		
+		ColouredGraph cloneGrph = new ColouredGraph(rawClonedGrph, vertexPalette, edgePalette);
+		cloneGrph.setVertexColours(vertexColours);
+		cloneGrph.setEdgeColours(edgeColours);
+		return cloneGrph;
+	}
+	
+	public int getTailOfTheEdge(int edgeId){
+		IntSet vertices = graph.getVerticesIncidentToEdge(edgeId);
+		if(vertices.size() > 0){
+			int [] arrVertIDs = vertices.toIntArray();
+			return arrVertIDs[0];
+		}
+		return -1;
+	}
+	
+	public int getHeadOfTheEdge(int edgeId){
+		IntSet vertices = graph.getVerticesIncidentToEdge(edgeId);
+		if(vertices.size() > 0 ){
+		int [] arrVertIDs = vertices.toIntArray();
+			if( arrVertIDs.length == 1 ){
+				return arrVertIDs[0];
+			}else{
+				return arrVertIDs[1];
+			}
+		}
+		return -1;
+	}
 }
