@@ -24,7 +24,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 	public ColouredGraph generateGraph(){
 		
 		Set<BitSet> keyVertColo = mMapColourToVertexIDs.keySet();
-		Set<BitSet> keyEdgeColo = mapColourToEdgeIDs.keySet();
+		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
@@ -32,7 +32,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			
 			/* the setFakeEdgeIDs helps us to know how many edges existing
 			 * in a specific edge's colour*/ 
-			IntSet setFakeEdgeIDs = mapColourToEdgeIDs.get(edgeColo);
+			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
 			for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
 				

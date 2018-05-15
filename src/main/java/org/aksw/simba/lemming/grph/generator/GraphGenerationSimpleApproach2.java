@@ -57,7 +57,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 
 	public ColouredGraph generateGraph(){
 		
-		Set<BitSet> keyEdgeColo = mapColourToEdgeIDs.keySet();
+		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
@@ -69,7 +69,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 			if(headColourProposer != null && tailColourProposer!= null && mapTailColoToTailIDs != null && mapHeadColoToHeadIDs != null){
 				
 				// the setFakeEdgeIDs helps us to know how many edges existing in a specific edge's colour
-				IntSet setFakeEdgeIDs = mapColourToEdgeIDs.get(edgeColo);
+				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
 					
 					boolean isFoundVerticesConnected = false;
@@ -153,7 +153,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	private void computeAvrgIOEdgeDistPerVertColo(ColouredGraph[] origGrphs){
 		// out degree colour distribution associated with edge colours
 		AvrgOutEdgeDistBaseEColoPerVColo avrgOutEdgeDistPerVertColoMetric = new AvrgOutEdgeDistBaseEColoPerVColo(origGrphs);
-		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
+		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : outEdgeColours){
@@ -166,7 +166,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		
 		// in degree colour distribution associated with edge colours
 		AvrgInEdgeDistBaseEColoPerVColo avrgInEdgeDistPerVertColoMetric = new AvrgInEdgeDistBaseEColoPerVColo(origGrphs);
-		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
+		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : inEdgeColours){
@@ -184,7 +184,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		// compute for each vertex's colour, the average in-degree associated with a specific edge's colour
 		AvrgOutDegreeDistBaseVEColo avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrphs);
 		
-		Set<BitSet> setEdgeColours = mapColourToEdgeIDs.keySet();
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
 		
 		for(BitSet edgeColo : setEdgeColours){

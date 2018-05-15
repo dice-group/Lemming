@@ -477,17 +477,25 @@ public class ColourMappingRules implements IColourMappingRules{
 	}
 
 	@Override
-	public boolean canConnect(BitSet headColour, BitSet tailColour,
+	public boolean canConnect(BitSet tailColour, BitSet headColour, 
 			BitSet edgeColour) {
 		
-		if(headColour != null && tailColour != null && edgeColour!=null){
-			ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColour) ;
-			if(mapHeadToTail!= null){
-				Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
-				if(setTailColours != null && setTailColours.contains(tailColour)){
+		if(headColour != null && tailColour != null ){
+			if(edgeColour!=null){
+				ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColour) ;
+				if(mapHeadToTail!= null){
+					Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
+					if(setTailColours != null && setTailColours.contains(tailColour)){
+						return true;
+					}
+				}	
+			}else{
+				Set<BitSet> setHeadColours = mMapTailColoToHeadColo.get(tailColour);
+				if(setHeadColours != null && setHeadColours.contains(headColour)){
 					return true;
 				}
 			}
+			
 		}
 		return false;
 	}

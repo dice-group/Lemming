@@ -10,6 +10,7 @@ import java.io.Serializable;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 
+import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
@@ -254,5 +255,24 @@ public class ColouredGraph implements Serializable{
 			}
 		}
 		return -1;
+	}
+	
+	public IntSet getVertices(BitSet vertexColour){
+		IntSet setVertices = new DefaultIntSet();
+		
+		new MultiThreadProcessing(this.getVertices()) {
+			
+			@Override
+			protected void run(int threadID, int vertId) {
+				BitSet vertColo = getVertexColour(vertId);
+				if(vertexColour.equals(vertColo)){
+					synchronized(setVertices){
+						setVertices.add(vertId);
+					}
+				}
+			}
+		};
+		
+		return setVertices;
 	}
 }

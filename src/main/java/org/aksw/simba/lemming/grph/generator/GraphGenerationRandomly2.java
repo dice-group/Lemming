@@ -35,7 +35,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 
 	public ColouredGraph generateGraph(){
 		
-		Set<BitSet> keyEdgeColo = mapColourToEdgeIDs.keySet();
+		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
@@ -48,7 +48,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 				
 				/* the setFakeEdgeIDs helps us to know how many edges existing
 				 * in a specific edge's colour*/ 
-				IntSet setFakeEdgeIDs = mapColourToEdgeIDs.get(edgeColo);
+				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 				// use each edge to connect vertices
 				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
 					
@@ -174,7 +174,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 		// compute for each vertex's colour, the average in-degree associated with a specific edge's colour
 		AvrgOutDegreeDistBaseVEColo avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrphs);
 		
-		Set<BitSet> setEdgeColours = mapColourToEdgeIDs.keySet();
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
 		
 		for(BitSet edgeColo : setEdgeColours){

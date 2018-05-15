@@ -35,6 +35,26 @@ public class MapUtil {
         return null;
     }
     
+	public static <T, E> ObjectDistribution<T> converta(
+			ObjectDoubleOpenHashMap<T> sourceData) {
+
+		if (sourceData != null) {
+			int iLength = sourceData.allocated.length;
+			T[] samples = (T[]) new Object[sourceData.assigned];
+			double[] values = new double[sourceData.assigned];
+			int ipos = 0;
+			for (int i = 0; i < iLength; ++i) {
+				if (sourceData.allocated[i]) {
+					samples[ipos] = (T) ((Object[]) sourceData.keys)[i];
+					values[ipos] = (double) (sourceData.values)[i];
+					ipos++;
+				}
+			}
+			return new ObjectDistribution<T>(samples, values);
+		}
+		return null;
+	}
+    
     public static Set<BitSet> convert(List<BitSet> lstItemColours){
     	Set<BitSet> res = new HashSet<BitSet>();
     	if(lstItemColours != null){
@@ -43,7 +63,7 @@ public class MapUtil {
     	return res;
     }
     
-    public static List<BitSet> extractKeys(ObjectDoubleOpenHashMap<BitSet> mapDoubleKeyValue){
+    public static List<BitSet> keysToList(ObjectDoubleOpenHashMap<BitSet> mapDoubleKeyValue){
     	if(mapDoubleKeyValue != null){
     		List<BitSet> res = new ArrayList<BitSet>();
     		Object[] keySamples = mapDoubleKeyValue.keys;
@@ -57,7 +77,33 @@ public class MapUtil {
     		return res;
     	}
     	return null; 
-    	
+    }
+    
+    public static Set<Integer> convert(IntSet setInt){
+    	Set<Integer> setRes = new HashSet<Integer>();
+    	if(setInt!=null && setInt.size() > 0){
+    		int[] arrInt = setInt.toIntArray();
+    		for (int i : arrInt){
+    			setRes.add(i);
+    		}
+    	}
+    	return setRes;
+    }
+    
+    public static Set<BitSet> keysToSet(ObjectDoubleOpenHashMap<BitSet> mapDoubleKeyValue){
+    	if(mapDoubleKeyValue != null){
+    		Set<BitSet> res = new HashSet<BitSet>();
+    		Object[] keySamples = mapDoubleKeyValue.keys;
+    		int iNoOfSamples = keySamples.length;
+    		for(int i = 0 ; i< iNoOfSamples ; ++i){
+    			if(mapDoubleKeyValue.allocated[i]){
+    				BitSet key = (BitSet) keySamples[i];
+    				res.add(key);
+    			}
+    		}
+    		return res;
+    	}
+    	return null; 
     }
     
     public static ObjectDoubleOpenHashMap<BitSet> convert(ObjectDistribution<BitSet> sourceData){

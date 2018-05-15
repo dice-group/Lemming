@@ -55,7 +55,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 
 	public ColouredGraph generateGraph(){
 		
-		Set<BitSet> keyEdgeColo = mapColourToEdgeIDs.keySet();
+		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
@@ -65,7 +65,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 				
 				/* the setFakeEdgeIDs helps us to know how many edges existing
 				 * in a specific edge's colour*/ 
-				IntSet setFakeEdgeIDs = mapColourToEdgeIDs.get(edgeColo);
+				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 				// use each edge to connect vertices
 				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
 					
@@ -148,7 +148,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	private void computeAvrgIOEdgeDistPerVertColo(ColouredGraph[] origGrphs){
 		// out degree colour distribution associated with edge colours
 		AvrgOutEdgeDistBaseEColoPerVColo avrgOutEdgeDistPerVertColoMetric = new AvrgOutEdgeDistBaseEColoPerVColo(origGrphs);
-		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
+		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : outEdgeColours){
@@ -161,7 +161,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		
 		// in degree colour distribution associated with edge colours
 		AvrgInEdgeDistBaseEColoPerVColo avrgInEdgeDistPerVertColoMetric = new AvrgInEdgeDistBaseEColoPerVColo(origGrphs);
-		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
+		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : inEdgeColours){
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);

@@ -41,7 +41,7 @@ public abstract class AbstractGraphGeneration {
 	 * the keys are the edge's color and the values are the set of edge's ids
 	 * (note: fake id)
 	 */
-	protected Map<BitSet, IntSet> mapColourToEdgeIDs = new HashMap<BitSet, IntSet>();
+	protected Map<BitSet, IntSet> mMapColourToEdgeIDs = new HashMap<BitSet, IntSet>();
 	
 	protected ObjectDistribution<BitSet> mVertColoDist;
 	protected ObjectDistribution<BitSet> mEdgeColoDist;
@@ -99,7 +99,7 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	public Map<BitSet, IntSet> getMappingColoursAndEdges(){
-		return mapColourToEdgeIDs;
+		return mMapColourToEdgeIDs;
 	}
 	
 	public IColourMappingRules getColourMapper() {
@@ -265,10 +265,10 @@ public abstract class AbstractGraphGeneration {
 			 * ==> just track the edge's color
 			 */
 			
-			IntSet setEdgeIDs = mapColourToEdgeIDs.get(offeredColor);
+			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
 			if(setEdgeIDs == null){
 				setEdgeIDs = new DefaultIntSet();
-				mapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
+				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
 			// fake edge's id
 			setEdgeIDs.add(i);
@@ -322,10 +322,10 @@ public abstract class AbstractGraphGeneration {
 		
 		System.out.println("Number of painted vertices: " + totalVertices + " in total " + keyVertColo.size() +" colors");
 		
-		Set<BitSet> keyEdgeColo = mapColourToEdgeIDs.keySet();
+		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		int totalEdges = 0 ;
 		for(BitSet edgeColo: keyEdgeColo){
-			IntSet setEdgeIDs = mapColourToEdgeIDs.get(edgeColo);
+			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			totalEdges += setEdgeIDs.size();
 		}
 		

@@ -6,7 +6,10 @@ import grph.algo.topology.StarTopologyGenerator;
 import grph.in_memory.InMemoryGrph;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -18,8 +21,12 @@ import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitness
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
+import org.aksw.simba.lemming.grph.generator.GraphGenerationGroupingTriple;
+import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
+import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
+import org.aksw.simba.lemming.grph.generator.GraphGenerationWithoutEdgeColours;
 import org.aksw.simba.lemming.grph.generator.GraphRefinementAdvanced;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -30,8 +37,12 @@ import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.util.MetricTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import toools.set.DefaultIntSet;
+import toools.set.IntSet;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
@@ -48,7 +59,26 @@ public class GraphGenerationTest {
 	public static void main(String[] args) {
 		
 		boolean isStop = false;
-		
+//		Random rand = new Random();
+//		Set<Integer> a = new HashSet<Integer>();
+//		for(int i = 0 ; i < 20 ; i++){
+//			a.add(rand.nextInt(30));
+//		}
+//		Set<Integer> b = new HashSet<Integer>();
+//		for(int i = 0 ; i < 10 ; i++){
+//			b.add(rand.nextInt(30));
+//		}
+//		
+//		
+//		System.out.println("a : " + a);
+//		System.out.println("b : " + b);
+//		b.retainAll(a);
+//		System.out.println("a : " + a);
+//		System.out.println("b : " + b);
+//		
+//		if(!isStop)
+//			return;
+//		
 		 // For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
@@ -69,26 +99,29 @@ public class GraphGenerationTest {
         if (USE_SEMANTIC_DOG_FOOD) {
             graphs = SemanticWebDogFoodReader.readGraphsFromFile(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
         }
-
+        
         IGraphGeneration grphGenerater;
-        
-       
-        
         //grphGenerater = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
+       // grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
         grphGenerater = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerater = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
+       //grphGenerater = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerater = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerater = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
         
         double currentTime = System.currentTimeMillis();
         // generate the new graph
-        grphGenerater.generateGraph();
+        ColouredGraph tempGrph =  grphGenerater.generateGraph();
         // estimate the costed time for generation
         System.out.println("End of graph generation!");
         currentTime = System.currentTimeMillis() - currentTime;
         System.out.println("Time of graph generation: " + currentTime);
         
-        //MetricPrinter.printMetricInformation(graphs);
-        
+        MetricTester.printMetricInformation(metrics, graphs);
+        MetricTester.printMetricInformation(metrics, tempGrph);
+        if(!isStop){
+        	return;
+        }
+//        
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();
         fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
                 createReferenceGraphVectors(graphs, metrics));
@@ -183,3 +216,4 @@ public class GraphGenerationTest {
 	    }
 	
 }
+

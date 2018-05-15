@@ -21,20 +21,19 @@ public class TripleBaseSetOfIDs {
 	public double noOfEdges;
 	public IntSet edgeIDs;
 	
-	public TripleBaseSetOfIDs(BitSet headColo, double rateOfHeads, BitSet tailColo, double rateOfTails,
-						BitSet edgeColo, double rateOfEdges){
-		
-		headColour = headColo;
-		noOfHeads = rateOfHeads;
-		headIDs = new DefaultIntSet();
+	public TripleBaseSetOfIDs(BitSet tailColo, double rateOfTails, BitSet edgeColo, double rateOfEdges, BitSet headColo, double rateOfHeads){
 		
 		tailColour = tailColo;
 		noOfTails = rateOfTails;
 		tailIDs = new DefaultIntSet();
-		
+
 		edgeColour = edgeColo;
 		noOfEdges = rateOfEdges;
 		edgeIDs = new DefaultIntSet();
+		
+		headColour = headColo;
+		noOfHeads = rateOfHeads;
+		headIDs = new DefaultIntSet();
 	}
 	
 	public boolean equals(Object obj){
