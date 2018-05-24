@@ -2,18 +2,14 @@ package org.aksw.simba.lemming.grph.generator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.refinement.RefinementNode;
 import org.aksw.simba.lemming.dist.utils.NormalDistribution;
-import org.aksw.simba.lemming.rules.IColourMappingRules;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
-import org.apache.jena.graph.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +17,8 @@ import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 
-public class GraphRefinementAdvanced {
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphRefinementAdvanced.class);
+public class GraphRefinement {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphRefinement.class);
 	
 	private int mMaxIteration = 1000 ;
 	private boolean mProcessRandomly = true;
@@ -38,7 +34,7 @@ public class GraphRefinementAdvanced {
 	
 	private NormalDistribution mErrScoreCalculator;
 	
-	public GraphRefinementAdvanced(ColouredGraph[] origGrphs, int iNoOfIteration, 
+	public GraphRefinement(ColouredGraph[] origGrphs, int iNoOfIteration, 
 			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
 		
 		/*

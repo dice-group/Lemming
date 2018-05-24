@@ -73,7 +73,8 @@ public class RefinementTest {
             // generator.setNumberOfEdges((i + 2) * (i + 1));
             // generator.setK(3);
             generator.compute(temp);
-            graphs[i] = new ColouredGraph(temp, null, null);
+            //graphs[i] = new ColouredGraph(temp, null, null);
+            graphs[i] = new ColouredGraph(temp, null, null, null);
         }
 
         if (USE_SEMANTIC_DOG_FOOD) {
@@ -120,31 +121,32 @@ public class RefinementTest {
             temp = new InMemoryGrph();
             temp.addNVertices(numberOfNodes);
             starGenerator.compute(temp);
-            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null), metrics));
+            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null), metrics));
+            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null, null), metrics));
             temp = null;
 
             // Grid
             partSize = (int) Math.sqrt(numberOfNodes);
-            MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null),
-                    metrics);
-
+           //MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null), metrics);
+            MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null, null), metrics);
             // Ring
-            vectors.add(MetricUtils.calculateGraphMetrics(
-                    new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null), metrics));
+            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null), metrics));
+            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null, null), metrics));
 
             // Clique
             // vectors.add(MetricUtils.calculateGraphMetrics(
             // new ColouredGraph(ClassicalGraphs.completeGraph(numberOfNodes),
             // null, null), metrics));
-            vectors.add(MetricUtils.calculateGraphMetrics(
-                    new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null), metrics));
+            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null), metrics));
+            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null, null), metrics));
 
             // Bipartite
             // partSize = numberOfNodes / 2;
             partSize = numberOfNodes / 8;
-            vectors.add(MetricUtils.calculateGraphMetrics(
-                    new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null),
-                    metrics));
+            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null), metrics));
+			vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(
+					ClassicalGraphs.completeBipartiteGraph(partSize, partSize),
+					null, null, null), metrics));
         }
         return vectors.toArray(new ObjectDoubleOpenHashMap[vectors.size()]);
     }

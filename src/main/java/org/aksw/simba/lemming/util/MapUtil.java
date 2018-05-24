@@ -55,6 +55,62 @@ public class MapUtil {
 		return null;
 	}
     
+	public static float[] computeMeanVector(List<float[]> lstVectors){
+		if(lstVectors != null && lstVectors.size() > 0){
+			int iLenOfAVec = lstVectors.get(0).length; 
+			float[] vecRes = new float[iLenOfAVec];
+			for(int j = 0 ; j< iLenOfAVec ; j++){
+				float sum = 0 ; 
+				for(int i = 0 ; i< lstVectors.size() ; i++){
+					sum += lstVectors.get(i)[j];
+				}
+				
+				float avrg = sum/lstVectors.size();
+				vecRes[j] = avrg;
+			}
+			return vecRes;
+		}
+		return new float[0];
+	}
+	
+	public static float[] computerStandardDeviationVector(List<float[]> lstVectors, float[] meanVector){
+		if(lstVectors != null && lstVectors.size()> 0 && meanVector!= null && meanVector.length >0){
+			if(lstVectors.get(0).length == meanVector.length){
+				int iLenOfAVec = meanVector.length;
+				float[] vecRes = new float[iLenOfAVec];
+				for(int j = 0 ; j< iLenOfAVec ; j++){
+					float meanVal = meanVector[j];
+					float []vector = new float[lstVectors.size()];
+					
+					for(int i = 0 ; i < lstVectors.size(); i++){
+						vector[i] = lstVectors.get(i)[j];
+					}
+					vecRes[j] = computeSingleStandardDeviation(vector, meanVal);
+				}
+				
+				return vecRes;
+			}
+		}
+		return new float[0];
+	}
+	
+	public static float computeSingleStandardDeviation(float[] vector, float meanValue){
+		if(vector == null || vector.length == 0){
+			return 0;
+		}
+		
+		float sum = 0;
+		int iNoOfVals = vector.length;
+		
+		for(int j = 0 ; j < iNoOfVals ; ++j){
+			sum += Math.pow(meanValue- vector[j], 2);
+		}
+		if(iNoOfVals == 1){
+			return (float) Math.sqrt(sum);
+		}
+		return (float) Math.sqrt(sum/ (iNoOfVals -1));
+	}
+	
     public static Set<BitSet> convert(List<BitSet> lstItemColours){
     	Set<BitSet> res = new HashSet<BitSet>();
     	if(lstItemColours != null){

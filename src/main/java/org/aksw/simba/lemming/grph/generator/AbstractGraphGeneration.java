@@ -171,7 +171,7 @@ public abstract class AbstractGraphGeneration {
 					BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
 					
 					// get vertex's ids according to the vertex's colours
-					if(mMapColourToVertexIDs.get(tailColo) != null && mMapColourToVertexIDs.get(headColo) != null){
+					if(mMapColourToVertexIDs.get(headColo) != null){
 						int[] arrTailIDs = mMapColourToVertexIDs.get(tailColo).toIntArray();
 						int[] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
 						

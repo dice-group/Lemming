@@ -1,11 +1,12 @@
 package org.aksw.simba.lemming;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import grph.Grph;
 import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
-
-import java.io.Serializable;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
@@ -15,36 +16,61 @@ import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
-public class ColouredGraph implements Serializable{
+public class ColouredGraph{
 
 	protected Grph graph;
 	protected ObjectArrayList<BitSet> vertexColours = new ObjectArrayList<BitSet>();
 	protected ObjectArrayList<BitSet> edgeColours = new ObjectArrayList<BitSet>();
 	protected ColourPalette vertexPalette;
 	protected ColourPalette edgePalette;
-
+	protected ColourPalette dtEdgePalette;
+	
+	//mapping vertex's colours to datatyped edge's colours
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapVertexColourToDataTypedEdge;
+	//mapping datatyped edge's colours to set of literals
+	protected ObjectObjectOpenHashMap<BitSet, Set<String>> mapDataTypedEdgeColourToLiterals;	
+	
 	protected GrphAlgorithmCache<Integer> diameterAlgorithm;
 
 	public ColouredGraph() {
-		this(null, null);
-	}
-
-	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette) {
-		this(new InMemoryGrph(), vertexPalette, edgePalette);
-	}
-
-	public IntSet getVerticesIncidentToEdge(int edgeId){
-		return graph.getVerticesIncidentToEdge(edgeId);
+		this(null, null, null);
 	}
 	
-	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
+//	public ColouredGraph() {
+//		this(null, null);
+//	}
+
+//	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette) {
+//		this(new InMemoryGrph(), vertexPalette, edgePalette);
+//	}
+	
+//	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
+//		setGraph(graph);
+//		this.vertexPalette = vertexPalette;
+//		this.edgePalette = edgePalette;
+//	}
+
+//	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
+//		this(new InMemoryGrph(), vertexPalette, edgePalette);
+//		dtEdgePalette = datatypedEdgePalette;
+//	}
+	
+	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
+		this(new InMemoryGrph(), vertexPalette, edgePalette, datatypedEdgePalette);
+	}
+	
+	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
 		setGraph(graph);
 		this.vertexPalette = vertexPalette;
 		this.edgePalette = edgePalette;
-
+		this.dtEdgePalette = datatypedEdgePalette;
+		
+		mapVertexColourToDataTypedEdge = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+		mapDataTypedEdgeColourToLiterals = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
 	}
-
+	
 	public void removeEdge(int edgeId){
 		edgeColours.set(edgeId, null);
 		IntSet edgeIDs = graph.getEdges();
@@ -198,6 +224,7 @@ public class ColouredGraph implements Serializable{
 			vertexColours.add(inVertexColours.get(i));
 		}
 	}
+	
 	public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours){
 		edgeColours = new ObjectArrayList<BitSet>();
 		for(int i = 0 ; i < inEdgeColours.size() ; ++i){
@@ -229,9 +256,12 @@ public class ColouredGraph implements Serializable{
 			}
 		};
 		
-		ColouredGraph cloneGrph = new ColouredGraph(rawClonedGrph, vertexPalette, edgePalette);
+		ColouredGraph cloneGrph = new ColouredGraph(rawClonedGrph, vertexPalette, edgePalette, dtEdgePalette);
 		cloneGrph.setVertexColours(vertexColours);
 		cloneGrph.setEdgeColours(edgeColours);
+		// TODO set literal of the old graph to the new graph here
+		//--------------------------------------------------------
+		
 		return cloneGrph;
 	}
 	
@@ -274,5 +304,27 @@ public class ColouredGraph implements Serializable{
 		};
 		
 		return setVertices;
+	}
+	
+	public void addLiterals(String literal, BitSet subjectColour, BitSet datatypedEdgeColour){
+		
+		Set<BitSet> setDTEdgeColours = mapVertexColourToDataTypedEdge.get(subjectColour);
+		if(setDTEdgeColours == null){
+			setDTEdgeColours = new HashSet<BitSet>();
+			mapVertexColourToDataTypedEdge.put(subjectColour, setDTEdgeColours);
+		}
+		setDTEdgeColours.add(datatypedEdgeColour);
+		
+		Set<String> setLiterals = mapDataTypedEdgeColourToLiterals.get(datatypedEdgeColour);
+		if(setLiterals == null){
+			setLiterals = new HashSet<String>();
+			mapDataTypedEdgeColourToLiterals.put(datatypedEdgeColour, setLiterals);
+		}
+		
+		setLiterals.add(literal);
+	}
+	
+	public IntSet getVerticesIncidentToEdge(int edgeId){
+		return graph.getVerticesIncidentToEdge(edgeId);
 	}
 }

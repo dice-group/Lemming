@@ -27,7 +27,7 @@ import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationWithoutEdgeColours;
-import org.aksw.simba.lemming.grph.generator.GraphRefinementAdvanced;
+import org.aksw.simba.lemming.grph.generator.GraphRefinement;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
@@ -101,12 +101,12 @@ public class GraphGenerationTest {
         }
         
         IGraphGeneration grphGenerater;
-        //grphGenerater = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
+       //grphGenerater = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
        // grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
-        grphGenerater = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
+       grphGenerater = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
        //grphGenerater = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerater = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerater = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
+       //grphGenerater = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
+       //grphGenerater = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
         
         double currentTime = System.currentTimeMillis();
         // generate the new graph
@@ -150,7 +150,7 @@ public class GraphGenerationTest {
             System.out.println();
         }
         
-        GraphRefinementAdvanced grphRefinement = new GraphRefinementAdvanced(graphs, 1000, grphGenerater, bestNodes);
+        GraphRefinement grphRefinement = new GraphRefinement(graphs, 1000, grphGenerater, bestNodes);
         System.out.println("Refine graph randomly");
         grphRefinement.setRefineGraphRandomly(true);
         ColouredGraph refinedGrph = grphRefinement.refineGraph();
@@ -186,31 +186,32 @@ public class GraphGenerationTest {
 	            temp = new InMemoryGrph();
 	            temp.addNVertices(numberOfNodes);
 	            starGenerator.compute(temp);
-	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null), metrics));
+	            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null, null), metrics));
 	            temp = null;
 
 	            // Grid
 	            partSize = (int) Math.sqrt(numberOfNodes);
-	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null),
-	                    metrics));
+	            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null, null), metrics));
 
 	            // Ring
+//	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null), metrics));
 	            vectors.add(MetricUtils.calculateGraphMetrics(
-	                    new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null), metrics));
+	                    new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null, null), metrics));
 
 	            // Clique
 	            // vectors.add(MetricUtils.calculateGraphMetrics(
 	            // new ColouredGraph(ClassicalGraphs.completeGraph(numberOfNodes),
 	            // null, null), metrics));
-	            vectors.add(MetricUtils.calculateGraphMetrics(
-	                    new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null), metrics));
-
+//	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null, null), metrics));
 	            // Bipartite
 	            // partSize = numberOfNodes / 2;
 	            partSize = numberOfNodes / 8;
-	            vectors.add(MetricUtils.calculateGraphMetrics(
-	                    new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null),
-	                    metrics));
+	            //vectors.add(MetricUtils.calculateGraphMetrics( new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics( new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null, null), metrics));
+	            
 	        }
 	        return vectors.toArray(new ObjectDoubleOpenHashMap[vectors.size()]);
 	    }

@@ -16,8 +16,8 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.dist.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
+import org.aksw.simba.lemming.metrics.dist.multi.TripleColourDistributionMetric;
 import org.aksw.simba.lemming.rules.TripleBaseSetOfIDs;
-import org.aksw.simba.lemming.rules.TripleColourDistributionMetric;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,11 +72,9 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 			TripleColourDistributionMetric colorMapping = new TripleColourDistributionMetric();
 			colorMapping.applyWithSingleThread(grph);
 			mLstEVColorMapping.add(colorMapping);
-			
-			
+			System.out.println("-------------");
+			//testing
 			colorMapping.printInfo();
-			
-			
 		}
 	}
 	

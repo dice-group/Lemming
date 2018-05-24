@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.rules;
+package org.aksw.simba.lemming.metrics.dist.multi;
 
 import grph.algo.MultiThreadProcessing;
 
@@ -44,6 +44,7 @@ public class TripleColourDistributionMetric  {
 	
 	
 	private ColouredGraph testVarGrph;
+	private TestMaxNoOfGrpOfAVertex testMaxNoOfGrps;
 	/**
 	 * Constructor
 	 */
@@ -53,6 +54,8 @@ public class TripleColourDistributionMetric  {
 		mTripleMapTailEdgeHeads = new HashMap<BitSet, Map<BitSet, Map<BitSet, IntSet>>>();
 		mMapVertColoDist = new ObjectDoubleOpenHashMap<BitSet>();
 		mMapEdgeColoDist = new ObjectDoubleOpenHashMap<BitSet>();
+		
+		testMaxNoOfGrps = new TestMaxNoOfGrpOfAVertex();
 	}
 
 	public double getTotalNoOfEdgesIn(BitSet edgeColo){
@@ -151,6 +154,8 @@ public class TripleColourDistributionMetric  {
 					
 			}
 		}
+		
+		testMaxNoOfGrps.apply(grph);
 	}
 		
 	private void putToMap( BitSet firstKey, BitSet secondKey, BitSet thirdKey, int itemID,
@@ -294,6 +299,8 @@ public class TripleColourDistributionMetric  {
 				}
 			}
 		};
+		
+		testMaxNoOfGrps.apply(grph);
 	}
 	
 	
@@ -306,53 +313,128 @@ public class TripleColourDistributionMetric  {
 		Set<BitSet> setEdgeColo = MapUtil.keysToSet(mMapEdgeColoDist);
 		Set<BitSet> setVertColo = MapUtil.keysToSet(mMapVertColoDist);
 		
+		Map<BitSet, List<IntSet>> mapColourToTails = new HashMap<BitSet, List<IntSet>>();
+		Map<BitSet, List<IntSet>> mapColourToHeads = new HashMap<BitSet, List<IntSet>>();
 		
 		
-		for (BitSet tailColo : setVertColo) {
-
-			Map<BitSet, List<IntSet>> lstSetOfTails = new HashMap<BitSet, List<IntSet>>();
-
-			if (mTripleMapTailHeadEdges.containsKey(tailColo)) {
-				Map<BitSet, Map<BitSet, IntSet>> mapHeadToEdges = mTripleMapTailHeadEdges.get(tailColo);
-				for (BitSet headColo : setVertColo) {
+		for (BitSet headColo : setVertColo) {
+			for (BitSet tailColo : setVertColo) {
+				if (mTripleMapTailEdgeHeads.containsKey(tailColo)) {
+					Map<BitSet, Map<BitSet, IntSet>> mapEdgeToHeads = mTripleMapTailEdgeHeads.get(tailColo);
 					for (BitSet edgeColo : setEdgeColo) {
-						if (mapHeadToEdges.containsKey(headColo)) {
-							Map<BitSet, IntSet> mapEdges = mapHeadToEdges.get(headColo);
-							if (mapEdges.containsKey(edgeColo)) {
-								IntSet setTails = mTripleMapHeadEdgeTails.get(headColo).get(edgeColo).get(tailColo);
-								List<IntSet> lst = lstSetOfTails.get(edgeColo);
-								if(lst == null ){
-									lst = new ArrayList<IntSet>();
-									lstSetOfTails.put(edgeColo, lst);
+						if (mapEdgeToHeads.containsKey(edgeColo)) {
+							Map<BitSet, IntSet> mapHeads = mapEdgeToHeads.get(edgeColo);
+							if (mapHeads.containsKey(headColo)) {
+								// the vetices as tails
+								IntSet setHeads = mTripleMapTailEdgeHeads.get(tailColo).get(edgeColo).get(headColo);
+								List<IntSet> lstHeads = mapColourToHeads.get(headColo);
+								if(lstHeads == null ){
+									lstHeads = new ArrayList<IntSet>();
+									mapColourToHeads.put(headColo, lstHeads);
 								}
-								lst.add(setTails);
+								lstHeads.add(setHeads);
 							}
 						}
 					}
 				}
 			}
-
-			
-			System.out.println("Tail colour is " + tailColo + " has " + mMapVertColoDist.get(tailColo));
-			IntSet setOfAllVertices = testVarGrph.getVertices(tailColo);
-
-			Set<Integer> testSetInt = MapUtil.convert(setOfAllVertices);
-			
-			System.out.println("Vertices: " + setOfAllVertices);
-			Set<BitSet> setEdgeColoTmp = lstSetOfTails.keySet();
-			for(BitSet edgeColo : setEdgeColoTmp){
-				List<IntSet> lstTails = lstSetOfTails.get(edgeColo);
-				
-				for (int i = 0; i < lstTails.size(); i++) {
-					Set<Integer> setTmp = MapUtil.convert(lstTails.get(i));
-					System.out.println("Tail ids: " + lstTails.get(i));
-					testSetInt.retainAll(setTmp);
-					System.out.println("After join: " + testSetInt);
+		}
+		
+		
+		for (BitSet tailColo : setVertColo) {
+			for (BitSet headColo : setVertColo) {
+				if(mTripleMapHeadEdgeTails.containsKey(headColo)){
+					Map<BitSet, Map<BitSet, IntSet>> mapEdgeToTails = mTripleMapHeadEdgeTails.get(headColo);
+					for (BitSet edgeColo : setEdgeColo) {
+						if (mapEdgeToTails.containsKey(edgeColo)) {
+							Map<BitSet, IntSet> mapTails = mapEdgeToTails.get(edgeColo);
+							if (mapTails.containsKey(tailColo)) {
+								// the vetices as tails
+								IntSet setTails = mTripleMapHeadEdgeTails.get(headColo).get(edgeColo).get(tailColo);
+								List<IntSet> lstTails = mapColourToTails.get(tailColo);
+								if(lstTails == null ){
+									lstTails = new ArrayList<IntSet>();
+									mapColourToTails.put(tailColo, lstTails);
+								}
+								lstTails.add(setTails);
+							}
+						}
+					}
 				}
 			}
-			
-			
 		}
+			
+		Set<BitSet> setTailColo = 	mapColourToTails.keySet();
+		Set<BitSet> setHeadColo = mapColourToHeads.keySet();
+		System.out.println("No of tail colours: " + setTailColo.size() + " No of head colours: " + setHeadColo.size());
+		Set<BitSet> setJoinedColo = mapColourToHeads.keySet();
+		setJoinedColo.retainAll(setTailColo);
+		System.out.println("There are " + setJoinedColo.size() +" colours having both tails and heads");	
+
+		for(BitSet joinedColo: setJoinedColo){
+			List<IntSet> lstAllHeads = mapColourToHeads.get(joinedColo);
+			List<IntSet> lstAllTails = mapColourToTails.get(joinedColo);
+			
+			System.out.println("");
+			System.out.println("Vertex colour: " + joinedColo + " has " + mMapVertColoDist.get(joinedColo) + " vertices");
+			System.out.println("Max number of group: " + testMaxNoOfGrps.getMapTailsToNoOfGrp().get(joinedColo));
+			System.out.println("Vertices (as tails) are clustered in : " + lstAllTails.size() + " groups");
+			System.out.println("Vertices (as heads) are clustered in : " + lstAllHeads.size() + " groups");
+		}
+		
+		for(BitSet tailColo: setTailColo){
+			if(!setJoinedColo.contains(tailColo)){
+				List<IntSet> lstAllTails = mapColourToTails.get(tailColo);
+				System.out.println("");
+				System.out.println("Vertex colour: " + tailColo + " has " + mMapVertColoDist.get(tailColo) + " vertices");
+				System.out.println("Max number of group: " + testMaxNoOfGrps.getMapTailsToNoOfGrp().get(tailColo));
+				System.out.println("Vertices (as tails) are clustered in : " + lstAllTails.size() + " groups");
+				System.out.println("Vertices (as heads) are in NO groups");
+			}
+		}
+		
+		for(BitSet headColo: setHeadColo){
+			if(!setJoinedColo.contains(headColo)){
+				List<IntSet> lstAllHeads = mapColourToHeads.get(headColo);
+				System.out.println("");
+				System.out.println("Vertex colour: " + headColo + " has " + mMapVertColoDist.get(headColo) + " vertices");
+				System.out.println("Max number of group: " + testMaxNoOfGrps.getMapTailsToNoOfGrp().get(headColo));
+				System.out.println("Vertices (as tails) are in NO groups");
+				System.out.println("Vertices (as heads) are clustered in : " + lstAllHeads.size() + " groups");
+			}
+		}
+		
+//			System.out.println("Vertices: " + setOfAllVertices);
+//			int iNoOfGrp =lstAllTails.size(); 
+//			if(iNoOfGrp > 1){
+//				for (int i = 0 ; i < iNoOfGrp -1 ; i++ ){
+//					Set<Integer> setI = MapUtil.convert(lstAllTails.get(i));
+//					for(int j = i+1 ; j < iNoOfGrp ; j++){
+//						Set<Integer> setJ = MapUtil.convert(lstAllTails.get(j));
+//						
+//						System.out.println("- No of items in setI: " + setI.size());
+//						System.out.println("- No of items in setJ: " + setJ.size());
+//						setJ.retainAll(setI);
+//						System.out.println("      => No of joined items: " + setJ.size());
+//					}
+//				}
+//			}
+			
+//			Set<BitSet> setEdgeColoTmp = mapEdgeToTails.keySet();
+//			for(BitSet edgeColo : setEdgeColoTmp){
+//				List<IntSet> lstTails = mapEdgeToTails.get(edgeColo);
+//				
+//				for (int i = 0; i < lstTails.size()- 1; i++) {
+//					Set<Integer> setI = MapUtil.convert(lstTails.get(i));
+//					for(int j = i+1 ; j<  lstTails.size() ; j++){
+//						Set<Integer> setJ = MapUtil.convert(lstTails.get(j));
+//						System.out.println("- No of items in seti: " + setI.size());
+//						System.out.println("- No of items in setj: " + setJ.size());
+//						setJ.retainAll(setI);
+//						System.out.println("\tNo of joined items: " + setJ.size());
+//					}
+//				}
+//			}
 		//System.out.println("--------------------------------------" );
 		//System.out.println("Total edges is " + totalEdges);
 		

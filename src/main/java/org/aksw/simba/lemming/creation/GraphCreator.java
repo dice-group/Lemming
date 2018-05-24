@@ -1,10 +1,14 @@
 package org.aksw.simba.lemming.creation;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphExt;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
@@ -16,8 +20,10 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+import com.kitfox.svg.app.beans.ProportionalLayoutPanel;
 
 public class GraphCreator {
 
@@ -26,7 +32,10 @@ public class GraphCreator {
     protected ObjectObjectOpenHashMap<Resource, HierarchyNode> properties;
     protected ColourPalette vertexPalette;
     protected ColourPalette edgePalette;
-
+    
+    protected ColourPalette datatypedEdgePalette;
+    protected Set<Resource> dataTypedProperties;
+    
     public GraphCreator() {
         // Initialize the classes
         classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
@@ -42,12 +51,17 @@ public class GraphCreator {
         properties.put(RDF.type, new HierarchyNode());
         edgePalette = new InMemoryPalette();
         edgePalette.addColour(RDF.type.getURI());
+        
+        dataTypedProperties = new HashSet<Resource>();
+        datatypedEdgePalette = new InMemoryPalette();
     }
 
     public ColouredGraph processModel(Model model) {
         ColourPalette vertexPalette = createVertexPalette(model);
         ColourPalette edgePalette = createEdgePalette(model);
-        ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
+        ColourPalette datatypedEdgePalette = createDatatypedPalette(model);
+        //ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
+        ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette, datatypedEdgePalette);
         ObjectIntOpenHashMap<Resource> resourceIdMapping = new ObjectIntOpenHashMap<Resource>();
         StmtIterator iterator = model.listStatements();
         Statement statement;
@@ -92,10 +106,35 @@ public class GraphCreator {
                             vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
                 }
             }
+            
+            //if this statement has an object as a literal
+            else{
+            	if(statement.getObject().isLiteral()){
+            		Literal literal = statement.getObject().asLiteral();
+            		
+            		BitSet vertexColour = graph.getVertexColour(subjectId);
+            		
+            		property = statement.getPredicate();
+            		propertyUri = property.getURI();
+            		
+            		if(!datatypedEdgePalette.containsUri(propertyUri)){
+            			datatypedEdgePalette.addColour(propertyUri);
+            		}
+            		
+            		
+            		BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
+//            		if(literal.toString().contains("^^")){
+            			// becareful when literal is datetime
+//            			System.out.println(literal.toString());
+//            		}
+            		graph.addLiterals(literal.toString(), vertexColour, datatypedEdgeColour);
+            	}
+            }
         }
         return graph;
     }
-
+    
+   
     protected ColourPalette createVertexPalette(Model model) {
         NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
         RDFNode node;
@@ -274,5 +313,34 @@ public class GraphCreator {
             }
         }
     }
+    
+    
+    protected ColourPalette createDatatypedPalette(Model model){
+    	RDFNode object;
+        Resource subject;
+        Literal resource2 ;
+        Property property;
+        StmtIterator sIterator = model.listStatements();
+        Statement statement;
+        // Iterate over the class hierarchy triples
+        while (sIterator.hasNext()) {
+            statement = sIterator.next();
+            subject = statement.getSubject();
+            object = statement.getObject();
+            property = statement.getPredicate();
+            if (statement.getObject().isLiteral()) {
+            	dataTypedProperties.add(property);
+            }
+        }
+
+     // All properties have been collected
+        // The colours can be defined
+        for (Resource res : dataTypedProperties) {
+        	datatypedEdgePalette.addColour(res.getURI());
+        }
+        
+    	return datatypedEdgePalette;
+    }
+    
 
 }
