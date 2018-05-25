@@ -1,12 +1,15 @@
 package org.aksw.simba.lemming;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import grph.Grph;
 import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
@@ -27,10 +30,19 @@ public class ColouredGraph{
 	protected ColourPalette edgePalette;
 	protected ColourPalette dtEdgePalette;
 	
+	
+	/**
+	 * this is new for processing the literals in the original RDF dataset
+	 */
 	//mapping vertex's colours to datatyped edge's colours
-	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapVertexColourToDataTypedEdge;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapVertexColoursToDataTypedEdgeColours;
 	//mapping datatyped edge's colours to set of literals
-	protected ObjectObjectOpenHashMap<BitSet, Set<String>> mapDataTypedEdgeColourToLiterals;	
+	protected ObjectObjectOpenHashMap<BitSet, Set<String>> mapDTEdgeColoursToLiterals;
+	// map data typed edge's colours to set of connected vertex' ids
+	protected ObjectObjectOpenHashMap<BitSet, IntSet> mapDTEdgeColoursToVertexIDs;
+	
+	protected Map<Integer, Map<BitSet, List<String>>> mapVertexIdAndLiterals;
+	
 	
 	protected GrphAlgorithmCache<Integer> diameterAlgorithm;
 
@@ -67,8 +79,11 @@ public class ColouredGraph{
 		this.edgePalette = edgePalette;
 		this.dtEdgePalette = datatypedEdgePalette;
 		
-		mapVertexColourToDataTypedEdge = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-		mapDataTypedEdgeColourToLiterals = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
+		mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
+		
+		mapVertexColoursToDataTypedEdgeColours = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+		mapDTEdgeColoursToLiterals = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
+		mapDTEdgeColoursToVertexIDs = new ObjectObjectOpenHashMap<BitSet, IntSet>();
 	}
 	
 	public void removeEdge(int edgeId){
@@ -218,13 +233,20 @@ public class ColouredGraph{
 		graph.display();
 	}
 	
+	/**
+	 * Set new data to the mapping of vertex's ids and vertex's colours
+	 * @param inVertexColours
+	 */
 	public void setVertexColours(ObjectArrayList<BitSet> inVertexColours){
 		vertexColours = new ObjectArrayList<BitSet>();
 		for(int i = 0 ; i < inVertexColours.size() ; ++i){
 			vertexColours.add(inVertexColours.get(i));
 		}
 	}
-	
+	/**
+	 * Set new data to the mapping of edge's ids and edge's colours 
+	 * @param inEdgeColours
+	 */
 	public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours){
 		edgeColours = new ObjectArrayList<BitSet>();
 		for(int i = 0 ; i < inEdgeColours.size() ; ++i){
@@ -232,6 +254,9 @@ public class ColouredGraph{
 		}
 	}
 	
+	/**
+	 * Clone the current instance of coloured graph to a new object
+	 */
 	@Override
 	public ColouredGraph clone(){
 		Grph rawClonedGrph = new InMemoryGrph();
@@ -259,7 +284,12 @@ public class ColouredGraph{
 		ColouredGraph cloneGrph = new ColouredGraph(rawClonedGrph, vertexPalette, edgePalette, dtEdgePalette);
 		cloneGrph.setVertexColours(vertexColours);
 		cloneGrph.setEdgeColours(edgeColours);
+		
+		//--------------------------------------------------------
 		// TODO set literal of the old graph to the new graph here
+		// May be not necessary, since all original graphs are
+		// not cloned instead of the mimic graph and the mimic graph
+		// has not had any literals yet
 		//--------------------------------------------------------
 		
 		return cloneGrph;
@@ -287,6 +317,11 @@ public class ColouredGraph{
 		return -1;
 	}
 	
+	/**
+	 * Get list of vertex ID's based on a colour
+	 * @param vertexColour the colour whoes vertex IDs we want to get
+	 * @return
+	 */
 	public IntSet getVertices(BitSet vertexColour){
 		IntSet setVertices = new DefaultIntSet();
 		
@@ -306,25 +341,125 @@ public class ColouredGraph{
 		return setVertices;
 	}
 	
-	public void addLiterals(String literal, BitSet subjectColour, BitSet datatypedEdgeColour){
+	/**
+	 * Add a literal associated with the data typed property to the data store
+	 * @param literal a literal
+	 * @param tailId the vertex id which has the data typed property
+	 * @param dtEdgeColour the data typed property's colour connecting to the vertex
+	 */
+	public void addLiterals(String literal, int tailId, BitSet dtEdgeColour){
 		
-		Set<BitSet> setDTEdgeColours = mapVertexColourToDataTypedEdge.get(subjectColour);
+		BitSet vertColo = getVertexColour(tailId);
+		
+		Set<BitSet> setDTEdgeColours = mapVertexColoursToDataTypedEdgeColours.get(vertColo);
 		if(setDTEdgeColours == null){
 			setDTEdgeColours = new HashSet<BitSet>();
-			mapVertexColourToDataTypedEdge.put(subjectColour, setDTEdgeColours);
+			mapVertexColoursToDataTypedEdgeColours.put(vertColo, setDTEdgeColours);
 		}
-		setDTEdgeColours.add(datatypedEdgeColour);
+		setDTEdgeColours.add(dtEdgeColour);
 		
-		Set<String> setLiterals = mapDataTypedEdgeColourToLiterals.get(datatypedEdgeColour);
+		Set<String> setLiterals = mapDTEdgeColoursToLiterals.get(dtEdgeColour);
 		if(setLiterals == null){
 			setLiterals = new HashSet<String>();
-			mapDataTypedEdgeColourToLiterals.put(datatypedEdgeColour, setLiterals);
+			mapDTEdgeColoursToLiterals.put(dtEdgeColour, setLiterals);
 		}
-		
 		setLiterals.add(literal);
+		
+		IntSet setVertexIDs = mapDTEdgeColoursToVertexIDs.get(dtEdgeColour);
+		if(setVertexIDs == null){
+			setVertexIDs = new DefaultIntSet();
+			mapDTEdgeColoursToVertexIDs.put(dtEdgeColour, setVertexIDs);
+		}
+		setVertexIDs.add(tailId);
 	}
 	
+	/**
+	 * Get list of all vertex IDs connecting to the the edgeId
+	 * @param edgeId the id of an edge connecting 1-2 vertices together
+	 * @return set of vertex ID's
+	 */
 	public IntSet getVerticesIncidentToEdge(int edgeId){
 		return graph.getVerticesIncidentToEdge(edgeId);
 	}
+	
+	/**
+	 * Get a set of all associated data typed properties with the given vertex's colour
+	 * @param vertexColour the colour of the vertex having data typed properties
+	 * @return
+	 */
+	public Set<BitSet> getSetDTEdgeColours(BitSet vertexColour){
+		if(mapVertexColoursToDataTypedEdgeColours != null){
+			return mapVertexColoursToDataTypedEdgeColours.get(vertexColour);
+		}
+		return null;
+	}
+	
+	/**
+	 * Return all literals belonging to the data typed properties
+	 * @param dtEdgeColour the data typed property's colour
+	 * @return
+	 */
+	public Set<String> getSetLiterals(BitSet dtEdgeColour){
+		if(mapDTEdgeColoursToLiterals != null ){
+			return mapDTEdgeColoursToLiterals.get(dtEdgeColour);
+		}
+		return null;
+	}
+	
+	/**
+	 * Get a map of the data typed properties with their sets of associated literals based on the vertex's color
+	 * 
+	 * @param vertexColour the colour of the vertex which has the data typed properties
+	 * @return
+	 */
+	public ObjectObjectOpenHashMap<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(BitSet vertexColour){
+		ObjectObjectOpenHashMap mapRes = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
+		if(mapVertexColoursToDataTypedEdgeColours != null && mapDTEdgeColoursToLiterals != null) {
+			Set<BitSet> setDTEdgeColours = mapVertexColoursToDataTypedEdgeColours.get(vertexColour);
+			if(setDTEdgeColours != null && setDTEdgeColours.size() > 0 ){
+				for(BitSet dtEdgeColo : setDTEdgeColours){
+					Set<String> setLiterals = mapDTEdgeColoursToLiterals.get(dtEdgeColo);
+					if(setLiterals != null && setLiterals.size() > 0 ){
+						//just for testing
+						if(mapRes.containsKey(dtEdgeColo)){
+							System.err.println("getMapDTEdgeColoursToLiterals has serious errors");
+							return null;
+						}
+						
+						mapRes.put(dtEdgeColo, setLiterals);
+					}
+				}
+			}
+		}
+		return mapRes;
+	}
+	
+	/**
+	 * Get the map of data typed properties with the set of all associated literals
+	 * @return
+	 */
+	public ObjectObjectOpenHashMap<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(){
+		return mapDTEdgeColoursToLiterals;
+	}
+	
+	/**
+	 * get the map of data typed properties with the set of vertex IDs
+	 * @return a map
+	 */
+	public ObjectObjectOpenHashMap<BitSet, IntSet> getMapDTEdgeColoursToVertexIDs(){
+		return mapDTEdgeColoursToVertexIDs;
+	}
+	
+	public String getResourceURI(BitSet vColo){
+		return vertexPalette.getURI(vColo);
+	}
+	
+	public String getPropertyURI(BitSet eColo){
+		return edgePalette.getURI(eColo);
+	}
+	
+	public String getDataTypedPropertyURI(BitSet dteColo){
+		return dtEdgePalette.getURI(dteColo); 
+	}
+	
 }

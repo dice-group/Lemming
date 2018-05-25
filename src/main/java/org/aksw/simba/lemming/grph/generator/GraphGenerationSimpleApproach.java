@@ -8,8 +8,8 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.dist.utils.IOfferedItem;
 import org.aksw.simba.lemming.dist.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
-import org.aksw.simba.lemming.metrics.dist.multi.AvrgInEdgeDistBaseEColoPerVColo;
-import org.aksw.simba.lemming.metrics.dist.multi.AvrgOutEdgeDistBaseEColoPerVColo;
+import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredIEDistPerVColour;
+import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,7 +147,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	 */
 	private void computeAvrgIOEdgeDistPerVertColo(ColouredGraph[] origGrphs){
 		// out degree colour distribution associated with edge colours
-		AvrgOutEdgeDistBaseEColoPerVColo avrgOutEdgeDistPerVertColoMetric = new AvrgOutEdgeDistBaseEColoPerVColo(origGrphs);
+		AvrgColouredOEDistPerVColour avrgOutEdgeDistPerVertColoMetric = new AvrgColouredOEDistPerVColour(origGrphs);
 		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
@@ -160,7 +160,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		}
 		
 		// in degree colour distribution associated with edge colours
-		AvrgInEdgeDistBaseEColoPerVColo avrgInEdgeDistPerVertColoMetric = new AvrgInEdgeDistBaseEColoPerVColo(origGrphs);
+		AvrgColouredIEDistPerVColour avrgInEdgeDistPerVertColoMetric = new AvrgColouredIEDistPerVColour(origGrphs);
 		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : inEdgeColours){

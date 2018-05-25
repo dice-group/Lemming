@@ -22,4 +22,5 @@ public interface IColourMappingRules {
 	boolean isHeadColourOf(BitSet tailColour, BitSet checkedColour);
 	boolean isTailColourOf(BitSet headColour, BitSet checkedColour);
 	public boolean canConnect(BitSet headColour, BitSet tailColour, BitSet edgeColour);
+	public Set<BitSet> getDataTypedEdgeColoursByVertexColour(BitSet vertexColour);
 }

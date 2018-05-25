@@ -10,6 +10,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
@@ -40,6 +41,12 @@ public class ColourMappingRules implements IColourMappingRules{
 	 */
 	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToTailAndHeadColo;
 
+	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
+	
+	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
+	
+	
+	
 	boolean mIsMultiThreadProcessing = false;
 	
 	/**
@@ -50,7 +57,8 @@ public class ColourMappingRules implements IColourMappingRules{
 		mMapTailColoToHeadColo = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
 		mMapEdgeColoToHeadAndTailColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>>();
 		mMapEdgeColoToTailAndHeadColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>>();
-		
+		mMapDTEColoToVColo = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+		mMapVColoToDTEColo = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
 	}
 	
 	public void analyzeRules(ColouredGraph[] origGrphs) {
@@ -134,6 +142,8 @@ public class ColourMappingRules implements IColourMappingRules{
 				}
 			};
 		}
+		// process for data typed properties (~ dteColour )
+		matchDTEColoursAndVColours(origGrphs);
 	}
 	
 	private void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
@@ -203,7 +213,43 @@ public class ColourMappingRules implements IColourMappingRules{
 				}
 			}
 		}
+		// process for data typed properties (~ dteColour )
+		matchDTEColoursAndVColours(origGrphs);
 	}
+	
+	private void matchDTEColoursAndVColours(ColouredGraph [] origGrphs){
+		for(ColouredGraph grph: origGrphs){
+			// get all vertex's colours
+			ObjectArrayList<BitSet> lstVColours = grph.getVertexColours();
+			// for each vertex's colour get the associated data typed property edges
+			for(int i = 0 ; i <lstVColours.size() ; i++){
+				BitSet vColo = lstVColours.get(i);
+				
+				// set of data typed edge's colours
+				Set<BitSet> setDTEColours = grph.getSetDTEdgeColours(vColo);
+				if(setDTEColours != null){
+					Set<BitSet> setLinkedDTEColours = mMapVColoToDTEColo.get(vColo);
+					
+					if(setLinkedDTEColours == null){
+						setLinkedDTEColours = new HashSet<BitSet>();
+						mMapVColoToDTEColo.put(vColo, setLinkedDTEColours);
+					}
+					
+					for(BitSet dteColo : setDTEColours){
+						setLinkedDTEColours.add(dteColo);
+
+						Set<BitSet> setLinkedVColours = mMapDTEColoToVColo.get(dteColo);
+						if(setLinkedVColours == null){
+							setLinkedVColours = new HashSet<BitSet>();
+							mMapDTEColoToVColo.put(dteColo, setLinkedVColours);
+						}
+						setLinkedVColours.add(vColo);
+					}
+				}
+			}
+		}
+	}
+	
 	
 	public Set<BitSet> getHeadColoursFromEdgeColour(BitSet edgeColour) {
 		Set<BitSet> setColours = new HashSet<BitSet>();
@@ -498,6 +544,12 @@ public class ColourMappingRules implements IColourMappingRules{
 			
 		}
 		return false;
+	}
+
+	@Override
+	public Set<BitSet> getDataTypedEdgeColoursByVertexColour(BitSet vertexColour) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	

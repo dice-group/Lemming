@@ -17,67 +17,64 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
-
 /**
- * Compute, for each out-edge's color, the average distribution of out-edges over vertex's
- * colors. i.e., for out green out-edges, the red vertices use average 16.5% of green out-edges,
- * the blue vertices use about 28.5% of the green out-edges and the yellow vertices use
- * the rest of the green out-edges.
+ * Compute, for each in-edge's colour, the average distribution of in-edges over vertex's
+ * colors. i.e., for green in-edges, the red vertices use average 16.5% of green in-edges,
+ * the blue vertices use about 15.5% of the green in-edges and the yellow vertices use
+ * the rest of the green in-edges.
  * 
  * @author nptsy
  */
-public class AvrgOutEdgeDistBaseEColoPerVColo {
-	
+public class AvrgColouredIEDistPerVColour {
 	/**
 	 * key1: edge's colors, values the appearing time of edge's color associated
 	 * with the vertex's color over all versions
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgOutEdgeAppearTimes;
+	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgInEdgeAppearTimes;
 	
 	/**
 	 * key1: edge's colors, values: the distribution of edges over different vertex's colors
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapAvrgOutEdgeDist;
+	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapAvrgInEdgeDist;
 	
-	
-	public static String getName(){
-		return "AvrgOutEdgeDistBaseEColoPerVColo";
+	public static String getName (){
+		return "AvrgColouredIEDistPerVColour";
 	}
 	
-	public AvrgOutEdgeDistBaseEColoPerVColo(ColouredGraph[] origGrphs){
-		mMapAvrgOutEdgeAppearTimes = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
-		mMapAvrgOutEdgeDist = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
+	public AvrgColouredIEDistPerVColour(ColouredGraph[] origGrphs){
+		mMapAvrgInEdgeAppearTimes = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
+		mMapAvrgInEdgeDist = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
 		
 		apply(origGrphs);
 	}
 	
-	public Map<BitSet, ObjectDistribution<BitSet>> getMapAvrgOutEdgeDist(){
+	public Map<BitSet, ObjectDistribution<BitSet>> getMapAvrgInEdgeDist(){
 		Map<BitSet, ObjectDistribution<BitSet>> res = new HashMap<BitSet, ObjectDistribution<BitSet>>();
-		Object[] keyEdgeColors = mMapAvrgOutEdgeDist.keys;
+		Object[] keyEdgeColors = mMapAvrgInEdgeDist.keys;
 		int iNoOfEdgeColors = keyEdgeColors.length;
 		for(int i = 0 ; i < iNoOfEdgeColors; i++){
-			if(mMapAvrgOutEdgeDist.allocated[i]){
+			if(mMapAvrgInEdgeDist.allocated[i]){
 				BitSet edgeColo = (BitSet) keyEdgeColors[i];
-				ObjectDistribution<BitSet> dist = MapUtil.convert(mMapAvrgOutEdgeDist.get(edgeColo)); 
+				ObjectDistribution<BitSet> dist = MapUtil.convert(mMapAvrgInEdgeDist.get(edgeColo)); 
 				res.put(edgeColo, dist);
 			}
 		}
 		return res;
 	}
 	
-	public Map<BitSet, ObjectDistribution<BitSet>> getMapAvrgOutEdgeDist(Set<BitSet> setFilteredEdgeColours, Set<BitSet> setFilteredVertColours){
+	public Map<BitSet, ObjectDistribution<BitSet>> getMapAvrgInEdgeDist(Set<BitSet> setFilteredEdgeColours, Set<BitSet> setFilteredVertColours){
 		
 		if(setFilteredEdgeColours !=null && setFilteredVertColours != null){
 			// keys are the edge's colours and the values are the distribution of edges per vertex's colour
 			Map<BitSet, ObjectDistribution<BitSet>> mapEdgeColoToEdgeDist = new HashMap<BitSet, ObjectDistribution<BitSet>>();
 			
-			Object[] keyEdgeColors = mMapAvrgOutEdgeDist.keys;
+			Object[] keyEdgeColors = mMapAvrgInEdgeDist.keys;
 			int iNoOfEdgeColors = keyEdgeColors.length;
 			for(int i = 0 ; i < iNoOfEdgeColors; i++){
-				if(mMapAvrgOutEdgeDist.allocated[i]){
+				if(mMapAvrgInEdgeDist.allocated[i]){
 					BitSet edgeColo = (BitSet) keyEdgeColors[i];
 					if(setFilteredEdgeColours.contains(edgeColo)){
-						ObjectDoubleOpenHashMap<BitSet> edgeDistPerVertColo = mMapAvrgOutEdgeDist.get(edgeColo); 
+						ObjectDoubleOpenHashMap<BitSet> edgeDistPerVertColo = mMapAvrgInEdgeDist.get(edgeColo); 
 						Object[] arrVertColours = edgeDistPerVertColo.keys;
 						double[] arrEdgeDist = edgeDistPerVertColo.values;
 
@@ -103,13 +100,13 @@ public class AvrgOutEdgeDistBaseEColoPerVColo {
 			}
 			return mapEdgeColoToEdgeDist;
 		}else{
-			return getMapAvrgOutEdgeDist();
+			return getMapAvrgInEdgeDist();
 		}
 	}
 	
 	private void apply(ColouredGraph[] origGrphs){
 		
-		OutEdgeDistBaseEColoPerVColo outEdgeDistAnalyzer = new OutEdgeDistBaseEColoPerVColo();
+		ColouredIEDistPerVColour inEdgeDistAnalyzer = new ColouredIEDistPerVColour();
 		EdgeColourDistributionMetric edgeColorDistMetric  = new EdgeColourDistributionMetric();
 		for( ColouredGraph grph : origGrphs){
 			
@@ -118,24 +115,24 @@ public class AvrgOutEdgeDistBaseEColoPerVColo {
 			/**
 			 * key1: edge's colors, values: the distribution of edges over vertex's colors
 			 */
-			Map<BitSet, ObjectDistribution<BitSet>> mapEdgeColoAndDist	= outEdgeDistAnalyzer.apply(grph);
+			Map<BitSet, ObjectDistribution<BitSet>> mapEdgeColoAndDist	= inEdgeDistAnalyzer.apply(grph);
 			
 			Set<BitSet> setEdgeColors = mapEdgeColoAndDist.keySet();
 			
 			for(BitSet edgeColo : setEdgeColors){
 				
 				// map of appearing time (key is vertex's color)
-				ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapAvrgOutEdgeAppearTimes.get(edgeColo);
+				ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapAvrgInEdgeAppearTimes.get(edgeColo);
 				if(mapAppearTimes == null){
 					mapAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-					mMapAvrgOutEdgeAppearTimes.put(edgeColo, mapAppearTimes);
+					mMapAvrgInEdgeAppearTimes.put(edgeColo, mapAppearTimes);
 				}
 				
 				// map of average distribution of edges (key is vertex's color)
-				ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgOutEdgeDist.get(edgeColo);
+				ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgInEdgeDist.get(edgeColo);
 				if(mapAvrgDist == null){
 					mapAvrgDist = new ObjectDoubleOpenHashMap<BitSet>();
-					mMapAvrgOutEdgeDist.put(edgeColo, mapAvrgDist);
+					mMapAvrgInEdgeDist.put(edgeColo, mapAvrgDist);
 				}
 				
 				double iNoOfEdges = mapEdgeColoDist.get(edgeColo);
@@ -156,15 +153,15 @@ public class AvrgOutEdgeDistBaseEColoPerVColo {
 		}
 		
 		//compute average distribution of edges over all different versions
-		Object[] keyEdgeColors =  mMapAvrgOutEdgeAppearTimes.keys;
+		Object[] keyEdgeColors =  mMapAvrgInEdgeAppearTimes.keys;
 		int iNoOfEdgeColors = keyEdgeColors.length;
 		for(int i = 0 ; i < iNoOfEdgeColors ; i++){
-			if(mMapAvrgOutEdgeAppearTimes.allocated[i]){
+			if(mMapAvrgInEdgeAppearTimes.allocated[i]){
 				BitSet edgeColo = (BitSet) keyEdgeColors[i];
-				ObjectIntOpenHashMap<BitSet> mapAppearTime = mMapAvrgOutEdgeAppearTimes.get(edgeColo);
+				ObjectIntOpenHashMap<BitSet> mapAppearTime = mMapAvrgInEdgeAppearTimes.get(edgeColo);
 				Object[] keyVertColors = mapAppearTime.keys;
 				
-				ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgOutEdgeDist.get(edgeColo);
+				ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgInEdgeDist.get(edgeColo);
 				int iNoOfVertColors = keyVertColors.length;
 				for(int j = 0 ; j< iNoOfVertColors ;j++){
 					if(mapAppearTime.allocated[j]){
@@ -181,6 +178,7 @@ public class AvrgOutEdgeDistBaseEColoPerVColo {
 				}
 			}
 		}
+		
 		//System.out.println("complete the computation");
 	}
 }

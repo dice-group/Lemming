@@ -95,4 +95,12 @@ public interface ColourPalette {
      */
     public void setColour(String uri, BitSet colour);
 
+    
+    /**
+     * Get the URI corresponding to the given colour.
+     * @param colour the given colour whose URI should be returned
+     * @return URI
+     */
+    public String getURI(BitSet colour);
+    
 }

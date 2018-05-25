@@ -20,44 +20,47 @@ import com.carrotsearch.hppc.ObjectIntOpenHashMap;
  * 
  * @author nptsy
  */
-public class OutEdgeDistBaseEColoPerVColo extends AbstractMetric implements IMultiObjectDistributionMetric<BitSet>{
+public class ColouredOEDistPerVColour extends AbstractMetric implements IMultiObjectDistributionMetric<BitSet>{
 	
 	
-	public OutEdgeDistBaseEColoPerVColo(String name) {
+	public ColouredOEDistPerVColour(String name) {
 		super(name);
 	}
 	
-	public OutEdgeDistBaseEColoPerVColo() {
-		super("OutDegreeColourDistOfEdgeColourMetric");
+	public ColouredOEDistPerVColour() {
+		super("ColouredOEDistPerVColour");
 	}
 	
 	@Override
 	public Map<BitSet, ObjectDistribution<BitSet>> apply(ColouredGraph graph) {
-		IntSet setVertIDs = graph.getVertices();
-		int[] arrOfVertIDs = setVertIDs.toIntArray();
+		IntSet setOfVIds = graph.getVertices();
+		int[] arrOfVIds = setOfVIds.toIntArray();
 		
 		/**
-		 * the keys are the edge's colors and the values are the distribution of edges for each vertex's color
+		 * the keys are the edge's colors and the values are the distribution of edges over each vertex's color
 		 */
 		Map<BitSet, ObjectIntOpenHashMap<BitSet>> data = new HashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		  
 		// iterate all vertices 
-		for(int vertexID : arrOfVertIDs){
-			BitSet vertColo = graph.getVertexColour(vertexID);
+		for(int vId : arrOfVIds){
+			BitSet vColo = graph.getVertexColour(vId);
 			// set of out edges
-			IntSet setOfOutEdgeIDs = graph.getOutEdges(vertexID);
-			int[] arrOfOutEdgeIDs = setOfOutEdgeIDs.toIntArray();
-			for(int edgeId : arrOfOutEdgeIDs){
-				BitSet edgeColor = graph.getEdgeColour(edgeId); 
-				// value ObjectIntOpenHashMap 
-				ObjectIntOpenHashMap<BitSet> counts = data.get(edgeColor);;
+			IntSet setOfOEIds = graph.getOutEdges(vId);
+			int[] arrOfOEIds = setOfOEIds.toIntArray();
+			
+			
+			// count the number of edges associated with the current vertex 
+			for(int eId : arrOfOEIds){
+				BitSet eColo = graph.getEdgeColour(eId); 
+				// the number of edges base vertex's colours
+				ObjectIntOpenHashMap<BitSet> counts = data.get(eColo);
 				
 				// data checks a key already existing
 				if(counts == null){
 					counts = new ObjectIntOpenHashMap<BitSet>();
-					data.put(edgeColor, counts);
+					data.put(eColo, counts);
 				}
-				counts.putOrAdd(vertColo, 1, 1);
+				counts.putOrAdd(vColo, 1, 1);
 			}			
 		}
 		
@@ -65,22 +68,24 @@ public class OutEdgeDistBaseEColoPerVColo extends AbstractMetric implements IMul
 		Map<BitSet, ObjectDistribution<BitSet>> result = new HashMap<BitSet, ObjectDistribution<BitSet>>();
 		
 		for (BitSet key: data.keySet()){
-			// value ObjectIntOpenHashMap 
+			// the number of edges base vertex's colours
 			ObjectIntOpenHashMap<BitSet> counts = data.get(key);
 			
-			BitSet sampleSpace[] = new BitSet[counts.assigned];
-			double distribution[] = new double [counts.assigned];
+			BitSet sampleVColours[] = new BitSet[counts.assigned];
+			double oeDistribution[] = new double [counts.assigned];
 			
 			int pos = 0;
 			
 			for (int i = 0; i < counts.allocated.length; ++i) {
 				if (counts.allocated[i]) {
-					sampleSpace[pos] = (BitSet)((Object[]) counts.keys)[i];
-					distribution[pos] = counts.values[i];
+					// the vertex's colour
+					sampleVColours[pos] = (BitSet)((Object[]) counts.keys)[i];
+					// the number of edges
+					oeDistribution[pos] = counts.values[i];
 					++pos;
 				}
 			}
-			result.put(key, new ObjectDistribution<BitSet>(sampleSpace, distribution));
+			result.put(key, new ObjectDistribution<BitSet>(sampleVColours, oeDistribution));
 		}
 		return result;
 	}

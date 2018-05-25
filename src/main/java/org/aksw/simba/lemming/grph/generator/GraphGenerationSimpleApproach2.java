@@ -11,9 +11,9 @@ import org.aksw.simba.lemming.dist.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.dist.utils.PoissonDistribution;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgInDegreeDistBaseVEColo;
-import org.aksw.simba.lemming.metrics.dist.multi.AvrgInEdgeDistBaseEColoPerVColo;
+import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredIEDistPerVColour;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgOutDegreeDistBaseVEColo;
-import org.aksw.simba.lemming.metrics.dist.multi.AvrgOutEdgeDistBaseEColoPerVColo;
+import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.rules.ColourMappingRules;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.slf4j.Logger;
@@ -152,7 +152,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	 */
 	private void computeAvrgIOEdgeDistPerVertColo(ColouredGraph[] origGrphs){
 		// out degree colour distribution associated with edge colours
-		AvrgOutEdgeDistBaseEColoPerVColo avrgOutEdgeDistPerVertColoMetric = new AvrgOutEdgeDistBaseEColoPerVColo(origGrphs);
+		AvrgColouredOEDistPerVColour avrgOutEdgeDistPerVertColoMetric = new AvrgColouredOEDistPerVColour(origGrphs);
 		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric.getMapAvrgOutEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
@@ -165,7 +165,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		}
 		
 		// in degree colour distribution associated with edge colours
-		AvrgInEdgeDistBaseEColoPerVColo avrgInEdgeDistPerVertColoMetric = new AvrgInEdgeDistBaseEColoPerVColo(origGrphs);
+		AvrgColouredIEDistPerVColour avrgInEdgeDistPerVertColoMetric = new AvrgColouredIEDistPerVColour(origGrphs);
 		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric.getMapAvrgInEdgeDist(mMapColourToEdgeIDs.keySet(), mMapColourToVertexIDs.keySet());
 		
 		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();

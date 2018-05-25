@@ -81,5 +81,20 @@ public class InMemoryPalette implements ColourPalette {
     public void setColour(String uri, BitSet colour) {
         uriColourMap.put(uri, colour);
     }
-
+    
+    @Override
+    public String getURI(BitSet inColour){
+    	if(inColour != null){
+	    	Object[] arrOfURIs = uriColourMap.keys;
+	    	for(int i = 0 ; i < arrOfURIs.length ; i++){
+	    		if(uriColourMap.allocated[i]){
+	    			String uri = (String) arrOfURIs[i];
+	    			BitSet colo = uriColourMap.get(uri);
+	    			if(colo.equals(inColour))
+	    				return uri;
+	    		}
+	    	}
+    	}
+    	return "";
+    }
 }

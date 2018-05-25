@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphExt;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
 import org.apache.jena.rdf.model.Literal;
@@ -23,7 +22,6 @@ import org.apache.jena.vocabulary.RDFS;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
-import com.kitfox.svg.app.beans.ProportionalLayoutPanel;
 
 public class GraphCreator {
 
@@ -110,24 +108,20 @@ public class GraphCreator {
             //if this statement has an object as a literal
             else{
             	if(statement.getObject().isLiteral()){
+            		//literal
             		Literal literal = statement.getObject().asLiteral();
             		
-            		BitSet vertexColour = graph.getVertexColour(subjectId);
-            		
+            		//data typed property
             		property = statement.getPredicate();
             		propertyUri = property.getURI();
             		
+            		//put datatype property to the palette
             		if(!datatypedEdgePalette.containsUri(propertyUri)){
             			datatypedEdgePalette.addColour(propertyUri);
             		}
-            		
-            		
             		BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
-//            		if(literal.toString().contains("^^")){
-            			// becareful when literal is datetime
-//            			System.out.println(literal.toString());
-//            		}
-            		graph.addLiterals(literal.toString(), vertexColour, datatypedEdgeColour);
+            		//add to the coloured graph
+            		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour);
             	}
             }
         }
