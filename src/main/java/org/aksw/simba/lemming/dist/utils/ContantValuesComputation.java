@@ -9,9 +9,9 @@ import org.aksw.simba.lemming.algo.refinement.RefinementNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NormalDistribution {
+public class ContantValuesComputation {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(NormalDistribution.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContantValuesComputation.class);
 	
 	private List<Double> mLstOfMeanValues;
 	private List<Double> mLstOfStandardDeviations;
@@ -22,7 +22,7 @@ public class NormalDistribution {
 	 * @param sampleGraphs the array of sampled graph
 	 * @param constExprs the set of constant expressions
 	 */
-	public NormalDistribution(ColouredGraph[] sampleGraphs, SortedSet<RefinementNode> constExprs){
+	public ContantValuesComputation(ColouredGraph[] sampleGraphs, SortedSet<RefinementNode> constExprs){
 		mSetConstExpr = constExprs;
 		
 		mLstOfMeanValues = new ArrayList<Double>();

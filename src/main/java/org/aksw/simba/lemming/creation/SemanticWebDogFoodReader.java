@@ -1,6 +1,10 @@
 package org.aksw.simba.lemming.creation;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +27,8 @@ public class SemanticWebDogFoodReader {
     }
 
     public static ColouredGraph[] readGraphsFromFile(String dataFolderPath) {
+    	boolean testWriteOnly1File = true;
+    	
         Model dogFoodModel = ModelFactory.createDefaultModel();
 
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
@@ -42,6 +48,29 @@ public class SemanticWebDogFoodReader {
                     if (graph != null) {
                         LOGGER.info("Generated graph.", dogFoodModel.size());
                         graphs.add(graph);
+                        
+                        if(testWriteOnly1File){
+                        	testWriteOnly1File = false;
+                        	
+                        	try{
+                        		// test writing the original model back to rdf file
+                            	Writer writerforInModel = new FileWriter(new File ("original_model_ " + y +".txt"));
+                            	dogFoodModel.write(writerforInModel);
+                            	writerforInModel.close();
+                                
+                            	// graph reverter: generate a new model from a coloured graph
+                                GraphReverter reverter = new GraphReverter(graph, dogFoodModel);
+                                Model newDogFoodModel = reverter.processGraph();
+                            	
+                                Writer writerforOutModel = new FileWriter(new File ("new_model_" + y +".txt"));
+                                newDogFoodModel.write(writerforOutModel);
+                            	writerforOutModel.close();
+                            }catch (Exception ex){
+                            	LOGGER.error("Failed to write to file: " + ex.getMessage());
+                            	System.err.println("Failed to write to file: "+ ex.getMessage());
+                            	System.exit(1);
+                            }
+                        }
                     } else {
                         LOGGER.error("Couldn't generate coloured graph.");
                     }

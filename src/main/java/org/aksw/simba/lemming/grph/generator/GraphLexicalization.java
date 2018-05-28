@@ -1,62 +1,114 @@
 package org.aksw.simba.lemming.grph.generator;
 
-
+import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.LiteralProcessor;
+import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredVDistPerDTEColour;
 import org.aksw.simba.lemming.rules.IColourMappingRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import toools.set.IntSet;
+
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectArrayList;
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class GraphLexicalization {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphLexicalization.class);
-	
-	private IWord2Vec mWordProposer;
+	private static final Logger LOGGER = LoggerFactory
+			.getLogger(GraphLexicalization.class);
+
+	private IRDFLiteralProposer mWordProposer;
 	private IColourMappingRules mColourMapper;
-	private ColouredGraph mMimicGraph;
+	private IGraphGeneration mGraphGenerator;
 	private LiteralProcessor mLiteralProcessor;
-	
-	public GraphLexicalization(ColouredGraph[] origGrphs, ColouredGraph mimicGraph){
-		mMimicGraph = mimicGraph;
+	private AvrgColouredVDistPerDTEColour mAvrgVDistPerDREColourMetric;
+
+	public GraphLexicalization(ColouredGraph[] origGrphs,
+			IGraphGeneration graphGenerator) {
+		mGraphGenerator = graphGenerator;
+		// average vertex distribution per data typed property
+		mAvrgVDistPerDREColourMetric = new AvrgColouredVDistPerDTEColour(
+				origGrphs);
+
+		// literal collection
 		mLiteralProcessor = new LiteralProcessor(origGrphs);
+
+		// word2vec model to obtain closest
+		mWordProposer = new RDFLiteralProposer(
+				mLiteralProcessor.getWordsOfEachDTEColour());
 	}
-	
-	public ColouredGraph lexicalizeGraph(){
-		
-		/* 
-		 * get all words associated with the vectex's colours existing in the
-		 * refined graph
+
+	public ColouredGraph lexicalizeGraph() {
+
+		/*
+		 * get the already refined graph
 		 */
-		
-		ObjectArrayList<BitSet> lstVColours = mMimicGraph.getVertexColours();
-		BitSet[] arrVColours = lstVColours.buffer;
-		for(BitSet vColo : arrVColours){
-			// first get the data typed edge's colours associated to this vertColo
-			Set<BitSet> setDTEColours = mColourMapper.getDataTypedEdgeColoursByVertexColour(vColo) ;
-			for(BitSet dteColo : setDTEColours){
-				// get a list of literals associated with the data typed edge's colours
-				Set<String> setOfWords = mLiteralProcessor.getWords(dteColo);
-				// get average number of words which the data typed edge's colour may contain
-				double avrgNoOfWords = mLiteralProcessor.getAvrgNoOfWords(dteColo);
-				
-				// get a potential literal based on the word2vec model
-				String literal = mWordProposer.getWords(setOfWords, (int)avrgNoOfWords);
-				
-				// add it to the mimic graph
-				
+		ColouredGraph mimicGraph = mGraphGenerator.getMimicGraph();
+
+		/*
+		 * get a list of data typed edge's colours
+		 */
+		Map<BitSet, ObjectDoubleOpenHashMap<BitSet>> mapVColoDistPerDTEColo = mAvrgVDistPerDREColourMetric
+				.getMapAvrgColouredVDist();
+
+		/*
+		 * set of all data typed edge's colours
+		 */
+		Set<BitSet> setOfDTEColours = mapVColoDistPerDTEColo.keySet();
+
+		/*
+		 * accordingly to each data typed edge's colour, we get the average
+		 * number of vertices in a particular vertex's colour
+		 */
+		for (BitSet dteColo : setOfDTEColours) {
+			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo
+					.get(dteColo);
+
+			if (vColoDistPerDTEColour != null) {
+				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
+				for (int i = 0; i < arrOfProcessedVColours.length; ++i) {
+					if (vColoDistPerDTEColour.allocated[i]) {
+						BitSet vColo = (BitSet) arrOfProcessedVColours[i];
+						double avrgNoOfVertices = vColoDistPerDTEColour.values[i];
+
+						// compute
+						Map<BitSet, IntSet> mapVColoToVertices = mGraphGenerator
+								.getMappingColoursAndVertices();
+						if (mapVColoToVertices.containsKey(vColo)) {
+							int[] arrOfVertices = mapVColoToVertices.get(vColo)
+									.toIntArray();
+
+							double numOfConsidedVertices = avrgNoOfVertices
+									* arrOfVertices.length;
+							if (numOfConsidedVertices == 0) {
+								numOfConsidedVertices = 1;
+							}
+
+							numOfConsidedVertices = Math
+									.round(numOfConsidedVertices);
+							int indexOfVertex = 0;
+							while (i < numOfConsidedVertices) {
+								// get a
+								int vId = arrOfVertices[indexOfVertex];
+								// get literal
+								String literal = mWordProposer.getWords(
+										dteColo, mLiteralProcessor
+												.getWords(dteColo),
+										(int) mLiteralProcessor
+												.getAvrgNoOfWords(dteColo));
+								// add it to the coloured graph
+								mimicGraph.addLiterals(literal, vId, dteColo);
+							}
+						}
+					}
+				}
 			}
-			
-			 
-			
 		}
-		// finally the mimic graph is reversed into RDF data set
-			
-		return mMimicGraph;
+
+		return mimicGraph;
 	}
-	
+
 }

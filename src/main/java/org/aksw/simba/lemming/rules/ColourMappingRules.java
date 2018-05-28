@@ -8,6 +8,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 
 import toools.set.IntSet;
+import brite.Graph.Graph;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
@@ -62,180 +63,89 @@ public class ColourMappingRules implements IColourMappingRules{
 	}
 	
 	public void analyzeRules(ColouredGraph[] origGrphs) {
-		if(mIsMultiThreadProcessing){
-			analyzeRulesWithMultiThreads(origGrphs);
-		}else{
-			analyzeRulesWithSingleThread(origGrphs);
-		}
-	}
-	
-	private void analyzeRulesWithMultiThreads(ColouredGraph[] origGrphs){
-		
-		for(ColouredGraph grph: origGrphs){
-			new MultiThreadProcessing(grph.getEdges()) {
-				
-				@Override
-				protected void run(int threadID, int edgeId) {
-					BitSet edgeColo = grph.getEdgeColour(edgeId);
-					IntSet incidentVertices  = grph.getVerticesIncidentToEdge(edgeId);
-					if(incidentVertices != null){
-						int[] arrIncidentVertices = incidentVertices.toIntArray();
-						int tailId = arrIncidentVertices[0];
-						BitSet tailColo = grph.getVertexColour(tailId);
-						
-						int headId = arrIncidentVertices.length == 1 ? arrIncidentVertices[0] : arrIncidentVertices[1];
-						BitSet headColo = grph.getVertexColour(headId);
-						
-						synchronized(mMapHeadColoToTailColo){
-							//map head to tail
-							Set<BitSet> setTailColo = mMapHeadColoToTailColo.get(headColo);
-							if(setTailColo == null){
-								setTailColo = new HashSet<BitSet>();
-								mMapHeadColoToTailColo.put(headColo, setTailColo);
-							}
-							setTailColo.add(tailColo);	
-						}
-						
-						
-						synchronized(mMapTailColoToHeadColo){
-							//map tail to head
-							Set<BitSet> setHeadColo = mMapTailColoToHeadColo.get(tailColo);
-							if(setHeadColo == null){
-								setHeadColo = new HashSet<BitSet>();
-								mMapTailColoToHeadColo.put(tailColo, setHeadColo);
-							}
-							setHeadColo.add(headColo);
-						}
-						
-						synchronized(mMapEdgeColoToHeadAndTailColo){
-							//map edge to head and tail
-							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-							if(mapHeadToTail == null){
-								mapHeadToTail = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-								mMapEdgeColoToHeadAndTailColo.put(edgeColo, mapHeadToTail);
-							}
-							
-							Set<BitSet> setTailColo = mapHeadToTail.get(headColo);
-							if(setTailColo == null){
-								setTailColo = new HashSet<BitSet>();
-								mapHeadToTail.put(headColo, setTailColo);
-							}
-							setTailColo.add(tailColo);
-						}
-						
-						synchronized(mMapEdgeColoToTailAndHeadColo){
-							//map edge to tail and head
-							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapTailToHead = mMapEdgeColoToTailAndHeadColo.get(edgeColo);
-							if(mapTailToHead == null){
-								mapTailToHead = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-								mMapEdgeColoToTailAndHeadColo.put(edgeColo, mapTailToHead);
-							}
-							
-							Set<BitSet> setHeadColo = mapTailToHead.get(tailColo);
-							if(setHeadColo == null){
-								setHeadColo = new HashSet<BitSet>();
-								mapTailToHead.put(tailColo, setHeadColo);
-							}
-							setHeadColo.add(headColo);
-						}
-					}
-				}
-			};
-		}
-		// process for data typed properties (~ dteColour )
-		matchDTEColoursAndVColours(origGrphs);
+		analyzeRulesWithSingleThread(origGrphs);
 	}
 	
 	private void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
-		
 		for(ColouredGraph grph: origGrphs){
-			IntSet setEdgeIDs = grph.getEdges();
-			int[] arrEdgeIDs = setEdgeIDs.toIntArray();
+			IntSet setofVIDs = grph.getVertices();
+			int[] arrOfVIDs = setofVIDs.toIntArray();
 			
-			for(int edgeId: arrEdgeIDs){
-				BitSet edgeColo = grph.getEdgeColour(edgeId);
-				IntSet incidentVertices  = grph.getVerticesIncidentToEdge(edgeId);
-				if(incidentVertices != null){
-					int[] arrIncidentVertices = incidentVertices.toIntArray();
+			for(int tailId : arrOfVIDs){
+				BitSet tailColo = grph.getVertexColour(tailId);
+				IntSet setOfOEIDs = grph.getOutEdges(tailId);
+				if(setOfOEIDs != null && setOfOEIDs.size() > 0){
+					int[] arrOfOEIDs = setOfOEIDs.toIntArray();
 					
-					int headId = arrIncidentVertices.length == 1 ? arrIncidentVertices[0] : arrIncidentVertices[1];
-					BitSet headColo = grph.getVertexColour(headId);
-					
-					int tailId = arrIncidentVertices[0];
-					BitSet tailColo = grph.getVertexColour(tailId);
-					
-					// put to map
-					
-					//map head to tail
-					Set<BitSet> setTailColo = mMapHeadColoToTailColo.get(headColo);
-					if(setTailColo == null){
-						setTailColo = new HashSet<BitSet>();
-						mMapHeadColoToTailColo.put(headColo, setTailColo);
+					for(int oeId: arrOfOEIDs){
+						BitSet edgeColo = grph.getEdgeColour(oeId);
+						
+						int headId = grph.getHeadOfTheEdge(oeId);
+						BitSet headColo = grph.getVertexColour(headId);
+						
+						/*
+						 *  put to map
+						 */
+						
+						//map head to tail
+						Set<BitSet> setTailColo = mMapHeadColoToTailColo.get(headColo);
+						if(setTailColo == null){
+							setTailColo = new HashSet<BitSet>();
+							mMapHeadColoToTailColo.put(headColo, setTailColo);
+						}
+						setTailColo.add(tailColo);
+						
+						
+						//map tail to head
+						Set<BitSet> setHeadColo = mMapTailColoToHeadColo.get(tailColo);
+						if(setHeadColo == null){
+							setHeadColo = new HashSet<BitSet>();
+							mMapTailColoToHeadColo.put(tailColo, setHeadColo);
+						}
+						setHeadColo.add(headColo);
+						
+						//map edge to head and tail
+						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
+						if(mapHeadToTail == null){
+							mapHeadToTail = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+							mMapEdgeColoToHeadAndTailColo.put(edgeColo, mapHeadToTail);
+						}
+						
+						setTailColo = mapHeadToTail.get(headColo);
+						if(setTailColo == null){
+							setTailColo = new HashSet<BitSet>();
+							mapHeadToTail.put(headColo, setTailColo);
+						}
+						setTailColo.add(tailColo);
+						
+						//map edge to tail and head
+						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapTailToHead = mMapEdgeColoToTailAndHeadColo.get(edgeColo);
+						if(mapTailToHead == null){
+							mapTailToHead = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+							mMapEdgeColoToTailAndHeadColo.put(edgeColo, mapTailToHead);
+						}
+						
+						setHeadColo = mapTailToHead.get(tailColo);
+						if(setHeadColo == null){
+							setHeadColo = new HashSet<BitSet>();
+							mapTailToHead.put(tailColo, setHeadColo);
+						}
+						setHeadColo.add(headColo);
+						
 					}
-					setTailColo.add(tailColo);
-					
-					
-					//map tail to head
-					Set<BitSet> setHeadColo = mMapTailColoToHeadColo.get(tailColo);
-					if(setHeadColo == null){
-						setHeadColo = new HashSet<BitSet>();
-						mMapTailColoToHeadColo.put(tailColo, setHeadColo);
-					}
-					setHeadColo.add(headColo);
-					
-					//map edge to head and tail
-					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-					if(mapHeadToTail == null){
-						mapHeadToTail = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-						mMapEdgeColoToHeadAndTailColo.put(edgeColo, mapHeadToTail);
-					}
-					
-					setTailColo = mapHeadToTail.get(headColo);
-					if(setTailColo == null){
-						setTailColo = new HashSet<BitSet>();
-						mapHeadToTail.put(headColo, setTailColo);
-					}
-					setTailColo.add(tailColo);
-					
-					//map edge to tail and head
-					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapTailToHead = mMapEdgeColoToTailAndHeadColo.get(edgeColo);
-					if(mapTailToHead == null){
-						mapTailToHead = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-						mMapEdgeColoToTailAndHeadColo.put(edgeColo, mapTailToHead);
-					}
-					
-					setHeadColo = mapTailToHead.get(tailColo);
-					if(setHeadColo == null){
-						setHeadColo = new HashSet<BitSet>();
-						mapTailToHead.put(tailColo, setHeadColo);
-					}
-					setHeadColo.add(headColo);
 				}
-			}
-		}
-		// process for data typed properties (~ dteColour )
-		matchDTEColoursAndVColours(origGrphs);
-	}
-	
-	private void matchDTEColoursAndVColours(ColouredGraph [] origGrphs){
-		for(ColouredGraph grph: origGrphs){
-			// get all vertex's colours
-			ObjectArrayList<BitSet> lstVColours = grph.getVertexColours();
-			// for each vertex's colour get the associated data typed property edges
-			for(int i = 0 ; i <lstVColours.size() ; i++){
-				BitSet vColo = lstVColours.get(i);
 				
-				// set of data typed edge's colours
-				Set<BitSet> setDTEColours = grph.getSetDTEdgeColours(vColo);
-				if(setDTEColours != null){
-					Set<BitSet> setLinkedDTEColours = mMapVColoToDTEColo.get(vColo);
+				// process for literals
+				Set<BitSet> setOfDTEColours = grph.getDataTypedEdgeColours(tailColo);
+				if(setOfDTEColours != null){
+					Set<BitSet> setLinkedDTEColours = mMapVColoToDTEColo.get(tailColo);
 					
 					if(setLinkedDTEColours == null){
 						setLinkedDTEColours = new HashSet<BitSet>();
-						mMapVColoToDTEColo.put(vColo, setLinkedDTEColours);
+						mMapVColoToDTEColo.put(tailColo, setLinkedDTEColours);
 					}
 					
-					for(BitSet dteColo : setDTEColours){
+					for(BitSet dteColo : setOfDTEColours){
 						setLinkedDTEColours.add(dteColo);
 
 						Set<BitSet> setLinkedVColours = mMapDTEColoToVColo.get(dteColo);
@@ -243,13 +153,12 @@ public class ColourMappingRules implements IColourMappingRules{
 							setLinkedVColours = new HashSet<BitSet>();
 							mMapDTEColoToVColo.put(dteColo, setLinkedVColours);
 						}
-						setLinkedVColours.add(vColo);
+						setLinkedVColours.add(tailColo);
 					}
 				}
 			}
 		}
 	}
-	
 	
 	public Set<BitSet> getHeadColoursFromEdgeColour(BitSet edgeColour) {
 		Set<BitSet> setColours = new HashSet<BitSet>();
@@ -551,6 +460,153 @@ public class ColourMappingRules implements IColourMappingRules{
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
+	@Deprecated
+	private void analyzeRulesWithMultiThreads(ColouredGraph[] origGrphs){
+		
+		for(ColouredGraph grph: origGrphs){
+			new MultiThreadProcessing(grph.getEdges()) {
+				
+				@Override
+				protected void run(int threadID, int edgeId) {
+					BitSet edgeColo = grph.getEdgeColour(edgeId);
+					IntSet incidentVertices  = grph.getVerticesIncidentToEdge(edgeId);
+					if(incidentVertices != null){
+						int[] arrIncidentVertices = incidentVertices.toIntArray();
+						int tailId = arrIncidentVertices[0];
+						BitSet tailColo = grph.getVertexColour(tailId);
+						
+						int headId = arrIncidentVertices.length == 1 ? arrIncidentVertices[0] : arrIncidentVertices[1];
+						BitSet headColo = grph.getVertexColour(headId);
+						
+						synchronized(mMapHeadColoToTailColo){
+							//map head to tail
+							Set<BitSet> setTailColo = mMapHeadColoToTailColo.get(headColo);
+							if(setTailColo == null){
+								setTailColo = new HashSet<BitSet>();
+								mMapHeadColoToTailColo.put(headColo, setTailColo);
+							}
+							setTailColo.add(tailColo);	
+						}
+						
+						
+						synchronized(mMapTailColoToHeadColo){
+							//map tail to head
+							Set<BitSet> setHeadColo = mMapTailColoToHeadColo.get(tailColo);
+							if(setHeadColo == null){
+								setHeadColo = new HashSet<BitSet>();
+								mMapTailColoToHeadColo.put(tailColo, setHeadColo);
+							}
+							setHeadColo.add(headColo);
+						}
+						
+						synchronized(mMapEdgeColoToHeadAndTailColo){
+							//map edge to head and tail
+							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
+							if(mapHeadToTail == null){
+								mapHeadToTail = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+								mMapEdgeColoToHeadAndTailColo.put(edgeColo, mapHeadToTail);
+							}
+							
+							Set<BitSet> setTailColo = mapHeadToTail.get(headColo);
+							if(setTailColo == null){
+								setTailColo = new HashSet<BitSet>();
+								mapHeadToTail.put(headColo, setTailColo);
+							}
+							setTailColo.add(tailColo);
+						}
+						
+						synchronized(mMapEdgeColoToTailAndHeadColo){
+							//map edge to tail and head
+							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapTailToHead = mMapEdgeColoToTailAndHeadColo.get(edgeColo);
+							if(mapTailToHead == null){
+								mapTailToHead = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+								mMapEdgeColoToTailAndHeadColo.put(edgeColo, mapTailToHead);
+							}
+							
+							Set<BitSet> setHeadColo = mapTailToHead.get(tailColo);
+							if(setHeadColo == null){
+								setHeadColo = new HashSet<BitSet>();
+								mapTailToHead.put(tailColo, setHeadColo);
+							}
+							setHeadColo.add(headColo);
+						}
+					}
+				}
+			};
+		}
+	}
+	
+	@Deprecated
+	private void analyzeRulesWithSingleThreadF(ColouredGraph[] origGrphs){
+		
+		for(ColouredGraph grph: origGrphs){
+			IntSet setEdgeIDs = grph.getEdges();
+			int[] arrEdgeIDs = setEdgeIDs.toIntArray();
+			
+			for(int edgeId: arrEdgeIDs){
+				BitSet edgeColo = grph.getEdgeColour(edgeId);
+				IntSet incidentVertices  = grph.getVerticesIncidentToEdge(edgeId);
+				if(incidentVertices != null){
+					int[] arrIncidentVertices = incidentVertices.toIntArray();
+					
+					int headId = arrIncidentVertices.length == 1 ? arrIncidentVertices[0] : arrIncidentVertices[1];
+					BitSet headColo = grph.getVertexColour(headId);
+					
+					int tailId = arrIncidentVertices[0];
+					BitSet tailColo = grph.getVertexColour(tailId);
+					
+					/*
+					 *  put to map
+					 */
+					
+					//map head to tail
+					Set<BitSet> setTailColo = mMapHeadColoToTailColo.get(headColo);
+					if(setTailColo == null){
+						setTailColo = new HashSet<BitSet>();
+						mMapHeadColoToTailColo.put(headColo, setTailColo);
+					}
+					setTailColo.add(tailColo);
+					
+					
+					//map tail to head
+					Set<BitSet> setHeadColo = mMapTailColoToHeadColo.get(tailColo);
+					if(setHeadColo == null){
+						setHeadColo = new HashSet<BitSet>();
+						mMapTailColoToHeadColo.put(tailColo, setHeadColo);
+					}
+					setHeadColo.add(headColo);
+					
+					//map edge to head and tail
+					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
+					if(mapHeadToTail == null){
+						mapHeadToTail = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+						mMapEdgeColoToHeadAndTailColo.put(edgeColo, mapHeadToTail);
+					}
+					
+					setTailColo = mapHeadToTail.get(headColo);
+					if(setTailColo == null){
+						setTailColo = new HashSet<BitSet>();
+						mapHeadToTail.put(headColo, setTailColo);
+					}
+					setTailColo.add(tailColo);
+					
+					//map edge to tail and head
+					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapTailToHead = mMapEdgeColoToTailAndHeadColo.get(edgeColo);
+					if(mapTailToHead == null){
+						mapTailToHead = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
+						mMapEdgeColoToTailAndHeadColo.put(edgeColo, mapTailToHead);
+					}
+					
+					setHeadColo = mapTailToHead.get(tailColo);
+					if(setHeadColo == null){
+						setHeadColo = new HashSet<BitSet>();
+						mapTailToHead.put(tailColo, setHeadColo);
+					}
+					setHeadColo.add(headColo);
+				}
+			}
+		}
+	}
 	
 }

@@ -5,6 +5,7 @@ import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,13 +35,6 @@ public class ColouredGraph{
 	/**
 	 * this is new for processing the literals in the original RDF dataset
 	 */
-	//mapping vertex's colours to datatyped edge's colours
-	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapVertexColoursToDataTypedEdgeColours;
-	//mapping datatyped edge's colours to set of literals
-	protected ObjectObjectOpenHashMap<BitSet, Set<String>> mapDTEdgeColoursToLiterals;
-	// map data typed edge's colours to set of connected vertex' ids
-	protected ObjectObjectOpenHashMap<BitSet, IntSet> mapDTEdgeColoursToVertexIDs;
-	
 	protected Map<Integer, Map<BitSet, List<String>>> mapVertexIdAndLiterals;
 	
 	
@@ -80,10 +74,6 @@ public class ColouredGraph{
 		this.dtEdgePalette = datatypedEdgePalette;
 		
 		mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
-		
-		mapVertexColoursToDataTypedEdgeColours = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
-		mapDTEdgeColoursToLiterals = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
-		mapDTEdgeColoursToVertexIDs = new ObjectObjectOpenHashMap<BitSet, IntSet>();
 	}
 	
 	public void removeEdge(int edgeId){
@@ -344,33 +334,24 @@ public class ColouredGraph{
 	/**
 	 * Add a literal associated with the data typed property to the data store
 	 * @param literal a literal
-	 * @param tailId the vertex id which has the data typed property
-	 * @param dtEdgeColour the data typed property's colour connecting to the vertex
+	 * @param tId the vertex id which has the data typed property
+	 * @param dteColo the data typed property's colour connecting to the vertex
 	 */
-	public void addLiterals(String literal, int tailId, BitSet dtEdgeColour){
+	public void addLiterals(String literal, int tId, BitSet dteColo){
 		
-		BitSet vertColo = getVertexColour(tailId);
-		
-		Set<BitSet> setDTEdgeColours = mapVertexColoursToDataTypedEdgeColours.get(vertColo);
-		if(setDTEdgeColours == null){
-			setDTEdgeColours = new HashSet<BitSet>();
-			mapVertexColoursToDataTypedEdgeColours.put(vertColo, setDTEdgeColours);
+		Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(tId);
+		if(mapDTEColoursToLiterals == null){
+			mapDTEColoursToLiterals = new HashMap<BitSet, List<String>> ();
+			mapVertexIdAndLiterals.put(tId, mapDTEColoursToLiterals);
 		}
-		setDTEdgeColours.add(dtEdgeColour);
 		
-		Set<String> setLiterals = mapDTEdgeColoursToLiterals.get(dtEdgeColour);
-		if(setLiterals == null){
-			setLiterals = new HashSet<String>();
-			mapDTEdgeColoursToLiterals.put(dtEdgeColour, setLiterals);
+		List<String> lstOfLiterals = mapDTEColoursToLiterals.get(dteColo);
+		if(lstOfLiterals == null){
+			lstOfLiterals = new ArrayList<String>();
+			mapDTEColoursToLiterals.put(dteColo, lstOfLiterals);
 		}
-		setLiterals.add(literal);
 		
-		IntSet setVertexIDs = mapDTEdgeColoursToVertexIDs.get(dtEdgeColour);
-		if(setVertexIDs == null){
-			setVertexIDs = new DefaultIntSet();
-			mapDTEdgeColoursToVertexIDs.put(dtEdgeColour, setVertexIDs);
-		}
-		setVertexIDs.add(tailId);
+		lstOfLiterals.add(literal);
 	}
 	
 	/**
@@ -381,73 +362,18 @@ public class ColouredGraph{
 	public IntSet getVerticesIncidentToEdge(int edgeId){
 		return graph.getVerticesIncidentToEdge(edgeId);
 	}
-	
+
 	/**
-	 * Get a set of all associated data typed properties with the given vertex's colour
-	 * @param vertexColour the colour of the vertex having data typed properties
-	 * @return
+	 * Get the set of data typed edge's colours which are connected to the vertex's colour
+	 * @param vertexColour 
+	 * @return a set of linked edge's colours
 	 */
-	public Set<BitSet> getSetDTEdgeColours(BitSet vertexColour){
-		if(mapVertexColoursToDataTypedEdgeColours != null){
-			return mapVertexColoursToDataTypedEdgeColours.get(vertexColour);
+	public Set<BitSet> getDataTypedEdgeColours (BitSet vertexColour){
+		Map<BitSet, List<String>> mapDTEColoToLiterals = mapVertexIdAndLiterals.get(vertexColour);
+		if(mapDTEColoToLiterals != null){
+			return mapDTEColoToLiterals.keySet();
 		}
 		return null;
-	}
-	
-	/**
-	 * Return all literals belonging to the data typed properties
-	 * @param dtEdgeColour the data typed property's colour
-	 * @return
-	 */
-	public Set<String> getSetLiterals(BitSet dtEdgeColour){
-		if(mapDTEdgeColoursToLiterals != null ){
-			return mapDTEdgeColoursToLiterals.get(dtEdgeColour);
-		}
-		return null;
-	}
-	
-	/**
-	 * Get a map of the data typed properties with their sets of associated literals based on the vertex's color
-	 * 
-	 * @param vertexColour the colour of the vertex which has the data typed properties
-	 * @return
-	 */
-	public ObjectObjectOpenHashMap<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(BitSet vertexColour){
-		ObjectObjectOpenHashMap mapRes = new ObjectObjectOpenHashMap<BitSet, Set<String>>();
-		if(mapVertexColoursToDataTypedEdgeColours != null && mapDTEdgeColoursToLiterals != null) {
-			Set<BitSet> setDTEdgeColours = mapVertexColoursToDataTypedEdgeColours.get(vertexColour);
-			if(setDTEdgeColours != null && setDTEdgeColours.size() > 0 ){
-				for(BitSet dtEdgeColo : setDTEdgeColours){
-					Set<String> setLiterals = mapDTEdgeColoursToLiterals.get(dtEdgeColo);
-					if(setLiterals != null && setLiterals.size() > 0 ){
-						//just for testing
-						if(mapRes.containsKey(dtEdgeColo)){
-							System.err.println("getMapDTEdgeColoursToLiterals has serious errors");
-							return null;
-						}
-						
-						mapRes.put(dtEdgeColo, setLiterals);
-					}
-				}
-			}
-		}
-		return mapRes;
-	}
-	
-	/**
-	 * Get the map of data typed properties with the set of all associated literals
-	 * @return
-	 */
-	public ObjectObjectOpenHashMap<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(){
-		return mapDTEdgeColoursToLiterals;
-	}
-	
-	/**
-	 * get the map of data typed properties with the set of vertex IDs
-	 * @return a map
-	 */
-	public ObjectObjectOpenHashMap<BitSet, IntSet> getMapDTEdgeColoursToVertexIDs(){
-		return mapDTEdgeColoursToVertexIDs;
 	}
 	
 	public String getResourceURI(BitSet vColo){
@@ -462,4 +388,59 @@ public class ColouredGraph{
 		return dtEdgePalette.getURI(dteColo); 
 	}
 	
+	public Map<BitSet, IntSet> getMapDTEdgeColoursToVertexIDs(){
+		Map<BitSet, IntSet> res =new HashMap<BitSet, IntSet>();
+		if(mapVertexIdAndLiterals != null && mapVertexIdAndLiterals.size() > 0 ){
+			IntSet setOfVIDs = getVertices();
+			int[] arrOfVIDs = setOfVIDs.toIntArray();
+			
+			for(int vId: arrOfVIDs){
+				Map<BitSet, List<String>> mapDTEColoursToVIDs = mapVertexIdAndLiterals.get(vId); 
+				if(mapDTEColoursToVIDs != null && mapDTEColoursToVIDs.size() > 0 ){
+					Set<BitSet> setOfDTEColours = mapDTEColoursToVIDs.keySet();
+					
+					for(BitSet dteColo : setOfDTEColours){
+						
+						IntSet setOfLinkedVIDs = res.get(dteColo);
+						if(setOfLinkedVIDs ==null){
+							setOfLinkedVIDs = new DefaultIntSet();
+							res.put(dteColo, setOfLinkedVIDs);
+						}
+						setOfLinkedVIDs.add(vId);
+					}
+				}
+			}
+		}
+		return res;
+	}
+	
+	public Map<BitSet, List<String>> getMapDTEdgeColoursToLiterals(int vertexId){
+		if(mapVertexIdAndLiterals.containsKey(vertexId) ){
+			return mapVertexIdAndLiterals.get(vertexId);
+		}
+		return null;
+	}
+	
+	public Map<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(){
+		Map<BitSet, Set<String>> res = new HashMap<BitSet, Set<String>>();
+		Set<Integer> setOfVIDs = mapVertexIdAndLiterals.keySet();
+		for(Integer vId: setOfVIDs){
+			Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(vId);
+			Set<BitSet> setOfDTEColours = mapDTEColoursToLiterals.keySet();
+			
+			for(BitSet dteColo: setOfDTEColours){
+				List<String> lstOfLiterals = mapDTEColoursToLiterals.get(dteColo);
+				
+				Set<String> setOfAllLiterals = res.get(dteColo);
+				if(setOfAllLiterals == null){
+					setOfAllLiterals = new HashSet<String>();	
+					res.put(dteColo, setOfAllLiterals);
+				}
+				
+				setOfAllLiterals.addAll(lstOfLiterals);
+			}
+		}
+		
+		return res;
+	}
 }
