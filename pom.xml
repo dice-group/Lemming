@@ -26,6 +26,13 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>org.aksw.simba.lemm.aksw.word2vecrestful</groupId>
+			<artifactId>word2vec</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/jword2vec.jar</systemPath>
+		</dependency>
+		<dependency>
 			<groupId>grph</groupId>
 			<artifactId>grph</artifactId>
 			<version>1.8.0</version>
