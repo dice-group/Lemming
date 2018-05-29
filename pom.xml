@@ -28,9 +28,7 @@
 		<dependency>
 			<groupId>org.aksw.word2vecrestful.word2vec</groupId>
 			<artifactId>word2vec</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/jword2vec.jar</systemPath>
+			<version>t1</version>			
 		</dependency>
 		<dependency>
 			<groupId>grph</groupId>
