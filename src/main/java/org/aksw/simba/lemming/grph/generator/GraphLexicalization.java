@@ -41,7 +41,7 @@ public class GraphLexicalization {
 	}
 
 	public ColouredGraph lexicalizeGraph() {
-		LOGGER.info("Lexicalize the mimic graph");
+		LOGGER.info("Start Lexicalizing the mimic graph");
 		/*
 		 * get the already refined graph
 		 */
@@ -65,7 +65,9 @@ public class GraphLexicalization {
 		for (BitSet dteColo : setOfDTEColours) {
 			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo
 					.get(dteColo);
-
+			
+			System.err.println("Process dte: " + dteColo);
+			
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
 				for (int i = 0; i < arrOfProcessedVColours.length; ++i) {
@@ -107,7 +109,7 @@ public class GraphLexicalization {
 				}
 			}
 		}
-		LOGGER.info("Lexicalize the mimic graph");
+		LOGGER.info("End lexicalizing the mimic graph");
 		return mimicGraph;
 	}
 
