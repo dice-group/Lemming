@@ -12,10 +12,13 @@ public class Constants {
 	public static final int STEP_JUNHAO_POISSON = 500;
 	public static final int ROUND_DECIMAL = 100;
 	
+	public static final boolean IS_EVALUATION_MODE = true;
+	
 	public static final int MAX_EXPLORING_TIME = 1000;
 	public static final String SIMULATED_URI= "http://aksw.simba.lemming.org/resouce#";
 	public static final String SIMULATED_CLASS_URI = "http://aksw.simba.lemming.org/class#";
 	public static final String SIMULATED_PROPERTY_URI = "http://aksw.simba.lemming.org/property#";
+	public static final String SIMULATED_DATA_TYPED_PROPERTY_URI = "http://aksw.simba.lemming.org/data_typed_property#";
 	public static final String SIMULATED_BLANK_OBJECT_RESOURCE = "http://org.apache.jena.rdfxml/blankObj#";
 	public static final String SIMULATED_BLANK_SUBJECT_RESOURCE = "http://org.apache.jena.rdfxml/blankSub#";
 	public static final String TYPE_CLASS_PREFIX = "class_";

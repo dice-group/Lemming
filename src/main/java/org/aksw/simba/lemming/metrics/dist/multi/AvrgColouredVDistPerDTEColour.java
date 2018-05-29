@@ -94,14 +94,16 @@ public class AvrgColouredVDistPerDTEColour {
 			ObjectDoubleOpenHashMap<BitSet> mapAvrgColouredVDist = mMapAvrgColouredVDist.get(dteColo);
 			
 			for(int j = 0 ; j< keyVColours.length ;j++){
-				BitSet vColo = (BitSet) keyVColours[j];
-				int noOfAppearTimes = mapAppearTimes.get(vColo);
-				double sumRate = mapAvrgColouredVDist.get(vColo);
-				
-				if(noOfAppearTimes != 0){
-					mapAvrgColouredVDist.put(vColo, sumRate/noOfAppearTimes);
-				}else{
-					mapAvrgColouredVDist.put(vColo, 0);
+				if(mapAppearTimes.allocated[j]){
+					BitSet vColo = (BitSet) keyVColours[j];
+					int noOfAppearTimes = mapAppearTimes.get(vColo);
+					double sumRate = mapAvrgColouredVDist.get(vColo);
+					
+					if(noOfAppearTimes != 0){
+						mapAvrgColouredVDist.put(vColo, sumRate/noOfAppearTimes);
+					}else{
+						mapAvrgColouredVDist.put(vColo, 0);
+					}
 				}
 			}
 		}

@@ -41,7 +41,7 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 	 * compute a vector for each of word based on the word2vec model
 	 */
 	private void computeDataVectors(){
-		
+		LOGGER.info("Start - computation of a mean vector and a standard deviation vector");
 		Set<BitSet> setOfDTEColours = mBaseData.keySet();
 		for(BitSet dteColo: setOfDTEColours){
 			float[] meanVec = new float[mWord2VecModel.vectorSize];
@@ -86,6 +86,7 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 			
 			mMeanVectors.put(dteColo, meanVec);
 			mStandardDeviationVectors.put(dteColo, standardDeviationVec);
+			LOGGER.info("End - computation of a mean vector and a standard deviation vector");
 		}
 	}
 
@@ -106,8 +107,9 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 			for(int i = 0 ; i < mWord2VecModel.vectorSize ; i++){
 				randomVec[i] = (float) mRand.nextGaussian() * stdDevVec[i] + meanVec[i];
 			}	
+			return randomVec;
 		}
-		return randomVec;
+		return null;
 	}
 	
 	/**
@@ -123,21 +125,21 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 		if(dteColo != null  && noOfWords > 0){
 			while(tempNoOfGeneratedWords <= noOfWords){
 				float[] wordVec = getRandomVector(dteColo);
-				Map<String, float[]> mapNewWords = mWord2VecModel.getClosestEntry(wordVec);
-				if(mapNewWords != null && mapNewWords.size() > 0){
-					tempNoOfGeneratedWords ++;
-					
-					// get random a word and put it to the result
-					Set<String> setOfWords = mapNewWords.keySet();
-					String [] arrOfWords = setOfWords.toArray(new String[0]);
-					
-					literal += arrOfWords[mRand.nextInt(arrOfWords.length)]; 
+				if(wordVec != null ){
+					Map<String, float[]> mapNewWords = mWord2VecModel.getClosestEntry(wordVec);
+					if(mapNewWords != null && mapNewWords.size() > 0){
+						tempNoOfGeneratedWords ++;
+						
+						// get random a word and put it to the result
+						Set<String> setOfWords = mapNewWords.keySet();
+						String [] arrOfWords = setOfWords.toArray(new String[0]);
+						
+						literal += arrOfWords[mRand.nextInt(arrOfWords.length)]; 
+					}
 				}
 			}
 		}
 		
 		return literal;
 	}
-	
-	
 }

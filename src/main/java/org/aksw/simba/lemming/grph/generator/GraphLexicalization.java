@@ -36,10 +36,12 @@ public class GraphLexicalization {
 		// word2vec model to obtain closest
 		mWordProposer = new RDFLiteralGenerator(
 				mLiteralProcessor.getWordsOfEachDTEColour());
+		
+		//mWordProposer = new RDFLiteralGeneratorTest(mLiteralProcessor.getWordsOfEachDTEColour());
 	}
 
 	public ColouredGraph lexicalizeGraph() {
-
+		LOGGER.info("Lexicalize the mimic graph");
 		/*
 		 * get the already refined graph
 		 */
@@ -71,7 +73,7 @@ public class GraphLexicalization {
 						BitSet vColo = (BitSet) arrOfProcessedVColours[i];
 						double avrgNoOfVertices = vColoDistPerDTEColour.values[i];
 
-						// compute
+						// get all vertices in all specific colours
 						Map<BitSet, IntSet> mapVColoToVertices = mGraphGenerator
 								.getMappingColoursAndVertices();
 						if (mapVColoToVertices.containsKey(vColo)) {
@@ -87,22 +89,25 @@ public class GraphLexicalization {
 							numOfConsidedVertices = Math
 									.round(numOfConsidedVertices);
 							int indexOfVertex = 0;
-							while (i < numOfConsidedVertices) {
+							while (indexOfVertex < numOfConsidedVertices) {
+								
 								// get a
 								int vId = arrOfVertices[indexOfVertex];
 								// get literal
 								String literal = mWordProposer.getWords(
 										dteColo, (int) mLiteralProcessor
 												.getAvrgNoOfWords(dteColo));
+								
 								// add it to the coloured graph
 								mimicGraph.addLiterals(literal, vId, dteColo);
+								indexOfVertex++;
 							}
 						}
 					}
 				}
 			}
 		}
-
+		LOGGER.info("Lexicalize the mimic graph");
 		return mimicGraph;
 	}
 

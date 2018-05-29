@@ -53,10 +53,10 @@ public class InMemoryPalette implements ColourPalette {
 
     @Override
     public BitSet addToColour(BitSet colour, String uri) {
-        if (uriColourMap.containsKey(uri)) {
-            colour.or(uriColourMap.get(uri));
-        }
-        return colour;
+		if (uriColourMap.containsKey(uri)) {
+			colour.or(uriColourMap.get(uri));
+		}
+		return colour;
     }
 
     @Override
@@ -97,4 +97,23 @@ public class InMemoryPalette implements ColourPalette {
     	}
     	return "";
     }
+
+	@Override
+	public void updateColour(BitSet colour, String uri) {
+		if(colour!= null){
+			if(uriColourMap.containsKey(uri)){
+				BitSet tmpColo = uriColourMap.get(uri);
+				if(!tmpColo.equals(colour)){
+					colour.or(uriColourMap.get(uri));
+					System.err.println("Same URI but different colours");
+				}
+			}
+			uriColourMap.put(uri, colour);
+		}
+	}
+
+	@Override
+	public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour() {
+		return uriColourMap; 
+	}
 }

@@ -21,7 +21,6 @@ import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public class ColouredGraph{
 
@@ -31,8 +30,6 @@ public class ColouredGraph{
 	protected ColourPalette vertexPalette;
 	protected ColourPalette edgePalette;
 	protected ColourPalette dtEdgePalette;
-	
-	private boolean isDebugging = true;
 	
 	/**
 	 * this is new for processing the literals in the original RDF dataset
@@ -166,6 +163,10 @@ public class ColouredGraph{
 		return edgePalette;
 	}
 
+	public ColourPalette getDataTypedEdgePalette(){
+		return dtEdgePalette;
+	}
+	
 	public int[][] getInNeighborhoodsArray() {
 		return graph.getInNeighborhoods();
 	}
@@ -340,7 +341,7 @@ public class ColouredGraph{
 	 * @param dteColo the data typed property's colour connecting to the vertex
 	 */
 	public void addLiterals(String literal, int tId, BitSet dteColo){
-		
+				
 		Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(tId);
 		if(mapDTEColoursToLiterals == null){
 			mapDTEColoursToLiterals = new HashMap<BitSet, List<String>> ();
@@ -395,7 +396,7 @@ public class ColouredGraph{
 	 */
 	public String getResourceClass(BitSet vColo){
 		// isDebugging for evaluation
-		if(isDebugging){
+		if(Constants.IS_EVALUATION_MODE){
 			return vertexPalette.getURI(vColo);
 		}
 		// in case for practical, we will use a dummy Class URL
@@ -406,7 +407,7 @@ public class ColouredGraph{
 	
 	public String getPropertyURI(BitSet eColo){
 		// isDebugging for evaluation
-		if(isDebugging){
+		if(Constants.IS_EVALUATION_MODE){
 			return edgePalette.getURI(eColo);
 		}
 		// in case for practical, we will use a dummy Class URL
@@ -416,7 +417,14 @@ public class ColouredGraph{
 	}
 	
 	public String getDataTypedPropertyURI(BitSet dteColo){
-		return dtEdgePalette.getURI(dteColo); 
+		// isDebugging for evaluation
+		if(Constants.IS_EVALUATION_MODE){
+			return dtEdgePalette.getURI(dteColo);
+		}
+		// in case for practical, we will use a dummy Class URL
+		else{
+			return Constants.SIMULATED_DATA_TYPED_PROPERTY_URI + dteColo;
+		}
 	}
 	
 	public Map<BitSet, IntSet> getMapDTEdgeColoursToVertexIDs(){
@@ -474,4 +482,19 @@ public class ColouredGraph{
 		
 		return res;
 	}
+	
+	
+	public void setEdgePalette(ColourPalette newEdgePalette){
+		edgePalette = newEdgePalette;
+	}
+	
+	public void setVertexPalette(ColourPalette newVertexPalette){
+		vertexPalette = newVertexPalette;
+	}
+	
+	public void setDataTypeEdgePalette(ColourPalette newDTEdgePalette){
+		dtEdgePalette = newDTEdgePalette;
+	}
+	
 }
+

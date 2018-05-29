@@ -7,6 +7,8 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.colour.ColourPalette;
+import org.aksw.simba.lemming.colour.InMemoryPalette;
 import org.aksw.simba.lemming.dist.utils.IOfferedItem;
 import org.aksw.simba.lemming.dist.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.metrics.dist.AvrgEdgeColoDistMetric;
@@ -15,6 +17,7 @@ import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.rules.ColourMappingRules;
 import org.aksw.simba.lemming.rules.IColourMappingRules;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
+import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +95,8 @@ public abstract class AbstractGraphGeneration {
 		assignColorToEdges();
 		
 		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours);
+		
+		copyColourPalette(origGrphs);
 	}
 
 	public Map<BitSet,IntSet> getMappingColoursAndVertices(){
@@ -330,5 +335,52 @@ public abstract class AbstractGraphGeneration {
 		}
 		
 		System.out.println("Number of painted edges: " + totalEdges + " in total " + keyEdgeColo.size() +" colors");
+	}
+	
+	private void copyColourPalette(ColouredGraph[] origGraphs){
+		if(Constants.IS_EVALUATION_MODE){
+			ColourPalette newVertexPalette = new InMemoryPalette();
+			ColourPalette newEdgePalette = new InMemoryPalette();
+			ColourPalette newDTEdgePalette = new InMemoryPalette();
+			
+			//copy colour palette of all the original graphs to the new one
+			
+			for(ColouredGraph grph: origGraphs){
+				// merge vertex colours
+				ColourPalette vPalette = grph.getVertexPalette();
+				ObjectObjectOpenHashMap<String, BitSet>mapVertexURIsToColours =  vPalette.getMapOfURIAndColour();
+				fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
+				
+				// merge edge colours
+				ColourPalette ePalette = grph.getEdgePalette();
+				ObjectObjectOpenHashMap<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
+				fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
+				
+				// merge data typed edge colours
+				ColourPalette dtePalette = grph.getDataTypedEdgePalette();
+				ObjectObjectOpenHashMap<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
+				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
+			}
+			
+			
+			int vAssigned = newVertexPalette.getMapOfURIAndColour().assigned;
+			int eAssigned = newEdgePalette.getMapOfURIAndColour().assigned;
+			int dteAssigned = newDTEdgePalette.getMapOfURIAndColour().assigned;
+			
+			mMimicGraph.setVertexPalette(newVertexPalette);
+			mMimicGraph.setEdgePalette(newEdgePalette);
+			mMimicGraph.setDataTypeEdgePalette(newDTEdgePalette);
+		}
+	}
+	
+	private void fillColourToPalette(ColourPalette palette, ObjectObjectOpenHashMap<String, BitSet> mapOfURIsAndColours){
+		Object[]arrObjURIs = mapOfURIsAndColours.keys;
+		for(int i = 0 ; i < arrObjURIs.length ; i++){
+			if(mapOfURIsAndColours.allocated[i]){
+				String uri = (String) arrObjURIs[i];
+				BitSet colour = mapOfURIsAndColours.get(uri);
+				palette.updateColour(colour, uri);
+			}
+		}
 	}
 }

@@ -6,10 +6,7 @@ import grph.algo.topology.StarTopologyGenerator;
 import grph.in_memory.InMemoryGrph;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
-import java.util.Set;
 import java.util.SortedSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -21,12 +18,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitness
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationGroupingTriple;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationWithoutEdgeColours;
 import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.grph.generator.GraphRefinement;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
@@ -38,14 +30,9 @@ import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.util.MetricTester;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class GraphGenerationTest {
@@ -150,12 +137,12 @@ public class GraphGenerationTest {
         System.out.println("Refine graph randomly");
         //grphRefinement.setRefineGraphRandomly(false);
         grphRefinement.setRefineGraphRandomly(true);
-        ColouredGraph refinedGrph = grphRefinement.refineGraph();
+        /*ColouredGraph refinedGrph = grphRefinement.refineGraph();
         System.out.println("==============================");
         for (RefinementNode n : bestNodes) {
             double val = n.getExpression().getValue(refinedGrph);
             System.out.println(val + " ");
-        }
+        }*/
         
         /*
          * ---------------------------------------
@@ -164,6 +151,7 @@ public class GraphGenerationTest {
          */
         GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, grphGenerator);
         SemanticWebDogFoodReader.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+        LOGGER.info("Application exits!!!");
 	}
 	
 	 @SuppressWarnings("unchecked")
