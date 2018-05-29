@@ -50,8 +50,10 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 				for(String word: setOfWords){
 					float[] wordVec = mWord2VecModel.word2vec.get(word);
 					
-					for(int i = 0 ; i< mWord2VecModel.vectorSize ; ++i){
-						meanVec[i] += wordVec[i];
+					if (wordVec != null){
+						for(int i = 0 ; i< mWord2VecModel.vectorSize ; ++i){
+							meanVec[i] += wordVec[i];
+						}
 					}
 				}
 				
@@ -64,9 +66,10 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 				// compute the standard deviation of value in each dimension of these words
 				for(String word: setOfWords){
 					float[] wordVec = mWord2VecModel.word2vec.get(word);
-					
-					for(int i = 0 ; i< mWord2VecModel.vectorSize ; ++i){
-						standardDeviationVec[i] += Math.pow(wordVec[i] - meanVec[i],2);
+					if(wordVec != null){
+						for(int i = 0 ; i< mWord2VecModel.vectorSize ; ++i){
+							standardDeviationVec[i] += Math.pow(wordVec[i] - meanVec[i],2);
+						}
 					}
 				}
 				
