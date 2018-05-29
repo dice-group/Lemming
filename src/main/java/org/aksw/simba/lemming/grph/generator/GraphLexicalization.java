@@ -6,7 +6,6 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.LiteralProcessor;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredVDistPerDTEColour;
-import org.aksw.simba.lemming.rules.IColourMappingRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +16,9 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class GraphLexicalization {
 
-	private static final Logger LOGGER = LoggerFactory
-			.getLogger(GraphLexicalization.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphLexicalization.class);
 
-	private IRDFLiteralProposer mWordProposer;
-	private IColourMappingRules mColourMapper;
+	private IRDFLiteralGenerator mWordProposer;
 	private IGraphGeneration mGraphGenerator;
 	private LiteralProcessor mLiteralProcessor;
 	private AvrgColouredVDistPerDTEColour mAvrgVDistPerDREColourMetric;
@@ -37,7 +34,7 @@ public class GraphLexicalization {
 		mLiteralProcessor = new LiteralProcessor(origGrphs);
 
 		// word2vec model to obtain closest
-		mWordProposer = new RDFLiteralProposer(
+		mWordProposer = new RDFLiteralGenerator(
 				mLiteralProcessor.getWordsOfEachDTEColour());
 	}
 
@@ -95,9 +92,7 @@ public class GraphLexicalization {
 								int vId = arrOfVertices[indexOfVertex];
 								// get literal
 								String literal = mWordProposer.getWords(
-										dteColo, mLiteralProcessor
-												.getWords(dteColo),
-										(int) mLiteralProcessor
+										dteColo, (int) mLiteralProcessor
 												.getAvrgNoOfWords(dteColo));
 								// add it to the coloured graph
 								mimicGraph.addLiterals(literal, vId, dteColo);

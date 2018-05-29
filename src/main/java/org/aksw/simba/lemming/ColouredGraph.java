@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.aksw.simba.lemming.util.Constants;
 
 import toools.set.DefaultIntSet;
 import toools.set.IntSet;
@@ -31,6 +32,7 @@ public class ColouredGraph{
 	protected ColourPalette edgePalette;
 	protected ColourPalette dtEdgePalette;
 	
+	private boolean isDebugging = true;
 	
 	/**
 	 * this is new for processing the literals in the original RDF dataset
@@ -376,12 +378,41 @@ public class ColouredGraph{
 		return null;
 	}
 	
-	public String getResourceURI(BitSet vColo){
-		return vertexPalette.getURI(vColo);
+	/**
+	 * get a dummy URI for a specific vertex
+	 * @param vId the identification of the vertex
+	 * 
+	 * @return a dummy URI
+	 */
+	public String getResourceDummyURI(int vId){
+		return Constants.SIMULATED_URI + vId;
+	}
+	
+	/**
+	 * get the resource class based on the colour
+	 * @param vColo
+	 * @return
+	 */
+	public String getResourceClass(BitSet vColo){
+		// isDebugging for evaluation
+		if(isDebugging){
+			return vertexPalette.getURI(vColo);
+		}
+		// in case for practical, we will use a dummy Class URL
+		else{
+			return Constants.SIMULATED_CLASS_URI + vColo;
+		}
 	}
 	
 	public String getPropertyURI(BitSet eColo){
-		return edgePalette.getURI(eColo);
+		// isDebugging for evaluation
+		if(isDebugging){
+			return edgePalette.getURI(eColo);
+		}
+		// in case for practical, we will use a dummy Class URL
+		else{
+			return Constants.SIMULATED_PROPERTY_URI + eColo;
+		}
 	}
 	
 	public String getDataTypedPropertyURI(BitSet dteColo){

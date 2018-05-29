@@ -7,7 +7,7 @@ import java.util.SortedSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.refinement.RefinementNode;
-import org.aksw.simba.lemming.dist.utils.ContantValuesComputation;
+import org.aksw.simba.lemming.dist.utils.ConstantValuesComputation;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class GraphRefinement {
 	// list of added edges associated with vertices
 	private List<TripleBaseSingleID> mAddedTriples;
 	
-	private ContantValuesComputation mErrScoreCalculator;
+	private ConstantValuesComputation mErrScoreCalculator;
 	
 	public GraphRefinement(ColouredGraph[] origGrphs, int iNoOfIteration, 
 			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
@@ -41,7 +41,7 @@ public class GraphRefinement {
 		 *  mErrScoreCalculator is used to compute the error score compared to original
 		 *  constant values of the original graphs
 		 */
-		mErrScoreCalculator = new ContantValuesComputation(origGrphs, constExprs);
+		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, constExprs);
 		
 		// the graph generator
 		mGraphGenerator = graphGenerator;

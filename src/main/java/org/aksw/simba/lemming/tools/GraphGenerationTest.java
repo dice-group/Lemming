@@ -27,6 +27,7 @@ import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationWithoutEdgeColours;
+import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.grph.generator.GraphRefinement;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class GraphGenerationTest {
@@ -59,31 +61,16 @@ public class GraphGenerationTest {
 	public static void main(String[] args) {
 		
 		boolean isStop = false;
-//		Random rand = new Random();
-//		Set<Integer> a = new HashSet<Integer>();
-//		for(int i = 0 ; i < 20 ; i++){
-//			a.add(rand.nextInt(30));
-//		}
-//		Set<Integer> b = new HashSet<Integer>();
-//		for(int i = 0 ; i < 10 ; i++){
-//			b.add(rand.nextInt(30));
-//		}
-//		
-//		
-//		System.out.println("a : " + a);
-//		System.out.println("b : " + b);
-//		b.retainAll(a);
-//		System.out.println("a : " + a);
-//		System.out.println("b : " + b);
-//		
-//		if(!isStop)
-//			return;
-//		
-		 // For this test, we do not need assertions
+		
+// 		if(!isStop){
+// 	   		return ;
+//    	}
+
+		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
         // metrics.add(new NumberOfTrianglesMetric());
-       // metrics.add(new AvgClusteringCoefficientMetric());
+        // metrics.add(new AvgClusteringCoefficientMetric());
         metrics.add(new AvgVertexDegreeMetric());
         metrics.add(new MaxVertexOutDegreeMetric());
         metrics.add(new MaxVertexInDegreeMetric());
@@ -96,32 +83,35 @@ public class GraphGenerationTest {
         
         ColouredGraph graphs[] = new ColouredGraph[20];
         
+        //load RDF data to coloured graph
         if (USE_SEMANTIC_DOG_FOOD) {
             graphs = SemanticWebDogFoodReader.readGraphsFromFile(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
         }
         
-        IGraphGeneration grphGenerater;
+        /*
+         * ---------------------------------------
+         * Generate a mimic graph
+         * ---------------------------------------
+         */
+        IGraphGeneration grphGenerator;
        //grphGenerater = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
-       // grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
-       grphGenerater = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
+       //grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
+       grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
        //grphGenerater = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
        //grphGenerater = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
        //grphGenerater = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
         
         double currentTime = System.currentTimeMillis();
         // generate the new graph
-        ColouredGraph tempGrph =  grphGenerater.generateGraph();
+        ColouredGraph tempGrph =  grphGenerator.generateGraph();
         // estimate the costed time for generation
         System.out.println("End of graph generation!");
         currentTime = System.currentTimeMillis() - currentTime;
         System.out.println("Time of graph generation: " + currentTime);
         
-        MetricTester.printMetricInformation(metrics, graphs);
-        MetricTester.printMetricInformation(metrics, tempGrph);
-        if(!isStop){
-        	return;
-        }
-//        
+        //MetricTester.printMetricInformation(metrics, graphs);
+        //MetricTester.printMetricInformation(metrics, tempGrph);
+        
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();
         fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
                 createReferenceGraphVectors(graphs, metrics));
@@ -133,6 +123,7 @@ public class GraphGenerationTest {
         
         
         List<List<Double>> lstOrigConstantValues = new ArrayList<List<Double>>();
+        
         
         SortedSet<RefinementNode> bestNodes = searcher.findExpression(graphs, 5);
         for (RefinementNode n : bestNodes) {
@@ -150,8 +141,14 @@ public class GraphGenerationTest {
             System.out.println();
         }
         
-        GraphRefinement grphRefinement = new GraphRefinement(graphs, 1000, grphGenerater, bestNodes);
+        /*
+         * ---------------------------------------
+         * refine the mimic graph
+         * ---------------------------------------
+         */
+        GraphRefinement grphRefinement = new GraphRefinement(graphs, 1000, grphGenerator, bestNodes);
         System.out.println("Refine graph randomly");
+        //grphRefinement.setRefineGraphRandomly(false);
         grphRefinement.setRefineGraphRandomly(true);
         ColouredGraph refinedGrph = grphRefinement.refineGraph();
         System.out.println("==============================");
@@ -160,15 +157,13 @@ public class GraphGenerationTest {
             System.out.println(val + " ");
         }
         
-        System.out.println("Refine graph based on the distribution");
-        grphRefinement.setRefineGraphRandomly(false);
-        refinedGrph = grphRefinement.refineGraph();
-        System.out.println("==============================");
-        for (RefinementNode n : bestNodes) {
-            double val = n.getExpression().getValue(refinedGrph);
-            System.out.println(val + " ");
-        }
-        System.out.println("End of graph refinement!");
+        /*
+         * ---------------------------------------
+         * lexicalize the mimic graph
+         * ---------------------------------------
+         */
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, grphGenerator);
+        SemanticWebDogFoodReader.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
 	}
 	
 	 @SuppressWarnings("unchecked")

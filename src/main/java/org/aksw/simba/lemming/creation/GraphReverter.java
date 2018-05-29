@@ -5,12 +5,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.util.Constants;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import toools.set.IntSet;
 
@@ -18,20 +21,26 @@ import com.carrotsearch.hppc.BitSet;
 
 public class GraphReverter {
 	
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphReverter.class);
+	
 	private ColouredGraph mGraph;
-	private Model mLatestModel; 
+	//private Model mLatestModel; 
 	private Model mNewModel;
+	
+	private int mResourceID = 1;
+	
 	public GraphReverter(ColouredGraph graph, Model origModel){
 		mGraph = graph;
-		mLatestModel = origModel;
-		
-		initializeModel(origModel);
+		mNewModel = origModel;
+		//mLatestModel = origModel;
+		//initialize new model
+		//initializeModel(origModel);
 	}
 	
-	private void initializeModel(Model origModel){
-		mNewModel = ModelFactory.createDefaultModel();
-		mNewModel.setNsPrefixes(origModel.getNsPrefixMap());
-	}
+//	private void initializeModel(Model origModel){
+//		mNewModel = ModelFactory.createDefaultModel();
+//		mNewModel.setNsPrefixes(origModel.getNsPrefixMap());
+//	}
 	
 	public Model processGraph(){
 		
@@ -41,35 +50,46 @@ public class GraphReverter {
 			/*
 			 *  process resources vertices
 			 */
-			BitSet tColo = mGraph.getVertexColour(tId);
-			String tURI = mGraph.getResourceURI(tColo);
-			Resource tRes = mNewModel.createResource(tURI);
+			String tDummyURI = mGraph.getResourceDummyURI(tId);
+			Resource tRes = mNewModel.createResource(tDummyURI);
 			
 			IntSet setOfOEIds = mGraph.getOutEdges(tId);
 			if(setOfOEIds != null && setOfOEIds.size() > 0 ){
-				
+				//array of out edges (object properties)
 				int [] arrOfOEIds = setOfOEIds.toIntArray();
 				
+				//iterate each out edge id
 				for(int oeId: arrOfOEIds){
+					// get the out edge's colour 
 					BitSet oeColo = mGraph.getEdgeColour(oeId);
-					int hId = mGraph.getHeadOfTheEdge(oeId);
-					BitSet hColo = mGraph.getVertexColour(hId);
-					
-					// get resources associated with the colours
-					
+					// get the corresponding URI
 					String propURI = mGraph.getPropertyURI(oeColo);
-					String hURI = mGraph.getResourceURI(hColo);
-					if(hURI == null || hURI.isEmpty()){
-						hURI = "http://org.apache.jena.rdfxml/blankObj#";
-					}
-					
 					if(propURI == null || propURI.isEmpty()){
 						propURI = "http://org.apache.jena.rdfxml/blankProp#";
+						LOGGER.warn("the property's URI is null or empty!");
 					}
 					
-					
-					Resource hRes = mNewModel.createResource(hURI);
 					Property propRes = mNewModel.createProperty(propURI);
+					
+					int hId = mGraph.getHeadOfTheEdge(oeId);
+					// get resources associated with the colours
+					String hDummyURI = "";
+					
+					if(propRes.equals(RDF.type)){
+						BitSet tColo = mGraph.getVertexColour(tId);
+						hDummyURI = mGraph.getResourceClass(tColo);
+						System.err.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
+					}else{
+						hDummyURI = mGraph.getResourceDummyURI(hId);
+						System.out.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
+					}
+					
+					if(hDummyURI == null || hDummyURI.isEmpty()){
+						hDummyURI = Constants.SIMULATED_BLANK_OBJECT_RESOURCE;
+						LOGGER.warn("the object's URI is null or empty!");
+					}
+					
+					Resource hRes = mNewModel.createResource(hDummyURI);
 					mNewModel.add(tRes, propRes, hRes);
 					
 					Triple triple = new Triple(tRes.asNode(), propRes.asNode(), hRes.asNode());
@@ -116,7 +136,7 @@ public class GraphReverter {
 	}
 	
 	
-	public void processGraphWithMultiThreads(Model model){
+	private void processGraphWithMultiThreads(Model model){
 		new grph.algo.MultiThreadProcessing(mGraph.getVertices()) {
 			
 			@Override
@@ -126,7 +146,7 @@ public class GraphReverter {
 				 *  process resources vertices
 				 */
 				BitSet tColo = mGraph.getVertexColour(vId);
-				String tURI = mGraph.getResourceURI(tColo);
+				String tURI = mGraph.getResourceDummyURI(vId);
 				Resource tRes = model.createResource(tURI);
 				
 				IntSet setOfOEIds = mGraph.getOutEdges(vId);
@@ -142,7 +162,7 @@ public class GraphReverter {
 						// get resources associated with the colours
 						
 						String propURI = mGraph.getPropertyURI(oeColo);
-						String hURI = mGraph.getResourceURI(hColo);
+						String hURI = mGraph.getResourceDummyURI(hId);
 						
 						
 						Resource hRes = model.createResource(hURI);

@@ -11,22 +11,22 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 
-public class RDFLiteralProposer implements IRDFLiteralProposer{
+public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(RDFLiteralProposer.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RDFLiteralGenerator.class);
 	
 	private Map<BitSet,Set<String>> mBaseData;
 	private Word2VecModel mWord2VecModel ;
 	
 	private Map<BitSet, float[]> mMeanVectors;
-	private Map<BitSet, float[]> mVariantVectors;
+	private Map<BitSet, float[]> mStandardDeviationVectors;
 	private Random mRand ;
 	
 	/**
 	 * Constructor
 	 * @param sampleData the map of data typed edge's colours and their corresponding words
 	 */
-	public RDFLiteralProposer(Map<BitSet, Set<String>> sampleData){
+	public RDFLiteralGenerator(Map<BitSet, Set<String>> sampleData){
 		mBaseData = sampleData;
 		mWord2VecModel = Word2VecFactory.get();
 		mRand = new Random();
@@ -78,22 +78,29 @@ public class RDFLiteralProposer implements IRDFLiteralProposer{
 			}
 			
 			mMeanVectors.put(dteColo, meanVec);
-			mVariantVectors.put(dteColo, standardDeviationVec);
+			mStandardDeviationVectors.put(dteColo, standardDeviationVec);
 		}
 	}
 
-	/**
-	 * compute the average value in each dimension for a vector according to a mean vector
-	 * @param wordVec an input vector
-	 * @param meanVec the corresponding mean vector
-	 * @return an average vector
+	/** 
+	 * Generate a random vector based on a mean vector and a standard deviation vector.
+	 * The mean and standard deivation vectors are got accordingly to the data typed edge's colour
+	 * 
+	 * @param dteColo the data typed edge's colour 
+	 * 
+	 * @return a random vector
 	 */
-	private float[] computeAverageVector(float [] wordVec, float[] meanVec){
-		float[] avrVec = new float[mWord2VecModel.vectorSize];
-		for (int i = 0 ; i < mWord2VecModel.vectorSize ; ++i){
-			avrVec[i] = (wordVec[i] + meanVec[i])/2;
+	private float[] getRandomVector(BitSet dteColo){
+		float [] randomVec = new float[mWord2VecModel.vectorSize];
+		
+		float[] meanVec = mMeanVectors.get(dteColo);
+		float[] stdDevVec = mStandardDeviationVectors.get(dteColo);
+		if(meanVec != null && meanVec.length > 0 && stdDevVec != null && stdDevVec.length > 0 ){
+			for(int i = 0 ; i < mWord2VecModel.vectorSize ; i++){
+				randomVec[i] = (float) mRand.nextGaussian() * stdDevVec[i] + meanVec[i];
+			}	
 		}
-		return avrVec; 
+		return randomVec;
 	}
 	
 	/**
@@ -103,22 +110,12 @@ public class RDFLiteralProposer implements IRDFLiteralProposer{
 	 * @return a string of words
 	 */
 	@Override
-	public String getWords(BitSet dteColo, Set<String> setOfBaseWords,
-			int noOfWords) {
+	public String getWords(BitSet dteColo, int noOfWords) {
 		String literal = "";
 		int tempNoOfGeneratedWords = 0;
-		if(dteColo != null && setOfBaseWords!=null && noOfWords > 0){
-			
-			if(setOfBaseWords.size() != noOfWords){
-				LOGGER.warn("The desired numberd of words is differnt to the number of sample words");
-			}
-			
-			float [] meanVec = mMeanVectors.get(dteColo);
-			
-			for(String word : setOfBaseWords){
-				
-				float[] wordVec = mWord2VecModel.word2vec.get(word);
-				wordVec = computeAverageVector(wordVec, meanVec);
+		if(dteColo != null  && noOfWords > 0){
+			while(tempNoOfGeneratedWords <= noOfWords){
+				float[] wordVec = getRandomVector(dteColo);
 				Map<String, float[]> mapNewWords = mWord2VecModel.getClosestEntry(wordVec);
 				if(mapNewWords != null && mapNewWords.size() > 0){
 					tempNoOfGeneratedWords ++;
@@ -129,33 +126,11 @@ public class RDFLiteralProposer implements IRDFLiteralProposer{
 					
 					literal += arrOfWords[mRand.nextInt(arrOfWords.length)]; 
 				}
-				
-				if(tempNoOfGeneratedWords > noOfWords){
-					break;
-				}
-			}
-			
-			if(tempNoOfGeneratedWords < noOfWords){
-				// get random word in the input list and generate until getting the desired number of words
-				String[] arrOfBaseWords = setOfBaseWords.toArray(new String[0]); 
-				while(tempNoOfGeneratedWords <= noOfWords){
-					String word = arrOfBaseWords[mRand.nextInt(arrOfBaseWords.length)];
-					float[] wordVec = mWord2VecModel.word2vec.get(word);
-					wordVec = computeAverageVector(wordVec, meanVec);
-					Map<String, float[]> mapNewWords = mWord2VecModel.getClosestEntry(wordVec);
-					if(mapNewWords != null && mapNewWords.size() > 0){
-						tempNoOfGeneratedWords ++;
-						
-						// get random a word and put it to the result
-						Set<String> setOfWords = mapNewWords.keySet();
-						String [] arrOfWords = setOfWords.toArray(new String[0]);
-						
-						literal += arrOfWords[mRand.nextInt(arrOfWords.length)]; 
-					}
-				}
 			}
 		}
 		
 		return literal;
 	}
+	
+	
 }
