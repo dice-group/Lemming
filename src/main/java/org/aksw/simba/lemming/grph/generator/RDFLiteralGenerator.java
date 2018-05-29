@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.grph.generator;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -30,6 +31,9 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 		mBaseData = sampleData;
 		mWord2VecModel = Word2VecFactory.get();
 		mRand = new Random();
+		
+		mMeanVectors = new HashMap<BitSet, float[]>();
+		mStandardDeviationVectors = new HashMap<BitSet, float[]>();
 		computeDataVectors();
 	}
 	
