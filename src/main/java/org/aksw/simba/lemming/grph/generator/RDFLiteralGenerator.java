@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.word2vecrestful.word2vec.Word2VecFactory;
 import org.aksw.word2vecrestful.word2vec.Word2VecModel;
 import org.slf4j.Logger;
@@ -123,6 +124,9 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 		String literal = "";
 		int tempNoOfGeneratedWords = 0;
 		if(dteColo != null  && noOfWords > 0){
+			double currentTime = System.currentTimeMillis();
+	       
+			
 			while(tempNoOfGeneratedWords <= noOfWords){
 				float[] wordVec = getRandomVector(dteColo);
 				if(wordVec != null ){
@@ -138,6 +142,8 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 					}
 				}
 			}
+		    currentTime = System.currentTimeMillis() - currentTime;
+		    System.out.println("Time to get " + noOfWords + " of data typed edge's colour ("+dteColo+") is " + currentTime);
 		}
 		
 		return literal;
