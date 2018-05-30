@@ -87,12 +87,13 @@ public class GraphLexicalization {
 							if (numOfConsidedVertices == 0) {
 								numOfConsidedVertices = 1;
 							}
-
+							System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
 							numOfConsidedVertices = Math
 									.round(numOfConsidedVertices);
 							int indexOfVertex = 0;
 							while (indexOfVertex < numOfConsidedVertices) {
 								
+								System.out.println("[Test] The vertex: " + indexOfVertex);
 								// get a
 								int vId = arrOfVertices[indexOfVertex];
 								// get literal
