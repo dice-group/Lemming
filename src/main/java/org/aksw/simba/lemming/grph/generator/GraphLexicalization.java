@@ -34,10 +34,10 @@ public class GraphLexicalization {
 		mLiteralProcessor = new LiteralProcessor(origGrphs);
 
 		// word2vec model to obtain closest
-		mWordProposer = new RDFLiteralGenerator(
-				mLiteralProcessor.getWordsOfEachDTEColour());
+		//mWordProposer = new RDFLiteralGenerator(
+		//		mLiteralProcessor.getWordsOfEachDTEColour());
 		
-		//mWordProposer = new RDFLiteralGeneratorTest(mLiteralProcessor.getWordsOfEachDTEColour());
+		mWordProposer = new RDFLiteralGeneratorTest(mLiteralProcessor.getWordsOfEachDTEColour());
 	}
 
 	public ColouredGraph lexicalizeGraph() {
