@@ -86,8 +86,8 @@ public class RDFLiteralGenerator implements IRDFLiteralGenerator{
 			
 			mMeanVectors.put(dteColo, meanVec);
 			mStandardDeviationVectors.put(dteColo, standardDeviationVec);
-			LOGGER.info("End - computation of a mean vector and a standard deviation vector");
 		}
+		LOGGER.info("End - computation of a mean vector and a standard deviation vector");
 	}
 
 	/** 
