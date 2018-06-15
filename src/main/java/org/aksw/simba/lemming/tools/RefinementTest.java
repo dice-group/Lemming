@@ -14,12 +14,7 @@ import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinem
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.DiameterMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.junit.Ignore;
 import org.slf4j.Logger;
