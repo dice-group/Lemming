@@ -22,7 +22,7 @@ public class GraphRefinement {
 	
 	private int mMaxIteration = 1000 ;
 	private boolean mProcessRandomly = true;
-	private int mMaxRepeatedSelection = 5000;
+	private int mMaxRepeatedSelection = 50000;
 	
 	private IGraphGeneration mGraphGenerator;
 	
@@ -70,13 +70,13 @@ public class GraphRefinement {
 		
 		for(int i = 0 ; i < mMaxIteration ; ++i){
 
-			// go left
+			// go left by removing an edge
 			removeEdges(clonedGrph);
 			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());
 			lErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph);
 			undoChangingGrph(clonedGrph, Constants.REMOVE_ACTION);
 			
-			 // go right
+			 // go right by adding a new edge
 			addEdges(clonedGrph);
 			//System.out.println("[R]Aft -Number of edges: "+ parentGrph.getEdges().size());
 			rErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph);
@@ -122,7 +122,14 @@ public class GraphRefinement {
 		return clonedGrph;
 	}
 	
-	
+	/**
+	 * Compute the smallest error score among the three inputs
+	 * 
+	 * @param pErrScore the error score at the parent node
+	 * @param lErrScore the error score if go left
+	 * @param rErrScore the error score if go right
+	 * @return the smalles error score among them
+	 */
 	private double minValues(double pErrScore, double lErrScore, double rErrScore){
 		double minErrScore = Double.MAX_VALUE;
 		if(pErrScore != Double.NaN && pErrScore < minErrScore){
@@ -158,6 +165,13 @@ public class GraphRefinement {
 		}
 	}
 	
+	/**
+	 * redo the change of the graph from the previous action 
+	 * 			(the action: REMOVING an edge or ADDING an edge)
+	 *  
+	 * @param mimicGrph the target graph requires redoing
+	 * @param beforeAction the previous action
+	 */
 	private void redoChangingGrph(ColouredGraph mimicGrph, int beforeAction){
 		// remove the same edge as previous removing action
 		if(beforeAction == Constants.REMOVE_ACTION){
@@ -175,6 +189,10 @@ public class GraphRefinement {
 		}
 	}
 	
+	/**
+	 * remove an edge 
+	 * @param clonedGrph the target graph
+	 */
 	private void removeEdges(ColouredGraph clonedGrph){
 		IntSet setOfEdges =	clonedGrph.getEdges();
 		Random rand = new Random();
@@ -197,6 +215,10 @@ public class GraphRefinement {
 		//System.out.println("\t - reID: " + edgeId +"("+headID+","+tailID+")"+ " c: " + lGrph.getEdgeColour(edgeId));
 	}
 	
+	/**
+	 * add an edge
+	 * @param mimicGrph the target graph
+	 */
 	private void addEdges(ColouredGraph mimicGrph){
 		TripleBaseSingleID pair = mGraphGenerator.getProposedTriple(mProcessRandomly);
 		int edgeId = mimicGrph.addEdge(pair.tailId, pair.headId, pair.edgeColour);
@@ -204,6 +226,9 @@ public class GraphRefinement {
 		pair.edgeId = edgeId;
 		mAddedTriples.add(pair);
 	}
+
+
+	
 }
 
 
