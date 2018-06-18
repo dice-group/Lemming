@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredIEDistPerVColour;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
+import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		
-		maxIterationFor1EdgeColo = 10000;
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 
 		computeAvrgIOEdgeDistPerVertColo(origGrphs);
 	}
@@ -64,16 +65,21 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			if(headColourProposer != null && headColourProposer!= null ){
 				
 				/* the setFakeEdgeIDs helps us to know how many edges existing
-				 * in a specific edge's colour*/ 
+				 * in a specific edge's colour
+				 */
 				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
+				
 				// use each edge to connect vertices
-				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
-					
+				int i = 0 ; 
+				while (i < setFakeEdgeIDs.size()){
+						
 					boolean isFoundVerticesConnected = false;
 					
-					// tail colour
+					// get tail colour based on distribution of the edge colour over the vertex colour 
 					BitSet tailColo = tailColourProposer.getPotentialItem();
+					// get a set of head colours associated with the edge colour and the tail colour
 					Set<BitSet> setRestrictedHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+					
 					// base on the possible linked head's colours got from the tailColo we get the potential headColo
 					BitSet headColo = headColourProposer.getPotentialItem(setRestrictedHeadColours);
 					
@@ -89,45 +95,57 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 				    		int[] arrHeadVertices = headIDs.toIntArray();
 				    		int tailId = arrTailVertices[mRandom.nextInt(arrTailVertices.length)];
 				    		int headId = arrHeadVertices[mRandom.nextInt(arrHeadVertices.length)];
-				    		mMimicGraph.addEdge(tailId, headId, edgeColo);
-				    		isFoundVerticesConnected = true;
-			    		}else{
-			    			System.err.println("Could not find any vertices with the tail's or head's colours!");
-							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+				    		
+				    		if(connectableVertices(tailId, headId, edgeColo)){
+								mMimicGraph.addEdge(tailId, headId, edgeColo);
+								isFoundVerticesConnected = true;
+								i++;
+							}
 			    		}
-					}else{
+//			    		else{
+//			    			System.err.println("Could not find any vertices with the tail's or head's colours!");
+//							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+//			    		}
+					}
+					else{
 						System.err.println("Could not find matching tail's and head's colours to connect!");
-						LOGGER.warn("Could not find matching tail's and head's colours to connect!");
+						LOGGER.error("Could not find matching tail's and head's colours to connect!");
 					}
 					
 					if (!isFoundVerticesConnected) {
-						i--;
 						// System.err.println("Could not link " + tailColo +
 						// " - " + edgeColo + " - "+ headColo);
 						maxIterationFor1EdgeColo--;
 						if (maxIterationFor1EdgeColo == 0) {
-							LOGGER.warn("Could not create "
+							LOGGER.error("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
-									+ " colour since it could not find any approriate vertices to connect.");
+									+ " colour since it could not find any approriate tail and head to connect.");
 							
 							System.err.println("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
-									+ " colour since it could not find any approriate vertices to connect.");
+									+ " colour since it could not find any approriate tail and head to connect.");
 							break;
 						}
 					}
 				}
-				if(maxIterationFor1EdgeColo==0){
-					maxIterationFor1EdgeColo = 10000;
-					continue;
-				}else{
-					maxIterationFor1EdgeColo =10000;
-				}
+				
+				
+				maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+				
 			}else{
+				
+				/*
+				 * this case may never happen since in RDF graph, an edge is always is used to connect 2 vertices 
+				 */
+				
 				LOGGER.warn("Could not consider the"
 						+ edgeColo
 						+ " edge's colour since it could not find any approriate vertex's colours.");
@@ -175,7 +193,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		
 		if(!isRandom){
-			System.out.println("using override function getProposedTriple(");
+			//System.out.println("using override function getProposedTriple(");
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
 				if(edgeColo != null){
@@ -198,20 +216,23 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 							int tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
 							int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
 							
-							TripleBaseSingleID triple = new TripleBaseSingleID();
-							triple.tailId = tailId;
-							triple.tailColour = tailColo;
-							triple.headId = headId;
-							triple.headColour = headColo;
-							triple.edgeColour = edgeColo;
 							
-							return triple;
+							if(connectableVertices(tailId, headId, edgeColo)){
+								TripleBaseSingleID triple = new TripleBaseSingleID();
+								triple.tailId = tailId;
+								triple.tailColour = tailColo;
+								triple.headId = headId;
+								triple.headColour = headColo;
+								triple.edgeColour = edgeColo;
+								
+								return triple;
+							}
 						}
 					}
 				}
 			}
 		}else{
-			System.out.println("using base function getProposedTriple(");
+			//System.out.println("using base function getProposedTriple(");
 			return super.getProposedTriple(true);
 		}
 	}

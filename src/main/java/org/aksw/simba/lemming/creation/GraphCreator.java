@@ -1,12 +1,15 @@
 package org.aksw.simba.lemming.creation;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
@@ -32,7 +35,7 @@ public class GraphCreator {
     protected ColourPalette edgePalette;
     
     protected ColourPalette datatypedEdgePalette;
-    protected Set<Resource> dataTypedProperties;
+    protected Map<Resource, Set<RDFDatatype>>dataTypedProperties;
     
     public GraphCreator() {
         // Initialize the classes
@@ -50,7 +53,7 @@ public class GraphCreator {
         edgePalette = new InMemoryPalette();
         edgePalette.addColour(RDF.type.getURI());
         
-        dataTypedProperties = new HashSet<Resource>();
+        dataTypedProperties = new HashMap<Resource, Set<RDFDatatype>>();
         datatypedEdgePalette = new InMemoryPalette();
     }
 
@@ -105,15 +108,24 @@ public class GraphCreator {
                 }
             }
             
-            //if this statement has an object as a literal
+            /*
+             * -------------------------------------------------
+             * if this statement has an object as a literal
+             * This section is already done in the function createDatatypedEdgePalette()
+             * -------------------------------------------------
+             *
             else{
-            	if(statement.getObject().isLiteral()){
+            	
+            	//data typed property
+        		property = statement.getPredicate();
+        		propertyUri = property.getURI();
+            	
+            	if(statement.getObject().isLiteral() && !dataTypedProperties.containsKey(property)){
             		//literal
             		Literal literal = statement.getObject().asLiteral();
             		
-            		//data typed property
-            		property = statement.getPredicate();
-            		propertyUri = property.getURI();
+            		
+            		//RDFDatatype litType= literal.getDatatype();
             		
             		//put datatype property to the palette
             		if(!datatypedEdgePalette.containsUri(propertyUri)){
@@ -124,6 +136,7 @@ public class GraphCreator {
             		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour);
             	}
             }
+            */
         }
         return graph;
     }
@@ -322,14 +335,23 @@ public class GraphCreator {
             subject = statement.getSubject();
             object = statement.getObject();
             property = statement.getPredicate();
-            if (statement.getObject().isLiteral()) {
-            	dataTypedProperties.add(property);
+            if (object.isLiteral()) {
+            	
+            	Set<RDFDatatype> setDatatypes = dataTypedProperties.get(property);
+            	if(setDatatypes == null){
+            		setDatatypes = new HashSet<RDFDatatype>();
+            		dataTypedProperties.put(property, setDatatypes);
+            	}
+            	RDFDatatype type = object.asLiteral().getDatatype();
+            	// get data type 
+            	setDatatypes.add(type);
             }
         }
 
      // All properties have been collected
         // The colours can be defined
-        for (Resource res : dataTypedProperties) {
+        Set<Resource> setOfResources = dataTypedProperties.keySet();
+        for (Resource res : setOfResources) {
         	datatypedEdgePalette.addColour(res.getURI());
         }
         

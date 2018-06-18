@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgInDegreeDistBaseVEColo;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgOutDegreeDistBaseVEColo;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
+import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	public GraphGenerationRandomly2(int iNumberOfVertices,
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
-		maxIterationFor1EdgeColo = 10000;
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;;
 		
 		// extend step compared to the class GraphGenerationSimpleApproach
 		computePotentialIODegreePerVert(origGrphs);
@@ -49,9 +50,10 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 				/* the setFakeEdgeIDs helps us to know how many edges existing
 				 * in a specific edge's colour*/ 
 				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
-				// use each edge to connect vertices
-				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
-					
+				int i = 0 ;
+				while(i < setFakeEdgeIDs.size()){
+					// use each edge to connect vertices
+						
 					boolean isFoundVerticesConnected = false;
 					
 					BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
@@ -69,36 +71,45 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 							
 							int tailId = tailIDProposer.getPotentialItem();
 							int headId = headIDProposer.getPotentialItem();
-							
-							mMimicGraph.addEdge(tailId, headId, edgeColo);
-							isFoundVerticesConnected = true;
-						}else{
-							System.err.println("Could not find any vertices with the tail's or head's colours!");
-							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+							if(connectableVertices(tailId, headId, edgeColo)){
+								mMimicGraph.addEdge(tailId, headId, edgeColo);
+								isFoundVerticesConnected = true;
+								i++;
+							}
 						}
+//						else{
+//							System.err.println("Could not find any vertices with the tail's or head's colours!");
+//							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+//						}
 					}
 					
 					if (!isFoundVerticesConnected) {
-						i--;
 						maxIterationFor1EdgeColo--;
 						if (maxIterationFor1EdgeColo == 0) {
-							LOGGER.warn("Could not create "
+							LOGGER.error("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate tail and head to connect.");
 							
 							System.err.println("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate tail and head to connect.");
 							break;
 						}
 					}
 				}
+				
+				maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+				
 			}else{
-				LOGGER.warn("Could not consider the"
+				LOGGER.error("Could not consider the"
 						+ edgeColo
 						+ " edge's coloursince it could not find any distribution of edges.");
 				
@@ -112,7 +123,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		if(!isRandom){
-			System.out.println("using override function getProposedTriple(");
+			//System.out.println("using override function getProposedTriple(");
 			
 			Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
 			BitSet[] arrVertexColours = setVertexColours.toArray(new BitSet[]{});
@@ -148,22 +159,25 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 							
 							int tailId = tailIDsProposer.getPotentialItem();
 							int headId = headIDsProposer.getPotentialItem();
-							
-							TripleBaseSingleID triple = new TripleBaseSingleID();
-							triple.tailId = tailId;
-							triple.tailColour = tailColo;
-							triple.headId = headId;
-							triple.headColour = headColo;
-							triple.edgeColour = edgeColo;
-							
-							return triple;
+							if(connectableVertices(tailId, headId, edgeColo)){
+								
+								// if the vertices can be connected via the edge colour => connect them 
+								TripleBaseSingleID triple = new TripleBaseSingleID();
+								triple.tailId = tailId;
+								triple.tailColour = tailColo;
+								triple.headId = headId;
+								triple.headColour = headColo;
+								triple.edgeColour = edgeColo;
+								
+								return triple;
+							}
 						}
 					}
 				}
 			}
 			
 		}else{
-			System.out.println("using base function getProposedTriple(");
+			//System.out.println("using base function getProposedTriple(");
 			return super.getProposedTriple(true);
 		}
 	}

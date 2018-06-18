@@ -8,10 +8,8 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 
 import toools.set.IntSet;
-import brite.Graph.Graph;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
@@ -45,8 +43,6 @@ public class ColourMappingRules implements IColourMappingRules{
 	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
 	
 	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
-	
-	
 	
 	boolean mIsMultiThreadProcessing = false;
 	
@@ -454,12 +450,9 @@ public class ColourMappingRules implements IColourMappingRules{
 		}
 		return false;
 	}
-
-	@Override
-	public Set<BitSet> getDataTypedEdgeColoursByVertexColour(BitSet vertexColour) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
+	
+	
 	
 	@Deprecated
 	private void analyzeRulesWithMultiThreads(ColouredGraph[] origGrphs){

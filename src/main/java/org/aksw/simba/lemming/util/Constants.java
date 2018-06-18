@@ -24,4 +24,7 @@ public class Constants {
 	public static final String TYPE_CLASS_PREFIX = "class_";
 	public static final String TYPE_SUBCLASS_PREFIX = "subclass_";
 	public static final String PROPERTY = "property_";
+	
+	public static final int MAX_ITERATION_FOR_1_COLOUR = 1000000;
+	
 }

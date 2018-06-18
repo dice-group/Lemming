@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.grph.generator;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 	public GraphGenerationRandomly(int iNumberOfVertices,
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
-		maxIterationFor1EdgeColo = 1000;
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 	}
 
 	public ColouredGraph generateGraph(){
@@ -34,8 +35,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			 * in a specific edge's colour*/ 
 			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
-			for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
-				
+			int i = 0 ;
+			while(i < setFakeEdgeIDs.size()){
+					
 				boolean isFoundVerticesConnected = false;
 				
 				BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
@@ -55,27 +57,32 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						int tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
 						int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
-						
-						mMimicGraph.addEdge(tailId, headId, edgeColo);
-						isFoundVerticesConnected = true;
-					}else{
-						System.err.println("Could not find any vertices with the tail's or head's colours!");
-						LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+						if(connectableVertices(tailId, headId, edgeColo)){
+							mMimicGraph.addEdge(tailId, headId, edgeColo);
+							isFoundVerticesConnected = true;	
+							i++;
+						}
+//						else{
+//							System.err.println("Found same vertices to connect");
+//						}
 					}
+//					else{
+//						System.err.println("Could not find any vertices with the tail's or head's colours!");
+//						LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+//					}
 				}
 				
 				if (!isFoundVerticesConnected) {
-					i--;
 					maxIterationFor1EdgeColo--;
 					if (maxIterationFor1EdgeColo == 0) {
-						LOGGER.warn("Could not create "
-								+ setFakeEdgeIDs.size()
+						LOGGER.error("Could not create "
+								+ (setFakeEdgeIDs.size() - i)
 								+ " edges in the "
 								+ edgeColo
 								+ " colour since it could not find any approriate vertices to connect.");
 						
 						System.err.println("Could not create "
-								+ setFakeEdgeIDs.size()
+								+ (setFakeEdgeIDs.size() - i)
 								+ " edges in the "
 								+ edgeColo
 								+ " colour since it could not find any approriate vertices to connect.");
@@ -83,6 +90,8 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					}
 				}
 			}
+			
+			maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		}
 		return mMimicGraph;
 	}

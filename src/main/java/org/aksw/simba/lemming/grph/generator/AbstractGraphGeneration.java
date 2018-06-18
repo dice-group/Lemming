@@ -33,27 +33,26 @@ public abstract class AbstractGraphGeneration {
 	protected int mIDesiredNoOfVertices = 0;
 	protected int mIDesiredNoOfEdges = 0;
 	
-	protected IOfferedItem<BitSet> mEdgeColoProposer;
+	protected ObjectDistribution<BitSet> mVertColoDist;
+	protected ObjectDistribution<BitSet> mEdgeColoDist;
 	
-	protected Random mRandom ;	
 	/*
 	 * the keys are the vertex's color and the values are the set of vertex's ids
 	 */
 	protected Map<BitSet, IntSet> mMapColourToVertexIDs = new HashMap<BitSet, IntSet>();
+	
 	/*
 	 * the keys are the edge's color and the values are the set of edge's ids
 	 * (note: fake id)
 	 */
 	protected Map<BitSet, IntSet> mMapColourToEdgeIDs = new HashMap<BitSet, IntSet>();
-	
-	protected ObjectDistribution<BitSet> mVertColoDist;
-	protected ObjectDistribution<BitSet> mEdgeColoDist;
-	
+
 	/*
 	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
 	 * to each vertex's id
 	 */
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
+	
 	/*
 	 * the key1: the in-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
 	 * to each vertex's id
@@ -62,9 +61,27 @@ public abstract class AbstractGraphGeneration {
 	
 	protected ColouredGraph mMimicGraph;
 	
+	/*
+	 * the mColourMapper is responsible for monitoring connection between vertex colours using edge colour 
+	 */
 	protected IColourMappingRules mColourMapper;
 	
+	/*
+	 * this set manage a list of considered edge's colours can only exist in the mimic graph
+	 * An edge colour can only exist if there are vertices in colours such that the edge colour can be use 
+	 * to connect them
+	 */
 	private HashSet<BitSet> mSetOfRestrictedEdgeColours = new HashSet<BitSet>();
+	
+	/*
+	 * 1st key: the edge colour, 2nd key is the tail id and the value is the set of already connected head id
+	 */
+	private Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertex;
+	
+	protected IOfferedItem<BitSet> mEdgeColoProposer;
+	
+	protected Random mRandom ;
+	
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs){
 		mIDesiredNoOfVertices = iNumberOfVertices;
@@ -77,6 +94,8 @@ public abstract class AbstractGraphGeneration {
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
+		
+		mMapEdgeColoursToConnectedVertex = new HashMap<BitSet, Map<Integer, IntSet>>();
 		
 		mRandom = new Random();
 		
@@ -154,46 +173,66 @@ public abstract class AbstractGraphGeneration {
 		return null;
 	}
 	
+	/**
+	 * get a proposed triple of tail, head and their connection via edge
+	 */
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
 		BitSet[] arrVertexColours = setVertexColours.toArray(new BitSet[]{});
 		
 		while(true){
-			// tail colour
+			// get a random tail colour
 			BitSet tailColo = arrVertexColours[mRandom.nextInt(arrVertexColours.length)];
 			
+			// get associated edge colour based on the tail colour
 			Set<BitSet> possOutEdgeColours = mColourMapper.getPossibleOutEdgeColours(tailColo);
 			
-			if(possOutEdgeColours != null && possOutEdgeColours.size() > 0){
-				BitSet[] arrEdgeColours = possOutEdgeColours.toArray(new BitSet[]{});
+			/*
+			 * it is supposed that there always exist at least one edge colour used to connect
+			 * the vertices in the tail colour to other vertices
+			 */
+			//if(possOutEdgeColours != null && possOutEdgeColours.size() > 0){
+			BitSet[] arrEdgeColours = possOutEdgeColours.toArray(new BitSet[]{});
+			
+			// chose a random edge colour
+			BitSet edgeColo = arrEdgeColours[mRandom.nextInt(arrEdgeColours.length)];
+			
+			// get a set of head colours associated with the edgeColo and the tailColo
+			Set<BitSet> possHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+			
+			/*
+			 * it is supposed that there always exist at least one head colour that can be
+			 * connected with the tail colour via the edge colour
+			 */
+			//if(possHeadColours != null && possHeadColours.size() > 0){
+			BitSet[] arrHeadColours = possHeadColours.toArray(new BitSet[]{});
+			BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
+			
+			// get vertex's ids according to the vertex's colours
+			if(mMapColourToVertexIDs.get(headColo) != null){
+				int[] arrTailIDs = mMapColourToVertexIDs.get(tailColo).toIntArray();
+				int[] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
 				
-				BitSet edgeColo = arrEdgeColours[mRandom.nextInt(arrEdgeColours.length)];
-				
-				Set<BitSet> possHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
-				if(possHeadColours != null && possHeadColours.size() > 0){
-					BitSet[] arrHeadColours = possHeadColours.toArray(new BitSet[]{});
-					BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
+				int tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
+				int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+				if(connectableVertices(tailId, headId, edgeColo)){
+					// if the vertices can be connected via the edge colour => connect them
+					TripleBaseSingleID triple = new TripleBaseSingleID();
+					triple.tailId = tailId;
+					triple.tailColour = tailColo;
+					triple.headId = headId;
+					triple.headColour = headColo;
+					triple.edgeColour = edgeColo;
 					
-					// get vertex's ids according to the vertex's colours
-					if(mMapColourToVertexIDs.get(headColo) != null){
-						int[] arrTailIDs = mMapColourToVertexIDs.get(tailColo).toIntArray();
-						int[] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
-						
-						int tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
-						int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
-						
-						TripleBaseSingleID triple = new TripleBaseSingleID();
-						triple.tailId = tailId;
-						triple.tailColour = tailColo;
-						triple.headId = headId;
-						triple.headColour = headColo;
-						triple.edgeColour = edgeColo;
-						
-						return triple;
-					}
+					return triple;	
 				}
+//				else{
+//					System.err.println("There existing an edge in "+edgeColo+" connect the vertices");
+//				}
 			}
+			//}
+			//}
 		}
 	}
 	
@@ -382,5 +421,27 @@ public abstract class AbstractGraphGeneration {
 				palette.updateColour(colour, uri);
 			}
 		}
+	}
+	
+	public boolean connectableVertices(int tailId, int headId, BitSet eColo){
+		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertex.get(eColo);
+		boolean canConnect = false;
+		if(mapTailToHeads == null){
+			mapTailToHeads = new HashMap<Integer, IntSet>();
+			mMapEdgeColoursToConnectedVertex.put(eColo, mapTailToHeads);
+		}
+		
+		IntSet setOfHeads = mapTailToHeads.get(tailId);
+		if(setOfHeads == null){
+			setOfHeads = new DefaultIntSet();
+			mapTailToHeads.put(tailId, setOfHeads);
+		}
+		
+		if(!setOfHeads.contains(headId)){
+			setOfHeads.add(headId);
+			canConnect = true;
+		}
+		
+		return canConnect;
 	}
 }

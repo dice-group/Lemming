@@ -16,6 +16,7 @@ import org.aksw.simba.lemming.metrics.dist.multi.AvrgOutDegreeDistBaseVEColo;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.rules.ColourMappingRules;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
+import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
 		
-		maxIterationFor1EdgeColo = 10000;
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
@@ -70,8 +71,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 				
 				// the setFakeEdgeIDs helps us to know how many edges existing in a specific edge's colour
 				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
-				for(int i = 0 ; i < setFakeEdgeIDs.size() ; i++){
-					
+				
+				int i = 0 ;
+				while (i< setFakeEdgeIDs.size()){
+						
 					boolean isFoundVerticesConnected = false;
 					
 					BitSet tailColo = tailColourProposer.getPotentialItem();
@@ -91,47 +94,52 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						if(tailIDsProposer !=null && headIDsProposer != null ){
 							Integer tailId = tailIDsProposer.getPotentialItem();
 							Integer headId = headIDsProposer.getPotentialItem();
-							if(tailId != null && headId != null){
+							if(tailId != null && headId != null && 
+									connectableVertices(tailId, headId, edgeColo)){
 								mMimicGraph.addEdge(tailId, headId, edgeColo);
 								isFoundVerticesConnected = true;
+								i++;
 							}
-						}else{
-							System.err.println("Could not find any vertices with the tail's or head's colours!");
-							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
 						}
+//						else{
+//							System.err.println("Could not find any vertices with the tail's or head's colours!");
+//							LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
+//						}
 					}else{
 						System.err.println("Could not find matching tail's and head's colours to connect!");
 						LOGGER.warn("Could not find matching tail's and head's colours to connect!");
 					}
 					
 					if(!isFoundVerticesConnected){
-						i--;
-		    			//System.err.println("Could not link " + tailColo + " - " + edgeColo + " - "+ headColo);
 		    			maxIterationFor1EdgeColo--;
 		    			if(maxIterationFor1EdgeColo== 0){
 		    				LOGGER.warn("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate tail and head to connect.");
 							
 							System.err.println("Could not create "
+									+ (setFakeEdgeIDs.size() - i)
+									+ " edges (" 
 									+ setFakeEdgeIDs.size()
-									+ " edges in the "
+									+") in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate tail and head to connect.");
 		    				break;
 		    			}
 					}
 				}
+
+				maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 				
-				if(maxIterationFor1EdgeColo==0){
-					maxIterationFor1EdgeColo = 10000;
-					continue;
-				}else{
-					maxIterationFor1EdgeColo = 10000;
-				}
 			}else{
+				/*
+				 * this case seems to never happen since for an edge there are always vertices to be connected
+				 */
+				
 				LOGGER.warn("Could not consider the"
 						+ edgeColo
 						+ " edge's colour since it could not find any approriate vertices to connect.");
@@ -300,7 +308,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						if(tailIDsProposer !=null && headIDsProposer != null ){
 							Integer tailId = tailIDsProposer.getPotentialItem();
 							Integer headId = headIDsProposer.getPotentialItem();
-							if(tailId != null && headId != null){
+							if(tailId != null && headId != null && 
+									connectableVertices(tailId, headId, edgeColo)){
 								TripleBaseSingleID triple = new TripleBaseSingleID();
 								triple.tailId = tailId;
 								triple.tailColour = tailColo;

@@ -18,6 +18,7 @@ import org.aksw.simba.lemming.dist.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.metrics.dist.multi.TripleColourDistributionMetric;
 import org.aksw.simba.lemming.rules.TripleBaseSetOfIDs;
+import org.aksw.simba.lemming.util.Constants;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
-		maxIterationFor1EdgeColo = 1000;
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		
 		/*
 		 *  compute edges and vertices distribution over each triple's colour
@@ -72,9 +73,9 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 			TripleColourDistributionMetric colorMapping = new TripleColourDistributionMetric();
 			colorMapping.applyWithSingleThread(grph);
 			mLstEVColorMapping.add(colorMapping);
-			System.out.println("-------------");
+			//System.out.println("-------------");
 			//testing
-			colorMapping.printInfo();
+			//colorMapping.printInfo();
 		}
 	}
 	
@@ -93,18 +94,18 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 
 					int iNoOfSamples = mLstEVColorMapping.size();
 					for (int i = 0; i < iNoOfSamples; i++) {
-						TripleColourDistributionMetric coloMapper = mLstEVColorMapping
+						TripleColourDistributionMetric tripleColourMapper = mLstEVColorMapping
 								.get(i);
 
-						double noOfHeads = coloMapper.getNoOfIncidentHeads(tailColo, edgeColo, headColo);
-						double noOfTails = coloMapper.getNoOfIncidentTails(tailColo, edgeColo, headColo);
-						double noOfEdges = coloMapper.getNoOfIncidentEdges(tailColo, edgeColo, headColo);
+						double noOfHeads = tripleColourMapper.getNoOfIncidentHeads(tailColo, edgeColo, headColo);
+						double noOfTails = tripleColourMapper.getNoOfIncidentTails(tailColo, edgeColo, headColo);
+						double noOfEdges = tripleColourMapper.getNoOfIncidentEdges(tailColo, edgeColo, headColo);
 
 						if (noOfHeads != 0 && noOfTails != 0 && noOfEdges != 0) {
 							avrgDenominator++;
-							totalHeadPercentage += (noOfHeads / coloMapper.getTotalNoOfVerticesIn(headColo));
-							totalTailPercentage += (noOfTails / coloMapper.getTotalNoOfVerticesIn(tailColo));
-							totalEdgePercentage += (noOfEdges / coloMapper.getTotalNoOfEdgesIn(edgeColo));
+							totalHeadPercentage += (noOfHeads / tripleColourMapper.getTotalNoOfVerticesIn(headColo));
+							totalTailPercentage += (noOfTails / tripleColourMapper.getTotalNoOfVerticesIn(tailColo));
+							totalEdgePercentage += (noOfEdges / tripleColourMapper.getTotalNoOfEdgesIn(edgeColo));
 						} else {
 							// for testing only
 							if ((noOfHeads + noOfTails + noOfHeads) != 0) {
@@ -323,54 +324,81 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 		
 		for(BitSet tailColo: setVertColo){
 			for(BitSet headColo : setVertColo){
-				for(BitSet edgeColo: setEdgeColo){
-					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
-					if(mapHeadEdgeToGrpTriples != null){
-						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
-						if(mapEdgeToGrpTriples!= null){
+				Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
+				if(mapHeadEdgeToGrpTriples != null){
+					Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
+					
+					if(mapEdgeToGrpTriples!= null){
+						for(BitSet edgeColo: setEdgeColo){
 							TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
 							if(triple != null){
-								if(triple.noOfEdges != 0){
-									double noOfEdges = triple.edgeIDs.size();
-//									int[] arrHeadIDs = triple.headIDs.toIntArray();
-//									int[] arrTailIDs = triple.tailIDs.toIntArray();
+								double noOfEdges = triple.edgeIDs.size();
+								if(noOfEdges != 0){
+	//									int[] arrHeadIDs = triple.headIDs.toIntArray();
+	//									int[] arrTailIDs = triple.tailIDs.toIntArray();
 									
-									int[] arrHeadIDs = getRandomVertices(triple.headColour, triple.noOfHeads);
-									int[] arrTailIDs = getRandomVertices(triple.tailColour, triple.noOfTails);
+									IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads);
+									IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails);
+									
+									if(setOfRandomHeadIds == null || setOfRandomTailIds == null){
+										System.err.println("There exists no vertices in " + triple.headColour +" or " + triple.tailColour +" colour");
+										continue;
+									}
+									
+									int[] arrHeadIDs = setOfRandomHeadIds.toIntArray();
+									int[] arrTailIDs = setOfRandomTailIds.toIntArray();
 									triple.headIDs.addAll(arrHeadIDs);
 									triple.tailIDs.addAll(arrTailIDs);
 									
+									/*
+									 *  standardize the amount of edges and vertices
+									 *  this makes sure there is no pair of vertices are connected by 
+									 *  2 edges in same colour 
+									 */
+									if(arrHeadIDs.length * arrTailIDs.length < noOfEdges){
+										System.err.println("Not generate " + (noOfEdges - (arrHeadIDs.length * arrTailIDs.length)) + " edges in "+ edgeColo );
+										noOfEdges = arrHeadIDs.length * arrTailIDs.length;
+									}
 									
-									IntSet connectedHeadIds = new DefaultIntSet();
-									IntSet connectedTailIds = new DefaultIntSet();
+									
+									Map<Integer, IntSet> mapConnected = new HashMap<Integer, IntSet>();
 									
 									Random rand = new Random();
-									for(int i = 0 ; i < noOfEdges ; i++){
-										int headId = arrHeadIDs[rand.nextInt(arrHeadIDs.length)];
+									int headId = -1;
+									int i = 0 ; 
+									while(i < noOfEdges){
+										// select a random tail
 										int tailId = arrTailIDs[rand.nextInt(arrTailIDs.length)];
 										
-										if(connectedHeadIds.size() < arrHeadIDs.length){
-											while(connectedHeadIds.contains(headId)){
-												headId = arrHeadIDs[rand.nextInt(arrHeadIDs.length)];
-											}
+										setOfRandomHeadIds = triple.headIDs.clone();
+										
+										// get list of already connected head
+										IntSet setConnectedHeads = mapConnected.get(tailId);
+										if(setConnectedHeads == null){
+											setConnectedHeads = new DefaultIntSet();
+											mapConnected.put(tailId, setConnectedHeads);
 											
-											connectedHeadIds.add(headId);
 										}else{
-											headId = arrHeadIDs[rand.nextInt(arrHeadIDs.length)];
+											setOfRandomHeadIds.removeAll(setConnectedHeads);
 										}
 										
-										if(connectedTailIds.size() < arrTailIDs.length){
-											while(connectedTailIds.contains(tailId)){
-												tailId = arrTailIDs[rand.nextInt(arrTailIDs.length)];
-											}
-											
-											connectedTailIds.add(tailId);
-										}else{
-											tailId = arrTailIDs[rand.nextInt(arrTailIDs.length)];
+										arrHeadIDs = setOfRandomHeadIds.toIntArray();
+										
+										if(arrHeadIDs.length == 0){
+											setOfRandomTailIds.remove(tailId);
+											arrTailIDs = setOfRandomTailIds.toIntArray();
+											System.err.println("No head any more! Remove the tail id: " + tailId);
+											continue;
 										}
 										
-										mMimicGraph.addEdge(tailId, headId, edgeColo);
-									}	
+										headId = arrHeadIDs[rand.nextInt(arrHeadIDs.length)];
+										setConnectedHeads.add(headId);
+										
+										if(connectableVertices(tailId, headId, triple.edgeColour)){
+											mMimicGraph.addEdge(tailId, headId, edgeColo);
+											i++;
+										}
+									}// end while	
 								}
 							}
 						}
@@ -383,17 +411,17 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 		return mMimicGraph;
 	}
 	
-	private int[] getRandomVertices(BitSet vertColo, double iNoOfVertices){
+	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices){
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo);
 		if(setVertices != null){
 			Random rand = new Random();
-			int[] arrVertices = setVertices.toIntArray();
+			
+			int[] arrVertices= setVertices.toIntArray();
 			
 			IntSet res = new DefaultIntSet();
 			
 			if(iNoOfVertices >= arrVertices.length){
 				iNoOfVertices = arrVertices.length;
-				return arrVertices;
 			}
 			
 			while(iNoOfVertices > 0){
@@ -404,7 +432,7 @@ public class GraphGenerationGroupingTriple extends AbstractGraphGeneration
 				}
 			}
 			
-			return res.toIntArray();
+			return res;
 		}
 		return null;
 	}
