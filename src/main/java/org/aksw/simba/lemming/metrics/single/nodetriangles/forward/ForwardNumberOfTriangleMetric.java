@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles.forward;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
@@ -48,8 +49,12 @@ public class ForwardNumberOfTriangleMetric extends AbstractMetric implements Sin
     @Override
     public double apply(ColouredGraph coloredGraph) {
         initialize(coloredGraph);
+//        TreeSet<Integer> visitedNodes = new TreeSet<>();
+        HashSet<Integer> visitedNodes = new HashSet<>();
         for (Integer nodeId : nodeOrdering.getOrderedNodes()) {
-            processNeighborsOf(nodeId);
+            if (!visitedNodes.contains(nodeId))
+                processNeighborsOf(nodeId);
+            visitedNodes.add(nodeId);
         }
         return amountOfTriangles;
     }
