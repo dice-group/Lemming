@@ -4,6 +4,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.EdgeForwardNumberOfTriangleMetric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -64,6 +65,16 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
         Assert.assertNotNull(graph);
 
         NumberOfTrianglesMetric metric = new NumberOfTrianglesMetric();
+        double countedTriangles = metric.apply(graph);
+
+        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+    }
+
+    @Test
+    public void EdgeForwardNumberOfTriangleTest() {
+        Assert.assertNotNull(graph);
+
+        EdgeForwardNumberOfTriangleMetric metric = new EdgeForwardNumberOfTriangleMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
