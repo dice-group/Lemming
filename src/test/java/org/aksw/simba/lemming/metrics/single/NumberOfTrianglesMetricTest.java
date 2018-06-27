@@ -8,9 +8,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 
-abstract class NumberOfTrianglesMetricTest {
+public abstract class NumberOfTrianglesMetricTest {
 
-    ColouredGraph getColouredGraph(String graphFile) {
+    protected ColouredGraph getColouredGraph(String graphFile) {
         Model model = ModelFactory.createDefaultModel();
         InputStream is = this.getClass().getClassLoader().getResourceAsStream(graphFile);
         model.read(is, null, "N3");

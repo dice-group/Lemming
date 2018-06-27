@@ -1,6 +1,7 @@
-package org.aksw.simba.lemming.metrics.single;
+package org.aksw.simba.lemming.metrics.single.tests;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.DuolionNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorNumberOfTrianglesMetric;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Random;
 
 @RunWith(Parameterized.class)
-public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTest{
+public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTest {
     private int expectedTriangles;
     private static final double DOUBLE_COMPARISON_DELTA = 0.000001;
     private ColouredGraph graph;
