@@ -1,16 +1,14 @@
 package org.aksw.simba.lemming.metrics.single.tests;
 
-import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.EdgeForwardNumberOfTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -20,8 +18,6 @@ import java.util.List;
 
 @RunWith(Parameterized.class)
 public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTest {
-    @Rule
-    public TestRule benchmarkRun = new BenchmarkRule();
 
     private int expectedTriangles;
     private static final double DOUBLE_COMPARISON_DELTA = 0.000001;
@@ -82,7 +78,7 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void EdgeForwardNumberOfTriangleTest() {
         Assert.assertNotNull(graph);
 
-        EdgeForwardNumberOfTriangleMetric metric = new EdgeForwardNumberOfTriangleMetric();
+        ForwardMetric metric = new ForwardMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);

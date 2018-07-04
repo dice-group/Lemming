@@ -23,18 +23,18 @@ import toools.set.IntSets;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorNumberOfTrianglesMetric.java
  *
  */
-public class NodeIteratorNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
 
     private IntSet highDegreeVertices;
 
 
-    public NodeIteratorNumberOfTrianglesMetric() {
+    public NodeIteratorMetric() {
         super("node-iterator #node triangles");
         this.highDegreeVertices = IntSets.emptySet;
     }
 
 
-    public NodeIteratorNumberOfTrianglesMetric(IntSet highDegreeVertices) {
+    public NodeIteratorMetric(IntSet highDegreeVertices) {
         this();
         this.highDegreeVertices = highDegreeVertices;
     }

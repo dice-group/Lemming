@@ -23,9 +23,9 @@ import toools.set.IntSets;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorCoreNumberOfTrianglesMetric.java
  *
  */
-public class NodeIteratorCoreNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValueMetric {
 
-    public NodeIteratorCoreNumberOfTrianglesMetric() {
+    public NodeIteratorCoreMetric() {
         super("node-iterator-core #node triangles");
     }
 

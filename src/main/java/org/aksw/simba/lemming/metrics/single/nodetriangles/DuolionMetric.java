@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/DuolionNumberOfTrianglesMetric.java
  *
  */
-public class DuolionNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class DuolionMetric extends AbstractMetric implements SingleValueMetric {
 
     private SingleValueMetric triangleCountingAlgorithm;
 
@@ -35,7 +35,7 @@ public class DuolionNumberOfTrianglesMetric extends AbstractMetric implements Si
     private ColouredGraph graphCopy;
 
 
-    public DuolionNumberOfTrianglesMetric(SingleValueMetric triangleCountingMetric, double edgeSurvivalProbability, long seed) {
+    public DuolionMetric(SingleValueMetric triangleCountingMetric, double edgeSurvivalProbability, long seed) {
         super("duolion " + triangleCountingMetric.getName());
         this.triangleCountingAlgorithm = triangleCountingMetric;
         this.edgeSurvivalProbability = edgeSurvivalProbability;

@@ -4,7 +4,7 @@ import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.EdgeForwardNumberOfTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
 import org.openjdk.jmh.annotations.*;
 
 /**
@@ -57,7 +57,7 @@ public class BenchmarkEdgeTriangles extends NumberOfTrianglesMetricTest {
     public void EdgeForwardNumberOfTriangle(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        EdgeForwardNumberOfTriangleMetric metric = new EdgeForwardNumberOfTriangleMetric();
+        ForwardMetric metric = new ForwardMetric();
         metric.apply(graphs.graph);
     }
 }

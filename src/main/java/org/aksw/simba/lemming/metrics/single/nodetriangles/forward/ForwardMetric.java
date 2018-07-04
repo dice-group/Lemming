@@ -1,18 +1,18 @@
-package org.aksw.simba.lemming.metrics.single.edgetriangles.forward;
+package org.aksw.simba.lemming.metrics.single.nodetriangles.forward;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
-import com.google.common.collect.Sets;
-import grph.Grph;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+
+import com.carrotsearch.hppc.cursors.IntCursor;
+import com.google.common.collect.Sets;
+
 import toools.set.IntSet;
 import toools.set.IntSets;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 
 /**
@@ -27,7 +27,7 @@ import java.util.List;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/forward/ForwardNumberOfTriangleMetric.java
  *
  */
-public class EdgeForwardNumberOfTriangleMetric extends AbstractMetric implements SingleValueMetric {
+public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
 
     private ColouredGraph coloredGraph;
 
@@ -38,16 +38,17 @@ public class EdgeForwardNumberOfTriangleMetric extends AbstractMetric implements
 
 
     /**
-     * Creates a new {@link EdgeForwardNumberOfTriangleMetric}.
+     * Creates a new {@link ForwardMetric}.
      */
-    public EdgeForwardNumberOfTriangleMetric() {
-        super("forward #edge triangles");
+    public ForwardMetric() {
+        super("forward #node triangles");
     }
 
 
     @Override
     public double apply(ColouredGraph coloredGraph) {
         initialize(coloredGraph);
+//        TreeSet<Integer> visitedNodes = new TreeSet<>();
         HashSet<Integer> visitedNodes = new HashSet<>();
         for (Integer nodeId : nodeOrdering.getOrderedNodes()) {
             if (!visitedNodes.contains(nodeId))
@@ -68,15 +69,7 @@ public class EdgeForwardNumberOfTriangleMetric extends AbstractMetric implements
         for (IntCursor adjacentNodeIdCursor : neighborSet) {
             int adjacentNodeId = adjacentNodeIdCursor.value;
             if (nodeOrdering.isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
-                Sets.SetView<Integer> intersection = Sets.intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId));
-                if (intersection.size() > 0) {
-                    for (int intersect : intersection) {
-                        amountOfTriangles = amountOfTriangles +
-                                IntSets.intersection(nodeOrdering.getEdges(nodeId), nodeOrdering.getEdges(adjacentNodeId)).size() *
-                                IntSets.intersection(nodeOrdering.getEdges(adjacentNodeId), nodeOrdering.getEdges(intersect)).size() *
-                                IntSets.intersection(nodeOrdering.getEdges(intersect), nodeOrdering.getEdges(nodeId)).size();
-                    }
-                }
+                amountOfTriangles += Sets.intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId)).size();
                 adjacencyDatastructure.get(adjacentNodeId).add(nodeId);
             }
         }
@@ -84,18 +77,17 @@ public class EdgeForwardNumberOfTriangleMetric extends AbstractMetric implements
 
 
     /**
-     * Initializes this {@link EdgeForwardNumberOfTriangleMetric} for the given {@link ColouredGraph}.
+     * Initializes this {@link ForwardMetric} for the given {@link ColouredGraph}.
      *
      * @param coloredGraph The {@link ColouredGraph} whose triangles should be computed by this
      *           metric.
      */
     private void initialize(ColouredGraph coloredGraph) {
         this.coloredGraph = coloredGraph;
-
         amountOfTriangles = 0;
         adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
         for (int i = 0; i < coloredGraph.getVertices().size(); i++) {
-            adjacencyDatastructure.add(new HashSet<>());
+            adjacencyDatastructure.add(new HashSet<Integer>());
         }
         nodeOrdering = new DegreeBasedDecreasingNodeOrdering(coloredGraph);
     }

@@ -6,7 +6,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
@@ -24,12 +24,12 @@ import toools.set.IntSets;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/AyzNumberOfTrianglesMetric.java
  *
  */
-public class AyzNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class ListingAyzMetric extends AbstractMetric implements SingleValueMetric {
 
     public double delta;
 
 
-    public AyzNumberOfTrianglesMetric(double delta) {
+    public ListingAyzMetric(double delta) {
         super("ayz #node triangles");
         this.delta = delta;
     }
@@ -54,7 +54,7 @@ public class AyzNumberOfTrianglesMetric extends AbstractMetric implements Single
 
 
     private double countTrianglesViaNodeIterator(ColouredGraph graph, IntSet highDegreeVertices) {
-        NodeIteratorNumberOfTrianglesMetric nodeIterator = new NodeIteratorNumberOfTrianglesMetric(highDegreeVertices);
+        NodeIteratorMetric nodeIterator = new NodeIteratorMetric(highDegreeVertices);
         return nodeIterator.apply(graph);
     }
 

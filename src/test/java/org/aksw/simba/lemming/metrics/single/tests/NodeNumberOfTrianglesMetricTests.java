@@ -2,12 +2,9 @@ package org.aksw.simba.lemming.metrics.single.tests;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.DuolionNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NumberOfSimpleTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.AyzNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardNumberOfTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.*;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.ListingAyzMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardMetric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +46,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
         Assert.assertNotNull(graph);
 
         final double delta = 3.0;
-        AyzNumberOfTrianglesMetric metric = new AyzNumberOfTrianglesMetric(delta);
+        ListingAyzMetric metric = new ListingAyzMetric(delta);
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
@@ -59,7 +56,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void ForwardNumberOfTriangleTest() {
         Assert.assertNotNull(graph);
 
-        ForwardNumberOfTriangleMetric metric = new ForwardNumberOfTriangleMetric();
+        ForwardMetric metric = new ForwardMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
@@ -69,7 +66,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void NodeIteratorCoreNumberOfTrianglesTest() {
         Assert.assertNotNull(graph);
 
-        NodeIteratorCoreNumberOfTrianglesMetric metric = new NodeIteratorCoreNumberOfTrianglesMetric();
+        NodeIteratorCoreMetric metric = new NodeIteratorCoreMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
@@ -79,7 +76,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void NodeIteratorNumberOfTrianglesTest() {
         Assert.assertNotNull(graph);
 
-        NodeIteratorNumberOfTrianglesMetric metric = new NodeIteratorNumberOfTrianglesMetric();
+        NodeIteratorMetric metric = new NodeIteratorMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
@@ -100,7 +97,17 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
         Assert.assertNotNull(graph);
 
         final double edgeSurvivalProbability = 0.9;
-        DuolionNumberOfTrianglesMetric metric = new DuolionNumberOfTrianglesMetric(new ForwardNumberOfTriangleMetric(), edgeSurvivalProbability, new Random().nextLong());
+        DuolionMetric metric = new DuolionMetric(new ForwardMetric(), edgeSurvivalProbability, new Random().nextLong());
+        double countedTriangles = metric.apply(graph);
+
+        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+    }
+
+    @Test
+    public void EdgeIteratorNumberOfTrianglesTest() {
+        Assert.assertNotNull(graph);
+
+        EdgeIteratorMetric metric = new EdgeIteratorMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);

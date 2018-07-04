@@ -1,11 +1,11 @@
 package org.aksw.simba.lemming.metrics.single.benchmark;
 
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NumberOfSimpleTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.AyzNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardNumberOfTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.ListingAyzMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardMetric;
 import org.openjdk.jmh.annotations.*;
 
 /**
@@ -22,7 +22,7 @@ public class BenchmarkNodeTriangles extends NumberOfTrianglesMetricTest {
         graphs.graph = getColouredGraph(graphs.fileName);
 
         final double delta = 3.0;
-        AyzNumberOfTrianglesMetric metric = new AyzNumberOfTrianglesMetric(delta);
+        ListingAyzMetric metric = new ListingAyzMetric(delta);
         metric.apply(graphs.graph);
     }
 
@@ -34,7 +34,7 @@ public class BenchmarkNodeTriangles extends NumberOfTrianglesMetricTest {
     public void ForwardNumberOfTriangle(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        ForwardNumberOfTriangleMetric metric = new ForwardNumberOfTriangleMetric();
+        ForwardMetric metric = new ForwardMetric();
         metric.apply(graphs.graph);
     }
 
@@ -46,7 +46,7 @@ public class BenchmarkNodeTriangles extends NumberOfTrianglesMetricTest {
     public void NodeIteratorCoreNumberOfTriangles(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        NodeIteratorCoreNumberOfTrianglesMetric metric = new NodeIteratorCoreNumberOfTrianglesMetric();
+        NodeIteratorCoreMetric metric = new NodeIteratorCoreMetric();
         metric.apply(graphs.graph);
     }
 
@@ -58,7 +58,7 @@ public class BenchmarkNodeTriangles extends NumberOfTrianglesMetricTest {
     public void NodeIteratorNumberOfTriangles(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        NodeIteratorNumberOfTrianglesMetric metric = new NodeIteratorNumberOfTrianglesMetric();
+        NodeIteratorMetric metric = new NodeIteratorMetric();
         metric.apply(graphs.graph);
     }
 
