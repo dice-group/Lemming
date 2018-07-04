@@ -12,19 +12,19 @@ import toools.set.IntSets;
 /**
  * @author DANISH AHMED on 6/13/2018
  */
-public class EdgeIteratorNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
 
     private IntSet highDegreeVertices;
     private IntSet[] edges;
 
 
-    public EdgeIteratorNumberOfTrianglesMetric() {
+    public NodeIteratorMetric() {
         super("edge-iterator #edge triangles");
         this.highDegreeVertices = IntSets.emptySet;
     }
 
 
-    public EdgeIteratorNumberOfTrianglesMetric(IntSet highDegreeVertices) {
+    public NodeIteratorMetric(IntSet highDegreeVertices) {
         this();
         this.highDegreeVertices = highDegreeVertices;
     }

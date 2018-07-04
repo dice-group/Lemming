@@ -3,7 +3,7 @@ package org.aksw.simba.lemming.metrics.single.tests;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
@@ -45,10 +45,10 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeIteratorNumberOfTrianglesTest() {
+    public void NodeIteratorTest() {
         Assert.assertNotNull(graph);
 
-        EdgeIteratorNumberOfTrianglesMetric metric = new EdgeIteratorNumberOfTrianglesMetric();
+        NodeIteratorMetric metric = new NodeIteratorMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
@@ -75,10 +75,20 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeForwardNumberOfTriangleTest() {
+    public void ForwardMetricTest() {
         Assert.assertNotNull(graph);
 
         ForwardMetric metric = new ForwardMetric();
+        double countedTriangles = metric.apply(graph);
+
+        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+    }
+
+    @Test
+    public void EdgeIteratorMetricTest() {
+        Assert.assertNotNull(graph);
+
+        EdgeIteratorMetric metric = new EdgeIteratorMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);

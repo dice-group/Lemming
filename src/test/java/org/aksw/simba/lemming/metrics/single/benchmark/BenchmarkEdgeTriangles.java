@@ -1,7 +1,8 @@
 package org.aksw.simba.lemming.metrics.single.benchmark;
 
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorNumberOfTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
@@ -18,10 +19,22 @@ public class BenchmarkEdgeTriangles extends NumberOfTrianglesMetricTest {
     @BenchmarkMode(Mode.AverageTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 4)
-    public void EdgeIteratorNumberOfTriangles(BenchmarkGraphs.Graphs graphs) {
+    public void NodeIteratorMetric(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        EdgeIteratorNumberOfTrianglesMetric metric = new EdgeIteratorNumberOfTrianglesMetric();
+        NodeIteratorMetric metric = new NodeIteratorMetric();
+        metric.apply(graphs.graph);
+    }
+
+    @Fork(value = 1, warmups = 1)
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @Warmup(iterations = 1)
+    @Measurement(iterations = 4)
+    public void EdgeIteratorMetric(BenchmarkGraphs.Graphs graphs) {
+        graphs.graph = getColouredGraph(graphs.fileName);
+
+        EdgeIteratorMetric metric = new EdgeIteratorMetric();
         metric.apply(graphs.graph);
     }
 
@@ -54,7 +67,7 @@ public class BenchmarkEdgeTriangles extends NumberOfTrianglesMetricTest {
     @BenchmarkMode(Mode.AverageTime)
     @Warmup(iterations = 1)
     @Measurement(iterations = 4)
-    public void EdgeForwardNumberOfTriangle(BenchmarkGraphs.Graphs graphs) {
+    public void ForwardMetric(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
         ForwardMetric metric = new ForwardMetric();

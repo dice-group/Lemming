@@ -42,7 +42,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void AyzNumberOfTrianglesTest() {
+    public void ListingAyzMetricTest() {
         Assert.assertNotNull(graph);
 
         final double delta = 3.0;
@@ -53,7 +53,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void ForwardNumberOfTriangleTest() {
+    public void ForwardMetricTest() {
         Assert.assertNotNull(graph);
 
         ForwardMetric metric = new ForwardMetric();
@@ -63,7 +63,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NodeIteratorCoreNumberOfTrianglesTest() {
+    public void NodeIteratorCoreMetricTest() {
         Assert.assertNotNull(graph);
 
         NodeIteratorCoreMetric metric = new NodeIteratorCoreMetric();
@@ -73,7 +73,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NodeIteratorNumberOfTrianglesTest() {
+    public void NodeIteratorMetricTest() {
         Assert.assertNotNull(graph);
 
         NodeIteratorMetric metric = new NodeIteratorMetric();
@@ -93,7 +93,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void DuolionNumberOfTrianglesTest() {
+    public void DuolionMetricTest() {
         Assert.assertNotNull(graph);
 
         final double edgeSurvivalProbability = 0.9;
@@ -104,7 +104,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeIteratorNumberOfTrianglesTest() {
+    public void EdgeIteratorMetricTest() {
         Assert.assertNotNull(graph);
 
         EdgeIteratorMetric metric = new EdgeIteratorMetric();
