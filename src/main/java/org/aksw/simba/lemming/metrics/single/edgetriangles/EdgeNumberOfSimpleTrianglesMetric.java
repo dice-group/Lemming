@@ -59,11 +59,14 @@ public class EdgeNumberOfSimpleTrianglesMetric extends AbstractMetric implements
                     int n;
                     for (int i = 0; i < sourceEdges.length; ++i) {
                         n = grph.getDirectedSimpleEdgeHead(sourceEdges[i]);
-                        if (n == sourceId) {
-                            n = grph.getDirectedSimpleEdgeTail(sourceEdges[i]);
-                        }
                         if (n > sourceId) {
                             connectedNodesSet.add(n);
+                            continue;
+                        }
+                        if (n == sourceId) {
+                            n = grph.getDirectedSimpleEdgeTail(sourceEdges[i]);
+                            if (n > sourceId)
+                                connectedNodesSet.add(n);
                         }
                     }
                     int connectedNodes[] = connectedNodesSet.toIntArray();

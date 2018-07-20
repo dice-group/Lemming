@@ -10,6 +10,9 @@ import grph.Grph;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * This class models an algorithm for counting the amount of node triangles in a given graph. This
@@ -24,9 +27,20 @@ import toools.set.IntSets;
  *
  */
 public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValueMetric {
+    private List<Double> clusteringCoefficient = new ArrayList<>();
+    private Boolean calculateClusteringCoefficient = false;
 
     public NodeIteratorCoreMetric() {
         super("node-iterator-core #node triangles");
+    }
+
+    public NodeIteratorCoreMetric(Boolean calculateClusteringCoefficient) {
+        super("node-iterator-core #node triangles");
+        this.calculateClusteringCoefficient = calculateClusteringCoefficient;
+    }
+
+    public List<Double> getClusteringCoefficient() {
+        return clusteringCoefficient;
     }
 
 
@@ -43,6 +57,7 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValu
         int numberOfTriangles = 0;
         int vertexWithMinimumDegree = getNodeWithMinimumDegree(degrees);
         while (vertexWithMinimumDegree < Integer.MAX_VALUE && visitedVertices.size() < grph.getVertices().size() - 2) {
+            int triangleCount = 0;
             IntSet neighbors = IntSets.difference(
                     IntSets.union(grph.getInNeighbors(vertexWithMinimumDegree), grph.getOutNeighbors(vertexWithMinimumDegree)), visitedVertices);
             for (IntCursor neighbor1 : neighbors) {
@@ -52,16 +67,27 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValu
                     if (vertexWithMinimumDegree != neighbor1.value && vertexWithMinimumDegree != neighbor2.value
                             && neighbor1.value < neighbor2.value && neighbors1.contains(neighbor2.value)) {
                         numberOfTriangles++;
+                        triangleCount++;
 //                        numberOfTriangles = numberOfTriangles + IntSets.union(graph.getOutEdges(neighbor1.value), graph.getInEdges(neighbor1.value));
                     }
                 }
             }
-            visitedVertices.add(vertexWithMinimumDegree);
+
+            if (!this.calculateClusteringCoefficient)
+                visitedVertices.add(vertexWithMinimumDegree);
+
+            if (triangleCount > 0 && this.calculateClusteringCoefficient) {
+                IntSet vertexNeighbors = grph.getInNeighbors(vertexWithMinimumDegree);
+                vertexNeighbors.addAll(grph.getOutNeighbors(vertexWithMinimumDegree));
+                double degree = vertexNeighbors.size();
+                clusteringCoefficient.add((2 * triangleCount) / (degree * (degree - 1)));
+            }
 
             degrees[vertexWithMinimumDegree] = 0;
             for (IntCursor vertex : neighbors) {
                 if (degrees[vertex.value] > 0) {
-                    degrees[vertex.value]--;
+                    if (!this.calculateClusteringCoefficient)
+                        degrees[vertex.value]--;
                 }
             }
 

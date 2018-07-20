@@ -11,6 +11,9 @@ import grph.in_memory.InMemoryGrph;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class models an algorithm for counting the amount of node triangles in a given graph. This
  * is done using the so called node-iterator algorithm explained by Schank and Wagner in their work
@@ -26,19 +29,28 @@ import toools.set.IntSets;
 public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
 
     private IntSet highDegreeVertices;
-
+    private Boolean calculateClusteringCoefficient = false;
+    private List<Double> clusteringCoefficient = new ArrayList<>();
 
     public NodeIteratorMetric() {
         super("node-iterator #node triangles");
         this.highDegreeVertices = IntSets.emptySet;
     }
 
+    public NodeIteratorMetric(Boolean calculateClusteringCoefficient) {
+        super("node-iterator #node triangles");
+        this.highDegreeVertices = IntSets.emptySet;
+        this.calculateClusteringCoefficient = calculateClusteringCoefficient;
+    }
 
     public NodeIteratorMetric(IntSet highDegreeVertices) {
         this();
         this.highDegreeVertices = highDegreeVertices;
     }
 
+    public List<Double> getClusteringCoefficient() {
+        return clusteringCoefficient;
+    }
 
     @Override
     public double apply(ColouredGraph graph) {
@@ -47,6 +59,7 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
 
         int numberOfTriangles = 0;
         for (IntCursor vertex : graph.getVertices()) {
+            int triangleCount = 0;
             IntSet neighbors = IntSets.difference(IntSets.union(grph.getInNeighbors(vertex.value), grph.getOutNeighbors(vertex.value)),
                     visitedVertices);
             for (IntCursor neighbor1 : neighbors) {
@@ -58,12 +71,23 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
                         if (!highDegreeVertices.contains(vertex.value) || !highDegreeVertices.contains(neighbor1.value)
                                 || !highDegreeVertices.contains(neighbor2.value)) {
                             numberOfTriangles++;
+                            triangleCount++;
                         }
                     }
                 }
             }
-            visitedVertices.add(vertex.value);
+
+            if (!this.calculateClusteringCoefficient)
+                visitedVertices.add(vertex.value);
+
+            if (triangleCount > 0 && this.calculateClusteringCoefficient) {
+                IntSet vertexNeighbors = grph.getInNeighbors(vertex.value);
+                vertexNeighbors.addAll(grph.getOutNeighbors(vertex.value));
+                double degree = vertexNeighbors.size();
+                clusteringCoefficient.add((2 * triangleCount) / (degree * (degree - 1)));
+            }
         }
+
         return numberOfTriangles;
     }
 
