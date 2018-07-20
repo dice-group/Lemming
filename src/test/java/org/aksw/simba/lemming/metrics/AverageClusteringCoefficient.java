@@ -49,7 +49,7 @@ public class AverageClusteringCoefficient extends NumberOfTrianglesMetricTest {
         this.graph = getColouredGraph(graphFile);
     }
 
-    public double calculateAvgCC(List<Double> clusteringCoefficient) {
+    private double calculateAvgCC(List<Double> clusteringCoefficient) {
         double ccSum = 0.0;
         for (double cc : clusteringCoefficient)
             ccSum += cc;
@@ -71,7 +71,6 @@ public class AverageClusteringCoefficient extends NumberOfTrianglesMetricTest {
         NodeIteratorMetric metric = new NodeIteratorMetric(true);
         metric.apply(graph);
         List<Double> clusteringCoefficient = metric.getClusteringCoefficient();
-        System.out.println(calculateAvgCC(clusteringCoefficient));
         Assert.assertEquals(expectedAvgCC,
                 calculateAvgCC(clusteringCoefficient),
                 DOUBLE_COMPARISON_DELTA);
@@ -82,7 +81,6 @@ public class AverageClusteringCoefficient extends NumberOfTrianglesMetricTest {
         NodeIteratorCoreMetric metric = new NodeIteratorCoreMetric(true);
         metric.apply(graph);
         List<Double> clusteringCoefficient = metric.getClusteringCoefficient();
-        System.out.println(calculateAvgCC(clusteringCoefficient));
         Assert.assertEquals(expectedAvgCC,
                 calculateAvgCC(clusteringCoefficient),
                 DOUBLE_COMPARISON_DELTA);
@@ -93,7 +91,6 @@ public class AverageClusteringCoefficient extends NumberOfTrianglesMetricTest {
         NumberOfSimpleTrianglesMetric metric = new NumberOfSimpleTrianglesMetric(true);
         metric.apply(graph);
         List<Double> clusteringCoefficient = metric.getClusteringCoefficient();
-        System.out.println(calculateAvgCC(clusteringCoefficient));
         Assert.assertEquals(expectedAvgCC,
                 calculateAvgCC(clusteringCoefficient),
                 DOUBLE_COMPARISON_DELTA);

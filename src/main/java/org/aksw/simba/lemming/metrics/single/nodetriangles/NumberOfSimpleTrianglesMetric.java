@@ -75,7 +75,6 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
 
 		protected double calculate() {
 			Grph grph = graph.getGraph();
-			List<Double> clusteringCoefficient = new ArrayList<>();
 			for (int i = 0; i < edgesOfVertex.length; ++i) {
 				edgesOfVertex[i] = grph.getOutEdges(i);
 				edgesOfVertex[i].addAll(grph.getInEdges(i));
@@ -90,12 +89,6 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
 					int sourceEdges[] = edgesOfVertex[sourceId].toIntArray();
 					IntSet connectedNodesSet = new IntHashSet();
                     int n;
-
-					IntSet vertexNeighbors = null;
-					if (calculateClusteringCoefficient) {
-						vertexNeighbors = grph.getInNeighbors(sourceId);
-						vertexNeighbors.addAll(grph.getOutNeighbors(sourceId));
-					}
 
 					for (int i = 0; i < sourceEdges.length; ++i) {
 						n = grph.getDirectedSimpleEdgeHead(sourceEdges[i]);
@@ -123,6 +116,8 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
                         }
                     }
                     if (count > 0 && calculateClusteringCoefficient) {
+						IntSet vertexNeighbors = grph.getInNeighbors(sourceId);
+						vertexNeighbors.addAll(grph.getOutNeighbors(sourceId));
 //						double degree = connectedNodesSet.size();
 						double degree = vertexNeighbors.size();
 						clusteringCoefficient.add((2 * count) / (degree * (degree - 1)));
@@ -130,10 +125,6 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
 					addCount(count);
 				}
 			};
-			double ccSum = 0.0;
-			for (double cc : clusteringCoefficient)
-				ccSum += cc;
-			System.out.println((ccSum / grph.getNumberOfVertices()));
 			return trianglesSum;
 		}
 
