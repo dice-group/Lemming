@@ -16,9 +16,9 @@ import toools.set.IntSets;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class NumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric implements SingleValueMetric {
 
-    public NumberOfTrianglesMetric() {
+    public MultiThreadedNodeNeighborsCommonEdgesMetric() {
         super("#triangles");
     }
 
@@ -32,18 +32,18 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
 
         private ColouredGraph graph;
         private int trianglesSum = 0;
-        private IntSet edges[];
+        private IntSet edgesOfVertex[];
 
         public MultiThreadedTriangleCountingProcess(ColouredGraph graph) {
             this.graph = graph;
-            edges = new IntSet[graph.getGraph().getNumberOfVertices()];
+            edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
         }
 
         protected double calculate() {
             Grph grph = graph.getGraph();
-            for (int i = 0; i < edges.length; ++i) {
-                edges[i] = grph.getOutEdges(i);
-                edges[i].addAll(grph.getInEdges(i));
+            for (int i = 0; i < edgesOfVertex.length; ++i) {
+                edgesOfVertex[i] = grph.getOutEdges(i);
+                edgesOfVertex[i].addAll(grph.getInEdges(i));
             }
             /*
              * A triangle is handled by the thread which handles the node with the lowest id
@@ -53,7 +53,7 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
                 @Override
                 protected void run(int threadID, int sourceId) {
                     int count = 0;
-                    int sourceEdges[] = edges[sourceId].toIntArray();
+                    int sourceEdges[] = edgesOfVertex[sourceId].toIntArray();
                     int n_1, n_2;
                     for (int i = 0; i < sourceEdges.length; ++i) {
                         n_1 = grph.getDirectedSimpleEdgeHead(sourceEdges[i]);
@@ -70,7 +70,7 @@ public class NumberOfTrianglesMetric extends AbstractMetric implements SingleVal
                                 // make sure that n_2 is larger than the sourceId (so no other thread is
                                 // handling this triangle). Note that n_2 is allowed to be smaller than n_1
                                 if ((n_2 > sourceId) && (n_2 != n_1)) {
-                                    count += IntSets.intersection(edges[n_1], edges[n_2]).size();
+                                    count += IntSets.intersection(edgesOfVertex[n_1], edgesOfVertex[n_2]).size();
                                 }
                             }
                         }

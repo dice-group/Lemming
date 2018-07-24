@@ -42,7 +42,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void ListingAyzMetricTest() {
+    public void ListingAyzMetric() {
         Assert.assertNotNull(graph);
 
         final double delta = 3.0;
@@ -53,7 +53,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void ForwardMetricTest() {
+    public void forwardMetric() {
         Assert.assertNotNull(graph);
 
         ForwardMetric metric = new ForwardMetric();
@@ -63,7 +63,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NodeIteratorCoreMetricTest() {
+    public void nodeIteratorCoreMetric() {
         Assert.assertNotNull(graph);
 
         NodeIteratorCoreMetric metric = new NodeIteratorCoreMetric();
@@ -73,7 +73,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NodeIteratorMetricTest() {
+    public void nodeIteratorMetric() {
         Assert.assertNotNull(graph);
 
         NodeIteratorMetric metric = new NodeIteratorMetric();
@@ -83,17 +83,17 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NumberOfSimpleTrianglesTest() {
+    public void multiThreadedNodeNeighborTrianglesMetric() {
         Assert.assertNotNull(graph);
 
-        NumberOfSimpleTrianglesMetric metric = new NumberOfSimpleTrianglesMetric();
+        MultiThreadedNodeNeighborTrianglesMetric metric = new MultiThreadedNodeNeighborTrianglesMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
     }
 
     @Test
-    public void DuolionMetricTest() {
+    public void duolionMetric() {
         Assert.assertNotNull(graph);
 
         final double edgeSurvivalProbability = 0.9;
@@ -108,7 +108,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeIteratorMetricTest() {
+    public void edgeIteratorMetric() {
         Assert.assertNotNull(graph);
 
         EdgeIteratorMetric metric = new EdgeIteratorMetric();

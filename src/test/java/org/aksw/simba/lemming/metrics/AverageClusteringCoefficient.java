@@ -7,7 +7,7 @@ import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NumberOfSimpleTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,8 +87,8 @@ public class AverageClusteringCoefficient extends NumberOfTrianglesMetricTest {
     }
 
     @Test
-    public void numberOfSimpleTrianglesAvgCC() {
-        NumberOfSimpleTrianglesMetric metric = new NumberOfSimpleTrianglesMetric(true);
+    public void multiThreadedNodeNeighborTrianglesAvgCC() {
+        MultiThreadedNodeNeighborTrianglesMetric metric = new MultiThreadedNodeNeighborTrianglesMetric(true);
         metric.apply(graph);
         List<Double> clusteringCoefficient = metric.getClusteringCoefficient();
         Assert.assertEquals(expectedAvgCC,

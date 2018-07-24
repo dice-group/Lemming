@@ -12,7 +12,6 @@ import toools.set.IntSet;
 import toools.set.IntSets;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -21,15 +20,15 @@ import java.util.List;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 	private Boolean calculateClusteringCoefficient = false;
 	private List<Double> clusteringCoefficient = new ArrayList<>();
 
-	public NumberOfSimpleTrianglesMetric() {
+	public MultiThreadedNodeNeighborTrianglesMetric() {
 		super("#simpleTriangles");
 	}
 
-	public NumberOfSimpleTrianglesMetric(Boolean calculateClusteringCoefficient) {
+	public MultiThreadedNodeNeighborTrianglesMetric(Boolean calculateClusteringCoefficient) {
 		super("#simpleTriangles");
 		this.calculateClusteringCoefficient = calculateClusteringCoefficient;
 	}
@@ -58,18 +57,18 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
 		private List<Double> clusteringCoefficient = new ArrayList<>();
 		private Boolean calculateClusteringCoefficient = false;
 
-		public MultiThreadedTriangleCountingProcess(ColouredGraph graph) {
+		MultiThreadedTriangleCountingProcess(ColouredGraph graph) {
 			this.graph = graph;
 			edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
 		}
 
-		public MultiThreadedTriangleCountingProcess(ColouredGraph graph, Boolean calculateClusteringCoefficient) {
+		MultiThreadedTriangleCountingProcess(ColouredGraph graph, Boolean calculateClusteringCoefficient) {
 			this.graph = graph;
 			edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
 			this.calculateClusteringCoefficient = calculateClusteringCoefficient;
 		}
 
-		public List<Double> getClusteringCoefficient() {
+		List<Double> getClusteringCoefficient() {
 			return clusteringCoefficient;
 		}
 
@@ -90,14 +89,14 @@ public class NumberOfSimpleTrianglesMetric extends AbstractMetric implements Sin
 					IntSet connectedNodesSet = new IntHashSet();
                     int n;
 
-					for (int i = 0; i < sourceEdges.length; ++i) {
-						n = grph.getDirectedSimpleEdgeHead(sourceEdges[i]);
+					for (int sourceEdge : sourceEdges) {
+						n = grph.getDirectedSimpleEdgeHead(sourceEdge);
 						if (n > sourceId) {
 							connectedNodesSet.add(n);
 							continue;
 						}
 						if (n == sourceId) {
-							n = grph.getDirectedSimpleEdgeTail(sourceEdges[i]);
+							n = grph.getDirectedSimpleEdgeTail(sourceEdge);
 							if (n > sourceId)
 								connectedNodesSet.add(n);
 						}

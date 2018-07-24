@@ -3,9 +3,9 @@ package org.aksw.simba.lemming.metrics.single.numberoftriangles;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,9 +28,9 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
         List<Object[]> testParams = new ArrayList<>();
         for (int i = 0; i < 1; i++) {
             testParams.add(new Object[] {"graph1.n3", 1});
-//            testParams.add(new Object[] {"graph_loop.n3", 2});
-//            testParams.add(new Object[] {"graph_loop_2.n3", 5});
-//            testParams.add(new Object[] {"email-Eu-core.n3", 489286});
+            testParams.add(new Object[] {"graph_loop.n3", 2});
+            testParams.add(new Object[] {"graph_loop_2.n3", 5});
+            testParams.add(new Object[] {"email-Eu-core.n3", 489286});
         }
         return testParams;
     }
@@ -45,7 +45,7 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NodeIteratorTest() {
+    public void nodeIteratorMetric() {
         Assert.assertNotNull(graph);
 
         NodeIteratorMetric metric = new NodeIteratorMetric();
@@ -55,7 +55,7 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeNumberOfSimpleTrianglesTest() {
+    public void edgeNumberOfSimpleTrianglesMetric() {
         Assert.assertNotNull(graph);
 
         EdgeNumberOfSimpleTrianglesMetric metric = new EdgeNumberOfSimpleTrianglesMetric();
@@ -65,17 +65,17 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void NumberOfTrianglesTest() {
+    public void multiThreadedNodeNeighborsCommonEdgesMetric() {
         Assert.assertNotNull(graph);
 
-        NumberOfTrianglesMetric metric = new NumberOfTrianglesMetric();
+        MultiThreadedNodeNeighborsCommonEdgesMetric metric = new MultiThreadedNodeNeighborsCommonEdgesMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
     }
 
     @Test
-    public void ForwardMetricTest() {
+    public void forwardMetric() {
         Assert.assertNotNull(graph);
 
         ForwardMetric metric = new ForwardMetric();
@@ -85,7 +85,7 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void EdgeIteratorMetricTest() {
+    public void edgeIteratorMetric() {
         Assert.assertNotNull(graph);
 
         EdgeIteratorMetric metric = new EdgeIteratorMetric();
