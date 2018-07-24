@@ -14,8 +14,8 @@ import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinem
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.*;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class RefinementTest {
         List<SingleValueMetric> metrics = new ArrayList<>();
         // metrics.add(new AvgClusteringCoefficientMetric());
         // metrics.add(new AvgVertexDegreeMetric());
-         metrics.add(new NumberOfTrianglesMetric());
+        metrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
 //        metrics.add(new MaxVertexOutDegreeMetric());
 //        metrics.add(new DiameterMetric());
 //        metrics.add(new NumberOfEdgesMetric());
@@ -102,7 +102,7 @@ public class RefinementTest {
 
     @SuppressWarnings("unchecked")
     private static ObjectDoubleOpenHashMap<String>[] createReferenceGraphVectors(ColouredGraph[] graphs,
-            List<SingleValueMetric> metrics) {
+                                                                                 List<SingleValueMetric> metrics) {
         Grph temp;
         int numberOfNodes, partSize;
         List<ObjectDoubleOpenHashMap<String>> vectors = new ArrayList<ObjectDoubleOpenHashMap<String>>(
