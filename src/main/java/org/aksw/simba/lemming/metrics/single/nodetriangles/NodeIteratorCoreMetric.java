@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
@@ -26,7 +27,7 @@ import java.util.List;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorCoreNumberOfTrianglesMetric.java
  *
  */
-public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValueMetric, SingleValueClusteringCoefficientMetric {
     private List<Double> clusteringCoefficient = new ArrayList<>();
     private Boolean calculateClusteringCoefficient = false;
 

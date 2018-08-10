@@ -12,6 +12,8 @@ import toools.set.IntSet;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
+import java.rmi.UnexpectedException;
+
 public class ColouredGraph {
 	private String name;
 
@@ -72,6 +74,11 @@ public class ColouredGraph {
 
 	public int addEdge(int tail, int head) {
 		return addEdge(tail, head, new BitSet());
+	}
+
+	public void removeEdge(int edgeId) {
+		edgeColours.remove(edgeId);
+		graph.removeEdge(edgeId);
 	}
 
 	public int addEdge(int tail, int head, BitSet colour) {

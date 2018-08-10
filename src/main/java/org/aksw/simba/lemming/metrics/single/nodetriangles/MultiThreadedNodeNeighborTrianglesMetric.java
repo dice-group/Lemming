@@ -6,6 +6,7 @@ import grph.algo.MultiThreadProcessing;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
+import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import toools.set.IntHashSet;
 import toools.set.IntSet;
@@ -20,7 +21,7 @@ import java.util.List;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric {
+public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric, SingleValueClusteringCoefficientMetric {
 	private Boolean calculateClusteringCoefficient = false;
 	private List<Double> clusteringCoefficient = new ArrayList<>();
 
