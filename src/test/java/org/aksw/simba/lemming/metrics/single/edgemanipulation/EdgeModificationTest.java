@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
-import com.carrotsearch.hppc.BitSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;

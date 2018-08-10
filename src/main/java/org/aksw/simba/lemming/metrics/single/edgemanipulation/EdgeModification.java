@@ -4,11 +4,10 @@ import com.carrotsearch.hppc.BitSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
 /**
  * @author DANISH AHMED on 8/10/2018
@@ -18,6 +17,8 @@ public class EdgeModification {
     private Config metricConfiguration;
     private int numberOfInitialNodes;
     private int numberOfInitialEdges;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModification.class);
 
     EdgeModification(ColouredGraph graph, Config config) {
         this.graph = graph;
