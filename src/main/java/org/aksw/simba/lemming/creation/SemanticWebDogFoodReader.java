@@ -7,13 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.preprocessor.LiteralDatatypeAnalyser;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import bsh.This;
 
 public class SemanticWebDogFoodReader {
 

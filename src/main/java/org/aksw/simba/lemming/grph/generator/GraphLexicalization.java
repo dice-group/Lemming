@@ -4,10 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.grph.literal.ILiteralGenerator;
-import org.aksw.simba.lemming.grph.literal.LiteralAnalysis;
 import org.aksw.simba.lemming.grph.literal.RDFLiteralProposer;
-import org.aksw.simba.lemming.grph.literal.RDFLiteralProposerFactory;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredVDistPerDTEColour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
