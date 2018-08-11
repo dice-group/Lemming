@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
-import org.aksw.simba.lemming.preprocessor.LiteralDatatypeAnalyser;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
