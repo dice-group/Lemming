@@ -14,7 +14,10 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.aksw.simba.lemming.preprocessor.LiteralDatatypeAnalyser;
 import org.aksw.simba.lemming.util.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import toools.set.DefaultIntSet;
 import toools.set.IntSet;
@@ -24,6 +27,8 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 public class ColouredGraph{
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class); 
+	
 	protected Grph graph;
 	protected ObjectArrayList<BitSet> vertexColours = new ObjectArrayList<BitSet>();
 	protected ObjectArrayList<BitSet> edgeColours = new ObjectArrayList<BitSet>();
@@ -31,37 +36,36 @@ public class ColouredGraph{
 	protected ColourPalette edgePalette;
 	protected ColourPalette dtEdgePalette;
 	
-	/**
-	 * this is new for processing the literals in the original RDF dataset
+	/*
+	 * 1st key: vertex ID, 2nd key: data typed property and the values is the value
+	 * of the literal
 	 */
 	protected Map<Integer, Map<BitSet, List<String>>> mapVertexIdAndLiterals;
 	
+	/*
+	 * map for storing type of literal accordingly to the data typed property edge
+	 */
+	protected Map<BitSet, String> mapLiteralTypes;
 	
 	protected GrphAlgorithmCache<Integer> diameterAlgorithm;
 
 	public ColouredGraph() {
-		this(null, null, null);
+		this(null, null);
+	}
+
+	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette) {
+		this(new InMemoryGrph(), vertexPalette, edgePalette);
 	}
 	
-//	public ColouredGraph() {
-//		this(null, null);
-//	}
+	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
+		setGraph(graph);
+		this.vertexPalette = vertexPalette;
+		this.edgePalette = edgePalette;
+		
+		mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
+		mapLiteralTypes = new HashMap<BitSet, String>();
+	}
 
-//	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette) {
-//		this(new InMemoryGrph(), vertexPalette, edgePalette);
-//	}
-	
-//	public ColouredGraph(Grph graph, ColourPalette vertexPalette, ColourPalette edgePalette) {
-//		setGraph(graph);
-//		this.vertexPalette = vertexPalette;
-//		this.edgePalette = edgePalette;
-//	}
-
-//	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
-//		this(new InMemoryGrph(), vertexPalette, edgePalette);
-//		dtEdgePalette = datatypedEdgePalette;
-//	}
-	
 	public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
 		this(new InMemoryGrph(), vertexPalette, edgePalette, datatypedEdgePalette);
 	}
@@ -73,6 +77,7 @@ public class ColouredGraph{
 		this.dtEdgePalette = datatypedEdgePalette;
 		
 		mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
+		mapLiteralTypes = new HashMap<BitSet, String>();
 	}
 	
 	public void removeEdge(int edgeId){
@@ -99,6 +104,9 @@ public class ColouredGraph{
 	public ObjectArrayList<BitSet> getEdgeColours() {
 		return edgeColours;
 	}
+	
+	
+	
 
 	public int addVertex() {
 		return addVertex(new BitSet());
@@ -335,12 +343,12 @@ public class ColouredGraph{
 	}
 	
 	/**
-	 * Add a literal associated with the data typed property to the data store
+	 * Add a literal associated with its data typed property to the data store
 	 * @param literal a literal
 	 * @param tId the vertex id which has the data typed property
-	 * @param dteColo the data typed property's colour connecting to the vertex
+	 * @param dteColo the colour of the data typed property connecting to the vertex.
 	 */
-	public void addLiterals(String literal, int tId, BitSet dteColo){
+	public void addLiterals(String literal, int tId, BitSet dteColo, String datatype){
 				
 		Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(tId);
 		if(mapDTEColoursToLiterals == null){
@@ -355,6 +363,15 @@ public class ColouredGraph{
 		}
 		
 		lstOfLiterals.add(literal);
+		
+		// TODO check this part again, since one literal may have different data type.
+		// this should load from the supporting file which contains all datatype of literal
+		String origDataType = mapLiteralTypes.get(dteColo);
+		if(origDataType != null && !origDataType.equals(datatype)){
+			LOGGER.warn("Data types are conflicting: " + origDataType + " vs " + datatype);
+		}else{
+			mapLiteralTypes.put(dteColo, datatype);
+		}
 	}
 	
 	/**
@@ -368,7 +385,8 @@ public class ColouredGraph{
 
 	/**
 	 * Get the set of data typed edge's colours which are connected to the vertex's colour
-	 * @param vertexColour 
+	 * 
+	 * @param vertexColour the colour of the target vertex
 	 * @return a set of linked edge's colours
 	 */
 	public Set<BitSet> getDataTypedEdgeColours (BitSet vertexColour){
@@ -462,9 +480,13 @@ public class ColouredGraph{
 	
 	public Map<BitSet, Set<String>> getMapDTEdgeColoursToLiterals(){
 		Map<BitSet, Set<String>> res = new HashMap<BitSet, Set<String>>();
+		// set of vertices that have literals
 		Set<Integer> setOfVIDs = mapVertexIdAndLiterals.keySet();
 		for(Integer vId: setOfVIDs){
+			// map of literals and their corresponding different values
 			Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(vId);
+			
+			// set of literals
 			Set<BitSet> setOfDTEColours = mapDTEColoursToLiterals.keySet();
 			
 			for(BitSet dteColo: setOfDTEColours){
@@ -483,6 +505,51 @@ public class ColouredGraph{
 		return res;
 	}
 	
+	/**
+	 * get literals based on the datatype edge colours associated with a specific tail colour.
+	 * 
+	 * @return a map of literals where, 1st key is datatype edge colour, 2nd key is tail colour,
+	 * and value is a set of string values.
+	 */
+	public Map<BitSet, Map<BitSet, Set<String>>> getMapLiterals(){
+		
+		// 1st key: dteColo, 2nd key: tColo, value: set of literals
+		Map<BitSet, Map<BitSet, Set<String>>> res = new HashMap<BitSet, Map<BitSet, Set<String>>>();
+		// set of vertices that have literals
+		Set<Integer> setOfVIDs = mapVertexIdAndLiterals.keySet();
+		for(Integer vId: setOfVIDs){
+			// map of literals and their corresponding different values
+			Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(vId);
+			
+			if(mapDTEColoursToLiterals != null && mapDTEColoursToLiterals.size()> 0 ){
+				BitSet vColo = getVertexColour(vId);
+				// set of literals
+				Set<BitSet> setOfDTEColours = mapDTEColoursToLiterals.keySet();
+				
+				for(BitSet dteColo: setOfDTEColours){
+					List<String> lstOfLiterals = mapDTEColoursToLiterals.get(dteColo);
+					if(lstOfLiterals == null || lstOfLiterals.isEmpty()){
+						continue;
+					}
+					
+					Map<BitSet, Set<String>> setOfAllLiterals = res.get(dteColo);
+					if(setOfAllLiterals == null){
+						setOfAllLiterals = new HashMap<BitSet, Set<String>>();	
+						res.put(dteColo, setOfAllLiterals);
+					}
+					
+					Set<String>setOfLiterals = setOfAllLiterals.get(vColo);
+					if(setOfLiterals == null ){
+						setOfLiterals = new HashSet<String>();
+						setOfAllLiterals.put(vColo, setOfLiterals);
+					}
+					setOfLiterals.addAll(lstOfLiterals);					
+				}
+			}
+		}
+		
+		return res;
+	}
 	
 	public void setEdgePalette(ColourPalette newEdgePalette){
 		edgePalette = newEdgePalette;
@@ -494,6 +561,10 @@ public class ColouredGraph{
 	
 	public void setDataTypeEdgePalette(ColourPalette newDTEdgePalette){
 		dtEdgePalette = newDTEdgePalette;
+	}
+	
+	public String getLiteralType(BitSet dteColo){
+		return mapLiteralTypes.get(dteColo);
 	}
 	
 }

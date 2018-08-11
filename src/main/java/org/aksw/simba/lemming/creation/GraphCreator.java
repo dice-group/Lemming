@@ -60,9 +60,7 @@ public class GraphCreator {
     public ColouredGraph processModel(Model model) {
         ColourPalette vertexPalette = createVertexPalette(model);
         ColourPalette edgePalette = createEdgePalette(model);
-        ColourPalette datatypedEdgePalette = createDatatypedPalette(model);
-        //ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
-        ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette, datatypedEdgePalette);
+        ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
         ObjectIntOpenHashMap<Resource> resourceIdMapping = new ObjectIntOpenHashMap<Resource>();
         StmtIterator iterator = model.listStatements();
         Statement statement;
@@ -111,21 +109,20 @@ public class GraphCreator {
             /*
              * -------------------------------------------------
              * if this statement has an object as a literal
-             * This section is already done in the function createDatatypedEdgePalette()
              * -------------------------------------------------
-             *
+             */
             else{
             	
             	//data typed property
         		property = statement.getPredicate();
         		propertyUri = property.getURI();
             	
-            	if(statement.getObject().isLiteral() && !dataTypedProperties.containsKey(property)){
+            	if(statement.getObject().isLiteral()){
             		//literal
             		Literal literal = statement.getObject().asLiteral();
-            		
-            		
-            		//RDFDatatype litType= literal.getDatatype();
+            		RDFDatatype litType= literal.getDatatype();
+
+            		String datatype = litType != null ? litType.getURI() : ""; 
             		
             		//put datatype property to the palette
             		if(!datatypedEdgePalette.containsUri(propertyUri)){
@@ -133,14 +130,15 @@ public class GraphCreator {
             		}
             		BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
             		//add to the coloured graph
-            		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour);
+            		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour, datatype);
             	}
             }
-            */
         }
+        
+        // set the datatypedEdgePalette to the graph
+        graph.setDataTypeEdgePalette(datatypedEdgePalette);
         return graph;
     }
-    
    
     protected ColourPalette createVertexPalette(Model model) {
         NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
@@ -322,41 +320,39 @@ public class GraphCreator {
     }
     
     
-    protected ColourPalette createDatatypedPalette(Model model){
-    	RDFNode object;
-        Resource subject;
-        Literal resource2 ;
-        Property property;
-        StmtIterator sIterator = model.listStatements();
-        Statement statement;
-        // Iterate over the class hierarchy triples
-        while (sIterator.hasNext()) {
-            statement = sIterator.next();
-            subject = statement.getSubject();
-            object = statement.getObject();
-            property = statement.getPredicate();
-            if (object.isLiteral()) {
-            	
-            	Set<RDFDatatype> setDatatypes = dataTypedProperties.get(property);
-            	if(setDatatypes == null){
-            		setDatatypes = new HashSet<RDFDatatype>();
-            		dataTypedProperties.put(property, setDatatypes);
-            	}
-            	RDFDatatype type = object.asLiteral().getDatatype();
-            	// get data type 
-            	setDatatypes.add(type);
-            }
-        }
-
-     // All properties have been collected
-        // The colours can be defined
-        Set<Resource> setOfResources = dataTypedProperties.keySet();
-        for (Resource res : setOfResources) {
-        	datatypedEdgePalette.addColour(res.getURI());
-        }
-        
-    	return datatypedEdgePalette;
-    }
-    
-
+//    protected ColourPalette createDatatypedPalette(Model model){
+//    	RDFNode object;
+//        Resource subject;
+//        Literal resource2 ;
+//        Property property;
+//        StmtIterator sIterator = model.listStatements();
+//        Statement statement;
+//        // Iterate over the class hierarchy triples
+//        while (sIterator.hasNext()) {
+//            statement = sIterator.next();
+//            subject = statement.getSubject();
+//            object = statement.getObject();
+//            property = statement.getPredicate();
+//            if (object.isLiteral()) {
+//            	
+//            	Set<RDFDatatype> setDatatypes = dataTypedProperties.get(property);
+//            	if(setDatatypes == null){
+//            		setDatatypes = new HashSet<RDFDatatype>();
+//            		dataTypedProperties.put(property, setDatatypes);
+//            	}
+//            	RDFDatatype type = object.asLiteral().getDatatype();
+//            	// get data type 
+//            	setDatatypes.add(type);
+//            }
+//        }
+//
+//     // All properties have been collected
+//        // The colours can be defined
+//        Set<Resource> setOfResources = dataTypedProperties.keySet();
+//        for (Resource res : setOfResources) {
+//        	datatypedEdgePalette.addColour(res.getURI());
+//        }
+//        
+//    	return datatypedEdgePalette;
+//    }
 }

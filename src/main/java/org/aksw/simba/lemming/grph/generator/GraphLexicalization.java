@@ -4,7 +4,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.dist.LiteralProcessor;
+import org.aksw.simba.lemming.grph.literal.ILiteralGenerator;
+import org.aksw.simba.lemming.grph.literal.LiteralAnalysis;
+import org.aksw.simba.lemming.grph.literal.RDFLiteralProposer;
+import org.aksw.simba.lemming.grph.literal.RDFLiteralProposerFactory;
 import org.aksw.simba.lemming.metrics.dist.multi.AvrgColouredVDistPerDTEColour;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,24 +21,22 @@ public class GraphLexicalization {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphLexicalization.class);
 
-	private IRDFLiteralGenerator mWordProposer;
+	private RDFLiteralProposer mLiteralProposer;
 	private IGraphGeneration mGraphGenerator;
-	private LiteralProcessor mLiteralProcessor;
 	private AvrgColouredVDistPerDTEColour mAvrgVDistPerDREColourMetric;
 
+	//private RDFLiteralProposerFactory mLiteralProposer2;
+	
 	public GraphLexicalization(ColouredGraph[] origGrphs,
 			IGraphGeneration graphGenerator) {
 		mGraphGenerator = graphGenerator;
+		
 		// average vertex distribution per data typed property
 		mAvrgVDistPerDREColourMetric = new AvrgColouredVDistPerDTEColour(
 				origGrphs);
 
-		// literal collection
-		mLiteralProcessor = new LiteralProcessor(origGrphs);
-
 		// word2vec model to obtain closest
-		mWordProposer = new RDFLiteralGenerator(
-				mLiteralProcessor.getWordsOfEachDTEColour());
+		mLiteralProposer = new RDFLiteralProposer(origGrphs);
 		
 		//mWordProposer = new RDFLiteralGeneratorTest(mLiteralProcessor.getWordsOfEachDTEColour());
 	}
@@ -66,7 +67,7 @@ public class GraphLexicalization {
 			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo
 					.get(dteColo);
 			
-			System.err.println("Process dte: " + dteColo);
+			//System.err.println("Process dte: " + dteColo);
 			
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
@@ -82,27 +83,25 @@ public class GraphLexicalization {
 							int[] arrOfVertices = mapVColoToVertices.get(vColo)
 									.toIntArray();
 
-							double numOfConsidedVertices = avrgNoOfVertices
-									* arrOfVertices.length;
+							double numOfConsidedVertices = avrgNoOfVertices	* arrOfVertices.length;
 							if (numOfConsidedVertices == 0) {
 								numOfConsidedVertices = 1;
 							}
+							numOfConsidedVertices = Math.round(numOfConsidedVertices);
 							System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
-							numOfConsidedVertices = Math
-									.round(numOfConsidedVertices);
+							
 							int indexOfVertex = 0;
 							while (indexOfVertex < numOfConsidedVertices) {
 								
-								System.out.println("[Test] The vertex: " + indexOfVertex);
 								// get a
 								int vId = arrOfVertices[indexOfVertex];
+								System.out.println("[Test] The vertex: " + vId);
 								// get literal
-								String literal = mWordProposer.getWords(
-										dteColo, (int) mLiteralProcessor
-												.getAvrgNoOfWords(dteColo));
+								String literal = mLiteralProposer
+										.getValue(vColo, dteColo);
 								
 								// add it to the coloured graph
-								mimicGraph.addLiterals(literal, vId, dteColo);
+								mimicGraph.addLiterals(literal, vId, dteColo, mGraphGenerator.getLiteralType(dteColo) );
 								indexOfVertex++;
 							}
 						}

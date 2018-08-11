@@ -22,4 +22,5 @@ public interface IGraphGeneration {
 	public TripleBaseSingleID getProposedTriple(boolean isRamdom);
 	
 	public ColouredGraph getMimicGraph();
+	public String getLiteralType(BitSet dteColo);
 }

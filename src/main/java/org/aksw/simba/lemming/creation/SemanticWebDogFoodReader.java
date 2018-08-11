@@ -2,17 +2,18 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.preprocessor.LiteralDatatypeAnalyser;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import bsh.This;
 
 public class SemanticWebDogFoodReader {
 
@@ -29,12 +30,6 @@ public class SemanticWebDogFoodReader {
 	public static void writeGraphsToFile(ColouredGraph grph) {
 		Model dogFoodModel = ModelFactory.createDefaultModel();
 		try {
-			// //test writing the original model back to rdf file
-			// Writer writerforInModel = new FileWriter(new File
-			// ("original_model_ " + y +".txt"));
-			// dogFoodModel.write(writerforInModel, "TURTLE");
-			// writerforInModel.close();
-
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, dogFoodModel);
 			Model newDogFoodModel = reverter.processGraph();
@@ -80,6 +75,11 @@ public class SemanticWebDogFoodReader {
                 LOGGER.error("The folder {} does not exist.", folder.toString());
             }
         }
+        
+        // try-and-error analysis of data typed literals in the current dataset.
+        //LiteralDatatypeAnalyser literalAnalyser = new LiteralDatatypeAnalyser(SemanticWebDogFoodReader.class.getName());
+        //literalAnalyser.analyzeDatatype(dogFoodModel);
+        
         return graphs.toArray(new ColouredGraph[graphs.size()]);
     }
 

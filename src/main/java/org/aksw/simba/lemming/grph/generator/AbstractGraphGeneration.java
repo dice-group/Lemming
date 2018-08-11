@@ -444,4 +444,8 @@ public abstract class AbstractGraphGeneration {
 		
 		return canConnect;
 	}
+	
+	public String getLiteralType(BitSet dteColo){
+		return mMimicGraph.getLiteralType(dteColo);
+	}
 }

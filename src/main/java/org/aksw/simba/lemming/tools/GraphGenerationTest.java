@@ -43,16 +43,12 @@ public class GraphGenerationTest {
 	private static final boolean USE_SEMANTIC_DOG_FOOD = true;
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	
-	private static final int NUMBEROFDESIREDVERTICES = 15000;
+	private static final int NUMBEROFDESIREDVERTICES = 5000;
 	
 	public static void main(String[] args) {
 		
-		boolean isStop = false;
+		boolean isStop = true;
 		
-// 		if(!isStop){
-// 	   		return ;
-//    	}
-
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
@@ -81,13 +77,14 @@ public class GraphGenerationTest {
          * ---------------------------------------
          */
         IGraphGeneration grphGenerator;
-       //grphGenerater = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
-       //grphGenerater = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
-       grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
-       //grphGenerater = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
-       //grphGenerater = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
-       //grphGenerater = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
-        
+        //grphGenerator = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
+        grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationFullyConnected(NUMBEROFDESIREDVERTICES, graphs);
+       
         double currentTime = System.currentTimeMillis();
         // generate the new graph
         ColouredGraph tempGrph =  grphGenerator.generateGraph();
@@ -96,8 +93,12 @@ public class GraphGenerationTest {
         currentTime = System.currentTimeMillis() - currentTime;
         System.out.println("Time of graph generation: " + currentTime);
         
-        //MetricTester.printMetricInformation(metrics, graphs);
-        //MetricTester.printMetricInformation(metrics, tempGrph);
+        
+        /*
+         * ---------------------------------------
+         * compute constant expressions
+         * ---------------------------------------
+         */
         
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();
         fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
@@ -110,8 +111,7 @@ public class GraphGenerationTest {
         
         
         List<List<Double>> lstOrigConstantValues = new ArrayList<List<Double>>();
-        
-        
+
         SortedSet<RefinementNode> bestNodes = searcher.findExpression(graphs, 5);
         for (RefinementNode n : bestNodes) {
             System.out.print("Fitness value: " + n.getFitness());
@@ -135,14 +135,14 @@ public class GraphGenerationTest {
          */
         GraphRefinement grphRefinement = new GraphRefinement(graphs, 1000, grphGenerator, bestNodes);
         System.out.println("Refine graph randomly");
-        //grphRefinement.setRefineGraphRandomly(false);
-        grphRefinement.setRefineGraphRandomly(true);
-        /*ColouredGraph refinedGrph = grphRefinement.refineGraph();
+        grphRefinement.setRefineGraphRandomly(false);
+        //grphRefinement.setRefineGraphRandomly(true);
+        ColouredGraph refinedGrph = grphRefinement.refineGraph();
         System.out.println("==============================");
         for (RefinementNode n : bestNodes) {
             double val = n.getExpression().getValue(refinedGrph);
             System.out.println(val + " ");
-        }*/
+        }
         
         /*
          * ---------------------------------------
@@ -154,8 +154,8 @@ public class GraphGenerationTest {
         LOGGER.info("Application exits!!!");
 	}
 	
-	 @SuppressWarnings("unchecked")
-	    private static ObjectDoubleOpenHashMap<String>[] createReferenceGraphVectors(ColouredGraph[] graphs,
+	@SuppressWarnings("unchecked")
+	private static ObjectDoubleOpenHashMap<String>[] createReferenceGraphVectors(ColouredGraph[] graphs,
 	            List<SingleValueMetric> metrics) {
 	        Grph temp;
 	        int numberOfNodes, partSize;
