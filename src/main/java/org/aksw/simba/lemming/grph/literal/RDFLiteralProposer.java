@@ -81,11 +81,12 @@ public class RDFLiteralProposer {
 		if(vColo != null && dteColo !=null){
 			double numOfValues = mLiteralAnalysis.getAvrgNoOfWords(vColo, dteColo);
 			String typeOfData = mLiteralAnalysis.getDataTypes(dteColo);
-
+			System.out.println("\t\tGet "+numOfValues+" word(s) of type:" + typeOfData );
 			ILiteralGenerator literalGenerator = mMapOfDataTypesAndGenerators.get(typeOfData);
 			double currentTime = System.currentTimeMillis();
 			literal = literalGenerator.getValue(vColo, dteColo, (int)numOfValues);
 		    currentTime = System.currentTimeMillis() - currentTime;
+		    System.out.println("\t\t\t Time comsumed:" + currentTime);
 		}
 		return literal;
 	}

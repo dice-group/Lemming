@@ -162,12 +162,13 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 						Set<String> setOfWords = mapNewWords.keySet();
 						String [] arrOfWords = setOfWords.toArray(new String[0]);
 						
-						literal += arrOfWords[mRand.nextInt(arrOfWords.length)] +" ";
+						//literal += arrOfWords[mRand.nextInt(arrOfWords.length)] +" ";
+						literal += arrOfWords[0] +" ";
 					}
 				}
 			}
 		    currentTime = System.currentTimeMillis() - currentTime;
-		    System.out.println("Time to get " + numberOfWords + " of data typed edge's colour ("+dteColo+") is " + currentTime);
+		    //System.out.println("Time to get " + numberOfWords + " of data typed edge's colour ("+dteColo+") is " + currentTime);
 		}
 		return literal.trim();
 	}

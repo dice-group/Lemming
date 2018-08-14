@@ -43,7 +43,7 @@ public class GraphGenerationTest {
 	private static final boolean USE_SEMANTIC_DOG_FOOD = true;
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	
-	private static final int NUMBEROFDESIREDVERTICES = 5000;
+	private static final int NUMBEROFDESIREDVERTICES = 13800;
 	
 	public static void main(String[] args) {
 		

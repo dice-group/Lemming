@@ -56,6 +56,8 @@ public class GraphLexicalization {
 		 */
 		Set<BitSet> setOfDTEColours = mapVColoDistPerDTEColo.keySet();
 
+		System.out.println("-- Process "+setOfDTEColours.size()+ " datatype edge colours");
+		int iCounter = 0;
 		/*
 		 * accordingly to each data typed edge's colour, we get the average
 		 * number of vertices in a particular vertex's colour
@@ -64,7 +66,7 @@ public class GraphLexicalization {
 			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo
 					.get(dteColo);
 			
-			//System.err.println("Process dte: " + dteColo);
+			System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
 			
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
@@ -85,14 +87,14 @@ public class GraphLexicalization {
 								numOfConsidedVertices = 1;
 							}
 							numOfConsidedVertices = Math.round(numOfConsidedVertices);
-							System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
+							//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
 							
 							int indexOfVertex = 0;
 							while (indexOfVertex < numOfConsidedVertices) {
 								
 								// get a
 								int vId = arrOfVertices[indexOfVertex];
-								System.out.println("[Test] The vertex: " + vId);
+								System.out.println("\t[Lexicalization] Procesing vertex " + vId +"("+indexOfVertex+"/"+numOfConsidedVertices+ ")...");
 								// get literal
 								String literal = mLiteralProposer
 										.getValue(vColo, dteColo);
