@@ -68,8 +68,10 @@ public class GraphRefinement {
 		double rErrScore = Double.NaN;
 		double pErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph); 
 		
-		for(int i = 0 ; i < mMaxIteration ; ++i){
-
+		int tempMaxIteration = 100 * mGraphGenerator.getMimicGraph().getEdges().size();
+		
+		//for(int i = 0 ; i < mMaxIteration ; ++i){
+		for(int i = 0 ; i < tempMaxIteration ; ++i){
 			// go left by removing an edge
 			removeEdges(clonedGrph);
 			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());

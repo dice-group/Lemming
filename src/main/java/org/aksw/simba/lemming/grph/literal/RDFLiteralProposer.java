@@ -60,8 +60,8 @@ public class RDFLiteralProposer {
 							mMapOfDataTypesAndGenerators.put(dataType, datetimeGenerator);
 						}else{
 							//by default create a string generator
-							ILiteralGenerator datetimeGenerator = new StringLiteralGenerator(mapOfDTEColoAndVColoValues);
-							//ILiteralGenerator datetimeGenerator = new UntypedLiteralGenerator(mapOfDTEColoAndVColoValues);
+							//ILiteralGenerator datetimeGenerator = new StringLiteralGenerator(mapOfDTEColoAndVColoValues);
+							ILiteralGenerator datetimeGenerator = new AtomicLiteralGenerator(mapOfDTEColoAndVColoValues);
 							mMapOfDataTypesAndGenerators.put(dataType, datetimeGenerator);
 						}
 					}//end if of checking valid sample data
