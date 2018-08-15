@@ -20,9 +20,9 @@ import com.carrotsearch.hppc.BitSet;
 public class GraphRefinement {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphRefinement.class);
 	
-	private int mMaxIteration = 100000 ;
+	private int mMaxIteration = 5000 ;
 	private boolean mProcessRandomly = true;
-	private int mMaxRepeatedSelection = 50000;
+	private int mMaxRepeatedSelection = 5000;
 	
 	private IGraphGeneration mGraphGenerator;
 	
@@ -33,28 +33,6 @@ public class GraphRefinement {
 	private List<TripleBaseSingleID> mAddedTriples;
 	
 	private ConstantValuesComputation mErrScoreCalculator;
-	
-	public GraphRefinement(ColouredGraph[] origGrphs, int iNoOfIteration, 
-			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
-		
-		/*
-		 *  mErrScoreCalculator is used to compute the error score compared to original
-		 *  constant values of the original graphs
-		 */
-		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, constExprs);
-		
-		// the graph generator
-		mGraphGenerator = graphGenerator;
-		
-		// the maximum number of iteration for graph refinement
-		mMaxIteration = iNoOfIteration;
-		
-		//set of removed triples
-		mRemovedTriples = new ArrayList<TripleBaseSingleID>();
-		
-		// list of added triples
-		mAddedTriples = new ArrayList<TripleBaseSingleID>();
-	}
 	
 	public GraphRefinement(ColouredGraph[] origGrphs,
 			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
