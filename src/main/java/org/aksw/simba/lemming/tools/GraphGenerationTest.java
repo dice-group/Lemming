@@ -141,8 +141,16 @@ public class GraphGenerationTest {
         ColouredGraph refinedGrph = grphRefinement.refineGraph();
         System.out.println("==============================");
         for (RefinementNode n : bestNodes) {
+        	String oriResults = n.getExpression() + "\n\tOriginal graphs:";
+        	for(ColouredGraph grphs:graphs){
+        		double oriVal = n.getExpression().getValue(refinedGrph);
+        		oriResults += oriVal +", ";
+        	}
+        	
             double val = n.getExpression().getValue(refinedGrph);
-            System.out.println(val + " ");
+            oriResults = oriResults.trim().substring(0, oriResults.length() -1);
+            oriResults += " | mimic graph: " +val;
+            LOGGER.info(oriResults);
         }
         
         /*
