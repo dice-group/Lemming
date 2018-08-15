@@ -56,6 +56,25 @@ public class GraphRefinement {
 		mAddedTriples = new ArrayList<TripleBaseSingleID>();
 	}
 	
+	public GraphRefinement(ColouredGraph[] origGrphs,
+			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
+		
+		/*
+		 *  mErrScoreCalculator is used to compute the error score compared to original
+		 *  constant values of the original graphs
+		 */
+		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, constExprs);
+		
+		// the graph generator
+		mGraphGenerator = graphGenerator;
+		
+		//set of removed triples
+		mRemovedTriples = new ArrayList<TripleBaseSingleID>();
+		
+		// list of added triples
+		mAddedTriples = new ArrayList<TripleBaseSingleID>();
+	}
+	
 	
 	public void setRefineGraphRandomly(boolean isRandom){
 		mProcessRandomly = isRandom;

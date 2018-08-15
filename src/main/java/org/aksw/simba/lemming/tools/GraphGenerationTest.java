@@ -134,7 +134,7 @@ public class GraphGenerationTest {
          * refine the mimic graph
          * ---------------------------------------
          */
-        GraphRefinement grphRefinement = new GraphRefinement(graphs, 1000, grphGenerator, bestNodes);
+        GraphRefinement grphRefinement = new GraphRefinement(graphs, grphGenerator, bestNodes);
         System.out.println("Refine graph randomly");
         grphRefinement.setRefineGraphRandomly(false);
         //grphRefinement.setRefineGraphRandomly(true);
