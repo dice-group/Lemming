@@ -94,7 +94,7 @@ public class GraphLexicalization {
 								
 								// get a
 								int vId = arrOfVertices[indexOfVertex];
-								System.out.println("\t[Lexicalization] Procesing vertex " + vId +"("+indexOfVertex+"/"+numOfConsidedVertices+ ")...");
+								System.out.println("\tGenerate literals for vertex " + vId +"("+indexOfVertex+"/"+numOfConsidedVertices+ ")...");
 								// get literal
 								String literal = mLiteralProposer
 										.getValue(vColo, dteColo);

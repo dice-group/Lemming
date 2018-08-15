@@ -367,7 +367,7 @@ public class ColouredGraph{
 		// this should load from the supporting file which contains all datatype of literal
 		String origDataType = mapLiteralTypes.get(dteColo);
 		if(origDataType != null && !origDataType.equals(datatype)){
-			LOGGER.warn("Data types are conflicting: " + origDataType + " vs " + datatype);
+			//LOGGER.warn("Data types are conflicting: " + origDataType + " vs " + datatype);
 		}else{
 			mapLiteralTypes.put(dteColo, datatype);
 		}

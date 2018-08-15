@@ -68,10 +68,7 @@ public class GraphRefinement {
 		double rErrScore = Double.NaN;
 		double pErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph); 
 		
-		int tempMaxIteration = 100 * mGraphGenerator.getMimicGraph().getEdges().size();
-		
-		//for(int i = 0 ; i < mMaxIteration ; ++i){
-		for(int i = 0 ; i < tempMaxIteration ; ++i){
+		for(int i = 0 ; i < mMaxIteration ; ++i){
 			// go left by removing an edge
 			removeEdges(clonedGrph);
 			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());
@@ -87,6 +84,10 @@ public class GraphRefinement {
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 			
+			System.out.println("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
+					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
+			
+			
 			if(minErrScore == lErrScore){
 				
 				pErrScore = lErrScore;
@@ -95,7 +96,7 @@ public class GraphRefinement {
 				//System.out.println("[SL]Be4 -Number of edges: "+ parentGrph.getEdges().size());
 				redoChangingGrph(clonedGrph, Constants.REMOVE_ACTION);
 				//System.out.println("[SL]Redo -Number of edges: "+ parentGrph.getEdges().size());
-				System.out.println("[GoLeft] Number of edges: "+ clonedGrph.getEdges().size());
+				System.out.println(" <= go left - no. edges: "+ clonedGrph.getEdges().size());
 				continue;
 			}
 			if(minErrScore == rErrScore){
@@ -106,12 +107,12 @@ public class GraphRefinement {
 				//System.out.println("[SR]Be4 -Number of edges: "+ parentGrph.getEdges().size());
 				redoChangingGrph(clonedGrph, Constants.ADD_ACTION);
 				//System.out.println("[SR]Redo -Number of edges: "+ parentGrph.getEdges().size());
-				System.out.println("[GoRight] Number of edges: "+ clonedGrph.getEdges().size());
+				System.out.println("=> go right - no. edges: "+ clonedGrph.getEdges().size());
 				continue;
 			}
 			
-			System.out.println("[AtMid "+i+"] Mid: "+ pErrScore 
-					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
+//			System.out.println("[AtMid "+i+"] Mid: "+ pErrScore 
+//					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
 			
 			noOfRepeatedParent ++;
 			
