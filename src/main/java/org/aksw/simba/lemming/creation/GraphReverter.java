@@ -78,10 +78,10 @@ public class GraphReverter {
 					if(propRes.equals(RDF.type)){
 						BitSet tColo = mGraph.getVertexColour(tId);
 						hDummyURI = mGraph.getResourceClass(tColo);
-						System.err.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
+						//System.err.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
 					}else{
 						hDummyURI = mGraph.getResourceDummyURI(hId);
-						System.out.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
+						//System.out.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
 					}
 					
 					if(hDummyURI == null || hDummyURI.isEmpty()){
