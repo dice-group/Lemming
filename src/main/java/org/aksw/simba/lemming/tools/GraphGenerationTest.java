@@ -19,6 +19,7 @@ import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinem
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
+import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
 import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.grph.generator.GraphRefinement;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
@@ -80,8 +81,8 @@ public class GraphGenerationTest {
         IGraphGeneration grphGenerator;
         //grphGenerator = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
-        grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerator = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
+        grphGenerator = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationFullyConnected(NUMBEROFDESIREDVERTICES, graphs);
