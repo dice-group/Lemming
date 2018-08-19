@@ -46,7 +46,7 @@ public class GraphGenerationTest {
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	
 	//the current max number of vertices is 45387 vertices
-	private static final int NUMBEROFDESIREDVERTICES = 44447;
+	private static final int NUMBEROFDESIREDVERTICES = 45387;
 	
 	public static void main(String[] args) {
 		
