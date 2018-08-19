@@ -25,7 +25,10 @@ public class NumberOfTrianglesMetricTest {
         testConfigs.add(new Object[] { "graph1.n3", 1 });
         testConfigs.add(new Object[] { "graph_loop.n3", 2 });
         testConfigs.add(new Object[] { "graph_loop_2.n3", 5 });
-        testConfigs.add(new Object[] { "email-Eu-core.n3", 105461 });
+        
+        //test number of triangles
+        //testConfigs.add(new Object[] { "email-Eu-core.n3", 105461 });
+        testConfigs.add(new Object[] { "email-Eu-core.n3", 489286 });
 
         return testConfigs;
     }
