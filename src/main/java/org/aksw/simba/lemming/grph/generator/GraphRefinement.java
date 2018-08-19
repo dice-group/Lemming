@@ -20,9 +20,9 @@ import com.carrotsearch.hppc.BitSet;
 public class GraphRefinement {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphRefinement.class);
 	
-	private int mMaxIteration = 5000 ;
+	private int mMaxIteration = 10000 ;
 	private boolean mProcessRandomly = true;
-	private int mMaxRepeatedSelection = 5000;
+	private int mMaxRepeatedSelection = 10000;
 	
 	private IGraphGeneration mGraphGenerator;
 	

@@ -19,16 +19,17 @@ import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinem
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
 import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.grph.generator.GraphRefinement;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.metrics.MetricUtils;
+import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.DiameterMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
+import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class GraphGenerationTest {
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	
 	//the current max number of vertices is 45387 vertices
-	private static final int NUMBEROFDESIREDVERTICES = 45387;
+	private static final int NUMBEROFDESIREDVERTICES = 44447;
 	
 	public static void main(String[] args) {
 		
@@ -54,8 +55,8 @@ public class GraphGenerationTest {
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
-        // metrics.add(new NumberOfTrianglesMetric());
-        // metrics.add(new AvgClusteringCoefficientMetric());
+        metrics.add(new NumberOfTrianglesMetric());
+        metrics.add(new AvgClusteringCoefficientMetric());
         metrics.add(new AvgVertexDegreeMetric());
         metrics.add(new MaxVertexOutDegreeMetric());
         metrics.add(new MaxVertexInDegreeMetric());
@@ -81,8 +82,8 @@ public class GraphGenerationTest {
         IGraphGeneration grphGenerator;
         //grphGenerator = new GraphGenerationRandomly(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationRandomly2(NUMBEROFDESIREDVERTICES, graphs);
-        //grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
-        grphGenerator = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
+        grphGenerator = new GraphGenerationSimpleApproach(NUMBEROFDESIREDVERTICES, graphs);
+        //grphGenerator = new GraphGenerationSimpleApproach2(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationGroupingTriple(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationWithoutEdgeColours(NUMBEROFDESIREDVERTICES, graphs);
         //grphGenerator = new GraphGenerationFullyConnected(NUMBEROFDESIREDVERTICES, graphs);
