@@ -295,6 +295,10 @@ public class ColouredGraph{
 		return cloneGrph;
 	}
 	
+	public ColouredGraph copy() {
+		return new ColouredGraph(graph.clone(), vertexPalette, edgePalette);
+	}
+	
 	public int getTailOfTheEdge(int edgeId){
 		IntSet vertices = graph.getVerticesIncidentToEdge(edgeId);
 		if(vertices.size() > 0){

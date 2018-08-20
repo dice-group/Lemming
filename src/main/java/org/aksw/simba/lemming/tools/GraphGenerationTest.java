@@ -32,6 +32,8 @@ import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,17 +57,19 @@ public class GraphGenerationTest {
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
-        metrics.add(new NumberOfTrianglesMetric());
-        metrics.add(new AvgClusteringCoefficientMetric());
-        metrics.add(new AvgVertexDegreeMetric());
-        metrics.add(new MaxVertexOutDegreeMetric());
-        metrics.add(new MaxVertexInDegreeMetric());
+       // metrics.add(new NumberOfTrianglesMetric());
+        metrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
+        //metrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
+        //metrics.add(new AvgClusteringCoefficientMetric());
+        //metrics.add(new AvgVertexDegreeMetric());
+        //metrics.add(new MaxVertexOutDegreeMetric());
+        //metrics.add(new MaxVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
         //metrics.add(new MinVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
-        metrics.add(new DiameterMetric());
-        metrics.add(new NumberOfEdgesMetric());
-        metrics.add(new NumberOfVerticesMetric());
+        //metrics.add(new DiameterMetric());
+        //metrics.add(new NumberOfEdgesMetric());
+        //metrics.add(new NumberOfVerticesMetric());
         
         ColouredGraph graphs[] = new ColouredGraph[20];
         
