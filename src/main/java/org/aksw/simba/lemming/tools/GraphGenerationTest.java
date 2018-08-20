@@ -59,17 +59,17 @@ public class GraphGenerationTest {
         List<SingleValueMetric> metrics = new ArrayList<>();
        // metrics.add(new NumberOfTrianglesMetric());
         metrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
-        //metrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
-        //metrics.add(new AvgClusteringCoefficientMetric());
-        //metrics.add(new AvgVertexDegreeMetric());
-        //metrics.add(new MaxVertexOutDegreeMetric());
-        //metrics.add(new MaxVertexInDegreeMetric());
+        metrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
+        metrics.add(new AvgClusteringCoefficientMetric());
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new MaxVertexOutDegreeMetric());
+        metrics.add(new MaxVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
         //metrics.add(new MinVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
         //metrics.add(new DiameterMetric());
-        //metrics.add(new NumberOfEdgesMetric());
-        //metrics.add(new NumberOfVerticesMetric());
+        metrics.add(new NumberOfEdgesMetric());
+        metrics.add(new NumberOfVerticesMetric());
         
         ColouredGraph graphs[] = new ColouredGraph[20];
         
