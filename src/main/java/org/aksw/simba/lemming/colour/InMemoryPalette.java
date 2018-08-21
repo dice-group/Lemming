@@ -91,7 +91,7 @@ public class InMemoryPalette implements ColourPalette {
 	    	for(int i = 0 ; i < arrOfURIs.length ; i++){
 	    		if(uriColourMap.allocated[i]){
 	    			String uri = (String) arrOfURIs[i];
-	    			BitSet colo = uriColourMap.get(uri);
+	    			BitSet colo =(BitSet) uriColourMap.get(uri).clone();
 	    			if(isProperty){
 	    				// just compare if 2 bitsets are really equal
 	    				if(colo.equals(inColour)){

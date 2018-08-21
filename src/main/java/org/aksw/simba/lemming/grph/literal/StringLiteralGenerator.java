@@ -144,9 +144,8 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 		}
 		LOGGER.info("End - computation of a mean vector and a standard deviation vector");
 	}
-	
-	
 
+	
 	/** 
 	 * Generate a random vector based on a mean vector and a standard deviation vector.
 	 * The mean and standard deivation vectors are got accordingly to the data typed edge's colour

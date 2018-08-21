@@ -100,6 +100,7 @@ public class GraphGenerationTest {
         System.out.println("End of graph generation!");
         currentTime = System.currentTimeMillis() - currentTime;
         System.out.println("Time of graph generation: " + currentTime);
+        
         //collect information of the mimic graph
         GlobalDataCollecter.getInstance().setMimicGraph(tempGrph);
         

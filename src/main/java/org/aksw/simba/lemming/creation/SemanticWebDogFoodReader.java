@@ -45,7 +45,9 @@ public class SemanticWebDogFoodReader {
     
     public static ColouredGraph[] readGraphsFromFile(String dataFolderPath) {
         Model dogFoodModel = ModelFactory.createDefaultModel();
-
+        //set dataset name
+        GlobalDataCollecter.getInstance().setDatasetName("SemanticWebDogFood");
+        
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
         ColouredGraph graph;
         GraphCreator creator = new GraphCreator();
@@ -68,6 +70,7 @@ public class SemanticWebDogFoodReader {
                         GlobalDataCollecter.getInstance().addGraphs(folder.getName(), graph);
                         GlobalDataCollecter.getInstance().setDatatypeEdgePalette(graph.getDataTypedEdgePalette());
                         GlobalDataCollecter.getInstance().setVertexPallete(graph.getVertexPalette());
+                        
                     } else {
                         LOGGER.error("Couldn't generate coloured graph.");
                     }

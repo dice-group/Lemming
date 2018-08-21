@@ -58,7 +58,7 @@ public class WordCentroidsCollectorIO {
 		
 		try {
 			ObjectWriter writer = mapper.writer(new DefaultPrettyPrinter());
-			writer.writeValue(new File(datasetName+".json"), root);
+			writer.writeValue(new File(datasetName), root);
 		} catch (Exception e) {
 		}
 	}

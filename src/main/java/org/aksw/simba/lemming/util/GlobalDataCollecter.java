@@ -68,6 +68,8 @@ public class GlobalDataCollecter {
 				key = mapTColoAndKeys.get(tColo);
 				if(key != null){
 					return key;
+				}else{
+					key="";
 				}
 			}else{
 				mapTColoAndKeys = new HashMap<BitSet, String>();
@@ -77,26 +79,30 @@ public class GlobalDataCollecter {
 			Set<String> propertyURIs = mDtEdgePalette.getURIs(dteColo, true);
 			Set<String> resourceClassURIs = mVertexPalette.getURIs(tColo, false);
 			
-			if(propertyURIs != null && propertyURIs.size() > 0 &&
-					resourceClassURIs != null && resourceClassURIs.size() >0){
+			
+			if(resourceClassURIs != null && resourceClassURIs.size() >0){
 				List<String> newResClassURIs = new ArrayList(new TreeSet(resourceClassURIs));
-				String propURI = propertyURIs.iterator().next();
+				
 				
 				for(String classUri : newResClassURIs){
-					if(classUri.length() > 10){
-						key+= classUri.substring(classUri.length()- 10, classUri.length()-1);
+					if(classUri.length() > 15){
+						key+= classUri.substring(classUri.length()- 15, classUri.length()-1);
 					}else{
 						key+= classUri;
 					}
 				}
-				if(propURI.length() > 10){
-					key+= propURI.substring(propURI.length()- 10, propURI.length()-1);
+			}
+				
+			if(propertyURIs != null && propertyURIs.size() > 0){
+				String propURI = propertyURIs.iterator().next();
+				if(propURI.length() > 15){
+					key+= propURI.substring(propURI.length()- 15, propURI.length()-1);
 				}else{
 					key+= propURI;
 				}
-				
-				mapTColoAndKeys.put(tColo, key);
 			}
+			
+			mapTColoAndKeys.put(tColo, key);
 		}
 			
 		return key;
