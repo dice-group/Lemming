@@ -411,41 +411,50 @@ public class ColouredGraph{
 	}
 	
 	/**
-	 * get the resource class based on the colour
-	 * @param vColo
-	 * @return
+	 * get classes of a resource based on it colour
+	 * @param vColo the resource's colour
+	 * 
+	 * @return a list of URIs 
 	 */
-	public String getResourceClass(BitSet vColo){
+	public Set<String> getResourceClass(BitSet vColo){
 		// isDebugging for evaluation
+		Set<String> setOfURIs = vertexPalette.getURIs(vColo, false);
 		if(Constants.IS_EVALUATION_MODE){
-			return vertexPalette.getURI(vColo);
+			return setOfURIs;
 		}
 		// in case for practical, we will use a dummy Class URL
 		else{
-			return Constants.SIMULATED_CLASS_URI + vColo;
+			Set<String> dummyURIs = new HashSet<String>();
+			for(int i = 0 ; i < setOfURIs.size() ; i++){
+				dummyURIs.add(Constants.SIMULATED_CLASS_URI + vColo + "_"+ i);
+			}
+			return dummyURIs;
 		}
 	}
 	
 	public String getPropertyURI(BitSet eColo){
 		// isDebugging for evaluation
 		if(Constants.IS_EVALUATION_MODE){
-			return edgePalette.getURI(eColo);
+			Set<String> setOfURIs =edgePalette.getURIs(eColo, true);
+			if(setOfURIs.size() > 0){
+				for(String uri : setOfURIs)
+					return uri;
+			}
 		}
-		// in case for practical, we will use a dummy Class URL
-		else{
-			return Constants.SIMULATED_PROPERTY_URI + eColo;
-		}
+		return Constants.SIMULATED_PROPERTY_URI + eColo;
 	}
 	
 	public String getDataTypedPropertyURI(BitSet dteColo){
 		// isDebugging for evaluation
 		if(Constants.IS_EVALUATION_MODE){
-			return dtEdgePalette.getURI(dteColo);
+			 Set<String> setofURIs = dtEdgePalette.getURIs(dteColo, true);
+			 if(setofURIs.size() >0){
+				 for(String uri : setofURIs){
+					 return uri;
+				 }
+			 }
 		}
-		// in case for practical, we will use a dummy Class URL
-		else{
-			return Constants.SIMULATED_DATA_TYPED_PROPERTY_URI + dteColo;
-		}
+		return Constants.SIMULATED_DATA_TYPED_PROPERTY_URI + dteColo;
 	}
 	
 	public Map<BitSet, IntSet> getMapDTEdgeColoursToVertexIDs(){

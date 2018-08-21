@@ -1,9 +1,12 @@
 package org.aksw.simba.lemming.grph.literal;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.simba.lemming.util.GlobalDataCollecter;
+import org.aksw.simba.lemming.util.WordCentroidsCollectorIO;
 import org.aksw.word2vecrestful.word2vec.Word2VecFactory;
 import org.aksw.word2vecrestful.word2vec.Word2VecModel;
 import org.slf4j.Logger;
@@ -36,6 +39,42 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 		
 		//compute data vectors
 		computeDataVectors();
+		
+		//output means and standardeviation to files
+		outputDataToFile();
+	}
+	
+	private void outputDataToFile(){
+		
+		String dataFile = GlobalDataCollecter.getInstance().getDatasetName()+".json";
+		
+		File f = new File(dataFile);
+		
+		if(f!= null && f.exists()){
+			LOGGER.info("A file of centroids and standard deviations of words is already generated!");
+			return;
+		}
+		
+		if(mMeanVectors!=null && mStandardDeviationVectors!= null){
+			Set<BitSet> dteColours = mMeanVectors.keySet();
+			
+			for(BitSet dteColo : dteColours){
+				Map<BitSet, float[]> mapTColoAndMeans = mMeanVectors.get(dteColo);
+				Map<BitSet, float[]> mapTColoAndStandardDeviations = mStandardDeviationVectors.get(dteColo);
+				
+				Set<BitSet> tColours = mapTColoAndMeans.keySet();
+				
+				for(BitSet tColo : tColours){
+					float[] means = mapTColoAndMeans.get(tColo);
+					float[] sd = mapTColoAndStandardDeviations.get(tColo);
+					
+					String key = GlobalDataCollecter.getInstance().getKey(tColo, dteColo);
+					WordCentroidsCollectorIO.getInstance().addWordData(key, means, sd);
+				}
+			}
+		}
+		
+		WordCentroidsCollectorIO.getInstance().writeFiles(dataFile);
 	}
 	
 	private void computeDataVectors(){
@@ -147,6 +186,11 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 	@Override
 	public String getValue(BitSet tColo, BitSet dteColo, int numberOfWords) {
 		String literal = "";
+		
+		//remove this when done
+		if(true)
+			return "hello";
+		
 		int noOfGeneratedWords = 0;
 		if(tColo!= null && dteColo != null  && numberOfWords > 0){
 			double currentTime = System.currentTimeMillis();

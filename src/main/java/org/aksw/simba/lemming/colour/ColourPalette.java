@@ -98,11 +98,13 @@ public interface ColourPalette {
 
     
     /**
-     * Get the URI corresponding to the given colour.
-     * @param colour the given colour whose URI should be returned
-     * @return URI
+     * Get the URIs corresponding to the given colour.
+     * @param colour a given colour (possible mixture colours) whose URIs should be returned
+     * @param isProperty 
+     * 				if the colour is the colour of properties (or of edges)
+     * @return a set of URIS
      */
-    public String getURI(BitSet colour);
+    public Set<String> getURIs(BitSet colour, boolean isProperty);
     
     /**
      * Update colour for an existing URI. If the URI is not existing ==> create new

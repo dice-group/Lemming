@@ -8,7 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.apache.jena.ext.com.google.common.collect.Sets.SetView;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;

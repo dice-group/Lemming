@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.util.GlobalDataCollecter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -62,6 +63,11 @@ public class SemanticWebDogFoodReader {
                     if (graph != null) {
                         LOGGER.info("Generated graph.", dogFoodModel.size());
                         graphs.add(graph);
+                        
+                        //collect information of current loaded graph
+                        GlobalDataCollecter.getInstance().addGraphs(folder.getName(), graph);
+                        GlobalDataCollecter.getInstance().setDatatypeEdgePalette(graph.getDataTypedEdgePalette());
+                        GlobalDataCollecter.getInstance().setVertexPallete(graph.getVertexPalette());
                     } else {
                         LOGGER.error("Couldn't generate coloured graph.");
                     }

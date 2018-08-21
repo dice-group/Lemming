@@ -34,6 +34,8 @@ import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
+import org.aksw.simba.lemming.util.GlobalDataCollecter;
+import org.aksw.simba.lemming.util.WordCentroidsCollectorIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,17 +55,16 @@ public class GraphGenerationTest {
 	public static void main(String[] args) {
 		
 		boolean isStop = true;
-		
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
        // metrics.add(new NumberOfTrianglesMetric());
-        metrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
-        metrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
-        metrics.add(new AvgClusteringCoefficientMetric());
+       // metrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
+       // metrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
+       // metrics.add(new AvgClusteringCoefficientMetric());
         metrics.add(new AvgVertexDegreeMetric());
-        metrics.add(new MaxVertexOutDegreeMetric());
-        metrics.add(new MaxVertexInDegreeMetric());
+       // metrics.add(new MaxVertexOutDegreeMetric());
+        //metrics.add(new MaxVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
         //metrics.add(new MinVertexInDegreeMetric());
         //metrics.add(new MinVertexOutDegreeMetric());
@@ -99,7 +100,8 @@ public class GraphGenerationTest {
         System.out.println("End of graph generation!");
         currentTime = System.currentTimeMillis() - currentTime;
         System.out.println("Time of graph generation: " + currentTime);
-        
+        //collect information of the mimic graph
+        GlobalDataCollecter.getInstance().setMimicGraph(tempGrph);
         
         /*
          * ---------------------------------------
@@ -135,6 +137,9 @@ public class GraphGenerationTest {
             System.out.println();
         }
         
+        //collect information of constant expressions
+        GlobalDataCollecter.getInstance().addConstantExpressions(bestNodes);
+        
         /*
          * ---------------------------------------
          * refine the mimic graph
@@ -159,6 +164,9 @@ public class GraphGenerationTest {
             LOGGER.info(oriResults);
         }
         
+        //collect refined graph
+        GlobalDataCollecter.getInstance().setRefinedMimicGraph(refinedGrph);
+        GlobalDataCollecter.getInstance().printResult();
         /*
          * ---------------------------------------
          * lexicalize the mimic graph

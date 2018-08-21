@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.colour;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.carrotsearch.hppc.BitSet;
@@ -83,19 +84,33 @@ public class InMemoryPalette implements ColourPalette {
     }
     
     @Override
-    public String getURI(BitSet inColour){
+    public Set<String> getURIs(BitSet inColour, boolean isProperty){
+    	Set<String> setOfURIs = new HashSet<String>();
     	if(inColour != null){
 	    	Object[] arrOfURIs = uriColourMap.keys;
 	    	for(int i = 0 ; i < arrOfURIs.length ; i++){
 	    		if(uriColourMap.allocated[i]){
 	    			String uri = (String) arrOfURIs[i];
 	    			BitSet colo = uriColourMap.get(uri);
-	    			if(colo.equals(inColour))
-	    				return uri;
+	    			if(isProperty){
+	    				// just compare if 2 bitsets are really equal
+	    				if(colo.equals(inColour)){
+	    					setOfURIs.add(uri);
+	    					break;
+	    				}
+	    			}else{
+	    				//and 2 bitsets
+	    				colo.and(inColour);
+	    				
+	    				//check if they have matching bits 1
+	    				if(colo.cardinality() == inColour.cardinality()){
+	    					setOfURIs.add(uri);
+	    				}
+	    			}
 	    		}
 	    	}
     	}
-    	return "";
+    	return setOfURIs;
     }
 
 	@Override

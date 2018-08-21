@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.creation;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,8 +45,7 @@ public class GraphReverter {
 	
 	public Model processGraph(){
 		
-		IntSet setOfVIds = mGraph.getVertices();
-		int [] arrOfVIds = setOfVIds.toIntArray();
+		int [] arrOfVIds = mGraph.getVertices().toIntArray();
 		for(int tId: arrOfVIds){
 			/*
 			 *  process resources vertices
@@ -58,6 +58,12 @@ public class GraphReverter {
 				//array of out edges (object properties)
 				int [] arrOfOEIds = setOfOEIds.toIntArray();
 				
+				
+				BitSet tColo = mGraph.getVertexColour(tId);
+				Set<String> setOfClassURIs = mGraph.getResourceClass(tColo);
+				List<String> lstClassURIs = new ArrayList<String>(setOfClassURIs);
+
+
 				//iterate each out edge id
 				for(int oeId: arrOfOEIds){
 					// get the out edge's colour 
@@ -75,13 +81,14 @@ public class GraphReverter {
 					// get resources associated with the colours
 					String hDummyURI = "";
 					
+					
 					if(propRes.equals(RDF.type)){
-						BitSet tColo = mGraph.getVertexColour(tId);
-						hDummyURI = mGraph.getResourceClass(tColo);
-						//System.err.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
+						if(lstClassURIs.size()> 0){
+							hDummyURI = lstClassURIs.get(0);
+							lstClassURIs.remove(0);
+						}
 					}else{
 						hDummyURI = mGraph.getResourceDummyURI(hId);
-						//System.out.println(tDummyURI + "(" +tId +")" +" - " + propRes + " - " + hDummyURI + "("+hId+")");
 					}
 					
 					if(hDummyURI == null || hDummyURI.isEmpty()){
