@@ -22,8 +22,6 @@ public class PersonGraphReader {
     }
 	
 	public static ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
-		 Model personModel = ModelFactory.createDefaultModel();
-		 
 		 //set dataset name
 		 GlobalDataCollecter.getInstance().setDatasetName("PersonGraph");
 		 
@@ -39,6 +37,7 @@ public class PersonGraphReader {
 				 File file = new File(dataFolderPath+"/"+fileName);
 				 
 				 if(file != null && file.isFile() && file.getTotalSpace() > 0){
+					 Model personModel = ModelFactory.createDefaultModel();
 					 //read file to model
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");
