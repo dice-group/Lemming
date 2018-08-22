@@ -136,7 +136,7 @@ public class GlobalDataCollecter {
 	}
 	
 	public void printResult(){
-		if(mMapOriginalGraphs != null && mMapOriginalGraphs.size()> 0  && mWriter!= null){
+		if(mMapOriginalGraphs != null && mMapOriginalGraphs.size()> 0){
 			try{
 				//open for appending content
 				mWriter = new BufferedWriter( new FileWriter("LemmingEx.result", true));
