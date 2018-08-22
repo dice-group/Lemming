@@ -17,6 +17,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
+import org.aksw.simba.lemming.creation.PersonGraphReader;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
 import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
@@ -46,8 +47,10 @@ public class GraphGenerationTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationTest.class);
 	private static final int MAX_ITERATIONS = 50;
 	private static final double MIN_FITNESS = 100000.0;
-	private static final boolean USE_SEMANTIC_DOG_FOOD = true;
+	private static final boolean USE_SEMANTIC_DOG_FOOD = false;
+	private static final boolean USE_PERSON_GRAPH = true;
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
+	private static final String PERSON_GRAPH = "PersonGraph/";
 	
 	//the current max number of vertices is 45387 vertices
 	private static final int NUMBEROFDESIREDVERTICES = 45387;
@@ -55,6 +58,7 @@ public class GraphGenerationTest {
 	public static void main(String[] args) {
 		
 		boolean isStop = true;
+		
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         List<SingleValueMetric> metrics = new ArrayList<>();
@@ -77,6 +81,8 @@ public class GraphGenerationTest {
         //load RDF data to coloured graph
         if (USE_SEMANTIC_DOG_FOOD) {
             graphs = SemanticWebDogFoodReader.readGraphsFromFile(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
+        }else if(USE_PERSON_GRAPH){
+        	graphs = PersonGraphReader.readGraphsFromFiles(PERSON_GRAPH);
         }
         
         /*
@@ -185,6 +191,22 @@ public class GraphGenerationTest {
 	        int numberOfNodes, partSize;
 	        List<ObjectDoubleOpenHashMap<String>> vectors = new ArrayList<ObjectDoubleOpenHashMap<String>>(
 	                5 * graphs.length);
+	        List<SingleValueMetric> costlyMetrics = new ArrayList<SingleValueMetric>();
+	        //filter the metrics of triangles calculating here
+	        List<SingleValueMetric> naiveMetrics = new ArrayList<SingleValueMetric>();
+	        for(int i = 0 ; i < metrics.size(); i++){
+	        	SingleValueMetric metric = metrics.get(i);
+	        	if(metric instanceof MultiThreadedNodeNeighborsCommonEdgesMetric ||
+	        			metric instanceof MultiThreadedNodeNeighborTrianglesMetric ||
+	        			metric instanceof AvgClusteringCoefficientMetric){
+	        		
+	        		costlyMetrics.add(metric);
+	        	}else{
+	        		naiveMetrics.add(metric); 
+	        	}
+	        }
+	        
+	        
 	        for (int i = 0; i < graphs.length; ++i) {
 	            numberOfNodes = graphs[i].getGraph().getNumberOfVertices();
 	            LOGGER.info("Generating reference graphs with " + numberOfNodes + " nodes.");
@@ -194,30 +216,30 @@ public class GraphGenerationTest {
 	            temp.addNVertices(numberOfNodes);
 	            starGenerator.compute(temp);
 	            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null), metrics));
-	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(temp, null, null, null), naiveMetrics));
 	            temp = null;
 
 	            // Grid
 	            partSize = (int) Math.sqrt(numberOfNodes);
 	            //vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null), metrics));
-	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null, null), naiveMetrics));
 
 	            // Ring
 //	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null), metrics));
 	            vectors.add(MetricUtils.calculateGraphMetrics(
-	                    new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null, null), metrics));
+	                    new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null, null), naiveMetrics));
 
 	            // Clique
 	            // vectors.add(MetricUtils.calculateGraphMetrics(
 	            // new ColouredGraph(ClassicalGraphs.completeGraph(numberOfNodes),
 	            // null, null), metrics));
 //	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null), metrics));
-	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics(new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null, null), naiveMetrics));
 	            // Bipartite
 	            // partSize = numberOfNodes / 2;
 	            partSize = numberOfNodes / 8;
 	            //vectors.add(MetricUtils.calculateGraphMetrics( new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null), metrics));
-	            vectors.add(MetricUtils.calculateGraphMetrics( new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null, null), metrics));
+	            vectors.add(MetricUtils.calculateGraphMetrics( new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null, null), naiveMetrics));
 	            
 	        }
 	        return vectors.toArray(new ObjectDoubleOpenHashMap[vectors.size()]);
