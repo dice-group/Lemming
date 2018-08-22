@@ -17,6 +17,7 @@ import org.aksw.simba.lemming.algo.refinement.RefinementNode;
 import org.aksw.simba.lemming.colour.ColourPalette;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public class GlobalDataCollecter {
 
@@ -48,13 +49,41 @@ public class GlobalDataCollecter {
 		mScoreError.add(scoreErr);
 	}
 	
-	
 	public void setVertexPallete(ColourPalette vertexPalette){
-		mVertexPalette = vertexPalette;
+		if(mVertexPalette != null){
+			if(vertexPalette != null){
+				ObjectObjectOpenHashMap<String, BitSet>objHashMap = vertexPalette.getMapOfURIAndColour();
+				
+				String[] keyURIs = objHashMap.keys; 
+				for(int i = 0 ; i < keyURIs.length ; i++){
+					if(objHashMap.allocated[i]){
+						String uri = keyURIs[i];
+						BitSet colour = objHashMap.get(uri);
+						mVertexPalette.addToColour(colour, uri);
+					}
+				}
+			}
+		}else{
+			mVertexPalette = vertexPalette;
+		}
+		
 	}
 	
 	public void setDatatypeEdgePalette(ColourPalette dtePalette){
-		mDtEdgePalette = dtePalette;
+		if(mDtEdgePalette == null){
+			mDtEdgePalette = dtePalette;
+		}else{
+			ObjectObjectOpenHashMap<String, BitSet>objHashMap = dtePalette.getMapOfURIAndColour();
+			
+			String[] keyURIs = objHashMap.keys; 
+			for(int i = 0 ; i < keyURIs.length ; i++){
+				if(objHashMap.allocated[i]){
+					String uri = keyURIs[i];
+					BitSet colour = objHashMap.get(uri);
+					mDtEdgePalette.addToColour(colour, uri);
+				}
+			}
+		}
 	}
 	
 	public void setDatasetName(String datasetName){
