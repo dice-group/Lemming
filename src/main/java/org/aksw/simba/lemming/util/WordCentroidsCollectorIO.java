@@ -92,9 +92,9 @@ public class WordCentroidsCollectorIO {
 				StringBuilder res = new StringBuilder("[");
 				for(int i = 0 ; i< arrStandardDeviation.length ; i++){
 					if(i < arrStandardDeviation.length -1){
-						res.append(arrMeans[i]+", ");
+						res.append(arrStandardDeviation[i]+", ");
 					}else{
-						res.append(arrMeans[i]+"");
+						res.append(arrStandardDeviation[i]+"");
 					}
 				}
 				res.append("]");

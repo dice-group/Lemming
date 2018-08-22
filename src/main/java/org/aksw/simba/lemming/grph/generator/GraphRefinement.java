@@ -10,6 +10,7 @@ import org.aksw.simba.lemming.algo.refinement.RefinementNode;
 import org.aksw.simba.lemming.dist.utils.ConstantValuesComputation;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.GlobalDataCollecter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,10 @@ public class GraphRefinement {
 		double pErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph); 
 		
 		for(int i = 0 ; i < mMaxIteration ; ++i){
+			
+			// add errorScore to tracking list result
+			GlobalDataCollecter.getInstance().addScoreError(pErrScore);
+			
 			// go left by removing an edge
 			removeEdges(clonedGrph);
 			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());

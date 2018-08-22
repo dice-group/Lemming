@@ -18,8 +18,6 @@ import org.aksw.simba.lemming.colour.ColourPalette;
 
 import com.carrotsearch.hppc.BitSet;
 
-import brite.Graph.Edge;
-
 public class GlobalDataCollecter {
 
 	private static GlobalDataCollecter mInstance = new GlobalDataCollecter();
@@ -36,17 +34,20 @@ public class GlobalDataCollecter {
 	
 	private static BufferedWriter mWriter ;
 	
+	private List<Double> mScoreError;
+	
+	
 	private GlobalDataCollecter(){
 		mMapOriginalGraphs = new HashMap<String, ColouredGraph>();
 		mSetConstantExpressions = new TreeSet<RefinementNode>();
 		mMappingKeysAndColours = new HashMap<BitSet, Map<BitSet, String>>();
-		try {
-			//open for appending content
-			mWriter = new BufferedWriter( new FileWriter("LemmingEx.result", true));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		mScoreError= new ArrayList<Double>();
 	}
+	
+	public void addScoreError(double scoreErr){
+		mScoreError.add(scoreErr);
+	}
+	
 	
 	public void setVertexPallete(ColourPalette vertexPalette){
 		mVertexPalette = vertexPalette;
@@ -83,10 +84,11 @@ public class GlobalDataCollecter {
 			if(resourceClassURIs != null && resourceClassURIs.size() >0){
 				List<String> newResClassURIs = new ArrayList(new TreeSet(resourceClassURIs));
 				
-				
 				for(String classUri : newResClassURIs){
-					if(classUri.length() > 15){
-						key+= classUri.substring(classUri.length()- 15, classUri.length()-1);
+					int indexOfLastFlash = classUri.lastIndexOf('/');
+					
+					if(indexOfLastFlash != -1){
+						key+= classUri.substring(indexOfLastFlash+1, classUri.length());
 					}else{
 						key+= classUri;
 					}
@@ -95,8 +97,9 @@ public class GlobalDataCollecter {
 				
 			if(propertyURIs != null && propertyURIs.size() > 0){
 				String propURI = propertyURIs.iterator().next();
-				if(propURI.length() > 15){
-					key+= propURI.substring(propURI.length()- 15, propURI.length()-1);
+				int indexOfLastFlash = propURI.lastIndexOf('/');
+				if(indexOfLastFlash!= -1){
+					key+= propURI.substring(indexOfLastFlash+1, propURI.length());
 				}else{
 					key+= propURI;
 				}
@@ -135,6 +138,9 @@ public class GlobalDataCollecter {
 	public void printResult(){
 		if(mMapOriginalGraphs != null && mMapOriginalGraphs.size()> 0  && mWriter!= null){
 			try{
+				//open for appending content
+				mWriter = new BufferedWriter( new FileWriter("LemmingEx.result", true));
+				
 				Set<String> setFileNames = mMapOriginalGraphs.keySet(); 
 
 				int iCounter = 0;
@@ -206,7 +212,7 @@ public class GlobalDataCollecter {
 							ColouredGraph grph = mMapOriginalGraphs.get(fileName);
 							constVal = n.getExpression().getValue(grph);
 							if(i < setFileNames.size()-1){
-								mWriter.write(constVal +",");
+								mWriter.write(constVal +", ");
 							}else{
 								mWriter.write(constVal+"");
 							}
@@ -217,6 +223,19 @@ public class GlobalDataCollecter {
 						constVal = n.getExpression().getValue(mRefinedMimicGraph);
 						mWriter.write("\tConstant value of refined mimic graph: "+constVal+"\n\n");
 					}
+				}
+				
+				if(mScoreError != null && mScoreError.size() > 0){
+					mWriter.write("#Score error: \n");
+					mWriter.write("\t[");
+					for(int i = 0 ; i < mScoreError.size() ; i++){
+						if(i < mScoreError.size()-1){
+							mWriter.write(mScoreError.get(i) +", ");
+						}else{
+							mWriter.write(mScoreError.get(i)+"");
+						}
+					}
+					mWriter.write("]\n");
 				}
 				
 				mWriter.write("\n\n\n");
