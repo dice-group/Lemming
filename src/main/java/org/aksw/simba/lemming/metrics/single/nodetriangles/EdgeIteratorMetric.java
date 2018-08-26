@@ -33,7 +33,7 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
     }
 
     protected double countTriangles() {
-        HashSet<String> visitedV = new HashSet<>();
+        HashSet<Triangle> visitedV = new HashSet<>();
 
         int triangleCount = 0;
         Grph grph = graph.getGraph();
@@ -47,6 +47,7 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
             vertexNeighbors[i].addAll(grph.getOutNeighbors(i));
         }
 
+        Triangle temp = new Triangle(0, 0, 0);
         for (int i = 0; i < edges.length; i++) {
             int[] verticesConnectedToEdge = edges[i].toIntArray();
 
@@ -61,17 +62,106 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
                     if (vertex.value == verticesConnectedToEdge[0]
                             || vertex.value == verticesConnectedToEdge[1])
                         continue;
-
-                    int[] vertices = {vertex.value, verticesConnectedToEdge[0], verticesConnectedToEdge[1]};
-                    Arrays.sort(vertices);
-                    if (visitedV.contains(Arrays.toString(vertices)))
+                    temp.set(vertex.value, verticesConnectedToEdge[0], verticesConnectedToEdge[1]);
+                    if (visitedV.contains(temp))
                         continue;
 
-                    visitedV.add(Arrays.toString(vertices));
+                    try {
+                        visitedV.add((Triangle) temp.clone());
+                    } catch (CloneNotSupportedException e) {
+                        e.printStackTrace();
+                    }
                     triangleCount++;
                 }
             }
         }
         return triangleCount;
+    }
+    
+    public static class Triangle {
+        private int a,b,c;
+
+        public Triangle(int a, int b, int c) {
+            set(a, b, c);
+        }
+        
+        public Triangle(Triangle t) {
+            this.a = t.a;
+            this.b = t.b;
+            this.c = t.c;
+        }
+        
+        public void set(int a, int b, int c) {
+            if(a < b) {
+                if(a < c) {
+                    this.a = a;
+                    if(b < c) {
+                        this.b = b;
+                        this.c = c;
+                    } else {
+                        this.b = c;
+                        this.c = b;
+                    }
+                } else {
+                    this.a = c;
+                    this.b = a;
+                    this.c = b;
+                }
+            } else {
+                if(a < c) {
+                    this.a = b;
+                    this.b = a;
+                    this.c = c;
+                } else {
+                    this.c = a;
+                    if(b < c) {
+                        this.a = b;
+                        this.b = c;
+                    } else {
+                        this.a = c;
+                        this.b = b;
+                    }
+                }
+            }
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + a;
+            result = prime * result + b;
+            result = prime * result + c;
+            return result;
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            Triangle other = (Triangle) obj;
+            if (a != other.a)
+                return false;
+            if (b != other.b)
+                return false;
+            if (c != other.c)
+                return false;
+            return true;
+        }
+        
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return new Triangle(this);
+        }
     }
 }
