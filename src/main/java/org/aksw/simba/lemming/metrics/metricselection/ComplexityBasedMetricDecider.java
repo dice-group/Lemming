@@ -85,8 +85,4 @@ public class ComplexityBasedMetricDecider {
         }
         return null;
     }
-
-    public static void main(String[] args) {
-
-    }
 }

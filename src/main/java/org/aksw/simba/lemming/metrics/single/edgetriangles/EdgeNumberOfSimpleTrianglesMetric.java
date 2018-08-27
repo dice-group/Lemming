@@ -21,7 +21,7 @@ import toools.set.IntSets;
 public class EdgeNumberOfSimpleTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 
     public EdgeNumberOfSimpleTrianglesMetric() {
-        super("#simpleEdgeTriangles");
+        super("#edgetriangles");
     }
 
     @Override

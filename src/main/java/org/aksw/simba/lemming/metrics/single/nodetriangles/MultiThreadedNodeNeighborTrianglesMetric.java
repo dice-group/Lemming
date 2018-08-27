@@ -26,7 +26,7 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
 	private List<Double> clusteringCoefficient = new ArrayList<>();
 
 	public MultiThreadedNodeNeighborTrianglesMetric() {
-		super("#simpleTriangles");
+		super("#nodetriangles");
 	}
 
 	public MultiThreadedNodeNeighborTrianglesMetric(Boolean calculateClusteringCoefficient) {

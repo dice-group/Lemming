@@ -30,7 +30,7 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
 
 
     public ListingAyzMetric(double delta) {
-        super("ayz #node triangles");
+        super("#nodetriangles");
         this.delta = delta;
     }
 

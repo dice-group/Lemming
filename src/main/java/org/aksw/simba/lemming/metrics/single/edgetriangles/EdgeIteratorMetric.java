@@ -17,7 +17,7 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
     private ColouredGraph graph;
 
     public EdgeIteratorMetric() {
-        super("#edgeIterator");
+        super("#edgetriangles");
     }
 
     @Override

@@ -34,12 +34,12 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
     private List<Double> clusteringCoefficient = new ArrayList<>();
 
     public NodeIteratorMetric() {
-        super("node-iterator #node triangles");
+        super("#nodetriangles");
         this.highDegreeVertices = IntSets.emptySet;
     }
 
     public NodeIteratorMetric(Boolean calculateClusteringCoefficient) {
-        super("node-iterator #node triangles");
+        super("#nodetriangles");
         this.highDegreeVertices = IntSets.emptySet;
         this.calculateClusteringCoefficient = calculateClusteringCoefficient;
     }

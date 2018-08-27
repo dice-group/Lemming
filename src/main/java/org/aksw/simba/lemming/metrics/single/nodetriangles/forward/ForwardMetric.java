@@ -41,7 +41,7 @@ public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
      * Creates a new {@link ForwardMetric}.
      */
     public ForwardMetric() {
-        super("forward #node triangles");
+        super("#nodetriangles");
     }
 
 

@@ -19,7 +19,7 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
 
 
     public NodeIteratorMetric() {
-        super("edge-iterator #edge triangles");
+        super("#edgetriangles");
         this.highDegreeVertices = IntSets.emptySet;
     }
 

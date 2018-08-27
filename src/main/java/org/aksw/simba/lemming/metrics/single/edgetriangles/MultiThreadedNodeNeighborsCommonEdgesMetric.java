@@ -19,7 +19,7 @@ import toools.set.IntSets;
 public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric implements SingleValueMetric {
 
     public MultiThreadedNodeNeighborsCommonEdgesMetric() {
-        super("#triangles");
+        super("#edgetriangles");
     }
 
     @Override

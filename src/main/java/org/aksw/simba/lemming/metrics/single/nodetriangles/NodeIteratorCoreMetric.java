@@ -32,7 +32,7 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValu
     private Boolean calculateClusteringCoefficient = false;
 
     public NodeIteratorCoreMetric() {
-        super("node-iterator-core #node triangles");
+        super("#nodetriangles");
     }
 
     public NodeIteratorCoreMetric(Boolean calculateClusteringCoefficient) {
