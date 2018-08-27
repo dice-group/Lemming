@@ -14,7 +14,11 @@ public class MetricDeciderTest  extends NumberOfTrianglesMetricTest {
     public void complexityBasedNodeMetric() {
         ColouredGraph graph = getColouredGraph("email-Eu-core.n3");
         ComplexityBasedMetricDecider complexityBasedMetricDecider = new ComplexityBasedMetricDecider(graph);
+
         SingleValueMetric nodeMetric = complexityBasedMetricDecider.getMinComplexityForNodeMetric();
+        SingleValueMetric edgeMetric = complexityBasedMetricDecider.getMinComplexityForEdgeMetric();
+
         nodeMetric.apply(complexityBasedMetricDecider.getGraph());
+        edgeMetric.apply(complexityBasedMetricDecider.getGraph());
     }
 }

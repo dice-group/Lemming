@@ -16,9 +16,6 @@ import java.util.*;
 public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMetric {
 
     private ColouredGraph graph;
-    private int trianglesSum = 0;
-    private IntSet edges[];
-    private IntSet vertexNeighbors[];
 
     public EdgeIteratorMetric() {
         super("#edgeIterator");
@@ -27,12 +24,12 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
     @Override
     public double apply(ColouredGraph graph) {
         this.graph = graph;
-        edges = new IntSet[graph.getGraph().getNumberOfEdges()];
-        vertexNeighbors = new IntSet[graph.getGraph().getNumberOfVertices()];
         return countTriangles();
     }
 
     protected double countTriangles() {
+        IntSet[] edges = new IntSet[graph.getGraph().getNumberOfEdges()];
+        IntSet[] vertexNeighbors = new IntSet[graph.getGraph().getNumberOfVertices()];
         HashSet<Triangle> visitedV = new HashSet<>();
 
         int triangleCount = 0;
@@ -85,7 +82,7 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
             set(a, b, c);
         }
         
-        public Triangle(Triangle t) {
+        Triangle(Triangle t) {
             this.a = t.a;
             this.b = t.b;
             this.c = t.c;
@@ -154,13 +151,11 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
                 return false;
             if (b != other.b)
                 return false;
-            if (c != other.c)
-                return false;
-            return true;
+            return c == other.c;
         }
         
         @Override
-        protected Object clone() throws CloneNotSupportedException {
+        public Object clone() throws CloneNotSupportedException {
             return new Triangle(this);
         }
     }
