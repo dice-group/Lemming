@@ -14,7 +14,6 @@ import java.util.*;
  * @author DANISH AHMED on 7/3/2018
  */
 public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMetric {
-    private ColouredGraph graph;
 
     public EdgeIteratorMetric() {
         super("#edgetriangles");
@@ -22,11 +21,10 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
 
     @Override
     public double apply(ColouredGraph graph) {
-        this.graph = graph;
-        return countTriangles();
+        return countTriangles(graph);
     }
 
-    protected double countTriangles() {
+    protected double countTriangles(ColouredGraph graph) {
         HashSet<org.aksw.simba.lemming.metrics.single.nodetriangles.EdgeIteratorMetric.Triangle> visitedV = new HashSet<>();
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfEdges()];
         IntSet[] vertexEdges = new IntSet[graph.getGraph().getNumberOfVertices()];

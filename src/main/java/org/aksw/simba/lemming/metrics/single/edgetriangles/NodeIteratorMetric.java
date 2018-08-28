@@ -13,27 +13,14 @@ import toools.set.IntSets;
  * @author DANISH AHMED on 6/13/2018
  */
 public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
-
-    private IntSet highDegreeVertices;
-    private IntSet[] edges;
-
-
     public NodeIteratorMetric() {
         super("#edgetriangles");
-        this.highDegreeVertices = IntSets.emptySet;
     }
-
-
-    public NodeIteratorMetric(IntSet highDegreeVertices) {
-        this();
-        this.highDegreeVertices = highDegreeVertices;
-    }
-
 
     @Override
     public double apply(ColouredGraph graph) {
-        edges = new IntSet[graph.getGraph().getNumberOfVertices()];
-        IntSet visitedVertices = IntSets.from(new int[] {});
+        IntSet[] edges = new IntSet[graph.getGraph().getNumberOfVertices()];
+        IntSet visitedVertices = IntSets.from();
         Grph grph = getUndirectedGraph(graph.getGraph());
 
         for (int i = 0; i < edges.length; ++i) {
@@ -51,13 +38,10 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
                 for (IntCursor neighbor2 : neighbors) {
                     if (vertex.value != neighbor1.value && vertex.value != neighbor2.value && neighbor1.value < neighbor2.value
                             && neighbors1.contains(neighbor2.value)) {
-                        if (!highDegreeVertices.contains(vertex.value) || !highDegreeVertices.contains(neighbor1.value)
-                                || !highDegreeVertices.contains(neighbor2.value)) {
-                            numberOfTriangles = numberOfTriangles +
-                                    (IntSets.intersection(edges[vertex.value], edges[neighbor1.value]).size() *
-                                            IntSets.intersection(edges[neighbor1.value], edges[neighbor2.value]).size() *
-                                            IntSets.intersection(edges[neighbor2.value], edges[vertex.value]).size());
-                        }
+                        numberOfTriangles = numberOfTriangles +
+                                (IntSets.intersection(edges[vertex.value], edges[neighbor1.value]).size() *
+                                        IntSets.intersection(edges[neighbor1.value], edges[neighbor2.value]).size() *
+                                        IntSets.intersection(edges[neighbor2.value], edges[vertex.value]).size());
                     }
                 }
             }
