@@ -45,8 +45,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void ListingAyzMetric() {
         Assert.assertNotNull(graph);
 
-        final double delta = 3.0;
-        ListingAyzMetric metric = new ListingAyzMetric(delta);
+        ListingAyzMetric metric = new ListingAyzMetric();
         double countedTriangles = metric.apply(graph);
 
         Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);

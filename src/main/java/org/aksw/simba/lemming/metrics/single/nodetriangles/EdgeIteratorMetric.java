@@ -14,20 +14,16 @@ import java.util.*;
  * @author DANISH AHMED on 6/28/2018
  */
 public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMetric {
-
-    private ColouredGraph graph;
-
     public EdgeIteratorMetric() {
         super("#nodetriangles");
     }
 
     @Override
     public double apply(ColouredGraph graph) {
-        this.graph = graph;
-        return countTriangles();
+        return countTriangles(graph);
     }
 
-    protected double countTriangles() {
+    protected double countTriangles(ColouredGraph graph) {
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfEdges()];
         IntSet[] vertexNeighbors = new IntSet[graph.getGraph().getNumberOfVertices()];
         HashSet<Triangle> visitedV = new HashSet<>();

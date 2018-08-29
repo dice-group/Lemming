@@ -21,32 +21,15 @@ import java.util.List;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric, SingleValueClusteringCoefficientMetric {
-	private Boolean calculateClusteringCoefficient = false;
-	private List<Double> clusteringCoefficient = new ArrayList<>();
+public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric{
 
 	public MultiThreadedNodeNeighborTrianglesMetric() {
 		super("#nodetriangles");
 	}
 
-	public MultiThreadedNodeNeighborTrianglesMetric(Boolean calculateClusteringCoefficient) {
-		super("#simpleTriangles");
-		this.calculateClusteringCoefficient = calculateClusteringCoefficient;
-	}
-
-	public List<Double> getClusteringCoefficient() {
-		return clusteringCoefficient;
-	}
-
 	@Override
 	public double apply(ColouredGraph graph) {
-		MultiThreadedTriangleCountingProcess process;
-		if (calculateClusteringCoefficient) {
-			process = new MultiThreadedTriangleCountingProcess(graph, true);
-			this.clusteringCoefficient = process.getClusteringCoefficient();
-		}
-		else
-			process = new MultiThreadedTriangleCountingProcess(graph);
+		MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
 		return process.calculate();
 	}
 
@@ -55,22 +38,10 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
 		private ColouredGraph graph;
 		private int trianglesSum = 0;
 		private IntSet edgesOfVertex[];
-		private List<Double> clusteringCoefficient = new ArrayList<>();
-		private Boolean calculateClusteringCoefficient = false;
 
 		MultiThreadedTriangleCountingProcess(ColouredGraph graph) {
 			this.graph = graph;
 			edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
-		}
-
-		MultiThreadedTriangleCountingProcess(ColouredGraph graph, Boolean calculateClusteringCoefficient) {
-			this.graph = graph;
-			edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
-			this.calculateClusteringCoefficient = calculateClusteringCoefficient;
-		}
-
-		List<Double> getClusteringCoefficient() {
-			return clusteringCoefficient;
 		}
 
 		protected double calculate() {
@@ -101,10 +72,6 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
 							if (n > sourceId)
 								connectedNodesSet.add(n);
 						}
-
-//						for loop / self edge
-						if (n != sourceId && calculateClusteringCoefficient)
-							connectedNodesSet.add(n);
 					}
 
                     int connectedNodes[] = connectedNodesSet.toIntArray();
@@ -115,13 +82,6 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
                             }
                         }
                     }
-                    if (count > 0 && calculateClusteringCoefficient) {
-						IntSet vertexNeighbors = grph.getInNeighbors(sourceId);
-						vertexNeighbors.addAll(grph.getOutNeighbors(sourceId));
-//						double degree = connectedNodesSet.size();
-						double degree = vertexNeighbors.size();
-						clusteringCoefficient.add((2 * count) / (degree * (degree - 1)));
-					}
 					addCount(count);
 				}
 			};

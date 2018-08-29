@@ -18,9 +18,6 @@ public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
 
     @Test
     public void edgeAdditionToGraph() {
-        List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics = new ArrayList<>();
-        clusteringCoefficientMetrics.add(new MultiThreadedNodeNeighborTrianglesMetric(true));
-
         List<SingleValueMetric> nodeTriangleMetrics = new ArrayList<>();
         nodeTriangleMetrics.add(new MultiThreadedNodeNeighborTrianglesMetric());
 
@@ -28,7 +25,6 @@ public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
         edgeTriangleMetrics.add(new MultiThreadedNodeNeighborsCommonEdgesMetric());
 
         Config metricConfiguration = new Config();
-        metricConfiguration.setClusteringCoefficientMetrics(clusteringCoefficientMetrics);
         metricConfiguration.setNodeTriangleMetric(nodeTriangleMetrics);
         metricConfiguration.setEdgeTriangleMetric(edgeTriangleMetrics);
 

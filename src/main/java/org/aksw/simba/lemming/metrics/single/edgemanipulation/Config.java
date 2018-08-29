@@ -12,8 +12,6 @@ public class Config {
     private List<SingleValueMetric> nodeTriMetrics;
     private List<SingleValueMetric> edgeTriMetrics;
 
-    private List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics;
-
     protected void setNodeTriangleMetric(List<SingleValueMetric> nodeTriMetrics) {
         this.nodeTriMetrics = nodeTriMetrics;
     }
@@ -22,19 +20,11 @@ public class Config {
         this.edgeTriMetrics = edgeTriMetrics;
     }
 
-    protected void setClusteringCoefficientMetrics(List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics) {
-        this.clusteringCoefficientMetrics = clusteringCoefficientMetrics;
-    }
-
     public List<SingleValueMetric> getNodeTriMetrics() {
         return nodeTriMetrics;
     }
 
     public List<SingleValueMetric> getEdgeTriMetrics() {
         return edgeTriMetrics;
-    }
-
-    public List<SingleValueClusteringCoefficientMetric> getClusteringCoefficientMetrics() {
-        return clusteringCoefficientMetrics;
     }
 }

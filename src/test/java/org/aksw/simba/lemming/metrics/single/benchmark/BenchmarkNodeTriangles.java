@@ -26,8 +26,7 @@ public class BenchmarkNodeTriangles extends NumberOfTrianglesMetricTest {
     public void listingAyzMetric(BenchmarkGraphs.Graphs graphs) {
         graphs.graph = getColouredGraph(graphs.fileName);
 
-        final double delta = 3.0;
-        ListingAyzMetric metric = new ListingAyzMetric(delta);
+        ListingAyzMetric metric = new ListingAyzMetric();
         metric.apply(graphs.graph);
     }
 

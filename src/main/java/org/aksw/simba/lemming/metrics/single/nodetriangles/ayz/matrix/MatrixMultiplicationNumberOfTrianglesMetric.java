@@ -24,11 +24,8 @@ import toools.math.IntMatrix;
  */
 public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric implements SingleValueMetric {
 
-    private ColouredGraph graph;
-
-
     public MatrixMultiplicationNumberOfTrianglesMetric() {
-        super("matrix multiplication #node triangles");
+        super("#nodetriangles");
     }
 
 
@@ -39,16 +36,15 @@ public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric 
         }
         // NOTE: This implementation only works under the assumption that no two nodes are connected
         // by more than one edge
-        this.graph = graph;
 
-        IntMatrix cubicAdjacencyMatrix = getCubicAdjacencyMatrix();
+        IntMatrix cubicAdjacencyMatrix = getCubicAdjacencyMatrix(graph);
 
         double diagonalSumOfCubicAdjacencyMatrix = getSumOfDiagonal(cubicAdjacencyMatrix);
         return diagonalSumOfCubicAdjacencyMatrix / 6;
     }
 
 
-    public IntMatrix getCubicAdjacencyMatrix() {
+    public IntMatrix getCubicAdjacencyMatrix(ColouredGraph graph) {
         MultiEdgeIgnoringAdjacencyMatrix adjacencyMatrix = new MultiEdgeIgnoringAdjacencyMatrix(graph.getGraph());
         return MultiEdgeIgnoringAdjacencyMatrix.power(adjacencyMatrix, 3);
     }
