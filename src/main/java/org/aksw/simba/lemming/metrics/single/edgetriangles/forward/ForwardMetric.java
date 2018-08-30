@@ -4,7 +4,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Sets;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
@@ -25,7 +25,7 @@ import java.util.List;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/forward/ForwardNumberOfTriangleMetric.java
  *
  */
-public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
+public class ForwardMetric extends AbstractMetric implements TriangleMetric {
     /**
      * Creates a new {@link ForwardMetric}.
      */
@@ -81,4 +81,8 @@ public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
         return triangles;
     }
 
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return (edges * Math.sqrt(edges) * (edges / (double) vertices));
+    }
 }

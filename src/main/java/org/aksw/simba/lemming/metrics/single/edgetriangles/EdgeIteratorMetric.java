@@ -4,7 +4,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import grph.Grph;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * @author DANISH AHMED on 7/3/2018
  */
-public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMetric {
+public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric {
 
     public EdgeIteratorMetric() {
         super("#edgetriangles");
@@ -77,5 +77,10 @@ public class EdgeIteratorMetric extends AbstractMetric implements SingleValueMet
             }
         }
         return triangleCount;
+    }
+
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return (Math.pow(edges, 4) / Math.pow(vertices, 4));
     }
 }

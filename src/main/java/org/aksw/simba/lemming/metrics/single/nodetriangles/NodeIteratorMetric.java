@@ -2,18 +2,15 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class models an algorithm for counting the amount of node triangles in a given graph. This
@@ -27,7 +24,7 @@ import java.util.List;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorNumberOfTrianglesMetric.java
  *
  */
-public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric {
     public NodeIteratorMetric() {
         super("#nodetriangles");
     }
@@ -73,5 +70,9 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
         return undirectedGraph;
     }
 
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return vertices * Math.pow(edges, 2);
+    }
 }
 

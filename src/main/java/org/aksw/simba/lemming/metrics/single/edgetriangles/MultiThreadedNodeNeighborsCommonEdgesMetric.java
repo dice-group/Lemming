@@ -6,7 +6,7 @@ import grph.algo.MultiThreadProcessing;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
@@ -16,7 +16,7 @@ import toools.set.IntSets;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric implements SingleValueMetric {
+public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric implements TriangleMetric {
 
     public MultiThreadedNodeNeighborsCommonEdgesMetric() {
         super("#edgetriangles");
@@ -26,6 +26,11 @@ public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric 
     public double apply(ColouredGraph graph) {
         MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
         return process.calculate();
+    }
+
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return (Math.pow(vertices, 2) * edges);
     }
 
     private static class MultiThreadedTriangleCountingProcess {

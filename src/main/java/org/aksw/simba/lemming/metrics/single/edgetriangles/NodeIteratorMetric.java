@@ -5,14 +5,14 @@ import grph.Grph;
 import grph.in_memory.InMemoryGrph;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
 /**
  * @author DANISH AHMED on 6/13/2018
  */
-public class NodeIteratorMetric extends AbstractMetric implements SingleValueMetric {
+public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric {
     public NodeIteratorMetric() {
         super("#edgetriangles");
     }
@@ -61,4 +61,8 @@ public class NodeIteratorMetric extends AbstractMetric implements SingleValueMet
         return undirectedGraph;
     }
 
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return vertices * Math.pow(edges, 2) * (edges / (double) vertices);
+    }
 }

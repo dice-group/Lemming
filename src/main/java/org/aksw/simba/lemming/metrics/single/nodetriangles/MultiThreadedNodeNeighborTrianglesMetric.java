@@ -6,14 +6,10 @@ import grph.algo.MultiThreadProcessing;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
-import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntHashSet;
 import toools.set.IntSet;
 import toools.set.IntSets;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This metric is the number of triangles of the graph.
@@ -21,7 +17,7 @@ import java.util.List;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements SingleValueMetric{
+public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric implements TriangleMetric {
 
 	public MultiThreadedNodeNeighborTrianglesMetric() {
 		super("#nodetriangles");
@@ -31,6 +27,11 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
 	public double apply(ColouredGraph graph) {
 		MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
 		return process.calculate();
+	}
+
+	@Override
+	public double calculateComplexity(int edges, int vertices) {
+		return (Math.pow(edges, 2) / Math.pow(vertices, 2));
 	}
 
 	private static class MultiThreadedTriangleCountingProcess {
