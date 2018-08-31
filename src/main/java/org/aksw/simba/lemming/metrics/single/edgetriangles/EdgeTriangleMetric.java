@@ -8,7 +8,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMetric{
 
 	public EdgeTriangleMetric() {
-		super("#edgeTriangles");
+		super("#edgetriangles");
 	}
 	
 	@Override

@@ -40,7 +40,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class PrecomputingValues {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RefinementTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrecomputingValues.class);
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
@@ -148,8 +148,8 @@ public class PrecomputingValues {
         List<SingleValueMetric> costlyMetrics = new ArrayList<SingleValueMetric>();
         List<SingleValueMetric> naiveMetrics = new ArrayList<SingleValueMetric>();
         for(SingleValueMetric metric : metrics){
-        	if(metric.getName().equalsIgnoreCase("edgeTriangles") || 
-        			metric.getName().equalsIgnoreCase("nodetriangles")||
+        	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+        			metric.getName().equalsIgnoreCase("#nodetriangles")||
         			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
         		costlyMetrics.add(metric);
         	} else {
@@ -174,8 +174,8 @@ public class PrecomputingValues {
             ColouredGraph startColouredGraph = new ColouredGraph(temp, null, null);
             ObjectDoubleOpenHashMap<String> starGraphMetrics = MetricUtils.calculateGraphMetrics(startColouredGraph, naiveMetrics);
             for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("edgeTriangles")|| 
-            			metric.getName().equalsIgnoreCase("nodetriangles")||
+            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+            			metric.getName().equalsIgnoreCase("#nodetriangles")||
             			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
             		starGraphMetrics.putOrAdd(metric.getName(), 0, 0);
             	}else{
@@ -194,8 +194,8 @@ public class PrecomputingValues {
             ObjectDoubleOpenHashMap<String> gridGraphMetrics = MetricUtils.calculateGraphMetrics(gridColouredGraph, naiveMetrics);
             
             for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("edgeTriangles")|| 
-            			metric.getName().equalsIgnoreCase("nodetriangles")||
+            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+            			metric.getName().equalsIgnoreCase("#nodetriangles")||
             			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
             		gridGraphMetrics.putOrAdd(metric.getName(), 0, 0);
             	}else{
@@ -214,8 +214,8 @@ public class PrecomputingValues {
             ObjectDoubleOpenHashMap<String> ringGraphMetrics = MetricUtils.calculateGraphMetrics(ringColouredGraph, naiveMetrics);
             
             for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("edgeTriangles")|| 
-            			metric.getName().equalsIgnoreCase("nodetriangles")||
+            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+            			metric.getName().equalsIgnoreCase("#nodetriangles")||
             			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
             		if(numberOfNodes == 3){
             			ringGraphMetrics.putOrAdd(metric.getName(), 1, 1);
@@ -237,8 +237,8 @@ public class PrecomputingValues {
             ObjectDoubleOpenHashMap<String> cliqueGraphMetrics = MetricUtils.calculateGraphMetrics(cliqueColouredGraph, naiveMetrics);
             
             for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("edgeTriangles")|| 
-            			metric.getName().equalsIgnoreCase("nodetriangles")||
+            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+            			metric.getName().equalsIgnoreCase("#nodetriangles")||
             			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
             		
             			if(partSize <3){
@@ -264,8 +264,8 @@ public class PrecomputingValues {
             ObjectDoubleOpenHashMap<String> bipartiteGraphMetrics = MetricUtils.calculateGraphMetrics(bipartiteColouredGraph, naiveMetrics);
             
             for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("edgeTriangles")|| 
-            			metric.getName().equalsIgnoreCase("nodetriangles")||
+            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
+            			metric.getName().equalsIgnoreCase("#nodetriangles")||
             			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
             		bipartiteGraphMetrics.putOrAdd(metric.getName(), 0, 0);
             	}else{
