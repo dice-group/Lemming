@@ -152,8 +152,10 @@ public class PrecomputingValues {
         			metric.getName().equalsIgnoreCase("#nodetriangles")||
         			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
         		costlyMetrics.add(metric);
+        		LOGGER.info("Costly metric: " + metric.getName());
         	} else {
         		naiveMetrics.add(metric);
+        		LOGGER.info("Naive metric: " + metric.getName());
         	}
         }
         
