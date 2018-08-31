@@ -23,7 +23,7 @@ import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
-import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;

@@ -22,7 +22,7 @@ import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
 import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.grph.generator.GraphOptimization;
 import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
-import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;

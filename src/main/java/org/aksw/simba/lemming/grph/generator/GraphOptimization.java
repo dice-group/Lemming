@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.dist.utils.ConstantValuesComputation;
-import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;

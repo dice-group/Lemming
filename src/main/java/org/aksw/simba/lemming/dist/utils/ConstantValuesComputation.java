@@ -7,7 +7,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.refinement.RefinementNode;
-import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
