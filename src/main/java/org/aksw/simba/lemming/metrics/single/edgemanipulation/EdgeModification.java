@@ -1,111 +1,224 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.cursors.IntCursor;
+import grph.Grph;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import toools.set.IntSet;
+import toools.set.IntSets;
 
 /**
  * @author DANISH AHMED on 8/10/2018
  */
 public class EdgeModification {
     private ColouredGraph graph;
-    private Config metricConfiguration;
-    private int numberOfInitialNodes;
-    private int numberOfInitialEdges;
+    private SingleValueMetric nodeMetric;
+    private SingleValueMetric edgeMetric;
+    private int oldNodeTriangles = 0;
+    private int newNodeTriangles;
+    private int oldEdgeTriangles = 0;
+    private int newEdgeTriangles;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModification.class);
 
-    EdgeModification(ColouredGraph graph, Config config) {
+    public EdgeModification(ColouredGraph graph, SingleValueMetric nodeMetric, SingleValueMetric edgeMetric) {
         this.graph = graph;
-        this.metricConfiguration = config;
+        this.nodeMetric = nodeMetric;
+        this.edgeMetric = edgeMetric;
 
-        this.numberOfInitialNodes = this.graph.getGraph().getNumberOfVertices();
-        this.numberOfInitialEdges = this.graph.getGraph().getNumberOfEdges();
+        this.oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        this.oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+    }
+
+    public EdgeModification(ColouredGraph graph, int numberOfNodeTriangles, int numberOfEdgeTriangles) {
+        this.graph = graph;
+
+        this.oldNodeTriangles = numberOfNodeTriangles;
+        this.oldEdgeTriangles = numberOfEdgeTriangles;
+    }
+
+    public ColouredGraph getGraph() {
+        return graph;
+    }
+
+    public int getOldNodeTriangles() {
+        return oldNodeTriangles;
+    }
+
+    public int getOldEdgeTriangles() {
+        return oldEdgeTriangles;
+    }
+
+    public int getNewNodeTriangles() {
+        return newNodeTriangles;
+    }
+
+    public int getNewEdgeTriangles() {
+        return newEdgeTriangles;
+    }
+
+    public void setNodeMetric(SingleValueMetric nodeMetric) {
+        this.nodeMetric = nodeMetric;
+    }
+
+    public void setEdgeMetric(SingleValueMetric edgeMetric) {
+        this.edgeMetric = edgeMetric;
+    }
+
+    public void setGraph(ColouredGraph graph) {
+        this.graph = graph;
+    }
+
+    private double getNumberOfNodeTriangles() {
+        return nodeMetric.apply(graph);
+    }
+
+    private double getNumberOfEdgeTriangles() {
+        return edgeMetric.apply(graph);
     }
 
     void removeEdgeFromGraph(int edgeId) {
-        LOGGER.info(String.format("Initial Graph:\nNumber of nodes:\t%s\nNumber of edges:\t%s\n\n",
-                numberOfInitialNodes,
-                numberOfInitialEdges));
-        getNumberOfNodeTriangles();
-        getNumberOfEdgeTriangles();
-//        analyseClusteringCoefficient();
+        if (newNodeTriangles != 0 && newEdgeTriangles != 0) {
+            oldNodeTriangles = newNodeTriangles;
+            oldEdgeTriangles = newEdgeTriangles;
+        }
 
-        this.graph.removeEdge(edgeId);
+        if (oldNodeTriangles == 0)
+            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        if (oldEdgeTriangles == 0)
+            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        newNodeTriangles = 0;
+        newEdgeTriangles = 0;
+
+        Grph grph = graph.getGraph();
+        IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
+        int numEdgesBetweenConnectedVertices = IntSets.intersection(grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[0]),
+                grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[1])).size();
 
         LOGGER.info(String.format("Removed edge id:\t%s", edgeId));
-        LOGGER.info(String.format("After Graph Modification:\nNumber of nodes:\t%s\nNumber of edges:\t%s\n",
-                this.graph.getGraph().getNumberOfVertices(),
-                this.graph.getGraph().getNumberOfEdges()));
+        if (numEdgesBetweenConnectedVertices > 1) {
+            /* Same number of node triangles */
+            newNodeTriangles = oldNodeTriangles;
+        } else {
+            /* edge size = 1 */
+            /* remove number of triangles formed by subgraph*/
+            int oldSubGraphNodeTriangles = calculateSubGraphNodeTriangles(edgeId);
+            newNodeTriangles = oldNodeTriangles - oldSubGraphNodeTriangles;
+        }
 
-//        analyseClusteringCoefficient();
+        int subGraphTrianglesAfterRemovingEdge = 0;
+        int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId, subGraphTrianglesAfterRemovingEdge);
+        if (subGraphTrianglesAfterRemovingEdge == 0)
+            newEdgeTriangles = oldEdgeTriangles - oldSubGraphEdgeTriangles;
+        else {
+            int difference = oldSubGraphEdgeTriangles - subGraphTrianglesAfterRemovingEdge;
+            newEdgeTriangles = oldEdgeTriangles - difference;
+        }
+
+        this.graph.removeEdge(edgeId);
     }
 
-    private void getNumberOfNodeTriangles() {
-        List<SingleValueMetric> nodeTriangleMetrics = this.metricConfiguration.getNodeTriMetrics();
-        for (SingleValueMetric metric : nodeTriangleMetrics) {
-            double numberOfTriangles = metric.apply(graph);
-            LOGGER.info(String.format("Metric:\t%s", metric.getName()));
-            LOGGER.info(String.format("Number of Node Triangles:\t%s", numberOfTriangles));
-        }
+    /* Get number of triangles that were formed by utilizing this edge
+     * you need a sub graph of the vertices that are in common with edge's vertices */
+    private int calculateSubGraphNodeTriangles(int edgeId) {
+        Grph grph = graph.getGraph();
+        IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
+
+        return getVerticesInCommon(verticesConnectedToRemovingEdge.toIntArray()[0],
+                verticesConnectedToRemovingEdge.toIntArray()[1]).size();
     }
 
-    private void getNumberOfEdgeTriangles() {
-        List<SingleValueMetric> edgeTriangleMetrics = this.metricConfiguration.getEdgeTriMetrics();
-        for (SingleValueMetric metric : edgeTriangleMetrics) {
-            double numberOfTriangles = metric.apply(graph);
-            LOGGER.info(String.format("Metric:\t%s", metric.getName()));
-            LOGGER.info(String.format("Number of Edge Triangles:\t%s", numberOfTriangles));
+    private IntSet getVerticesInCommon(int v1, int v2) {
+        Grph grph = graph.getGraph();
+        IntSet[] neighborsOfConnectedVertices = new IntSet[2];
+
+        neighborsOfConnectedVertices[0] = grph.getInNeighbors(v1);
+        neighborsOfConnectedVertices[0].addAll(grph.getOutNeighbors(v1));
+
+        neighborsOfConnectedVertices[1] = grph.getInNeighbors(v2);
+        neighborsOfConnectedVertices[1].addAll(grph.getOutNeighbors(v2));
+
+        return IntSets.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
+    }
+
+    public int calculateSubGraphEdgeTriangles(int edgeId, int subGraphTrianglesAfterRemovingEdge) {
+        int oldSubGraphEdgeTriangles = 0;
+
+        Grph grph = graph.getGraph();
+        IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
+        int numEdgesBetweenConnectedVertices = IntSets.intersection(grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[0]),
+                grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[1])).size();
+        IntSet verticesFormingTriangle = getVerticesInCommon(verticesConnectedToRemovingEdge.toIntArray()[0],
+                verticesConnectedToRemovingEdge.toIntArray()[1]);
+
+        for (IntCursor vertex : verticesFormingTriangle) {
+            int numEdgesV1ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[0]),
+                    grph.getEdgesIncidentTo(vertex.value)).size();
+            int numEdgesV2ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(verticesConnectedToRemovingEdge.toIntArray()[1]),
+                    grph.getEdgesIncidentTo(vertex.value)).size();
+            int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
+            oldSubGraphEdgeTriangles += (mul * numEdgesBetweenConnectedVertices);
+            subGraphTrianglesAfterRemovingEdge += (mul * (numEdgesBetweenConnectedVertices - 1));
         }
+
+        return oldSubGraphEdgeTriangles;
     }
 
     void addEdgeToGraph(int tail, int head, BitSet color) {
-        LOGGER.info(String.format("Initial Graph:\nNumber of nodes:\t%s\nNumber of edges:\t%s\n\n",
-                numberOfInitialNodes,
-                numberOfInitialEdges));
-        getNumberOfNodeTriangles();
-        getNumberOfEdgeTriangles();
-//        analyseClusteringCoefficient();
+        if (newNodeTriangles != 0 && newEdgeTriangles != 0) {
+            oldNodeTriangles = newNodeTriangles;
+            oldEdgeTriangles = newEdgeTriangles;
+        }
 
-        int edgeId = graph.addEdge(tail, head, color);
-        LOGGER.info(String.format("Added edge id:\t%s", edgeId));
-        LOGGER.info(String.format("After Graph Modification:\nNumber of nodes:\t%s\nNumber of edges:\t%s\n",
-                this.graph.getGraph().getNumberOfVertices(),
-                this.graph.getGraph().getNumberOfEdges()));
+        if (oldNodeTriangles == 0)
+            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        if (oldEdgeTriangles == 0)
+            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
-//        analyseClusteringCoefficient();
+        Grph grph = graph.getGraph();
+        int numEdgesBetweenVertices = IntSets.intersection(grph.getEdgesIncidentTo(tail),
+                grph.getEdgesIncidentTo(head)).size();
+
+        IntSet verticesInCommon = getVerticesInCommon(tail, head);
+        int edgeId = 0;
+
+        if (numEdgesBetweenVertices > 0) {
+            // number of Node Triangles remains same
+            this.newNodeTriangles = oldNodeTriangles;
+
+            int oldSubGraphEdgeTriangles = 0;
+            int newSubGraphEdgeTriangles = 0;
+            for (IntCursor vertex : verticesInCommon) {
+                int numEdgesV1ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(tail),
+                        grph.getEdgesIncidentTo(vertex.value)).size();
+                int numEdgesV2ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(head),
+                        grph.getEdgesIncidentTo(vertex.value)).size();
+                int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
+
+                oldSubGraphEdgeTriangles += (mul * numEdgesBetweenVertices);
+                newSubGraphEdgeTriangles += (mul * (numEdgesBetweenVertices + 1));
+            }
+            this.newEdgeTriangles = oldEdgeTriangles + (newSubGraphEdgeTriangles - oldSubGraphEdgeTriangles);
+            edgeId = graph.addEdge(tail, head, color);
+        } else {
+            // no connection between vertices
+            this.newNodeTriangles = oldNodeTriangles + verticesInCommon.size();
+            edgeId = graph.addEdge(tail, head, color);
+            numEdgesBetweenVertices += 1;
+            int subGraphEdgeTriangles = 0;
+            for (IntCursor vertex : verticesInCommon) {
+                int numEdgesV1ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(tail),
+                        grph.getEdgesIncidentTo(vertex.value)).size();
+                int numEdgesV2ToTriangleVertex = IntSets.intersection(grph.getEdgesIncidentTo(head),
+                        grph.getEdgesIncidentTo(vertex.value)).size();
+                int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
+
+                subGraphEdgeTriangles += (mul * numEdgesBetweenVertices);
+            }
+            this.newEdgeTriangles = oldEdgeTriangles + subGraphEdgeTriangles;
+        }
     }
-
-
-
-    private double calculateAvgCC(List<Double> clusteringCoefficient) {
-        double ccSum = 0.0;
-        for (double cc : clusteringCoefficient)
-            ccSum += cc;
-        return (ccSum / this.graph.getGraph().getNumberOfVertices());
-    }
-
-//    private void analyseClusteringCoefficient() {
-//        /*
-//        * Note:
-//        * The implementation of clustering coefficient is done simultaneously while computing number of Node Triangles
-//        * */
-//
-//        List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics = this.metricConfiguration.getClusteringCoefficientMetrics();
-//        for (SingleValueClusteringCoefficientMetric metric : clusteringCoefficientMetrics) {
-//            double numberOfTriangles = metric.apply(this.graph);
-//            List<Double> individualVertexCC = metric.getClusteringCoefficient();
-//
-//            double cc = calculateAvgCC(individualVertexCC);
-//            LOGGER.info(String.format("Metric:\t%s", metric.getName()));
-//            LOGGER.info(String.format("Number of node triangles while computing clustering coefficient:\t%s", numberOfTriangles));
-//            LOGGER.info(String.format("Clustering Coefficient:\t%s\n", cc));
-//        }
-//    }
-
 }
