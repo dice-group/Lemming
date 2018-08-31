@@ -3,23 +3,55 @@ package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 import grph.Grph;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
+import org.junit.Assert;
 import org.junit.Test;
 import toools.set.IntSet;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author DANISH AHMED on 8/10/2018
  */
-public class EdgeModificationDemo extends NumberOfTrianglesMetricTest {
+public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
+    private int numNodes = 5;
+    private int numEdges = 9;
 
     @Test
-    public void edgeAdditionToGraph() {
+    public void edgeRemoval() {
+        ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
+        Assert.assertNotNull(graph);
+
+        EdgeModification edgeModification = new EdgeModification(graph,
+                new MultiThreadedNodeNeighborTrianglesMetric(),
+                new MultiThreadedNodeNeighborsCommonEdgesMetric());
+
+        edgeModification.removeEdgeFromGraph(1);
+        int removeNodeTri = edgeModification.getNewNodeTriangles();
+        int removeEdgeTri = edgeModification.getNewEdgeTriangles();
+
+        Assert.assertEquals(2, removeNodeTri);
+        Assert.assertEquals(3, removeEdgeTri);
+    }
+
+    @Test
+    public void edgeAddition() {
+        ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
+        Assert.assertNotNull(graph);
+
+        EdgeModification edgeModification = new EdgeModification(graph,
+                new MultiThreadedNodeNeighborTrianglesMetric(),
+                new MultiThreadedNodeNeighborsCommonEdgesMetric());
+
+        edgeModification.addEdgeToGraph(0, 2, graph.getEdgeColour(1));
+        int addEdgeNodeTri = edgeModification.getNewNodeTriangles();
+        int addEdgeEdgeTri = edgeModification.getNewEdgeTriangles();
+
+        Assert.assertEquals(3, addEdgeNodeTri);
+        Assert.assertEquals(7, addEdgeEdgeTri);
+    }
+
+
+    /*public void demo() {
         ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
         EdgeModification edgeModification = new EdgeModification(graph,
                 new MultiThreadedNodeNeighborTrianglesMetric(),
@@ -32,11 +64,11 @@ public class EdgeModificationDemo extends NumberOfTrianglesMetricTest {
         System.out.println("NumE:\t" +edgeModification.getGraph().getGraph().getNumberOfEdges());
         System.out.println("NT:\t" + initialGraphNodeTri + "\nET:\t" + initialGraphEdgeTri);
 
-        /* Before removing edge, you have to get vertices it is connected to, so you can revert back graph */
+        *//* Before removing edge, you have to get vertices it is connected to, so you can revert back graph *//*
         Grph grph = graph.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(1);
 
-        /* Removing edge */
+        *//* Removing edge *//*
         edgeModification.removeEdgeFromGraph(1);
         int removeNodeTri = edgeModification.getNewNodeTriangles();
         int removeEdgeTri = edgeModification.getNewEdgeTriangles();
@@ -46,7 +78,7 @@ public class EdgeModificationDemo extends NumberOfTrianglesMetricTest {
         System.out.println("NumE:\t" +edgeModification.getGraph().getGraph().getNumberOfEdges());
         System.out.println("NT:\t" + removeNodeTri + "\nET:\t" + removeEdgeTri);
 
-        /* reverting graph to original state by adding vertices*/
+        *//* reverting graph to original state by adding vertices*//*
         edgeModification.addEdgeToGraph(verticesConnectedToRemovingEdge.toIntArray()[0],
                 verticesConnectedToRemovingEdge.toIntArray()[1], graph.getEdgeColour(1));
         System.out.println();
@@ -55,7 +87,7 @@ public class EdgeModificationDemo extends NumberOfTrianglesMetricTest {
         System.out.println("NumE:\t" +edgeModification.getGraph().getGraph().getNumberOfEdges());
         System.out.println("NT:\t" + edgeModification.getNewNodeTriangles() + "\nET:\t" + edgeModification.getNewEdgeTriangles());
 
-        /* Adding Edge to vertices */
+        *//* Adding Edge to vertices *//*
         edgeModification.addEdgeToGraph(2, 1, graph.getEdgeColour(1));
         int addEdgeNodeTri = edgeModification.getNewNodeTriangles();
         int addEdgeEdgeTri = edgeModification.getNewEdgeTriangles();
@@ -64,5 +96,5 @@ public class EdgeModificationDemo extends NumberOfTrianglesMetricTest {
         System.out.println("NumV:\t" +edgeModification.getGraph().getGraph().getNumberOfVertices());
         System.out.println("NumE:\t" +edgeModification.getGraph().getGraph().getNumberOfEdges());
         System.out.println("NT:\t" + addEdgeNodeTri + "\nET:\t" + addEdgeEdgeTri);
-    }
+    }*/
 }
