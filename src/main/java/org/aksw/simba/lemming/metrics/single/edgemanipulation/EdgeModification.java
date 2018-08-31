@@ -34,7 +34,7 @@ public class EdgeModification {
                 numberOfInitialEdges));
         getNumberOfNodeTriangles();
         getNumberOfEdgeTriangles();
-        analyseClusteringCoefficient();
+//        analyseClusteringCoefficient();
 
         this.graph.removeEdge(edgeId);
 
@@ -43,7 +43,7 @@ public class EdgeModification {
                 this.graph.getGraph().getNumberOfVertices(),
                 this.graph.getGraph().getNumberOfEdges()));
 
-        analyseClusteringCoefficient();
+//        analyseClusteringCoefficient();
     }
 
     private void getNumberOfNodeTriangles() {
@@ -70,7 +70,7 @@ public class EdgeModification {
                 numberOfInitialEdges));
         getNumberOfNodeTriangles();
         getNumberOfEdgeTriangles();
-        analyseClusteringCoefficient();
+//        analyseClusteringCoefficient();
 
         int edgeId = graph.addEdge(tail, head, color);
         LOGGER.info(String.format("Added edge id:\t%s", edgeId));
@@ -78,7 +78,7 @@ public class EdgeModification {
                 this.graph.getGraph().getNumberOfVertices(),
                 this.graph.getGraph().getNumberOfEdges()));
 
-        analyseClusteringCoefficient();
+//        analyseClusteringCoefficient();
     }
 
 
@@ -90,22 +90,22 @@ public class EdgeModification {
         return (ccSum / this.graph.getGraph().getNumberOfVertices());
     }
 
-    private void analyseClusteringCoefficient() {
-        /*
-        * Note:
-        * The implementation of clustering coefficient is done simultaneously while computing number of Node Triangles
-        * */
-
-        List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics = this.metricConfiguration.getClusteringCoefficientMetrics();
-        for (SingleValueClusteringCoefficientMetric metric : clusteringCoefficientMetrics) {
-            double numberOfTriangles = metric.apply(this.graph);
-            List<Double> individualVertexCC = metric.getClusteringCoefficient();
-
-            double cc = calculateAvgCC(individualVertexCC);
-            LOGGER.info(String.format("Metric:\t%s", metric.getName()));
-            LOGGER.info(String.format("Number of node triangles while computing clustering coefficient:\t%s", numberOfTriangles));
-            LOGGER.info(String.format("Clustering Coefficient:\t%s\n", cc));
-        }
-    }
+//    private void analyseClusteringCoefficient() {
+//        /*
+//        * Note:
+//        * The implementation of clustering coefficient is done simultaneously while computing number of Node Triangles
+//        * */
+//
+//        List<SingleValueClusteringCoefficientMetric> clusteringCoefficientMetrics = this.metricConfiguration.getClusteringCoefficientMetrics();
+//        for (SingleValueClusteringCoefficientMetric metric : clusteringCoefficientMetrics) {
+//            double numberOfTriangles = metric.apply(this.graph);
+//            List<Double> individualVertexCC = metric.getClusteringCoefficient();
+//
+//            double cc = calculateAvgCC(individualVertexCC);
+//            LOGGER.info(String.format("Metric:\t%s", metric.getName()));
+//            LOGGER.info(String.format("Number of node triangles while computing clustering coefficient:\t%s", numberOfTriangles));
+//            LOGGER.info(String.format("Clustering Coefficient:\t%s\n", cc));
+//        }
+//    }
 
 }

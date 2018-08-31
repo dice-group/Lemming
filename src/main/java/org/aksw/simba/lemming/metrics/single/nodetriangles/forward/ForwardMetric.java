@@ -6,11 +6,11 @@ import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Sets;
 
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
 
@@ -27,32 +27,29 @@ import toools.set.IntSets;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/forward/ForwardNumberOfTriangleMetric.java
  *
  */
-public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
-
-    private ColouredGraph coloredGraph;
-
-    private List<HashSet<Integer>> adjacencyDatastructure;
-    private DegreeBasedDecreasingNodeOrdering nodeOrdering;
-
-    private int amountOfTriangles;
-
-
+public class ForwardMetric extends AbstractMetric implements TriangleMetric {
     /**
      * Creates a new {@link ForwardMetric}.
      */
     public ForwardMetric() {
-        super("forward #node triangles");
+        super("#nodetriangles");
     }
-
 
     @Override
     public double apply(ColouredGraph coloredGraph) {
-        initialize(coloredGraph);
-//        TreeSet<Integer> visitedNodes = new TreeSet<>();
+        List<HashSet<Integer>> adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
+        DegreeBasedDecreasingNodeOrdering nodeOrdering;
+        int amountOfTriangles = 0;
+
+        for (int i = 0; i < coloredGraph.getVertices().size(); i++) {
+            adjacencyDatastructure.add(new HashSet<>());
+        }
+        nodeOrdering = new DegreeBasedDecreasingNodeOrdering(coloredGraph);
+
         HashSet<Integer> visitedNodes = new HashSet<>();
         for (Integer nodeId : nodeOrdering.getOrderedNodes()) {
             if (!visitedNodes.contains(nodeId))
-                processNeighborsOf(nodeId);
+                amountOfTriangles += processNeighborsOf(nodeId, coloredGraph, adjacencyDatastructure, nodeOrdering);
             visitedNodes.add(nodeId);
         }
         return amountOfTriangles;
@@ -64,32 +61,21 @@ public class ForwardMetric extends AbstractMetric implements SingleValueMetric {
      *
      * @param nodeId The id of the node whose neighbors should be processed.
      */
-    private void processNeighborsOf(int nodeId) {
+    private int processNeighborsOf(int nodeId, ColouredGraph coloredGraph, List<HashSet<Integer>> adjacencyDatastructure, DegreeBasedDecreasingNodeOrdering nodeOrdering) {
+        int triangles = 0;
         IntSet neighborSet = IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));
         for (IntCursor adjacentNodeIdCursor : neighborSet) {
             int adjacentNodeId = adjacentNodeIdCursor.value;
             if (nodeOrdering.isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
-                amountOfTriangles += Sets.intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId)).size();
+                triangles += Sets.intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId)).size();
                 adjacencyDatastructure.get(adjacentNodeId).add(nodeId);
             }
         }
+        return triangles;
     }
 
-
-    /**
-     * Initializes this {@link ForwardMetric} for the given {@link ColouredGraph}.
-     *
-     * @param coloredGraph The {@link ColouredGraph} whose triangles should be computed by this
-     *           metric.
-     */
-    private void initialize(ColouredGraph coloredGraph) {
-        this.coloredGraph = coloredGraph;
-        amountOfTriangles = 0;
-        adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
-        for (int i = 0; i < coloredGraph.getVertices().size(); i++) {
-            adjacencyDatastructure.add(new HashSet<Integer>());
-        }
-        nodeOrdering = new DegreeBasedDecreasingNodeOrdering(coloredGraph);
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return (edges * Math.sqrt(edges));
     }
-
 }

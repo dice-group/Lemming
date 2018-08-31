@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.algo.expression;
 
+import java.io.Serializable;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
@@ -11,7 +13,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  * connecting both.
  * 
  */
-public class Operation implements Expression {
+public class Operation implements Expression, Serializable {
 
     /**
      * The left {@link Expression} of this operation.
@@ -43,10 +45,10 @@ public class Operation implements Expression {
         this.operation = operation;
     }
 
-    @Override
-    public SingleValueMetric getMetric() {
-        return null;
-    }
+//    @Override
+//    public SingleValueMetric getMetric() {
+//        return null;
+//    }
 
     @Override
     public Expression getLeft() {
@@ -83,23 +85,23 @@ public class Operation implements Expression {
         return true;
     }
 
-    @Override
-    public double getValue(ColouredGraph cg) {
-        double leftValue = left.getValue(cg);
-        double rightValue = right.getValue(cg);
-        switch (operation) {
-        case DIV:
-            return leftValue / rightValue;
-        case MINUS:
-            return leftValue - rightValue;
-        case PLUS:
-            return leftValue + rightValue;
-        case TIMES:
-            return leftValue * rightValue;
-        default:
-            return Double.NaN;
-        }
-    }
+//    @Override
+//    public double getValue(ColouredGraph cg) {
+//        double leftValue = left.getValue(cg);
+//        double rightValue = right.getValue(cg);
+//        switch (operation) {
+//        case DIV:
+//            return leftValue / rightValue;
+//        case MINUS:
+//            return leftValue - rightValue;
+//        case PLUS:
+//            return leftValue + rightValue;
+//        case TIMES:
+//            return leftValue * rightValue;
+//        default:
+//            return Double.NaN;
+//        }
+//    }
 
     @Override
     public double getValue(ObjectDoubleOpenHashMap<String> graphMetrics) {

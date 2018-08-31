@@ -28,7 +28,7 @@ public class Constants {
 	public static final String TYPE_SUBCLASS_PREFIX = "subclass_";
 	public static final String PROPERTY = "property_";
 	
-	public static final int MAX_ITERATION_FOR_1_COLOUR = 1000000;
+	public static final int MAX_ITERATION_FOR_1_COLOUR = 10000;
 	
 	public static final Pattern DATETIME_PATTERN = Pattern.compile(
 		      "^((2000|2400|2800|(19|2[0-9](0[48]|[2468][048]|[13579][26])))-02-29)$"
@@ -37,5 +37,6 @@ public class Constants {
 		      + "|^(((19|2[0-9])[0-9]{2})-(0[469]|11)-(0[1-9]|[12][0-9]|30))$"
 		      + "|^20\\d{2}(-|\\/)((0[1-9])|(1[0-2]))(-|\\/)((0[1-9])|([1-2][0-9])|(3[0-1]))(T|\\s)(([0-1][0-9])|(2[0-3])):([0-5][0-9]):([0-5][0-9]).*");
 	
-	public static final char[] PUNTUATION_MARKS = {'.', '?', '!', ';', ':', ',', '"', '\''};	
+	public static final char[] PUNTUATION_MARKS = {'.', '?', '!', ';', ':', ',', '"', '\''};
+	
 }

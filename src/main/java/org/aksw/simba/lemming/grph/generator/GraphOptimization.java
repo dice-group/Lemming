@@ -3,27 +3,28 @@ package org.aksw.simba.lemming.grph.generator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.SortedSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.algo.refinement.RefinementNode;
 import org.aksw.simba.lemming.dist.utils.ConstantValuesComputation;
+import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.metrics.MetricUtils;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.rules.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
-import org.aksw.simba.lemming.util.GlobalDataCollecter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-public class GraphRefinement {
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphRefinement.class);
+public class GraphOptimization {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
-	private int mMaxIteration = 10 ;
+	private int mMaxIteration = 5000 ;
 	private boolean mProcessRandomly = true;
-	private int mMaxRepeatedSelection = 10;
+	private int mMaxRepeatedSelection = 1000;
 	
 	private IGraphGeneration mGraphGenerator;
 	
@@ -34,15 +35,28 @@ public class GraphRefinement {
 	private List<TripleBaseSingleID> mAddedTriples;
 	
 	private ConstantValuesComputation mErrScoreCalculator;
+
+	private ObjectDoubleOpenHashMap<String> mMetricValues ;
 	
-	public GraphRefinement(ColouredGraph[] origGrphs,
-			IGraphGeneration graphGenerator, SortedSet<RefinementNode> constExprs) {
+	private List<SingleValueMetric> mLstMetrics;
+	
+	private MetricAndConstantValuesCarrier mValueCarrier;
+	
+	/*-----------------------------------------------
+	 * Variable for storing calculation information *
+	 -----------------------------------------------*/
+	
+	
+	public GraphOptimization(ColouredGraph[] origGrphs,
+			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  MetricAndConstantValuesCarrier valueCarriers) {
 		
+		
+		mLstMetrics = metrics;
 		/*
 		 *  mErrScoreCalculator is used to compute the error score compared to original
 		 *  constant values of the original graphs
 		 */
-		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, constExprs);
+		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, valueCarriers);
 		
 		// the graph generator
 		mGraphGenerator = graphGenerator;
@@ -52,8 +66,18 @@ public class GraphRefinement {
 		
 		// list of added triples
 		mAddedTriples = new ArrayList<TripleBaseSingleID>();
+		
+		mMetricValues = new ObjectDoubleOpenHashMap<String>();
+		
+		mValueCarrier = valueCarriers;
+		
+		//compute metric values of current graph;
+		computeMetricValues(graphGenerator.getMimicGraph());
 	}
 	
+	private ObjectDoubleOpenHashMap<String> computeMetricValues(ColouredGraph grph){
+		return MetricUtils.calculateGraphMetrics(grph, mLstMetrics);
+	}
 	
 	public void setRefineGraphRandomly(boolean isRandom){
 		mProcessRandomly = isRandom;
@@ -64,23 +88,27 @@ public class GraphRefinement {
 		
 		double lErrScore = Double.NaN; 
 		double rErrScore = Double.NaN;
-		double pErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph); 
+		
+		mMetricValues = computeMetricValues(clonedGrph);
+		
+		double pErrScore = mErrScoreCalculator.computeErrorScore(mMetricValues); 
 		
 		for(int i = 0 ; i < mMaxIteration ; ++i){
 			
 			// add errorScore to tracking list result
-			GlobalDataCollecter.getInstance().addScoreError(pErrScore);
 			
 			// go left by removing an edge
 			removeEdges(clonedGrph);
+			ObjectDoubleOpenHashMap<String> metricValuesOfLeft =  computeMetricValues(clonedGrph);
 			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());
-			lErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph);
+			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 			undoChangingGrph(clonedGrph, Constants.REMOVE_ACTION);
 			
 			 // go right by adding a new edge
 			addEdges(clonedGrph);
 			//System.out.println("[R]Aft -Number of edges: "+ parentGrph.getEdges().size());
-			rErrScore = mErrScoreCalculator.computeErrorScore(clonedGrph);
+			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  computeMetricValues(clonedGrph);
+			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
 			undoChangingGrph(clonedGrph, Constants.ADD_ACTION);
 			
 			// find min error score
@@ -232,8 +260,20 @@ public class GraphRefinement {
 		mAddedTriples.add(pair);
 	}
 
-
-	
+	public void printResult(){
+		
+		// number of input graphs
+		
+		// number of vertices ad edges 
+		
+		// constant expressions and their values for each graphs 
+		
+		// values of the first version of mimic graph
+		
+		// list of of error score
+		
+		// values of the final version of mimic graph
+	}
 }
 
 

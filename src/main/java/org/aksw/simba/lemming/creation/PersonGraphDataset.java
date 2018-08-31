@@ -7,23 +7,21 @@ import java.util.Collections;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.util.GlobalDataCollecter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PersonGraphReader {
-	private static final Logger LOGGER = LoggerFactory.getLogger(PersonGraphReader.class);
-	private static final String DATA_FOLDER_PATH = "PersonGraph/";
+public class PersonGraphDataset extends AbstractDatasetManager implements IDatasetManager{
 	
-	public static ColouredGraph[] readGraphsFromFiles() {
-        return readGraphsFromFiles(DATA_FOLDER_PATH);
-    }
+	private static final Logger LOGGER = LoggerFactory.getLogger(PersonGraphDataset.class);
 	
-	public static ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
-		 //set dataset name
-		 GlobalDataCollecter.getInstance().setDatasetName("PersonGraph");
+	public PersonGraphDataset() {
+		super("PersonGraph");
+	}
+	
+	@Override
+	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
 		 
 		 List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
 		 GraphCreator creator = new GraphCreator();
@@ -46,11 +44,6 @@ public class PersonGraphReader {
 					if (graph != null) {
 						LOGGER.info("Generated graph of "+ personModel.size() +" triples");
 						graphs.add(graph);
-
-						// collect information of current loaded graph
-						GlobalDataCollecter.getInstance().addGraphs(folder.getName(), graph);
-						GlobalDataCollecter.getInstance().setDatatypeEdgePalette(graph.getDataTypedEdgePalette());
-						GlobalDataCollecter.getInstance().setVertexPallete(graph.getVertexPalette());
 					}
 				 }
 			 }
@@ -62,7 +55,13 @@ public class PersonGraphReader {
 		 return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
 	
+	
+	@Override
+	public void writeGraphsToFile(ColouredGraph grph) {
+	}
+	
 	public static void main(String[] args) {
-		PersonGraphReader.readGraphsFromFiles();
+		String DATA_FOLDER_PATH = "PersonGraph/";
+		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
     }
 }

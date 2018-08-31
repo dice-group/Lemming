@@ -2,17 +2,13 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.cursors.IntCursor;
 
 import grph.Grph;
+import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import toools.set.IntSet;
 import toools.set.IntSets;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -27,27 +23,18 @@ import java.util.List;
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorCoreNumberOfTrianglesMetric.java
  *
  */
-public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValueMetric, SingleValueClusteringCoefficientMetric {
-    private List<Double> clusteringCoefficient = new ArrayList<>();
-    private Boolean calculateClusteringCoefficient = false;
-
+public class NodeIteratorCoreMetric extends AbstractMetric implements TriangleMetric {
     public NodeIteratorCoreMetric() {
-        super("node-iterator-core #node triangles");
+        super("#nodetriangles");
     }
 
     public NodeIteratorCoreMetric(Boolean calculateClusteringCoefficient) {
         super("node-iterator-core #node triangles");
-        this.calculateClusteringCoefficient = calculateClusteringCoefficient;
     }
-
-    public List<Double> getClusteringCoefficient() {
-        return clusteringCoefficient;
-    }
-
 
     @Override
     public double apply(ColouredGraph graph) {
-        IntSet visitedVertices = IntSets.from(new int[] {});
+        IntSet visitedVertices = IntSets.from();
         Grph grph = graph.getGraph();
 
         int[] degrees = new int[grph.getVertices().size()];
@@ -73,25 +60,14 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValu
                     }
                 }
             }
-
-            if (!this.calculateClusteringCoefficient)
-                visitedVertices.add(vertexWithMinimumDegree);
-
-            if (triangleCount > 0 && this.calculateClusteringCoefficient) {
-                IntSet vertexNeighbors = grph.getInNeighbors(vertexWithMinimumDegree);
-                vertexNeighbors.addAll(grph.getOutNeighbors(vertexWithMinimumDegree));
-                double degree = vertexNeighbors.size();
-                clusteringCoefficient.add((2 * triangleCount) / (degree * (degree - 1)));
-            }
+            visitedVertices.add(vertexWithMinimumDegree);
 
             degrees[vertexWithMinimumDegree] = 0;
             for (IntCursor vertex : neighbors) {
                 if (degrees[vertex.value] > 0) {
-                    if (!this.calculateClusteringCoefficient)
                         degrees[vertex.value]--;
                 }
             }
-
             vertexWithMinimumDegree = getNodeWithMinimumDegree(degrees);
         }
         return numberOfTriangles;
@@ -111,4 +87,8 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements SingleValu
         return nodeWithMinimumDegree;
     }
 
+    @Override
+    public double calculateComplexity(int edges, int vertices) {
+        return (vertices - 2) * Math.pow((edges/vertices), 2);
+    }
 }

@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.algo.expression;
 
+import java.io.Serializable;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
@@ -12,7 +14,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class Constant implements Expression {
+public class Constant implements Expression, Serializable {
 
     private final double constantValue;
 
@@ -20,10 +22,10 @@ public class Constant implements Expression {
         constantValue = value;
     }
 
-    @Override
-    public SingleValueMetric getMetric() {
-        return null;
-    }
+//    @Override
+//    public SingleValueMetric getMetric() {
+//        return null;
+//    }
 
     @Override
     public Expression getLeft() {
@@ -60,10 +62,10 @@ public class Constant implements Expression {
         return false;
     }
 
-    @Override
-    public double getValue(ColouredGraph cg) {
-        return constantValue;
-    }
+//    @Override
+//    public double getValue(ColouredGraph cg) {
+//        return constantValue;
+//    }
 
     @Override
     public double getValue(ObjectDoubleOpenHashMap<String> graphMetrics) {
@@ -107,5 +109,4 @@ public class Constant implements Expression {
     public int getSize() {
         return 0;
     }
-
 }

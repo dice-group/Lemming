@@ -36,7 +36,7 @@ public class DuolionMetric extends AbstractMetric implements SingleValueMetric {
 
 
     public DuolionMetric(SingleValueMetric triangleCountingMetric, double edgeSurvivalProbability, long seed) {
-        super("duolion " + triangleCountingMetric.getName());
+        super("#nodetriangles");
         this.triangleCountingAlgorithm = triangleCountingMetric;
         this.edgeSurvivalProbability = edgeSurvivalProbability;
         random = new Random(seed);

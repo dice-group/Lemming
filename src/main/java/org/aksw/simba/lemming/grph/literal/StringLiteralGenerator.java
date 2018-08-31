@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.aksw.simba.lemming.util.GlobalDataCollecter;
 import org.aksw.simba.lemming.util.WordCentroidsCollectorIO;
 import org.aksw.word2vecrestful.word2vec.Word2VecFactory;
 import org.aksw.word2vecrestful.word2vec.Word2VecModel;
@@ -46,7 +45,8 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 	
 	private void outputDataToFile(){
 		
-		String dataFile = GlobalDataCollecter.getInstance().getDatasetName()+".json";
+		//TODO CHECK THIS FILE again
+		String dataFile = "wordDB.json";
 		
 		File f = new File(dataFile);
 		
@@ -68,7 +68,9 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 					float[] means = mapTColoAndMeans.get(tColo);
 					float[] sd = mapTColoAndStandardDeviations.get(tColo);
 					
-					String key = GlobalDataCollecter.getInstance().getKey(tColo, dteColo);
+					//TODO check this again
+					//String key = GlobalDataCollecter.getInstance().getKey(tColo, dteColo);
+					String key = tColo.toString()+"-"+dteColo.toString();
 					WordCentroidsCollectorIO.getInstance().addWordData(key, means, sd);
 				}
 			}
@@ -76,6 +78,7 @@ public class StringLiteralGenerator extends AbstractLiteralGenerator implements 
 		
 		WordCentroidsCollectorIO.getInstance().writeFiles(dataFile);
 	}
+	
 	
 	private void computeDataVectors(){
 		LOGGER.info("Start - computation of a mean vector and a standard deviation vector");

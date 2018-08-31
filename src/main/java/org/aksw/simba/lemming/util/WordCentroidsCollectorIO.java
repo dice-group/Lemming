@@ -1,8 +1,6 @@
 package org.aksw.simba.lemming.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -48,8 +46,8 @@ public class WordCentroidsCollectorIO {
 			SingleWordData word = mMapOfWordData.get(key);
 
 			element.put("key", key);
-			element.put("centroid", word.getStringMeans());
-			element.put("sd", word.getStringStandardDeviation());
+			element.put("centroid", word.getStringMeans(mapper));
+			element.put("sd", word.getStringStandardDeviation(mapper));
 
 			data.add(element);
 		}
@@ -68,39 +66,27 @@ public class WordCentroidsCollectorIO {
 		protected float[] arrMeans;
 		protected float[] arrStandardDeviation;
 		
-		public String getStringMeans(){
+		public ArrayNode getStringMeans(ObjectMapper mapper){
+			ArrayNode data = mapper.createArrayNode();
 			if(arrMeans!= null && arrMeans.length > 0)
 			{
-				StringBuilder res = new StringBuilder("[");
-				
 				for(int i = 0 ; i <arrMeans.length ; i++){
-					if(i < arrMeans.length -1){
-						res.append(arrMeans[i]+", ");
-					}else{
-						res.append(arrMeans[i]+"");
-					}
+					data.add(arrMeans[i]);				
 				}
-				res.append("]");
-				return res.toString();
 			}
-			return "[]";
+			return data;
 		}
 		
-		public String getStringStandardDeviation(){
+		public ArrayNode getStringStandardDeviation(ObjectMapper mapper){
+			ArrayNode data = mapper.createArrayNode();
 			if(arrStandardDeviation != null && arrStandardDeviation.length > 0  )
 			{
 				StringBuilder res = new StringBuilder("[");
 				for(int i = 0 ; i< arrStandardDeviation.length ; i++){
-					if(i < arrStandardDeviation.length -1){
-						res.append(arrStandardDeviation[i]+", ");
-					}else{
-						res.append(arrStandardDeviation[i]+"");
-					}
+					data.add(arrStandardDeviation[i]);
 				}
-				res.append("]");
-				return res.toString();
 			}
-			return "[]";
+			return data;
 		}
 	}
 }

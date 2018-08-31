@@ -26,19 +26,17 @@ import toools.set.IntSets;
  */
 public class ListingAyzMetric extends AbstractMetric implements SingleValueMetric {
 
-    public double delta;
 
-
-    public ListingAyzMetric(double delta) {
-        super("ayz #node triangles");
-        this.delta = delta;
+    public ListingAyzMetric() {
+        super("#nodetriangles");
     }
 
 
     @Override
     public double apply(ColouredGraph graph) {
+        double delta = 3.0;
         double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), (delta - 1) / (delta + 1));
-        IntSet highDegreeVertices = IntSets.from(new int[] {});
+        IntSet highDegreeVertices = IntSets.from();
         for (IntCursor vertex : graph.getVertices()) {
             if (graph.getGraph().getVertexDegree(vertex.value) > threshold) {
                 highDegreeVertices.add(vertex.value);
@@ -54,8 +52,8 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
 
 
     private double countTrianglesViaNodeIterator(ColouredGraph graph, IntSet highDegreeVertices) {
-        NodeIteratorMetric nodeIterator = new NodeIteratorMetric(highDegreeVertices);
-        return nodeIterator.apply(graph);
+        NodeIteratorMetric nodeIterator = new NodeIteratorMetric();
+        return nodeIterator.calculateTriangles(graph, highDegreeVertices);
     }
 
 
