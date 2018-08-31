@@ -1,5 +1,11 @@
 package org.aksw.simba.lemming.tools;
 
+import grph.Grph;
+import grph.algo.topology.ClassicalGraphs;
+import grph.algo.topology.GridTopologyGenerator;
+import grph.algo.topology.StarTopologyGenerator;
+import grph.in_memory.InMemoryGrph;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -12,28 +18,15 @@ import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
-import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
+import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.DiameterMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
 import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-
-import grph.Grph;
-import grph.algo.topology.ClassicalGraphs;
-import grph.algo.topology.GridTopologyGenerator;
-import grph.algo.topology.StarTopologyGenerator;
-import grph.in_memory.InMemoryGrph;
 
 @Ignore
 public class RefinementTest {
@@ -82,7 +75,7 @@ public class RefinementTest {
         }
 
         if (USE_SEMANTIC_DOG_FOOD) {
-            graphs = SemanticWebDogFoodReader.readGraphsFromFile(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
+            graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
         }
 
         // FitnessFunction fitnessFunc = new MinSquaredError();
@@ -101,10 +94,12 @@ public class RefinementTest {
             System.out.print(" --> ");
             System.out.println(n.toString());
 
-            System.out.print(n.getExpression().getValue(graphs[0]));
+            ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(graphs[0], metrics);
+            System.out.print(n.getExpression().getValue(metricValues));
             for (int i = 1; i < graphs.length; ++i) {
                 System.out.print('\t');
-                System.out.print(n.getExpression().getValue(graphs[i]));
+                ObjectDoubleOpenHashMap<String> metricValues1 = MetricUtils.calculateGraphMetrics(graphs[i], metrics);
+                System.out.print(n.getExpression().getValue(metricValues1));
             }
             System.out.println();
         }
