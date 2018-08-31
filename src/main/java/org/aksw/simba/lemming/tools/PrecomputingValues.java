@@ -50,7 +50,7 @@ public class PrecomputingValues {
     private static final String PERSON_GRAPH = "PersonGraph/";
     
     public static void main(String[] args) {
-    	LOGGER.info("Start computing metric and constant expressions!");
+    	LOGGER.info("Start precomputing metric and constant expressions!");
         // MultiThreadProcessing.defaultNumberOfThreads = 1;
 
         // For this test, we do not need assertions
@@ -80,6 +80,7 @@ public class PrecomputingValues {
         //compute metrics for each graph here
         MetricAndConstantValuesCarrier valueCarrier = new MetricAndConstantValuesCarrier(datasetPath);
         boolean havingData = valueCarrier.havingData();
+        LOGGER.info("Compute metric values for graph ......");
          Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = getMapMetricValues(graphs, metrics);
         if(mapMetricValues == null){
         	valueCarrier.setMetricValues(mapMetricValues);
@@ -88,7 +89,7 @@ public class PrecomputingValues {
         }
         ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.getGraphMetricsVector(graphs, metrics);
         
-        
+        LOGGER.info("Compute constant expressions ......");
         // FitnessFunction fitnessFunc = new MinSquaredError();
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();
         fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
@@ -120,7 +121,7 @@ public class PrecomputingValues {
         
         // save to file
         valueCarrier.storeValues();
-        System.out.println("End");
+        LOGGER.info("Precomputation is DONE");        
     }
 
     /**
@@ -288,9 +289,8 @@ public class PrecomputingValues {
     	for(ColouredGraph grph : origGrphs){
     		int noOfVertices  = grph.getGraph().getNumberOfVertices();
     		int noOfEdges = grph.getGraph().getNumberOfEdges();
-    		
     		String key = noOfVertices + "-" + noOfEdges;
-    		
+    		LOGGER.info("Consider graph: " + key);
     		ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(grph, lstMetrics);
     		mapMetricValues.put(key, metricValues);
     	}
