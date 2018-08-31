@@ -1,6 +1,11 @@
 
 package org.aksw.simba.lemming.tools;
 
+import grph.Grph;
+import grph.algo.topology.ClassicalGraphs;
+import grph.algo.topology.StarTopologyGenerator;
+import grph.in_memory.InMemoryGrph;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,28 +26,17 @@ import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.DiameterMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
-import org.junit.Ignore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-
-import grph.Grph;
-import grph.algo.topology.ClassicalGraphs;
-import grph.algo.topology.GridTopologyGenerator;
-import grph.algo.topology.StarTopologyGenerator;
-import grph.in_memory.InMemoryGrph;
 
 public class PrecomputingValues {
 
@@ -50,12 +44,13 @@ public class PrecomputingValues {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static final boolean USE_SEMANTIC_DOG_FOOD = false;
-    private static final boolean USE_PERSON_GRAPH = true;
+    private static final boolean USE_SEMANTIC_DOG_FOOD = true;
+    private static final boolean USE_PERSON_GRAPH = false;
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String PERSON_GRAPH = "PersonGraph/";
     
     public static void main(String[] args) {
+    	LOGGER.info("Start computing metric and constant expressions!");
         // MultiThreadProcessing.defaultNumberOfThreads = 1;
 
         // For this test, we do not need assertions
