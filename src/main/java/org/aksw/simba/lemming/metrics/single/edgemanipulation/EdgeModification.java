@@ -139,8 +139,18 @@ public class EdgeModification {
         neighborsOfConnectedVertices[0] = grph.getInNeighbors(v1);
         neighborsOfConnectedVertices[0].addAll(grph.getOutNeighbors(v1));
 
+        if (neighborsOfConnectedVertices[0].contains(v1))
+            neighborsOfConnectedVertices[0].remove(v1);
+        if (neighborsOfConnectedVertices[0].contains(v2))
+            neighborsOfConnectedVertices[0].remove(v2);
+
         neighborsOfConnectedVertices[1] = grph.getInNeighbors(v2);
         neighborsOfConnectedVertices[1].addAll(grph.getOutNeighbors(v2));
+
+        if (neighborsOfConnectedVertices[1].contains(v1))
+            neighborsOfConnectedVertices[1].remove(v1);
+        if (neighborsOfConnectedVertices[1].contains(v2))
+            neighborsOfConnectedVertices[1].remove(v2);
 
         return IntSets.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
     }
