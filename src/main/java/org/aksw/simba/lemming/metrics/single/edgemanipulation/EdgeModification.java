@@ -21,6 +21,7 @@ public class EdgeModification {
     private int newNodeTriangles;
     private int oldEdgeTriangles = 0;
     private int newEdgeTriangles;
+    private int subGraphTrianglesAfterRemovingEdge = 0;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModification.class);
 
@@ -90,8 +91,8 @@ public class EdgeModification {
             oldNodeTriangles = (int) getNumberOfNodeTriangles();
         if (oldEdgeTriangles == 0)
             oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
-        newNodeTriangles = 0;
-        newEdgeTriangles = 0;
+//        newNodeTriangles = 0;
+//        newEdgeTriangles = 0;
 
         Grph grph = graph.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
@@ -109,14 +110,14 @@ public class EdgeModification {
             newNodeTriangles = oldNodeTriangles - oldSubGraphNodeTriangles;
         }
 
-        int subGraphTrianglesAfterRemovingEdge = 0;
-        int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId, subGraphTrianglesAfterRemovingEdge);
+        int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId);
         if (subGraphTrianglesAfterRemovingEdge == 0)
             newEdgeTriangles = oldEdgeTriangles - oldSubGraphEdgeTriangles;
         else {
             int difference = oldSubGraphEdgeTriangles - subGraphTrianglesAfterRemovingEdge;
             newEdgeTriangles = oldEdgeTriangles - difference;
         }
+        subGraphTrianglesAfterRemovingEdge = 0;
 
         this.graph.removeEdge(edgeId);
     }
@@ -144,7 +145,7 @@ public class EdgeModification {
         return IntSets.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
     }
 
-    public int calculateSubGraphEdgeTriangles(int edgeId, int subGraphTrianglesAfterRemovingEdge) {
+    public int calculateSubGraphEdgeTriangles(int edgeId) {
         int oldSubGraphEdgeTriangles = 0;
 
         Grph grph = graph.getGraph();
@@ -167,7 +168,7 @@ public class EdgeModification {
         return oldSubGraphEdgeTriangles;
     }
 
-    void addEdgeToGraph(int tail, int head, BitSet color) {
+    int addEdgeToGraph(int tail, int head, BitSet color) {
         if (newNodeTriangles != 0 && newEdgeTriangles != 0) {
             oldNodeTriangles = newNodeTriangles;
             oldEdgeTriangles = newEdgeTriangles;
@@ -220,5 +221,6 @@ public class EdgeModification {
             }
             this.newEdgeTriangles = oldEdgeTriangles + subGraphEdgeTriangles;
         }
+        return edgeId;
     }
 }
