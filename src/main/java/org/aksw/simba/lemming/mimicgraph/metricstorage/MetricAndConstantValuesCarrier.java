@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class MetricAndConstantValuesCarrier implements Serializable	{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(RefinementTest.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetricAndConstantValuesCarrier.class);
 	
 	private static final long serialVersionUID = 4123435321899822119L;
 	

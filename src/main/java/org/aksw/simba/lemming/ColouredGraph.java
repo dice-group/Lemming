@@ -15,6 +15,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.aksw.simba.lemming.util.Constants;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -352,7 +353,12 @@ public class ColouredGraph{
 	 * @param dteColo the colour of the data typed property connecting to the vertex.
 	 */
 	public void addLiterals(String literal, int tId, BitSet dteColo, String datatype){
-				
+			
+		if(dteColo == null){
+			LOGGER.warn("Cannot generate for datatype property "+ dteColo +"("+tId+")");
+			return;
+		}
+		
 		Map<BitSet, List<String>> mapDTEColoursToLiterals = mapVertexIdAndLiterals.get(tId);
 		if(mapDTEColoursToLiterals == null){
 			mapDTEColoursToLiterals = new HashMap<BitSet, List<String>> ();
@@ -367,12 +373,15 @@ public class ColouredGraph{
 		
 		lstOfLiterals.add(literal);
 		
+		if(datatype == null || datatype.isEmpty()){
+			LOGGER.error("datatype is null");
+			return ;
+		}
+		
 		// TODO check this part again, since one literal may have different data type.
 		// this should load from the supporting file which contains all datatype of literal
 		String origDataType = mapLiteralTypes.get(dteColo);
-		if(origDataType != null && !origDataType.equals(datatype)){
-			//LOGGER.warn("Data types are conflicting: " + origDataType + " vs " + datatype);
-		}else{
+		if(origDataType == null || (origDataType != null && !origDataType.equals(datatype) && origDataType.contains("#string"))){
 			mapLiteralTypes.put(dteColo, datatype);
 		}
 	}
@@ -426,10 +435,23 @@ public class ColouredGraph{
 		else{
 			Set<String> dummyURIs = new HashSet<String>();
 			for(int i = 0 ; i < setOfURIs.size() ; i++){
-				dummyURIs.add(Constants.SIMULATED_CLASS_URI + vColo + "_"+ i);
+				dummyURIs.add(Constants.SIMULATED_CLASS_URI + vColo + "_" + i);
 			}
 			return dummyURIs;
 		}
+	}
+	
+	public Set<BitSet> getClassColour(BitSet vColo){
+		Set<String> setOfURIs = vertexPalette.getURIs(vColo, false);
+		Set<BitSet> setClassColours = new HashSet<BitSet>();
+		
+		if(setOfURIs!= null && setOfURIs.size() > 0 ){
+			for(String uri: setOfURIs){
+				setClassColours.add(vertexPalette.getColour(uri));
+			}
+		}
+		
+		return setClassColours;
 	}
 	
 	public String getPropertyURI(BitSet eColo){
@@ -578,6 +600,18 @@ public class ColouredGraph{
 	public String getLiteralType(BitSet dteColo){
 		return mapLiteralTypes.get(dteColo);
 	}
+
 	
+	public boolean isRDFTypeEdge(int outEdgeId){
+		BitSet oeColo = getEdgeColour(outEdgeId);
+		if(oeColo != null){
+			return edgePalette.isColourOfRDFType(oeColo);
+		}
+		return false;
+	}
+	
+	public BitSet getRDFTypePropertyColour(){
+		return edgePalette.getColour(RDF.type.toString());
+	}
 }
 

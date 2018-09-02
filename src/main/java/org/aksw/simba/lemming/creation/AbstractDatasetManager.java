@@ -30,13 +30,19 @@ public class AbstractDatasetManager implements IDatasetManager{
 	}
 	
 	@Override
-	public void writeGraphsToFile(ColouredGraph grph) {
+	public String writeGraphsToFile(ColouredGraph grph) {
 		Model datasetModel = ModelFactory.createDefaultModel();
+		String fileName= "";
 		try {
-			new File("/results").mkdirs();
+			new File("results").mkdirs();
 			
-			String fileName = "/results/Mimic_" + mDatasetName + ".rdf";
-			String[] parts = fileName.split(".");
+			fileName = "results/Mimic_" + mDatasetName + ".rdf";
+			String[] parts = new String[2];
+			int index = fileName.lastIndexOf('.');
+			parts[0] = fileName.substring(0, index);
+			parts[1] = fileName.substring(index, fileName.length());
+			
+			
 			Path path = Paths.get(fileName);
 			File f = null;
 			int i = 1;
@@ -45,9 +51,9 @@ public class AbstractDatasetManager implements IDatasetManager{
 			    i++;
 			    path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
 			} 
-			f = new File(parts[0] + "(" + i + ")" + parts[1]);
+			f = path.toFile();
 			
-			
+			fileName = f.getName();
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, datasetModel);
 			Model newModel = reverter.processGraph();
@@ -59,8 +65,9 @@ public class AbstractDatasetManager implements IDatasetManager{
 		} catch (Exception ex) {
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
 			System.err.println("Failed to write to file: " + ex.getMessage());
-			System.exit(1);
 		}
+		
+		return fileName;
 	}
 
 	@Override

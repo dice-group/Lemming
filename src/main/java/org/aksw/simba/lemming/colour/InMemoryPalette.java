@@ -3,6 +3,8 @@ package org.aksw.simba.lemming.colour;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.jena.vocabulary.RDF;
+
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -103,7 +105,7 @@ public class InMemoryPalette implements ColourPalette {
 	    				colo.and(inColour);
 	    				
 	    				//check if they have matching bits 1
-	    				if(colo.cardinality() == inColour.cardinality()){
+	    				if(colo.cardinality() <= inColour.cardinality() && !colo.isEmpty()){
 	    					setOfURIs.add(uri);
 	    				}
 	    			}
@@ -113,6 +115,12 @@ public class InMemoryPalette implements ColourPalette {
     	return setOfURIs;
     }
 
+    @Override
+    public boolean isColourOfRDFType(BitSet colour){
+    	BitSet rdfTypeColour = uriColourMap.get(RDF.type.toString());
+    	return colour.equals(rdfTypeColour);
+    }
+    
 	@Override
 	public void updateColour(BitSet colour, String uri) {
 		if(colour!= null){

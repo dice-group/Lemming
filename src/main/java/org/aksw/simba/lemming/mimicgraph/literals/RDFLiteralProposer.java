@@ -12,12 +12,7 @@ import com.carrotsearch.hppc.BitSet;
 
 public class RDFLiteralProposer {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(RDFLiteralProposer.class);
-	
-	private Map<BitSet, String> mMapOfDataTypes;
-	
 	private LiteralAnalysis mLiteralAnalysis;
-	
 	private Map<String , ILiteralGenerator> mMapOfDataTypesAndGenerators;
 	
 	public RDFLiteralProposer(ColouredGraph[] origGrphs){
@@ -34,10 +29,10 @@ public class RDFLiteralProposer {
 			Map<String, Set<BitSet>> mapOfTypesAndDTEColo = mLiteralAnalysis.getMapOfTypesAndDTEColours();
 			if(mapOfTypesAndDTEColo!= null && mapOfTypesAndDTEColo.size()> 0 ){
 				Set<String> setOfTypes = mapOfTypesAndDTEColo.keySet();
+				
 				for(String dataType : setOfTypes){
-					
 					Set<BitSet> setOfDTEColours = mapOfTypesAndDTEColo.get(dataType);
-					// get sampledata according to the types and dteColours;
+					// get sample data according to the types and dteColours;
 					Map<BitSet, Map<BitSet, Set<String>>> mapOfDTEColoAndVColoValues = mLiteralAnalysis.getMapOfDTEColoursAndValues(setOfDTEColours);
 					
 					if(mapOfDTEColoAndVColoValues!=null){
@@ -56,8 +51,8 @@ public class RDFLiteralProposer {
 							mMapOfDataTypesAndGenerators.put(dataType, datetimeGenerator);
 						}else{
 							//by default create a string generator
-							ILiteralGenerator datetimeGenerator = new StringLiteralGenerator(mapOfDTEColoAndVColoValues);
-							//ILiteralGenerator datetimeGenerator = new AtomicLiteralGenerator(mapOfDTEColoAndVColoValues);
+							//ILiteralGenerator datetimeGenerator = new StringLiteralGenerator(mapOfDTEColoAndVColoValues);
+							ILiteralGenerator datetimeGenerator = new AtomicLiteralGenerator(mapOfDTEColoAndVColoValues);
 							mMapOfDataTypesAndGenerators.put(dataType, datetimeGenerator);
 						}
 					}//end if of checking valid sample data
@@ -73,17 +68,26 @@ public class RDFLiteralProposer {
 	 * @return a string of words
 	 */
 	public String getValue(BitSet vColo, BitSet dteColo) {
-	String literal = "";
+		String literal = "";
 		if(vColo != null && dteColo !=null){
 			double numOfValues = mLiteralAnalysis.getAvrgNoOfWords(vColo, dteColo);
 			String typeOfData = mLiteralAnalysis.getDataTypes(dteColo);
-			System.out.println("\t\tGet "+numOfValues+" word(s) of type:" + typeOfData );
+			//System.out.println("\t\tGet "+numOfValues+" word(s) of type:" + typeOfData );
 			ILiteralGenerator literalGenerator = mMapOfDataTypesAndGenerators.get(typeOfData);
-			double currentTime = System.currentTimeMillis();
+			//double currentTime = System.currentTimeMillis();
 			literal = literalGenerator.getValue(vColo, dteColo, (int)numOfValues);
-		    currentTime = System.currentTimeMillis() - currentTime;
-		    System.out.println("\t\t\t Time comsumed:" + currentTime);
+		    //currentTime = System.currentTimeMillis() - currentTime;
+		    //System.out.println("\t\t\t Time comsumed:" + currentTime);
 		}
 		return literal;
+	}
+	
+	
+	public String getLiteralType(BitSet dteColo){
+		String typeOfData = "http://www.w3.org/2001/XMLSchema#string";
+		if(dteColo !=null){
+			typeOfData = mLiteralAnalysis.getDataTypes(dteColo);
+		}
+		return typeOfData;
 	}
 }

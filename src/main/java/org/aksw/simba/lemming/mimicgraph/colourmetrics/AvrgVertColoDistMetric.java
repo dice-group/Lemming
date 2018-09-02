@@ -19,11 +19,12 @@ public class AvrgVertColoDistMetric {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AvrgVertColoDistMetric.class);
 	
 	public static ObjectDistribution<BitSet> apply(ColouredGraph[] origGrphs){
-		if(origGrphs != null && origGrphs.length >0){
+		
+		int numberOfGraph = 0;
+		if(origGrphs != null && (numberOfGraph = origGrphs.length) >0){
 			//vertex colour distribution
 			VertexColourDistributionMetric vertexColourMetric = new VertexColourDistributionMetric();
 			ObjectDoubleOpenHashMap<BitSet> mapVertColoRate = new ObjectDoubleOpenHashMap<BitSet>();
-			ObjectIntOpenHashMap<BitSet> mapVertColoApprearTime = new ObjectIntOpenHashMap<BitSet>();
 			
 			for(ColouredGraph graph: origGrphs){
 				// number of vertices
@@ -42,27 +43,20 @@ public class AvrgVertColoDistMetric {
 					double rate = vertSampleValues[i]/(iNoVertices);
 					
 					mapVertColoRate.putOrAdd(vertColo, rate, rate);
-					
-					mapVertColoApprearTime.putOrAdd(vertColo, 1, 1);
 				}
 			}
 			
-			Object [] keyVertColo = mapVertColoApprearTime.keys;
-			int iNoOfVertColo = keyVertColo.length;
-			for(int i = 0 ; i< iNoOfVertColo; i++){
-				if(mapVertColoApprearTime.allocated[i]){
+			Object [] keyVertColo = mapVertColoRate.keys;
+			for(int i = 0 ; i< keyVertColo.length; i++){
+				if(mapVertColoRate.allocated[i]){
 					BitSet vertColo = (BitSet) keyVertColo[i];
-					int iNoOfAppearTime = mapVertColoApprearTime.get(vertColo);
-					if(iNoOfAppearTime != 0){
-						double avertage = mapVertColoRate.get(vertColo)/iNoOfAppearTime;
-						mapVertColoRate.put(vertColo, avertage);	
-					}
-					else{
-						LOGGER.warn("the vertColo does not exist!");
-					}
+					double avertage = mapVertColoRate.get(vertColo)/numberOfGraph;
+					mapVertColoRate.put(vertColo, avertage);	
 				}
 			}
 			return MapUtil.convert(mapVertColoRate);
+		}else{
+			LOGGER.warn("Find no input graphs!");
 		}
 		return null;
 	}

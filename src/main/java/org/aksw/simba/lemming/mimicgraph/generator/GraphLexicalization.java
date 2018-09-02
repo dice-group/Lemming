@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -29,13 +30,10 @@ public class GraphLexicalization {
 		mGraphGenerator = graphGenerator;
 		
 		// average vertex distribution per data typed property
-		mAvrgVDistPerDREColourMetric = new AvrgColouredVDistPerDTEColour(
-				origGrphs);
+		mAvrgVDistPerDREColourMetric = new AvrgColouredVDistPerDTEColour(origGrphs);
 
-		// word2vec model to obtain closest
+		// literal proposer
 		mLiteralProposer = new RDFLiteralProposer(origGrphs);
-		
-		//mWordProposer = new RDFLiteralGeneratorTest(mLiteralProcessor.getWordsOfEachDTEColour());
 	}
 
 	public ColouredGraph lexicalizeGraph() {
@@ -56,17 +54,17 @@ public class GraphLexicalization {
 		 */
 		Set<BitSet> setOfDTEColours = mapVColoDistPerDTEColo.keySet();
 
-		System.out.println("-- Process "+setOfDTEColours.size()+ " datatype edge colours");
+		LOGGER.info("Generate "+ setOfDTEColours.size()+ " datatype edge colours (datatype properties)");
 		int iCounter = 0;
 		/*
-		 * accordingly to each data typed edge's colour, we get the average
+		 * accordingly to each data typed edge's colour, we get an average
 		 * number of vertices in a particular vertex's colour
 		 */
 		for (BitSet dteColo : setOfDTEColours) {
-			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo
-					.get(dteColo);
+			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo.get(dteColo);
 			
-			System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
+			LOGGER.info("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
+			//System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
 			
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
@@ -88,20 +86,19 @@ public class GraphLexicalization {
 							}
 							numOfConsidedVertices = Math.round(numOfConsidedVertices);
 							//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
-							
-							int indexOfVertex = 0;
-							while (indexOfVertex < numOfConsidedVertices) {
+							Random rand = new Random();
+							int counterVertices = 0;
+							while (counterVertices < numOfConsidedVertices) {
 								
 								// get a
-								int vId = arrOfVertices[indexOfVertex];
-								System.out.println("\tGenerate literals for vertex " + vId +"("+indexOfVertex+"/"+numOfConsidedVertices+ ")...");
+								int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
+								LOGGER.info("---- Generate literals for vertex" + vId +"("+counterVertices+"/"+numOfConsidedVertices+ ")...");
 								// get literal
-								String literal = mLiteralProposer
-										.getValue(vColo, dteColo);
+								String literal = mLiteralProposer.getValue(vColo, dteColo);
 								
 								// add it to the coloured graph
-								mimicGraph.addLiterals(literal, vId, dteColo, mGraphGenerator.getLiteralType(dteColo) );
-								indexOfVertex++;
+								mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
+								counterVertices++;
 							}
 						}
 					}
@@ -111,5 +108,4 @@ public class GraphLexicalization {
 		LOGGER.info("End lexicalizing the mimic graph");
 		return mimicGraph;
 	}
-
 }

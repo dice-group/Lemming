@@ -119,4 +119,7 @@ public interface ColourPalette {
      * @return the map of URIs and colours
      */
     public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour();
+    
+    public boolean isColourOfRDFType(BitSet colour);
+    
 }

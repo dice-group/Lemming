@@ -19,6 +19,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  * the data typed properties. For example,there are 30 green vertices (among 57 green vertices)
  * having the data typed property rdf:label.
  * A data typed property is represented as one colour.
+ * 
  * @author nptsy
  */
 public class ColouredVDistPerDTEColour extends AbstractMetric 	
@@ -72,16 +73,15 @@ public class ColouredVDistPerDTEColour extends AbstractMetric
 		}
 		
 		// if the map (of data typed property's colours to the vertex distribution) has data
+		Map<BitSet, ObjectDistribution<BitSet>> mapRes = new HashMap<BitSet, ObjectDistribution<BitSet>>();
 		if(mapDTEColoToVColoDist.size()> 0 ){
-			Map<BitSet, ObjectDistribution<BitSet>> mapRes = new HashMap<BitSet, ObjectDistribution<BitSet>>();
 			Set<BitSet> setDTEdgeColours = mapDTEColoToVColoDist.keySet();
 			for(BitSet dtEdgeColo : setDTEdgeColours){
 				ObjectDoubleOpenHashMap<BitSet> vertColoDist = mapDTEColoToVColoDist.get(dtEdgeColo);
 				mapRes.put(dtEdgeColo, MapUtil.convert(vertColoDist));
 			}
-			return mapRes;
 		}
-		return null;
+		return mapRes;
 	}
 
 }

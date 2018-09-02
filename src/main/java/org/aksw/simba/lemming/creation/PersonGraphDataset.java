@@ -56,12 +56,8 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	}
 	
 	
-	@Override
-	public void writeGraphsToFile(ColouredGraph grph) {
-	}
-	
-	public static void main(String[] args) {
-		String DATA_FOLDER_PATH = "PersonGraph/";
-		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-    }
+//	public static void main(String[] args) {
+//		String DATA_FOLDER_PATH = "PersonGraph/";
+//		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//    }
 }

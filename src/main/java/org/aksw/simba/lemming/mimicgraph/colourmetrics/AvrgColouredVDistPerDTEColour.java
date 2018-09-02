@@ -1,8 +1,6 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -10,20 +8,12 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.metrics.dist.VertexColourDistributionMetric;
 import org.aksw.simba.lemming.util.MapUtil;
-import org.apache.jena.ext.com.google.common.primitives.Doubles;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public class AvrgColouredVDistPerDTEColour {
 
-	/**
-	 * key1: data typed edge's colors, values the number of appearing time of a vertex's color associated
-	 * with the edge's color over all versions
-	 */
-	private Map<BitSet, ObjectIntOpenHashMap<BitSet>> mMapDTEAppearTimes;
 	
 	/**
 	 * key1: data typed edge's colors, values: the distribution of vertices in particular vertex's colour
@@ -32,9 +22,7 @@ public class AvrgColouredVDistPerDTEColour {
 	
 	public AvrgColouredVDistPerDTEColour(ColouredGraph [] origGrphs){
 		
-		mMapDTEAppearTimes = new HashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapAvrgColouredVDist= new HashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
-		
 		apply(origGrphs);
 	}
 	
@@ -43,66 +31,54 @@ public class AvrgColouredVDistPerDTEColour {
 		ColouredVDistPerDTEColour colouredVDistPerDTEColoMetric = new ColouredVDistPerDTEColour();
 		VertexColourDistributionMetric vColoDistributionMetric = new VertexColourDistributionMetric();
 		
-		for(ColouredGraph grph : origGrphs){
-			ObjectDistribution<BitSet> vColoDistribution = vColoDistributionMetric.apply(grph);
-			ObjectDoubleOpenHashMap<BitSet> mapVColoDistribution = MapUtil.convert(vColoDistribution);
-			
-			/**
-			 * key is the data typed edge's colour and the value is the distribution of vertices
-			 */
-			Map<BitSet, ObjectDistribution<BitSet>> mapColouredVDistPerDTEColo = colouredVDistPerDTEColoMetric.apply(grph);
+		int numberOfGrpahs = origGrphs.length;
+		if(numberOfGrpahs>0){
+			for(ColouredGraph grph : origGrphs){
+				//get vertices distributed to different colours
+				ObjectDistribution<BitSet> vColoDistribution = vColoDistributionMetric.apply(grph);
+				ObjectDoubleOpenHashMap<BitSet> mapVColoDistribution = MapUtil.convert(vColoDistribution);
+				
+				/**
+				 * key is the data typed edge's colour and the value is the distribution of vertices
+				 */
+				Map<BitSet, ObjectDistribution<BitSet>> mapColouredVDistPerDTEColo = colouredVDistPerDTEColoMetric.apply(grph);
 				Set<BitSet> setOfDTEColours = mapColouredVDistPerDTEColo.keySet();
-				
-			for(BitSet dteColo: setOfDTEColours){
-				ObjectDistribution<BitSet> colouredVDistribution = mapColouredVDistPerDTEColo.get(dteColo);
-				BitSet[] sampleVColours = colouredVDistribution.sampleSpace;
-				double[] vDistribution = colouredVDistribution.values;
-				
-				// map of appearing time (key is the data typed edge's color)
-				ObjectIntOpenHashMap<BitSet> mapAppearingTimes = mMapDTEAppearTimes.get(dteColo);
-				if(mapAppearingTimes == null ){
-					mapAppearingTimes = new ObjectIntOpenHashMap<BitSet>();
-					mMapDTEAppearTimes.put(dteColo, mapAppearingTimes);
-				}
-				
-				// map of average distribution of coloured vertices (key is the data typed edge's color)
-				ObjectDoubleOpenHashMap<BitSet> mapAvrgColouredVDist = mMapAvrgColouredVDist.get(dteColo);
-				if(mapAvrgColouredVDist == null){
-					mapAvrgColouredVDist = new ObjectDoubleOpenHashMap<BitSet>();
-					mMapAvrgColouredVDist.put(dteColo, mapAvrgColouredVDist);
-				}
-				
-				
-				for(int i = 0 ; i < sampleVColours.length ; i++){
-					BitSet vColo = sampleVColours[i];
-					double noOfVertices = mapVColoDistribution.get(vColo);
 					
-					double rate = vDistribution[i] / noOfVertices;
-					mapAvrgColouredVDist.putOrAdd(vColo, rate, rate);
-					mapAppearingTimes.putOrAdd(vColo, 1, 1);
+				for(BitSet dteColo: setOfDTEColours){
+					ObjectDistribution<BitSet> colouredVDistribution = mapColouredVDistPerDTEColo.get(dteColo);
+					BitSet[] sampleVColours = colouredVDistribution.sampleSpace;
+					double[] vDistribution = colouredVDistribution.values;
+					
+					// map of average distribution of coloured vertices (key is the data typed edge's color)
+					ObjectDoubleOpenHashMap<BitSet> mapAvrgColouredVDist = mMapAvrgColouredVDist.get(dteColo);
+					if(mapAvrgColouredVDist == null){
+						mapAvrgColouredVDist = new ObjectDoubleOpenHashMap<BitSet>();
+						mMapAvrgColouredVDist.put(dteColo, mapAvrgColouredVDist);
+					}
+					
+					
+					for(int i = 0 ; i < sampleVColours.length ; i++){
+						BitSet vColo = sampleVColours[i];
+						double noOfVertices = mapVColoDistribution.get(vColo);
+						
+						double rate = vDistribution[i] / noOfVertices;
+						mapAvrgColouredVDist.putOrAdd(vColo, rate, rate);
+					}
 				}
 			}
-		}
-		
-		Set<BitSet> setOfDTEColours = mMapDTEAppearTimes.keySet();
-		 
-		
-		for(BitSet dteColo : setOfDTEColours){
-			ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapDTEAppearTimes.get(dteColo);
 			
-			Object[] keyVColours = mapAppearTimes.keys;
-			ObjectDoubleOpenHashMap<BitSet> mapAvrgColouredVDist = mMapAvrgColouredVDist.get(dteColo);
+			Set<BitSet> setOfDTEColours = mMapAvrgColouredVDist.keySet();
+			 
 			
-			for(int j = 0 ; j< keyVColours.length ;j++){
-				if(mapAppearTimes.allocated[j]){
-					BitSet vColo = (BitSet) keyVColours[j];
-					int noOfAppearTimes = mapAppearTimes.get(vColo);
-					double sumRate = mapAvrgColouredVDist.get(vColo);
-					
-					if(noOfAppearTimes != 0){
-						mapAvrgColouredVDist.put(vColo, sumRate/noOfAppearTimes);
-					}else{
-						mapAvrgColouredVDist.put(vColo, 0);
+			for(BitSet dteColo : setOfDTEColours){
+				
+				ObjectDoubleOpenHashMap<BitSet> mapAvrgColouredVDist = mMapAvrgColouredVDist.get(dteColo);
+				Object[] arrVColours = mapAvrgColouredVDist.keys;
+				for(int j = 0 ; j< arrVColours.length ;j++){
+					if(mapAvrgColouredVDist.allocated[j]){
+						BitSet vColo = (BitSet) arrVColours[j];
+						double sumRate = mapAvrgColouredVDist.get(vColo);
+						mapAvrgColouredVDist.put(vColo, sumRate/numberOfGrpahs);
 					}
 				}
 			}
@@ -155,7 +131,7 @@ public class AvrgColouredVDistPerDTEColour {
 	}
 	
 	/**
-	 * get the map of average distribution of vertices (in a specific colours)
+	 * get the map of average distribution of vertices (in specific colours)
 	 * which associate with data typed edge's colours
 	 * 
 	 * @return a map in which the key is the data typed edge's colour and the

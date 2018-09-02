@@ -30,12 +30,6 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimpleApproach.class);
 	
-	//key: out-edge's colours, the values are the distribution of vertices per vertex's colours
-	//private Map<BitSet, ObjectDistribution<BitSet>> mMapAvrgOutEdgeDistPerVertColo;
-	
-	//key: in-edge's colours, the values are the distribution of vertices per vertex's colours
-	//private Map<BitSet, ObjectDistribution<BitSet>> mMapAvrgInEdgeDistPerVertColo;
-
 	private Map<BitSet, IOfferedItem<BitSet>> mMapOEColoToTailColoProposer;
 	
 	private Map<BitSet, IOfferedItem<BitSet>> mMapIEColoToHeadColoProposer;
@@ -56,13 +50,17 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 
 	public ColouredGraph generateGraph(){
 		
+		/*
+		 * the map mMapColourToEdgeIDs just contains normal edges
+		 * (not datatype property edges, or rdf:type edge) 
+		 */
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
 			IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColo);
 			
-			if(headColourProposer != null && headColourProposer!= null ){
+			if(tailColourProposer != null && headColourProposer!= null ){
 				
 				/* the setFakeEdgeIDs helps us to know how many edges existing
 				 * in a specific edge's colour
@@ -146,11 +144,11 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 				 * this case may never happen since in RDF graph, an edge is always is used to connect 2 vertices 
 				 */
 				
-				LOGGER.warn("Could not consider the"
+				LOGGER.warn("Not process the"
 						+ edgeColo
 						+ " edge's colour since it could not find any approriate vertex's colours.");
 				
-				System.err.println("Could not consider the"
+				System.err.println("Not process the"
 						+ edgeColo
 						+ " edge's colours ince it could not find any approriate vertex's colours.");
 			}
@@ -194,9 +192,10 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		
 		if(!isRandom){
 			//System.out.println("using override function getProposedTriple(");
+			LOGGER.info("Using the override function getProposedTriple");
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
-				if(edgeColo != null){
+				if(edgeColo != null && !edgeColo.equals(mRdfTypePropertyColour)){
 					
 					IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColo);
 					IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
@@ -233,6 +232,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			}
 		}else{
 			//System.out.println("using base function getProposedTriple(");
+			LOGGER.info("Using the base function getProposedTriple of abstract class");
 			return super.getProposedTriple(true);
 		}
 	}

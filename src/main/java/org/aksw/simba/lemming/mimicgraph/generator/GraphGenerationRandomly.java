@@ -24,7 +24,10 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 
 	public ColouredGraph generateGraph(){
 		
-		Set<BitSet> keyVertColo = mMapColourToVertexIDs.keySet();
+		/*
+		 * mMapColourToEdgeIDs contains only normal edges (not datatype property edges and
+		 * rdf:type edges)
+		 */
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			

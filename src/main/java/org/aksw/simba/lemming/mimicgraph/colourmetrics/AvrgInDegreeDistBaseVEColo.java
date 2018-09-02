@@ -24,20 +24,12 @@ public class AvrgInDegreeDistBaseVEColo {
 	 * the keys are the vertex's colors and the values are the distribution of
 	 * in degree associated with edge's colors
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgInDegreeAppearTime;
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapAvrgInDegreeValues;
-	
-	
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgMaxInDegreeAppearTime;
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapMaxInDegreeValues;
 	
 	
 	public AvrgInDegreeDistBaseVEColo(ColouredGraph[] origGrphs){
-		mMapAvrgInDegreeAppearTime = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapAvrgInDegreeValues = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
-		
-		
-		mMapAvrgMaxInDegreeAppearTime = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapMaxInDegreeValues = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
 		
 		apply(origGrphs);
@@ -59,100 +51,78 @@ public class AvrgInDegreeDistBaseVEColo {
 	
 	private void apply(ColouredGraph[] origGrphs){
 		
-		for( ColouredGraph grph : origGrphs){
-			
-			InDegreeDistBaseVEColo inDegreeAnalyzer = new InDegreeDistBaseVEColo(grph);
-			// key is vertex's colour, value is the set of edge's colours
-			Map<BitSet, Map<BitSet, Object>> mapVColoToIEColo = inDegreeAnalyzer.getMapVertColoToInEdgeColo();
-			// set vertex's colours
-			Set<BitSet> vertexColours = mapVColoToIEColo.keySet();
-			
-			for(BitSet vertColo : vertexColours){
-				Set<BitSet> setLinkedEdgeColours = mapVColoToIEColo.get(vertColo).keySet();
+		int numberOfGraphs = 0;
+		if(origGrphs!= null && (numberOfGraphs = origGrphs.length) > 0 ){
+			for( ColouredGraph grph : origGrphs){
 				
-				for(BitSet edgeColo : setLinkedEdgeColours){
-					double avrg = inDegreeAnalyzer.getAverageInDegreeOf(vertColo, edgeColo);
-					double maxDegree = inDegreeAnalyzer.getMaxInDegreeOf(vertColo, edgeColo);
+				InDegreeDistBaseVEColo inDegreeAnalyzer = new InDegreeDistBaseVEColo(grph);
+				// key is vertex's colour, value is the set of edge's colours
+				Map<BitSet, Map<BitSet, Object>> mapVColoToIEColo = inDegreeAnalyzer.getMapVertColoToInEdgeColo();
+				// set vertex's colours
+				Set<BitSet> vertexColours = mapVColoToIEColo.keySet();
+				
+				for(BitSet vertColo : vertexColours){
+					Set<BitSet> setLinkedEdgeColours = mapVColoToIEColo.get(vertColo).keySet();
 					
-					// average degree
-					if(avrg != 0 ){
-						// add to map
-						ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapAvrgInDegreeAppearTime.get(vertColo);
-						if(mapAppearTimes == null){
-							mapAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-							mMapAvrgInDegreeAppearTime.put(vertColo, mapAppearTimes);
+					for(BitSet edgeColo : setLinkedEdgeColours){
+						double avrg = inDegreeAnalyzer.getAverageInDegreeOf(vertColo, edgeColo);
+						double maxDegree = inDegreeAnalyzer.getMaxInDegreeOf(vertColo, edgeColo);
+						
+						// average degree
+						if(avrg != 0 ){
+							ObjectDoubleOpenHashMap<BitSet> mapIEColoToAvrgInDegree= mMapAvrgInDegreeValues.get(vertColo);
+							
+							if(mapIEColoToAvrgInDegree == null){
+								mapIEColoToAvrgInDegree = new ObjectDoubleOpenHashMap<BitSet>();
+								mMapAvrgInDegreeValues.put(vertColo, mapIEColoToAvrgInDegree);
+							}
+							mapIEColoToAvrgInDegree.putOrAdd(edgeColo, avrg, avrg);						
 						}
-						mapAppearTimes.putOrAdd(edgeColo,1,1);
 						
-						ObjectDoubleOpenHashMap<BitSet> mapIEColoToAvrgInDegree= mMapAvrgInDegreeValues.get(vertColo);
-						
-						if(mapIEColoToAvrgInDegree == null){
-							mapIEColoToAvrgInDegree = new ObjectDoubleOpenHashMap<BitSet>();
-							mMapAvrgInDegreeValues.put(vertColo, mapIEColoToAvrgInDegree);
+						// max degree
+						if(maxDegree!=0){
+							ObjectDoubleOpenHashMap<BitSet> mapIEColoToMaxDegree= mMapMaxInDegreeValues.get(vertColo);
+							
+							if(mapIEColoToMaxDegree == null){
+								mapIEColoToMaxDegree = new ObjectDoubleOpenHashMap<BitSet>();
+								mMapMaxInDegreeValues.put(vertColo, mapIEColoToMaxDegree);
+							}
+							mapIEColoToMaxDegree.putOrAdd(edgeColo, maxDegree, maxDegree);
 						}
-						mapIEColoToAvrgInDegree.putOrAdd(edgeColo, avrg, avrg);						
-					}
-					
-					// max degree
-					if(maxDegree!=0){
-						
-						// add to map
-						ObjectIntOpenHashMap<BitSet> mapMaxDegreeAppearTimes = mMapAvrgMaxInDegreeAppearTime.get(vertColo);
-						if(mapMaxDegreeAppearTimes == null){
-							mapMaxDegreeAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-							mMapAvrgMaxInDegreeAppearTime.put(vertColo, mapMaxDegreeAppearTimes);
-						}
-						mapMaxDegreeAppearTimes.putOrAdd(edgeColo,1,1);
-						
-						ObjectDoubleOpenHashMap<BitSet> mapIEColoToMaxDegree= mMapMaxInDegreeValues.get(vertColo);
-						
-						if(mapIEColoToMaxDegree == null){
-							mapIEColoToMaxDegree = new ObjectDoubleOpenHashMap<BitSet>();
-							mMapMaxInDegreeValues.put(vertColo, mapIEColoToMaxDegree);
-						}
-						mapIEColoToMaxDegree.putOrAdd(edgeColo, maxDegree, maxDegree);
 					}
 				}
 			}
-		}
-		
-		
-		// compute average in degree
-		Object[] keyVertexColours = mMapAvrgInDegreeAppearTime.keys;
-		for(int i = 0 ; i < keyVertexColours.length ; ++i) {
-			if(mMapAvrgInDegreeAppearTime.allocated[i]){
-				BitSet vertColo = (BitSet) keyVertexColours[i];
-				ObjectIntOpenHashMap<BitSet> mapIEColoToAppearTimes = mMapAvrgInDegreeAppearTime.get(vertColo);
-				if(mapIEColoToAppearTimes != null){
-					Object[] keyEdgeColours = mapIEColoToAppearTimes.keys;
+			
+			
+			// compute average in degree
+			Object[] keyVertexColours = mMapAvrgInDegreeValues.keys;
+			for(int i = 0 ; i < keyVertexColours.length ; ++i) {
+				if(mMapAvrgInDegreeValues.allocated[i]){
+					BitSet vertColo = (BitSet) keyVertexColours[i];
+					ObjectDoubleOpenHashMap<BitSet> edgeColourDist =  mMapAvrgInDegreeValues.get(vertColo);
+					Object[] keyEdgeColours = edgeColourDist.keys;
 					for(int j = 0; j< keyEdgeColours.length ; ++j){
-						if(mapIEColoToAppearTimes.allocated[j]){
+						if(edgeColourDist.allocated[j]){
 							BitSet edgeColo = (BitSet) keyEdgeColours[j];
-							int noOfTimes = mapIEColoToAppearTimes.get(edgeColo);
-							ObjectDoubleOpenHashMap<BitSet> mapAvrgDegreeValues = mMapAvrgInDegreeValues.get(vertColo);
-							Double noOfInDegree = mapAvrgDegreeValues.get(edgeColo);
-							mapAvrgDegreeValues.put(edgeColo, noOfInDegree / noOfTimes);
+							Double noOfInDegree = edgeColourDist.get(edgeColo);
+							edgeColourDist.put(edgeColo, noOfInDegree / numberOfGraphs);
 						}
 					}
 				}
 			}
-		}
-		
-		// compute average max degree
-		keyVertexColours = mMapAvrgMaxInDegreeAppearTime.keys;
-		for (int i = 0; i < keyVertexColours.length; ++i) {
-			if (mMapAvrgMaxInDegreeAppearTime.allocated[i]) {
-				BitSet vertColo = (BitSet) keyVertexColours[i];
-				ObjectIntOpenHashMap<BitSet> mapIEColoToAppearTimes = mMapAvrgMaxInDegreeAppearTime.get(vertColo);
-				if (mapIEColoToAppearTimes != null) {
-					Object[] keyEdgeColours = mapIEColoToAppearTimes.keys;
+			
+			// compute average max degree
+			keyVertexColours = mMapMaxInDegreeValues.keys;
+			for (int i = 0; i < keyVertexColours.length; ++i) {
+				if (mMapMaxInDegreeValues.allocated[i]) {
+					BitSet vertColo = (BitSet) keyVertexColours[i];
+					ObjectDoubleOpenHashMap<BitSet> mapMaxDegreeValues = mMapMaxInDegreeValues.get(vertColo);
+					Object[] keyEdgeColours = mapMaxDegreeValues.keys;
 					for (int j = 0; j < keyEdgeColours.length; ++j) {
-						if(mapIEColoToAppearTimes.allocated[j]){
+						if(mapMaxDegreeValues.allocated[j]){
 							BitSet edgeColo = (BitSet) keyEdgeColours[j];
-							int noOfTimes =  mapIEColoToAppearTimes.get(edgeColo);
-							ObjectDoubleOpenHashMap<BitSet> mapMaxDegreeValues = mMapMaxInDegreeValues.get(vertColo);
 							Double maxInDegree = mapMaxDegreeValues.get(edgeColo);
-							mapMaxDegreeValues.put(edgeColo, maxInDegree / noOfTimes);
+							mapMaxDegreeValues.put(edgeColo, maxInDegree / numberOfGraphs);
 						}
 					}
 				}

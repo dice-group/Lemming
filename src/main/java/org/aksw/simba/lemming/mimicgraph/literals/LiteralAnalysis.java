@@ -58,6 +58,11 @@ public class LiteralAnalysis {
 		analyze(origGrphs);
 	}
 	
+	/**
+	 * get map of type of datatype properties
+	 * the key is the type of properties, value is a set of properties having the same type
+	 * @return
+	 */
 	public Map<String, Set<BitSet>> getMapOfTypesAndDTEColours(){
 		Map<String, Set<BitSet>> mapOfTypesAndDTEColours = new HashMap<String, Set<BitSet>>();
 		if(mTypesOfDTEColours != null && mTypesOfDTEColours.size() > 0){
@@ -78,6 +83,13 @@ public class LiteralAnalysis {
 		return mapOfTypesAndDTEColours;
 	}
 	
+	/**
+	 * get map of literals based on the colour of datatype edges and of vertices
+	 * 
+	 * @param setOfDTEColours set of datatype edge's colours
+	 * 
+	 * @return a map containing literal of specific datatype edge colour for specific vertex colour
+	 */
 	public Map<BitSet, Map<BitSet, Set<String>>> getMapOfDTEColoursAndValues(Set<BitSet> setOfDTEColours){
 		if(setOfDTEColours!=null && setOfDTEColours.size() > 0){
 			

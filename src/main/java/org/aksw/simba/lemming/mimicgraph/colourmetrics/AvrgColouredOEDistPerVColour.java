@@ -29,12 +29,6 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 public class AvrgColouredOEDistPerVColour {
 	
 	/**
-	 * key1: edge's colors, values the appearing time of edge's color associated
-	 * with the vertex's color over all versions
-	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapOutEdgeAppearTimes;
-	
-	/**
 	 * key1: edge's colors, values: the distribution of edges over different vertex's colors
 	 */
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapAvrgOEDist;
@@ -45,9 +39,7 @@ public class AvrgColouredOEDistPerVColour {
 	}
 	
 	public AvrgColouredOEDistPerVColour(ColouredGraph[] origGrphs){
-		mMapOutEdgeAppearTimes = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapAvrgOEDist = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
-		
 		apply(origGrphs);
 	}
 	
@@ -114,74 +106,60 @@ public class AvrgColouredOEDistPerVColour {
 	}
 	
 	private void apply(ColouredGraph[] origGrphs){
-		
-		ColouredOEDistPerVColour oeDistributionMetric = new ColouredOEDistPerVColour();
-		EdgeColourDistributionMetric eColoDistributionMetric  = new EdgeColourDistributionMetric();
-		for( ColouredGraph grph : origGrphs){
-			
-			ObjectDistribution<BitSet>  eColoDistribution = eColoDistributionMetric.apply(grph);
-			ObjectDoubleOpenHashMap<BitSet> mapEColoDistribution = MapUtil.convert(eColoDistribution);
-			/**
-			 * key1: edge's colors, values: the distribution of edges over vertex's colors
-			 */
-			Map<BitSet, ObjectDistribution<BitSet>> mapOEDistPerVColo	= oeDistributionMetric.apply(grph);
-			
-			Set<BitSet> setOfOEColours = mapOEDistPerVColo.keySet();
-			
-			for(BitSet eColo : setOfOEColours){
+		int numberOfGraphs = 0;
+		if(origGrphs != null && (numberOfGraphs = origGrphs.length) > 0){
+			ColouredOEDistPerVColour oeDistributionMetric = new ColouredOEDistPerVColour();
+			EdgeColourDistributionMetric eColoDistributionMetric  = new EdgeColourDistributionMetric();
+			for( ColouredGraph grph : origGrphs){
 				
-				// map of appearing time (key is vertex's color)
-				ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapOutEdgeAppearTimes.get(eColo);
-				if(mapAppearTimes == null){
-					mapAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-					mMapOutEdgeAppearTimes.put(eColo, mapAppearTimes);
-				}
+				ObjectDistribution<BitSet>  eColoDistribution = eColoDistributionMetric.apply(grph);
+				ObjectDoubleOpenHashMap<BitSet> mapEColoDistribution = MapUtil.convert(eColoDistribution);
+				/**
+				 * key1: edge's colors, values: the distribution of edges over vertex's colors
+				 */
+				Map<BitSet, ObjectDistribution<BitSet>> mapOEDistPerVColo	= oeDistributionMetric.apply(grph);
 				
-				// map of average distribution of edges (key is vertex's color)
-				ObjectDoubleOpenHashMap<BitSet> mapAvrgOEDistPerVColo = mMapAvrgOEDist.get(eColo);
-				if(mapAvrgOEDistPerVColo == null){
-					mapAvrgOEDistPerVColo = new ObjectDoubleOpenHashMap<BitSet>();
-					mMapAvrgOEDist.put(eColo, mapAvrgOEDistPerVColo);
-				}
+				Set<BitSet> setOfOEColours = mapOEDistPerVColo.keySet();
 				
-				double noOfEdges = mapEColoDistribution.get(eColo);
-				
-				ObjectDistribution<BitSet> edgeDistPerVColo = mapOEDistPerVColo.get(eColo);
-				BitSet[] sampleVColours = edgeDistPerVColo.sampleSpace;
-				double[] oeDistribution = edgeDistPerVColo.values;
-				
-				int iNoOfVColours = sampleVColours.length;
-				for(int i = 0 ; i < iNoOfVColours ; i++){
-					BitSet vColo = sampleVColours[i];
-					double rate = oeDistribution[i] /noOfEdges;
+				for(BitSet eColo : setOfOEColours){
 					
-					mapAvrgOEDistPerVColo.putOrAdd(vColo, rate, rate);
-					mapAppearTimes.putOrAdd(vColo, 1, 1);
+					// map of average distribution of edges (key is vertex's color)
+					ObjectDoubleOpenHashMap<BitSet> mapAvrgOEDistPerVColo = mMapAvrgOEDist.get(eColo);
+					if(mapAvrgOEDistPerVColo == null){
+						mapAvrgOEDistPerVColo = new ObjectDoubleOpenHashMap<BitSet>();
+						mMapAvrgOEDist.put(eColo, mapAvrgOEDistPerVColo);
+					}
+					
+					double noOfEdges = mapEColoDistribution.get(eColo);
+					
+					ObjectDistribution<BitSet> edgeDistPerVColo = mapOEDistPerVColo.get(eColo);
+					BitSet[] sampleVColours = edgeDistPerVColo.sampleSpace;
+					double[] oeDistribution = edgeDistPerVColo.values;
+					
+					int iNoOfVColours = sampleVColours.length;
+					for(int i = 0 ; i < iNoOfVColours ; i++){
+						BitSet vColo = sampleVColours[i];
+						double rate = oeDistribution[i] /noOfEdges;
+						
+						mapAvrgOEDistPerVColo.putOrAdd(vColo, rate, rate);
+					}
 				}
 			}
-		}
-		
-		//compute average distribution of edges over all different versions
-		Object[] keyOEColours =  mMapOutEdgeAppearTimes.keys;
-		int noOfOEColours = keyOEColours.length;
-		for(int i = 0 ; i < noOfOEColours ; i++){
-			if(mMapOutEdgeAppearTimes.allocated[i]){
-				BitSet eColo = (BitSet) keyOEColours[i];
-				ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapOutEdgeAppearTimes.get(eColo);
-				Object[] keyVColours = mapAppearTimes.keys;
-				
-				ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgOEDist.get(eColo);
-				int noOfVColours = keyVColours.length;
-				for(int j = 0 ; j< noOfVColours ;j++){
-					if(mapAppearTimes.allocated[j]){
-						BitSet vColo = (BitSet) keyVColours[j];
-						int noOfAppearTimes = mapAppearTimes.get(vColo);
-						
-						double sumRate = mapAvrgDist.get(vColo);
-						if(noOfAppearTimes != 0){
-							mapAvrgDist.put(vColo, sumRate/noOfAppearTimes);
-						}else{
-							mapAvrgDist.put(vColo, 0);
+			
+			//compute average distribution of edges over all different versions
+			Object[] keyOEColours =  mMapAvrgOEDist.keys;
+			for(int i = 0 ; i < keyOEColours.length ; i++){
+				if(mMapAvrgOEDist.allocated[i]){
+					BitSet eColo = (BitSet) keyOEColours[i];
+					
+					ObjectDoubleOpenHashMap<BitSet> mapAvrgDist = mMapAvrgOEDist.get(eColo);
+					Object[] keyVColours = mapAvrgDist.keys;
+					for(int j = 0 ; j< keyVColours.length ;j++){
+						if(mapAvrgDist.allocated[j]){
+							BitSet vColo = (BitSet) keyVColours[j];
+							
+							double sumRate = mapAvrgDist.get(vColo);
+							mapAvrgDist.put(vColo, sumRate/numberOfGraphs);
 						}
 					}
 				}

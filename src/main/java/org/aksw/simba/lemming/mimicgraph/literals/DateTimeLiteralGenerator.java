@@ -48,12 +48,25 @@ public class DateTimeLiteralGenerator extends AbstractLiteralGenerator implement
 					Set<String> setOfValues = mapOfTColoAndValues.get(tColo);
 					if(setOfValues != null && setOfValues.size() > 0 ){
 						LocalDateTime startDate = LocalDateTime.now();
-						LocalDateTime endDate = LocalDateTime.now();
+						LocalDateTime endDate = LocalDateTime.of(1990,1, 1, 0, 0);
 						LocalDateTime date = LocalDateTime.now();
 						for(String val : setOfValues){
+							if(val == null || val.isEmpty()){
+								continue;
+							}
+							
 							try{
+								
+								if(val.length()>=19){
+									val = val.substring(0, 19);
+								}else{
+									val = val.substring(0, 10);
+									val+="T00:00:00";
+								}
+								//only get the first part of date and time
 								date = LocalDateTime.parse(val);
 							}catch(Exception Ex){
+								LOGGER.warn("Cannot parse the data: " + val +". Exception: "+ Ex.getCause().toString() );
 							}
 							if(date.isBefore(startDate)){
 								startDate = date;

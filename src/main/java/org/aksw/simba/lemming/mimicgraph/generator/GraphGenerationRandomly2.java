@@ -25,10 +25,27 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationRandomly2.class);
 	private int maxIterationFor1EdgeColo ;
 	
+	/*
+	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
+	 * to each vertex's id
+	 */
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
+	
+	/*
+	 * the key1: the in-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
+	 * to each vertex's id
+	 */
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
+	
+	
 	public GraphGenerationRandomly2(int iNumberOfVertices,
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;;
+		
+		// initilize variable
+		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		
 		// extend step compared to the class GraphGenerationSimpleApproach
 		computePotentialIODegreePerVert(origGrphs);
@@ -47,8 +64,10 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			
 			if(mapHeadColoToIDProposer != null && mapTailColoToIDProposer != null){
 				
-				/* the setFakeEdgeIDs helps us to know how many edges existing
-				 * in a specific edge's colour*/ 
+				/* 
+				 * the setFakeEdgeIDs helps us to know how many edges existing
+				 * of a specific edge's colour
+				 */ 
 				IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 				int i = 0 ;
 				while(i < setFakeEdgeIDs.size()){
@@ -133,17 +152,18 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 				BitSet tailColo = arrVertexColours[mRandom.nextInt(arrVertexColours.length)];
 				Set<BitSet> possOutEdgeColours = mColourMapper.getPossibleOutEdgeColours(tailColo);
 				
-				
-				
-				
 				if(possOutEdgeColours != null && possOutEdgeColours.size() > 0){
+					
+					if(possOutEdgeColours.contains(mRdfTypePropertyColour)){
+						possOutEdgeColours.remove(mRdfTypePropertyColour);
+					}
+					
 					BitSet[] arrEdgeColours = possOutEdgeColours.toArray(new BitSet[]{});
 					
 					BitSet edgeColo = arrEdgeColours[mRandom.nextInt(arrEdgeColours.length)];
 					Set<BitSet> possHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapTailColoToTailIDs = mapPossibleODegreePerOEColo.get(edgeColo);
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapHeadColoToHeadIDs = mapPossibleIDegreePerIEColo.get(edgeColo);
-					
 					
 					
 					if(possHeadColours != null && possHeadColours.size() > 0 && mapTailColoToTailIDs!= null && mapHeadColoToHeadIDs!=null){
@@ -229,7 +249,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					if(outDegreeProposer == null){
 						mapPossODegree.put(tailColo, potentialDegreeProposer);
 					}else{
-						LOGGER.error("Something is seriously happening");
+						LOGGER.error("Something is seriously happening for tail colours, since " + tailColo +" can not have more than 2 proposers");
 					}
 				}
 			}
@@ -268,7 +288,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					if(inDegreeProposer == null){
 						mapPossIDegree.put(headColo, potentialDegreeProposer);
 					}else{
-						LOGGER.error("Something is seriously happening");
+						LOGGER.error("Something is seriously happening for head colours, since " + headColo +" can not have more than 2 proposers");
 					}
 				}
 			}

@@ -47,18 +47,6 @@ public abstract class AbstractGraphGeneration {
 	 */
 	protected Map<BitSet, IntSet> mMapColourToEdgeIDs = new HashMap<BitSet, IntSet>();
 
-	/*
-	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
-	 * to each vertex's id
-	 */
-	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
-	
-	/*
-	 * the key1: the in-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
-	 * to each vertex's id
-	 */
-	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
-	
 	protected ColouredGraph mMimicGraph;
 	
 	/*
@@ -76,46 +64,62 @@ public abstract class AbstractGraphGeneration {
 	/*
 	 * 1st key: the edge colour, 2nd key is the tail id and the value is the set of already connected head id
 	 */
-	private Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertex;
+	private Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices;
 	
 	protected IOfferedItem<BitSet> mEdgeColoProposer;
 	
 	protected Random mRandom ;
 	
+	protected BitSet mRdfTypePropertyColour;
+	
+	protected Map<BitSet, Integer> mMapClassVertices;
+	protected Map<Integer, BitSet> mReversedMapClassVertices;
+	
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs){
+		//number of vertices
 		mIDesiredNoOfVertices = iNumberOfVertices;
 		
-		mMimicGraph = new ColouredGraph(); 
+		// mimic grpah
+		mMimicGraph = new ColouredGraph();
+		//copy all colour palette to the mimic graph
+		copyColourPalette(origGrphs);
 		
-		// initilize variable
-		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
-		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		// random
+		mRandom = new Random();
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
 		
-		mMapEdgeColoursToConnectedVertex = new HashMap<BitSet, Map<Integer, IntSet>>();
+		mMapEdgeColoursToConnectedVertices = new HashMap<BitSet, Map<Integer, IntSet>>();
 		
-		mRandom = new Random();
+		//compute average distribution of vertex's and edge's colors
+		mVertColoDist = AvrgVertColoDistMetric.apply(origGrphs);
+		mEdgeColoDist = AvrgEdgeColoDistMetric.apply(origGrphs);
+		
+		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist);
+		
+		mMapClassVertices = new HashMap<BitSet, Integer>();
+		mReversedMapClassVertices = new HashMap<Integer, BitSet>();
+		
+		
+		// colour of rdf:type edge
+		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
 		
 		//estimate potential number of edges
 		estimateNoEdges(origGrphs);
 		
-		//compute single distribution 
-		computeAvrgEVColorDist(origGrphs);
-		
-		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist);
-		
 		//assign colors to vertices
-		assignColorToVertices();
+		paintVertices();
 		
 		//assign colors to edges
-		assignColorToEdges();
+		paintEdges();
 		
 		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours);
 		
-		copyColourPalette(origGrphs);
+		//defining type of resource vertices
+		connectVerticesWithRDFTypeEdges();
+		
 	}
 
 	public Map<BitSet,IntSet> getMappingColoursAndVertices(){
@@ -144,6 +148,8 @@ public abstract class AbstractGraphGeneration {
 		}
 		return null;
 	}
+	
+	
 	
 	protected BitSet getProposedHeadColour(BitSet edgeColour, BitSet tailColour){
 		if(mColourMapper != null){
@@ -187,6 +193,15 @@ public abstract class AbstractGraphGeneration {
 			
 			// get associated edge colour based on the tail colour
 			Set<BitSet> possOutEdgeColours = mColourMapper.getPossibleOutEdgeColours(tailColo);
+			
+			//remove rdf:type edges
+			if(possOutEdgeColours == null){
+				continue;
+			}
+			
+			if(possOutEdgeColours.contains(mRdfTypePropertyColour)){
+				possOutEdgeColours.remove(mRdfTypePropertyColour);
+			}
 			
 			/*
 			 * it is supposed that there always exist at least one edge colour used to connect
@@ -246,19 +261,20 @@ public abstract class AbstractGraphGeneration {
 	 * @return a new mimic graph
 	 */
 	public ColouredGraph generateGraph(){
-		return null;
+		return mMimicGraph;
 	}
 	
 	/**
 	 * assign colours to vertices based on the average distribution of vertices
 	 * per colour over all versions of a graph
 	 */
-	private void assignColorToVertices(){
+	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist);
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
+				
 			int vertId = mMimicGraph.addVertex(offeredColor);
 			IntSet setVertIDs = mMapColourToVertexIDs.get(offeredColor);
 			if(setVertIDs == null){
@@ -267,7 +283,6 @@ public abstract class AbstractGraphGeneration {
 			}
 			setVertIDs.add(vertId);
 		}
-		
 		
 		// get restricted edge's colours can exist along with these created vertex's colours
 		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
@@ -288,15 +303,37 @@ public abstract class AbstractGraphGeneration {
 	 * assign colours to edges based on the average distribution of edges per
 	 * colour over all versions of a graph
 	 */
-	private void assignColorToEdges(){
+	private void paintEdges(){
 		LOGGER.info("Assign colors to edges.");
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mEdgeColoDist);
 		
-		for(int i = 0 ; i< mIDesiredNoOfEdges ; i++){
+		/*
+		 * calculate number of [rdf:type] edges first. these edges will be used to define 
+		 * classes of resources in vertices.
+		 */
+		int iNumberOfRdfTypeEdges = 0 ;
+		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVertexColours ){
+			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
+			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
+			if(definedColours!= null){
+				iNumberOfRdfTypeEdges += 	definedColours.size() * setOfVertices.size();
+			}
+		}
+		
+		// process normal edges
+		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		
+		for(int i = 0 ; i< iNumberOfOtherEdges ; i++){
 			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem();
 			
+			if(offeredColor.equals(mRdfTypePropertyColour)){
+				i--;
+				continue;
+			}
+			
 			if (!mSetOfRestrictedEdgeColours.contains(offeredColor)) {
-				System.err.println("This edge colour: "
+				LOGGER.warn("This edge colour: "
 								+ offeredColor
 								+ " won't be considered in the graph generation (since there is not approriate tail's colours and head's colours to connect)");
 				i--;
@@ -315,9 +352,69 @@ public abstract class AbstractGraphGeneration {
 				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
 			// fake edge's id
-			setEdgeIDs.add(i);
+			setEdgeIDs.add(-1);
 		}
 	}
+	
+	/**
+	 * connection typed resource vertices to its class with edge of rdf:type
+	 * if a vertex has a colour, then it connect to some vertices with rdf:type edges.
+	 * the number of connected heads is dependent on the number of colour the target has
+	 */
+	private void connectVerticesWithRDFTypeEdges(){
+		
+		/*
+		 * filter colour and empty colour vertices
+		 */
+		IntSet colourVertices = new DefaultIntSet();
+		IntSet emptyColourVertices = new DefaultIntSet();
+		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVertexColours){
+			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
+			
+			if(vColo.isEmpty()){
+				//get vertices with empty colours
+				emptyColourVertices.addAll(setVertices);
+			}else{
+				//get vertices with non-empty colour
+				colourVertices.addAll(setVertices);
+			}
+		}
+		
+		int[] arrColourVertices = colourVertices.toIntArray();
+		int[] arrEmptyColourVertices = emptyColourVertices.toIntArray(); 
+		Set<Integer> trackedClassVertices = new HashSet<Integer>();
+		//traverse through all coloured vertices and add classes to them
+		for(int vId : arrColourVertices){
+			BitSet vColo = mMimicGraph.getVertexColour(vId);
+			Set<BitSet> setClassColours = mMimicGraph.getClassColour(vColo);
+			
+			for(BitSet classColo: setClassColours){					
+				if(!mMapClassVertices.containsKey(classColo)){
+					int hId = arrEmptyColourVertices[mRandom.nextInt(arrEmptyColourVertices.length)];
+					
+					while(trackedClassVertices.contains(hId) 
+							&& trackedClassVertices.size() < arrEmptyColourVertices.length){
+						hId = arrEmptyColourVertices[mRandom.nextInt(arrEmptyColourVertices.length)];
+					}
+					if(trackedClassVertices.size() <= arrEmptyColourVertices.length){
+						trackedClassVertices.add(hId);
+						mMapClassVertices.put(classColo, hId);
+						mReversedMapClassVertices.put(hId, classColo);
+						//connect the vId and hId using the edge rdf:type
+						mMimicGraph.addEdge(vId, hId, mRdfTypePropertyColour);
+					}else{
+						LOGGER.warn("Cannot find any empty colour head for consideration as a class of resources!");
+					}
+				}else{
+					int hId = mMapClassVertices.get(classColo);
+					//connect the vId and hId using the edge rdf:type
+					mMimicGraph.addEdge(vId, hId, mRdfTypePropertyColour);
+				}
+			}
+		}
+	}
+	
 	
 	/**
 	 * draft estimation of number edges
@@ -347,34 +444,29 @@ public abstract class AbstractGraphGeneration {
 	 * 
 	 * @param origGrphs the array of all versions of a graph
 	 */
-	private void computeAvrgEVColorDist(ColouredGraph[] origGrphs){
-		LOGGER.info("Compute the average distribution for vertex's color and edge's color.");
-		mVertColoDist = AvrgVertColoDistMetric.apply(origGrphs);
-		mEdgeColoDist = AvrgEdgeColoDistMetric.apply(origGrphs);
-	}
 	
-	/**
-	 * just for testing the correctness of the constructor process
-	 */
-	private void printSimpleInfo(){
-		Set<BitSet> keyVertColo = mMapColourToVertexIDs.keySet();
-		int totalVertices = 0 ;
-		for(BitSet vertColo: keyVertColo){
-			IntSet setVertIDs = mMapColourToVertexIDs.get(vertColo);
-			totalVertices += setVertIDs.size();
-		}
-		
-		System.out.println("Number of painted vertices: " + totalVertices + " in total " + keyVertColo.size() +" colors");
-		
-		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
-		int totalEdges = 0 ;
-		for(BitSet edgeColo: keyEdgeColo){
-			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
-			totalEdges += setEdgeIDs.size();
-		}
-		
-		System.out.println("Number of painted edges: " + totalEdges + " in total " + keyEdgeColo.size() +" colors");
-	}
+//	/**
+//	 * just for testing the correctness of the constructor process
+//	 */
+//	private void printSimpleInfo(){
+//		Set<BitSet> keyVertColo = mMapColourToVertexIDs.keySet();
+//		int totalVertices = 0 ;
+//		for(BitSet vertColo: keyVertColo){
+//			IntSet setVertIDs = mMapColourToVertexIDs.get(vertColo);
+//			totalVertices += setVertIDs.size();
+//		}
+//		
+//		System.out.println("Number of painted vertices: " + totalVertices + " in total " + keyVertColo.size() +" colors");
+//		
+//		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
+//		int totalEdges = 0 ;
+//		for(BitSet edgeColo: keyEdgeColo){
+//			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
+//			totalEdges += setEdgeIDs.size();
+//		}
+//		
+//		System.out.println("Number of painted edges: " + totalEdges + " in total " + keyEdgeColo.size() +" colors");
+//	}
 	
 	private void copyColourPalette(ColouredGraph[] origGraphs){
 		if(Constants.IS_EVALUATION_MODE){
@@ -401,11 +493,6 @@ public abstract class AbstractGraphGeneration {
 				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
 			}
 			
-			
-			int vAssigned = newVertexPalette.getMapOfURIAndColour().assigned;
-			int eAssigned = newEdgePalette.getMapOfURIAndColour().assigned;
-			int dteAssigned = newDTEdgePalette.getMapOfURIAndColour().assigned;
-			
 			mMimicGraph.setVertexPalette(newVertexPalette);
 			mMimicGraph.setEdgePalette(newEdgePalette);
 			mMimicGraph.setDataTypeEdgePalette(newDTEdgePalette);
@@ -424,11 +511,16 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	public boolean connectableVertices(int tailId, int headId, BitSet eColo){
-		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertex.get(eColo);
+		
+		if(mReversedMapClassVertices.containsKey(headId)){
+			return false;
+		}
+		
+		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
 		boolean canConnect = false;
 		if(mapTailToHeads == null){
 			mapTailToHeads = new HashMap<Integer, IntSet>();
-			mMapEdgeColoursToConnectedVertex.put(eColo, mapTailToHeads);
+			mMapEdgeColoursToConnectedVertices.put(eColo, mapTailToHeads);
 		}
 		
 		IntSet setOfHeads = mapTailToHeads.get(tailId);
@@ -447,5 +539,9 @@ public abstract class AbstractGraphGeneration {
 	
 	public String getLiteralType(BitSet dteColo){
 		return mMimicGraph.getLiteralType(dteColo);
+	}
+	
+	public void setMimicGraph(ColouredGraph refinedGraph){
+		mMimicGraph = refinedGraph;
 	}
 }

@@ -23,18 +23,11 @@ public class AvrgOutDegreeDistBaseVEColo {
 	 * the keys are the vertex's colors and the values are the distribution of
 	 * in degree associated with edge's colors
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgOutDegreeAppearTime;
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapAvrgOutDegreeValues;
-	
-	private ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>> mMapAvrgMaxOutDegreeAppearTime;
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mMapMaxOutDegreeValues;
 		
 	public AvrgOutDegreeDistBaseVEColo(ColouredGraph[] origGrphs){
-		mMapAvrgOutDegreeAppearTime = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapAvrgOutDegreeValues = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
-		
-		
-		mMapAvrgMaxOutDegreeAppearTime = new ObjectObjectOpenHashMap<BitSet, ObjectIntOpenHashMap<BitSet>>();
 		mMapMaxOutDegreeValues = new ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>();
 		
 		apply(origGrphs);
@@ -56,101 +49,79 @@ public class AvrgOutDegreeDistBaseVEColo {
 	
 	private void apply(ColouredGraph[] origGrphs){
 		
-		for( ColouredGraph grph : origGrphs){
-			
-			OutDegreeDistBaseVEColo outDegreeAnalyzer = new OutDegreeDistBaseVEColo(grph);
-					
-			Map<BitSet, Map<BitSet,Object>> mapVColoToOEColo = outDegreeAnalyzer.getMapVertColoToOutEdgeColo();
-			
-			Set<BitSet> vertexColours = mapVColoToOEColo.keySet();
-			
-			for(BitSet vertColo : vertexColours){
-				Set<BitSet> setLinkedEdgeColours = mapVColoToOEColo.get(vertColo).keySet();
+		int numberOfGraphs = 0 ; 
+		if(origGrphs != null && (numberOfGraphs = origGrphs.length) > 0 ){
+			for( ColouredGraph grph : origGrphs){
 				
-				for(BitSet edgeColo : setLinkedEdgeColours){
-					double avrg = outDegreeAnalyzer.getAverageOutDegreeOf(vertColo, edgeColo);
-					double maxDegree = outDegreeAnalyzer.getMaxOutDegreeOf(vertColo, edgeColo);
-
-					// average degree
-					if(avrg != 0 ){
-						// add to map
-						ObjectIntOpenHashMap<BitSet> mapAppearTimes = mMapAvrgOutDegreeAppearTime.get(vertColo);
-						if(mapAppearTimes == null){
-							mapAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-							mMapAvrgOutDegreeAppearTime.put(vertColo, mapAppearTimes);
-						}
-						mapAppearTimes.putOrAdd(edgeColo,1,1);
+				OutDegreeDistBaseVEColo outDegreeAnalyzer = new OutDegreeDistBaseVEColo(grph);
 						
-						ObjectDoubleOpenHashMap<BitSet> mapAvrgDegree= mMapAvrgOutDegreeValues.get(vertColo);
-						
-						if(mapAvrgDegree == null){
-							mapAvrgDegree = new ObjectDoubleOpenHashMap<BitSet>();
-							mMapAvrgOutDegreeValues.put(vertColo, mapAvrgDegree);
-						}
-						mapAvrgDegree.putOrAdd(edgeColo, avrg, avrg);						
-					}
+				Map<BitSet, Map<BitSet,Object>> mapVColoToOEColo = outDegreeAnalyzer.getMapVertColoToOutEdgeColo();
+				
+				Set<BitSet> vertexColours = mapVColoToOEColo.keySet();
+				
+				for(BitSet vertColo : vertexColours){
+					Set<BitSet> setLinkedEdgeColours = mapVColoToOEColo.get(vertColo).keySet();
 					
-					// max degree
-					if(maxDegree!=0){
-						
-						// add to map
-						ObjectIntOpenHashMap<BitSet> mapMaxAppearTimes = mMapAvrgMaxOutDegreeAppearTime.get(vertColo);
-						if(mapMaxAppearTimes == null){
-							mapMaxAppearTimes = new ObjectIntOpenHashMap<BitSet>();
-							mMapAvrgMaxOutDegreeAppearTime.put(vertColo, mapMaxAppearTimes);
+					for(BitSet edgeColo : setLinkedEdgeColours){
+						double avrg = outDegreeAnalyzer.getAverageOutDegreeOf(vertColo, edgeColo);
+						double maxDegree = outDegreeAnalyzer.getMaxOutDegreeOf(vertColo, edgeColo);
+
+						// average degree
+						if(avrg != 0 ){
+							ObjectDoubleOpenHashMap<BitSet> mapAvrgDegree= mMapAvrgOutDegreeValues.get(vertColo);
+							
+							if(mapAvrgDegree == null){
+								mapAvrgDegree = new ObjectDoubleOpenHashMap<BitSet>();
+								mMapAvrgOutDegreeValues.put(vertColo, mapAvrgDegree);
+							}
+							mapAvrgDegree.putOrAdd(edgeColo, avrg, avrg);						
 						}
-						mapMaxAppearTimes.putOrAdd(edgeColo,1,1);
 						
-						ObjectDoubleOpenHashMap<BitSet> mapOEColoToMaxDegree= mMapMaxOutDegreeValues.get(vertColo);
-						
-						if(mapOEColoToMaxDegree == null){
-							mapOEColoToMaxDegree = new ObjectDoubleOpenHashMap<BitSet>();
-							mMapMaxOutDegreeValues.put(vertColo, mapOEColoToMaxDegree);
-						}
-						mapOEColoToMaxDegree.putOrAdd(edgeColo, maxDegree, maxDegree);
-					}
-				}
-			}
-		}
-		
-		
-		// compute average out degree
-		Object[] keyVertexColours = mMapAvrgOutDegreeAppearTime.keys;
-		for(int i = 0 ; i < keyVertexColours.length ; ++i) {
-			if(mMapAvrgOutDegreeAppearTime.allocated[i]){
-				BitSet vertColo = (BitSet) keyVertexColours[i];
-				ObjectIntOpenHashMap<BitSet> mapoEColoToAppearTimes = mMapAvrgOutDegreeAppearTime.get(vertColo);
-				if(mapoEColoToAppearTimes != null){
-					Object[] keyEdgeColours = mapoEColoToAppearTimes.keys;
-					for(int j = 0; j< keyEdgeColours.length ; ++j){
-						if(mapoEColoToAppearTimes.allocated[j]){
-							BitSet edgeColo = (BitSet) keyEdgeColours[j];
-							int noOfTimes = mapoEColoToAppearTimes.get(edgeColo);
-							ObjectDoubleOpenHashMap<BitSet> mapAvrgDegreeValues = mMapAvrgOutDegreeValues.get(vertColo);
-							Double noOfOutDegree = mapAvrgDegreeValues.get(edgeColo);
-							mapAvrgDegreeValues.put(edgeColo, noOfOutDegree / noOfTimes);
+						// max degree
+						if(maxDegree!=0){
+							ObjectDoubleOpenHashMap<BitSet> mapOEColoToMaxDegree= mMapMaxOutDegreeValues.get(vertColo);
+							
+							if(mapOEColoToMaxDegree == null){
+								mapOEColoToMaxDegree = new ObjectDoubleOpenHashMap<BitSet>();
+								mMapMaxOutDegreeValues.put(vertColo, mapOEColoToMaxDegree);
+							}
+							mapOEColoToMaxDegree.putOrAdd(edgeColo, maxDegree, maxDegree);
 						}
 					}
 				}
 			}
-		}
-		
-		
-		// compute average max degree
-		keyVertexColours = mMapAvrgMaxOutDegreeAppearTime.keys;
-		for (int i = 0; i < keyVertexColours.length; ++i) {
-			if (mMapAvrgMaxOutDegreeAppearTime.allocated[i]) {
-				BitSet vertColo = (BitSet) keyVertexColours[i];
-				ObjectIntOpenHashMap<BitSet> mapMaxDegreeTimes = mMapAvrgMaxOutDegreeAppearTime.get(vertColo);
-				if (mapMaxDegreeTimes != null) {
-					Object[] keyEdgeColours = mapMaxDegreeTimes.keys;
+			
+			
+			// compute average out degree
+			Object[] keyVertexColours = mMapAvrgOutDegreeValues.keys;
+			for(int i = 0 ; i < keyVertexColours.length ; ++i) {
+				if(mMapAvrgOutDegreeValues.allocated[i]){
+					BitSet vertColo = (BitSet) keyVertexColours[i];
+					ObjectDoubleOpenHashMap<BitSet> mapAvrgDegreeValues = mMapAvrgOutDegreeValues.get(vertColo);
+						Object[] keyEdgeColours = mapAvrgDegreeValues.keys;
+						for(int j = 0; j< keyEdgeColours.length ; ++j){
+							if(mapAvrgDegreeValues.allocated[j]){
+								BitSet edgeColo = (BitSet) keyEdgeColours[j];
+								Double noOfOutDegree = mapAvrgDegreeValues.get(edgeColo);
+								mapAvrgDegreeValues.put(edgeColo, noOfOutDegree / numberOfGraphs);
+							}
+						}
+				}
+			}
+			
+			
+			// compute average max degree
+			keyVertexColours = mMapMaxOutDegreeValues.keys;
+			for (int i = 0; i < keyVertexColours.length; ++i) {
+				if (mMapMaxOutDegreeValues.allocated[i]) {
+					BitSet vertColo = (BitSet) keyVertexColours[i];
+					ObjectDoubleOpenHashMap<BitSet> mapMaxDegreeValues = mMapMaxOutDegreeValues.get(vertColo);
+					Object[] keyEdgeColours = mapMaxDegreeValues.keys;
 					for (int j = 0; j < keyEdgeColours.length; ++j) {
-						if(mapMaxDegreeTimes.allocated[j]){
+						if(mapMaxDegreeValues.allocated[j]){
 							BitSet edgeColo = (BitSet) keyEdgeColours[j];
-							int noOfTimes =  mapMaxDegreeTimes.get(edgeColo);
-							ObjectDoubleOpenHashMap<BitSet> mapMaxDegreeValues = mMapMaxOutDegreeValues.get(vertColo);
 							Double maxOutDegree = mapMaxDegreeValues.get(edgeColo);
-							mapMaxDegreeValues.put(edgeColo, maxOutDegree / noOfTimes);
+							mapMaxDegreeValues.put(edgeColo, maxOutDegree / numberOfGraphs);
 						}
 					}
 				}

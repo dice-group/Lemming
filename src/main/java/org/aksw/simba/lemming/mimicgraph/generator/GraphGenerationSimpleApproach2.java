@@ -34,6 +34,18 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	//key: in-edge's colours, the values are the distribution of edges per vertex's colours
 	//private Map<BitSet, ObjectDistribution<BitSet>> mMapAvrgInEdgeDistPerVertColo;
 
+	/*
+	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
+	 * to each vertex's id
+	 */
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
+
+	/*
+	 * the key1: the in-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
+	 * to each vertex's id
+	 */
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
+
 
 	private Map<BitSet, IOfferedItem<BitSet>> mMapOEColoToTailColoProposer;
 	
@@ -46,6 +58,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		super(iNumberOfVertices, origGrphs);
 		
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+		
+		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
@@ -61,9 +76,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
+			//these proposers help to select a potential tail colour and a head colour
 			IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
 			IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColo);
 			
+			// these proposers provide a potential degree for each of tails and heads
 			ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapTailColoToTailIDs = mapPossibleODegreePerOEColo.get(edgeColo);
 			ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapHeadColoToHeadIDs = mapPossibleIDegreePerIEColo.get(edgeColo);
 			
@@ -112,7 +129,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 					
 					if(!isFoundVerticesConnected){
 		    			maxIterationFor1EdgeColo--;
-		    			if(maxIterationFor1EdgeColo== 0){
+		    			if(maxIterationFor1EdgeColo == 0){
 		    				LOGGER.warn("Could not create "
 									+ (setFakeEdgeIDs.size() - i)
 									+ " edges (" 
@@ -140,11 +157,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 				 * this case seems to never happen since for an edge there are always vertices to be connected
 				 */
 				
-				LOGGER.warn("Could not consider the"
+				LOGGER.warn("Not process the"
 						+ edgeColo
 						+ " edge's colour since it could not find any approriate vertices to connect.");
 				
-				System.err.println("Could not consider the"
+				System.err.println("Not process the"
 						+ edgeColo
 						+ " edge's coloursince it could not find any approriate vertices to connect");
 			}
@@ -284,11 +301,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		
 		if(!isRandom){
-			System.out.println("using override function getProposedTriple(");
-			
+			LOGGER.info("Using the override function getProposedTriple");
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
-				if(edgeColo != null){
+				if(edgeColo != null && !edgeColo.equals(mRdfTypePropertyColour)){
 					IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColo);
 					IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
 					
@@ -324,7 +340,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 				}
 			}
 		}else{
-			System.out.println("using base function getProposedTriple(");
+			LOGGER.info("Using the base function getProposedTriple of abstract class");
 			return super.getProposedTriple(true);
 		}
 	}

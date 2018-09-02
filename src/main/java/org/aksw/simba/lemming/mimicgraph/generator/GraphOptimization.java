@@ -27,14 +27,16 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
-	private int mMaxIteration = 1000 ;
+	private int mMaxIteration = 5000 ;
 	private int mMaxRepeatedSelection = 1000;
-	private boolean mProcessRandomly = true;
+	private boolean mProcessRandomly = false;
 	
 	private IGraphGeneration mGraphGenerator;
 	private EdgeModifier mEdgeModifier;
 	private ConstantValuesComputation mErrScoreCalculator;
 	private List<Double> mLstErrorScore; 
+	private double mOptimizedTime =0;
+	
 	
 	/*-----------------------------------------------
 	 * Variable for storing calculation information *
@@ -65,7 +67,7 @@ public class GraphOptimization {
 	}
 	
 	
-	public ColouredGraph refineGraph(){
+	public void refineGraph(){
 		
 		int noOfRepeatedParent = 0;
 
@@ -126,7 +128,8 @@ public class GraphOptimization {
 			}
 		}
 		
-		return mEdgeModifier.getGraph();
+		mGraphGenerator.setMimicGraph(mEdgeModifier.getGraph());
+		mOptimizedTime =  System.currentTimeMillis();
 	}
 	
 	/**
@@ -142,15 +145,12 @@ public class GraphOptimization {
 		if(pErrScore != Double.NaN && pErrScore < minErrScore){
 			minErrScore = pErrScore;
 		}
-		
 		if(lErrScore!= Double.NaN && lErrScore < minErrScore){
 			minErrScore = lErrScore;
 		}
-		
 		if(rErrScore != Double.NaN && rErrScore < minErrScore){
 			minErrScore = rErrScore;
 		}
-		
 		return minErrScore;
 	}
 	
@@ -161,13 +161,20 @@ public class GraphOptimization {
 	 * @a
 	 */
 	private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraph clonedGrph){
-		IntSet setOfEdges =	clonedGrph.getEdges();
+		int edgeId = -1;
+		BitSet edgeColour = null;
 		Random rand = new Random();
-		setOfEdges = clonedGrph.getEdges();
-		int[] arrEdges = setOfEdges.toIntArray();
-		// randomly choose edge id to remove
-		int edgeId = arrEdges[rand.nextInt(arrEdges.length)];
-		BitSet edgeColour = clonedGrph.getEdgeColour(edgeId);
+		while(true){
+			LOGGER.info("Try to get an edge for removing!");
+			IntSet setOfEdges =	clonedGrph.getEdges();
+			int[] arrEdges = setOfEdges.toIntArray();
+			// randomly choose edge id to remove
+			edgeId = arrEdges[rand.nextInt(arrEdges.length)];
+			edgeColour = clonedGrph.getEdgeColour(edgeId);
+			if(!edgeColour.equals(clonedGrph.getRDFTypePropertyColour())){
+				break;
+			}
+		}
 		
 		//track the head and tail of the removed edge
 		TripleBaseSingleID triple = new TripleBaseSingleID();
@@ -188,18 +195,41 @@ public class GraphOptimization {
 		return mGraphGenerator.getProposedTriple(mProcessRandomly);
 	}
 
-	public void printResult(double startingTime){
+	
+	/**
+	 * output results to file LemmingEx.result 
+	 * @param args all input configurations
+	 * @param startingTime the starting time of generation process
+	 * @param savedFile the saved file's name of the mimic dataset
+	 */
+	public void printResult(Map<String, String> args, double startingTime, String savedFile){
 		BufferedWriter fWriter ;
 		try{
 			LOGGER.warn("Output results to file!");
-			double currentTime =  System.currentTimeMillis();
+			
 			fWriter = new BufferedWriter( new FileWriter("LemmingEx.result", true));
 			// number of input graphs
 			fWriter.write("#----------------------------------------------------------------------#\n");
 			fWriter.write("# Graph Generation: " + LocalDateTime.now().toString() +".\n");
 			fWriter.write("# Total number of input graphs: " + mErrScoreCalculator.getNumberOfGraphs() +".\n");
 			fWriter.write("# Generate a mimic graph of "+ mEdgeModifier.getGraph().getVertices().size()+" vertices and "+ mEdgeModifier.getGraph().getEdges().size()+" edges.\n");
-			fWriter.write("# Duration: "+ (currentTime - startingTime)+" (ms).\n");
+			fWriter.write("# Saved file: "+ savedFile +".\n");
+			fWriter.write("# Duration: "+ (mOptimizedTime - startingTime)+" (ms).\n");
+			if(args!=null && args.size()>0){
+				//dataset 
+				if(args.containsKey("-ds")){
+					fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")? "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
+				}else{
+					fWriter.write("# Default input dataset: Sematic Web Dog Food.\n");
+				}
+				//generation approach
+				if(args.containsKey("-t")){
+					fWriter.write("# Generation approach: " + args.get("-t") +".\n");	
+				}else{
+					fWriter.write("# Defaule generation approach: random generation.\n");	
+				}
+			}
+			
 			fWriter.write("#----------------------------------------------------------------------#\n");
 			
 			// metric values of all graphs

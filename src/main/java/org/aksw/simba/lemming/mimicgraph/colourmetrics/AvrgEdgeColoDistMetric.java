@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 
 /**
  * Compute average distribution of edges per color over all versions
@@ -18,14 +17,14 @@ import com.carrotsearch.hppc.ObjectIntOpenHashMap;
  */
 public class AvrgEdgeColoDistMetric {
 	
-private static final Logger LOGGER = LoggerFactory.getLogger(AvrgEdgeColoDistMetric.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(AvrgEdgeColoDistMetric.class);
 	
 	public static ObjectDistribution<BitSet> apply(ColouredGraph[] origGrphs){
-		if(origGrphs != null && origGrphs.length >0){
+		int numberOfGraphs = 0;
+		if(origGrphs != null && (numberOfGraphs = origGrphs.length) >0){
 			//vertex colour distribution
 			EdgeColourDistributionMetric edgeColourMetric = new EdgeColourDistributionMetric();
 			ObjectDoubleOpenHashMap<BitSet> mapEdgeColoRate = new ObjectDoubleOpenHashMap<BitSet>();
-			ObjectIntOpenHashMap<BitSet> mapEdgeColoApprearTime = new ObjectIntOpenHashMap<BitSet>();
 			
 			for(ColouredGraph graph: origGrphs){
 				// number of vertices
@@ -44,26 +43,21 @@ private static final Logger LOGGER = LoggerFactory.getLogger(AvrgEdgeColoDistMet
 					double rate = edgeSampleValues[i]/(iNoOfEdges);
 					
 					mapEdgeColoRate.putOrAdd(edgeColo, rate, rate);
-					mapEdgeColoApprearTime.putOrAdd(edgeColo, 1, 1);
 				}
 			}
 			
-			Object [] keyEdgeColo = mapEdgeColoApprearTime.keys;
-			int iNoOfEdgeColo = keyEdgeColo.length;
-			for(int i = 0 ; i< iNoOfEdgeColo; i++){
-				if(mapEdgeColoApprearTime.allocated[i]){
+			Object [] keyEdgeColo = mapEdgeColoRate.keys;
+			for(int i = 0 ; i< keyEdgeColo.length; i++){
+				if(mapEdgeColoRate.allocated[i]){
 					BitSet edgeColo = (BitSet) keyEdgeColo[i];
-					int iNoOfAppearTime = mapEdgeColoApprearTime.get(edgeColo);
-					if(iNoOfAppearTime != 0){
-						double avertage = mapEdgeColoRate.get(edgeColo)/iNoOfAppearTime;
+						double avertage = mapEdgeColoRate.get(edgeColo)/numberOfGraphs;
 						mapEdgeColoRate.put(edgeColo, avertage);	
-					}
-					else{
-						LOGGER.warn("the vertColo does not exist!");
-					}
 				}
 			}
 			return MapUtil.convert(mapEdgeColoRate);
+		}
+		else{
+			LOGGER.warn("Find no input graphs!");
 		}
 		return null;
 	}
