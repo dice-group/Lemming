@@ -28,7 +28,7 @@ public class Constants {
 	public static final String TYPE_SUBCLASS_PREFIX = "subclass_";
 	public static final String PROPERTY = "property_";
 	
-	public static final int MAX_ITERATION_FOR_1_COLOUR = 10000;
+	public static final int MAX_ITERATION_FOR_1_COLOUR = 5000;
 	
 	public static final Pattern DATETIME_PATTERN = Pattern.compile(
 		      "^((2000|2400|2800|(19|2[0-9](0[48]|[2468][048]|[13579][26])))-02-29)$"

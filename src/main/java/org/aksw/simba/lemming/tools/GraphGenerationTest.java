@@ -14,19 +14,24 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationGroupingTriple;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationRandomly2;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach;
-import org.aksw.simba.lemming.grph.generator.GraphGenerationSimpleApproach2;
-import org.aksw.simba.lemming.grph.generator.GraphLexicalization;
-import org.aksw.simba.lemming.grph.generator.GraphOptimization;
-import org.aksw.simba.lemming.grph.generator.IGraphGeneration;
-import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
+import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationGroupingTriple;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly2;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach2;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,17 +73,17 @@ public class GraphGenerationTest {
          Definition of metrics to form constant expression
          ----------------------------------------------------*/
         List<SingleValueMetric> metrics = new ArrayList<>();
-        //metrics.add(new NodeTriangleMetric());
-        //metrics.add(new EdgeTriangleMetric());
-        //metrics.add(new AvgClusteringCoefficientMetric());
-        //metrics.add(new MaxVertexOutDegreeMetric());
-        //metrics.add(new MaxVertexInDegreeMetric());
+        //these are two fixed metrics: NodeTriangleMetric and EdgeTriangleMetric
+        metrics.add(new NodeTriangleMetric());
+        metrics.add(new EdgeTriangleMetric());
+        
+        //these are optional metrics
+        metrics.add(new AvgClusteringCoefficientMetric());
+        metrics.add(new MaxVertexOutDegreeMetric());
+        metrics.add(new MaxVertexInDegreeMetric());
         metrics.add(new NumberOfEdgesMetric());
         metrics.add(new NumberOfVerticesMetric());
         //metrics.add(new DiameterMetric());
-        
-       
-        
         
         /*---------------------------------------------------
         Loading RDF graphs into ColouredGraph models
@@ -109,7 +114,6 @@ public class GraphGenerationTest {
         	LOGGER.warn("Please generate the file [value_store.val] again!");
         	return ;
         }
-        
         
         /*---------------------------------------------------
         Generation for a draft graph
@@ -142,12 +146,12 @@ public class GraphGenerationTest {
 
         LOGGER.info("Generating a first version of mimic graph ...");
         //create a draft graph
-        double currentTime = System.currentTimeMillis();
+        double startTime = System.currentTimeMillis();
         // generate the new graph
         ColouredGraph tempGrph =  mGrphGenerator.generateGraph();
         // estimate the costed time for generation
-        currentTime = System.currentTimeMillis() - currentTime;
-        LOGGER.info("Finished graph generation process in " + currentTime +" ms");
+        double duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Finished graph generation process in " + duration +" ms");
         
         /*---------------------------------------------------
         Optimization with constant expressions
@@ -159,7 +163,7 @@ public class GraphGenerationTest {
         grphOptimizer.refineGraph();
         
         //output result to files       
-        grphOptimizer.printResult();
+        grphOptimizer.printResult(startTime);
         
         
         /*---------------------------------------------------

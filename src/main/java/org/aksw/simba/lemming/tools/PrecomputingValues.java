@@ -23,7 +23,6 @@ import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
-import org.aksw.simba.lemming.grph.simulator.metricstorage.MetricAndConstantValuesCarrier;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
@@ -33,6 +32,7 @@ import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,8 +44,8 @@ public class PrecomputingValues {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static final boolean USE_SEMANTIC_DOG_FOOD = false;
-    private static final boolean USE_PERSON_GRAPH = true;
+    private static final boolean USE_SEMANTIC_DOG_FOOD = true;
+    private static final boolean USE_PERSON_GRAPH = false;
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String PERSON_GRAPH = "PersonGraph/";
     
