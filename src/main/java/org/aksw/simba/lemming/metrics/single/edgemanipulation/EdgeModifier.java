@@ -45,6 +45,7 @@ public class EdgeModifier {
 					isCountingNodeTriangles = true;
 				}
 				
+				//compute value for each of metrics
 				mMapMetricValues.put(metric.getName(), metric.apply(clonedGraph));
 			}
 		}

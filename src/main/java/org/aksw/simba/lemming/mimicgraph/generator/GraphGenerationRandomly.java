@@ -30,9 +30,12 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		 * rdf:type edges)
 		 */
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
 			
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
+			setTailColours.retainAll(setAvailableVertexColours);
+			
 			BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
 			
 			/* the setFakeEdgeIDs helps us to know how many edges existing
@@ -47,55 +50,64 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 				BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
 				Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 				
-				if(setHeadColours.size() > 0){
-					BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
-					
-					BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
-					IntSet setTailIDs = new DefaultIntSet();
-					IntSet setHeadIDs = new DefaultIntSet();
-					
-					if(mMapColourToVertexIDs.containsKey(tailColo)){
-						setTailIDs = mMapColourToVertexIDs.get(tailColo).clone();
+				if(setHeadColours == null || setHeadColours.size() ==0){
+					continue;
+				}
+				
+				setHeadColours.retainAll(setAvailableVertexColours);
+				
+				if(setHeadColours.size() ==0)
+					continue;
+				
+				BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
+				
+				BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
+				IntSet setTailIDs = new DefaultIntSet();
+				IntSet setHeadIDs = new DefaultIntSet();
+				
+				if(mMapColourToVertexIDs.containsKey(tailColo)){
+					setTailIDs = mMapColourToVertexIDs.get(tailColo).clone();
+				}
+				
+				if(mMapColourToVertexIDs.containsKey(headColo)){
+					setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+				}
+				
+				if(setTailIDs!= null && setTailIDs.size()> 0 && setHeadIDs!=null && setHeadIDs.size()> 0){
+					int[] arrTailIDs = setTailIDs.toIntArray();
+					int tailId = -1;
+					while(true){
+						tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
+						if(!mReversedMapClassVertices.containsKey(tailColo))
+							break;
 					}
 					
-					if(mMapColourToVertexIDs.containsKey(headColo)){
-						setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+					int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
+					for(int connectedHead: arrConnectedHeads){
+						if(setHeadIDs.contains(connectedHead))
+							setHeadIDs.remove(connectedHead);
 					}
 					
-					if(setTailIDs!= null && setTailIDs.size()> 0 && setHeadIDs!=null && setHeadIDs.size()> 0){
-						int[] arrTailIDs = setTailIDs.toIntArray();
-						int tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
-						
-						
-						int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
-						for(int connectedHead: arrConnectedHeads){
-							if(setHeadIDs.contains(connectedHead))
-								setHeadIDs.remove(connectedHead);
-						}
-						
-						
-						
-						if(setHeadIDs.size() == 0 ){
-							continue;
-						}
-						
-						int[] arrHeadIDs = setHeadIDs.toIntArray();
-						
-						int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
-						if(connectableVertices(tailId, headId, edgeColo)){
-							mMimicGraph.addEdge(tailId, headId, edgeColo);
-							isFoundVerticesConnected = true;	
-							i++;
-						}
+					if(setHeadIDs.size() == 0 ){
+						continue;
+					}
+					
+					int[] arrHeadIDs = setHeadIDs.toIntArray();
+					
+					int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+					if(connectableVertices(tailId, headId, edgeColo)){
+						mMimicGraph.addEdge(tailId, headId, edgeColo);
+						isFoundVerticesConnected = true;	
+						i++;
+					}
 //						else{
 //							System.err.println("Found same vertices to connect");
 //						}
-					}
+				}
 //					else{
 //						System.err.println("Could not find any vertices with the tail's or head's colours!");
 //						LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
 //					}
-				}
 				
 				if (!isFoundVerticesConnected) {
 					maxIterationFor1EdgeColo--;

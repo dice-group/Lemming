@@ -55,10 +55,14 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 
 	public ColouredGraph generateGraph(){
 		
-		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
-		for(BitSet edgeColo : keyEdgeColo){
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+		
+		for(BitSet edgeColo : setEdgeColours){
 			
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
+			setTailColours.retainAll(setAvailableVertexColours);
+			
 			BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
 			
 			ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapHeadColoToIDProposer = mapPossibleIDegreePerIEColo.get(edgeColo);
@@ -79,6 +83,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					
 					BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
 					Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+					setHeadColours.retainAll(setAvailableVertexColours);
 					
 					if(setHeadColours.size() > 0){
 						BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
@@ -88,27 +93,26 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						IOfferedItem<Integer> headIDProposer = mapHeadColoToIDProposer.get(headColo);
 								
 						
-						if(tailIDProposer!= null && headIDProposer!=null){
+						if(tailIDProposer!= null && headIDProposer != null){
 							
 							int tailId = tailIDProposer.getPotentialItem();
+							if(mReversedMapClassVertices.containsKey(tailId)){
+								continue;
+							}
 							
 							IntSet setHeadIDs = new DefaultIntSet();
-							int sizeTmp = setHeadIDs.size();
 							if(mMapColourToVertexIDs.containsKey(headColo)){
 								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
 							}
+							
 							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
 								continue;
 							}
 							
-							int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
+							int[] arrConnectedHeads = getConnectedHeads(tailId, edgeColo).toIntArray(); 
 							for(int connectedHead: arrConnectedHeads){
 								if(setHeadIDs.contains(connectedHead))
 									setHeadIDs.remove(connectedHead);
-							}
-							
-							if(sizeTmp!= setHeadIDs.size()){
-								System.err.println("Remove head ids, remaining set size: " + setHeadIDs.size());
 							}
 							
 							if(setHeadIDs.size() == 0){

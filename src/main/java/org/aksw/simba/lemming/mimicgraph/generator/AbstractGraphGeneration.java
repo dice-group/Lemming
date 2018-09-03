@@ -573,7 +573,7 @@ public abstract class AbstractGraphGeneration {
 		return canConnect;
 	}
 	
-public IntSet getConnectedHeads(int tailId, BitSet eColo){
+	public IntSet getConnectedHeads(int tailId, BitSet eColo){
 		
 		IntSet setOfHeads = new DefaultIntSet();
 		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
