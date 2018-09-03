@@ -106,8 +106,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 						} else {
 							// for testing only
 							if ((noOfHeads + noOfTails + noOfHeads) != 0) {
-								System.err
-										.println("What wrong the result is!!!");
+								LOGGER.error("Found a triple missing of either tail, head or edges!");
 							}
 						}
 					}
@@ -174,18 +173,19 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				if (mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
 					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
 							.get(tailColo);
-					for (BitSet headColo : setVertColo) {
-						if (mapHeadEdgeToGrpTriples.containsKey(headColo)) {
-							Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples
-									.get(headColo);
+					
+					Set<BitSet> setHeadColours = mapHeadEdgeToGrpTriples.keySet();
+					
+					for (BitSet headColo : setHeadColours) {
+						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples
+								.get(headColo);
+						
+						if(mapEdgeToGrpTriples.containsKey(edgeColo)){
+							TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
 							
-							if(mapEdgeToGrpTriples.containsKey(edgeColo)){
-								TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
-								
-								if(triple != null){
-									lstGrpTriples.add(triple);
-									lstEdgeRatePerGrpTriple.add(triple.noOfEdges);
-								}
+							if(triple != null){
+								lstGrpTriples.add(triple);
+								lstEdgeRatePerGrpTriple.add(triple.noOfEdges);
 							}
 						}
 					}

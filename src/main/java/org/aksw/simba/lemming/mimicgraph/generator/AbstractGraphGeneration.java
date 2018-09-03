@@ -25,6 +25,7 @@ import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public abstract class AbstractGraphGeneration {
@@ -75,6 +76,7 @@ public abstract class AbstractGraphGeneration {
 	protected Map<BitSet, Integer> mMapClassVertices;
 	protected Map<Integer, BitSet> mReversedMapClassVertices;
 	
+	protected ObjectIntOpenHashMap<BitSet> mEdgeColoursThreshold;
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs){
 		//number of vertices
@@ -102,6 +104,7 @@ public abstract class AbstractGraphGeneration {
 		mMapClassVertices = new HashMap<BitSet, Integer>();
 		mReversedMapClassVertices = new HashMap<Integer, BitSet>();
 		
+		mEdgeColoursThreshold = new ObjectIntOpenHashMap<BitSet>();
 		
 		// colour of rdf:type edge
 		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
@@ -203,6 +206,10 @@ public abstract class AbstractGraphGeneration {
 				possOutEdgeColours.remove(mRdfTypePropertyColour);
 			}
 			
+			if(possOutEdgeColours.size() ==0){
+				continue;
+			}
+			
 			/*
 			 * it is supposed that there always exist at least one edge colour used to connect
 			 * the vertices in the tail colour to other vertices
@@ -284,7 +291,10 @@ public abstract class AbstractGraphGeneration {
 			setVertIDs.add(vertId);
 		}
 		
-		// get restricted edge's colours can exist along with these created vertex's colours
+		/*
+		 *  get restricted edge's colours can exist along with these created vertex's colours
+
+		 */
 		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
 		
 		for(BitSet tailColo: setVertColours){
@@ -293,6 +303,25 @@ public abstract class AbstractGraphGeneration {
 				if(lstPossEdgeColours != null && lstPossEdgeColours.size() >0){
 					for(BitSet edgeColo : lstPossEdgeColours){
 						mSetOfRestrictedEdgeColours.add(edgeColo);
+					}
+				}
+			}
+		}
+		
+		/*
+		 * get a threshold number of edges for each edge colours 
+		 */
+		for(BitSet edgeColo: mSetOfRestrictedEdgeColours){
+			for(BitSet tailColo: setVertColours){
+				Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+				IntSet setTailIds = mMapColourToVertexIDs.get(tailColo);
+				if(setHeadColours!= null){
+					for(BitSet headColo : setHeadColours){
+						if(setVertColours.contains(headColo)){
+							IntSet setHeadIds = mMapColourToVertexIDs.get(headColo);
+							mEdgeColoursThreshold.putOrAdd(edgeColo, setTailIds.size() * setHeadIds.size(), 
+									setTailIds.size() * setHeadIds.size());
+						}
 					}
 				}
 			}
@@ -351,8 +380,15 @@ public abstract class AbstractGraphGeneration {
 				setEdgeIDs = new DefaultIntSet();
 				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
-			// fake edge's id
-			setEdgeIDs.add(i);
+			
+			if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
+					setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
+				// fake edge's id
+				setEdgeIDs.add(i);
+			}else{
+				i--;
+			}
+			
 		}
 	}
 	
