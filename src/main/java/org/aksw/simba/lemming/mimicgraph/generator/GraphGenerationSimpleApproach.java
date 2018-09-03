@@ -15,6 +15,7 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
@@ -85,13 +86,31 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 						// get tailIds based on the tailColo
 						IntSet tailIDs = mMapColourToVertexIDs.get(tailColo);
 						
-						// get headIds based on the headColo
-						IntSet headIDs = mMapColourToVertexIDs.get(headColo);
 			    		
-			    		if(headIDs!= null && !headIDs.isEmpty() && tailIDs!=null && !tailIDs.isEmpty()){
+			    		if(tailIDs!=null && !tailIDs.isEmpty()){
 			    			int[] arrTailVertices = tailIDs.toIntArray();
-				    		int[] arrHeadVertices = headIDs.toIntArray();
 				    		int tailId = arrTailVertices[mRandom.nextInt(arrTailVertices.length)];
+				    		
+				    		IntSet setHeadIDs = new DefaultIntSet();
+							if(mMapColourToVertexIDs.containsKey(headColo)){
+								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							}
+				    		
+							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+								continue;
+							}
+							
+							int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
+							for(int connectedHead: arrConnectedHeads){
+								if(setHeadIDs.contains(connectedHead))
+									setHeadIDs.remove(connectedHead);
+							}
+							
+							if(setHeadIDs.size() == 0){
+								continue;
+							}
+							int[] arrHeadVertices = setHeadIDs.toIntArray();
+							
 				    		int headId = arrHeadVertices[mRandom.nextInt(arrHeadVertices.length)];
 				    		
 				    		if(connectableVertices(tailId, headId, edgeColo)){

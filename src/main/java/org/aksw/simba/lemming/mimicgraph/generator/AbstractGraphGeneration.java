@@ -573,6 +573,17 @@ public abstract class AbstractGraphGeneration {
 		return canConnect;
 	}
 	
+public IntSet getConnectedHeads(int tailId, BitSet eColo){
+		
+		IntSet setOfHeads = new DefaultIntSet();
+		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
+		if(mapTailToHeads != null && mapTailToHeads.containsKey(tailId)){
+			setOfHeads = mapTailToHeads.get(tailId);
+		}
+		
+		return setOfHeads;
+	}
+	
 	public String getLiteralType(BitSet dteColo){
 		return mMimicGraph.getLiteralType(dteColo);
 	}

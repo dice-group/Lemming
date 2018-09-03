@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
@@ -110,7 +112,28 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						
 						if(tailIDsProposer !=null && headIDsProposer != null ){
 							Integer tailId = tailIDsProposer.getPotentialItem();
-							Integer headId = headIDsProposer.getPotentialItem();
+							
+							IntSet setHeadIDs = new DefaultIntSet();
+							if(mMapColourToVertexIDs.containsKey(headColo)){
+								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							}
+							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+								continue;
+							}
+							
+							int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
+							for(int connectedHead: arrConnectedHeads){
+								if(setHeadIDs.contains(connectedHead))
+									setHeadIDs.remove(connectedHead);
+							}
+							
+							if(setHeadIDs.size() == 0){
+								continue;
+							}
+							
+							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							
+							Integer headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
 							if(tailId != null && headId != null && 
 									connectableVertices(tailId, headId, edgeColo)){
 								mMimicGraph.addEdge(tailId, headId, edgeColo);
