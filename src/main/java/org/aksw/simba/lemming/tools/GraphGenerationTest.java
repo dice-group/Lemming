@@ -2,10 +2,8 @@ package org.aksw.simba.lemming.tools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.IDatasetManager;
@@ -31,10 +29,6 @@ import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import toools.set.IntSet;
-
-import com.carrotsearch.hppc.BitSet;
 
 public class GraphGenerationTest {
 	

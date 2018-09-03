@@ -470,10 +470,12 @@ public class ColouredGraph{
 		// isDebugging for evaluation
 		if(Constants.IS_EVALUATION_MODE){
 			 Set<String> setofURIs = dtEdgePalette.getURIs(dteColo, true);
-			 if(setofURIs.size() >0){
+			 if(setofURIs.size() == 1){
 				 for(String uri : setofURIs){
 					 return uri;
 				 }
+			 }else{
+				 LOGGER.warn("This " + dteColo +" colour (datatype edge colour) has more than 1 URI");
 			 }
 		}
 		return Constants.SIMULATED_DATA_TYPED_PROPERTY_URI + dteColo;

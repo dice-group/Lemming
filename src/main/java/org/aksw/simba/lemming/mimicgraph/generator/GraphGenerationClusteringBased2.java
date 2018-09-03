@@ -55,6 +55,11 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		
+		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>(); 	
+		//compute potential degree for each of vertices
+		computePotentialIODegreePerVert(origGrphs);
+		
 		/*
 		 *  compute edges and vertices distribution over each triple's colour
 		 */
@@ -69,8 +74,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		//assign specific number of vertices to each grouped triple
 		assignVerticesToGroupedTriple();
 		
-		//compute potential degree for each of vertices
-		computePotentialIODegreePerVert(origGrphs);
+		
 	}
 
 public ColouredGraph generateGraph(){

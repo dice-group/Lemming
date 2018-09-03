@@ -352,7 +352,7 @@ public abstract class AbstractGraphGeneration {
 				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
 			// fake edge's id
-			setEdgeIDs.add(-1);
+			setEdgeIDs.add(i);
 		}
 	}
 	
