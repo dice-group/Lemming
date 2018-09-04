@@ -223,6 +223,10 @@ public abstract class AbstractGraphGeneration {
 			// get a set of head colours associated with the edgeColo and the tailColo
 			Set<BitSet> possHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 			
+			if(possHeadColours.size() == 0){
+				continue;
+			}
+			
 			/*
 			 * it is supposed that there always exist at least one head colour that can be
 			 * connected with the tail colour via the edge colour
