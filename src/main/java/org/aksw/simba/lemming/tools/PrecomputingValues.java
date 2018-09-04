@@ -77,7 +77,7 @@ public class PrecomputingValues {
         metrics.add(new NumberOfVerticesMetric());
 
         ColouredGraph graphs[] = new ColouredGraph[20];
-        IDatasetManager mDatasetManager;
+        IDatasetManager mDatasetManager = null;
         String datasetPath = "";
         if (USE_SEMANTIC_DOG_FOOD) {
         	datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
@@ -85,6 +85,10 @@ public class PrecomputingValues {
         } else if(USE_PERSON_GRAPH){
         	datasetPath = PERSON_GRAPH;
         	mDatasetManager = new PersonGraphDataset();
+        }
+        
+        if(mDatasetManager==null){
+        	return ;
         }
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
         
