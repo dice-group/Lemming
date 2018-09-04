@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.tools;
 
+import grph.Grph.DIRECTION;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,12 +11,12 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
-import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased;
@@ -43,7 +45,7 @@ public class GraphGenerationTest {
 		IGraphGeneration mGrphGenerator;
 		IDatasetManager mDatasetManager;
 		boolean isStop = true;
-		
+
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
         
@@ -75,9 +77,11 @@ public class GraphGenerationTest {
         metrics.add(new EdgeTriangleMetric());
         
         //these are optional metrics
-        metrics.add(new AvgClusteringCoefficientMetric());
-        metrics.add(new MaxVertexOutDegreeMetric());
-        metrics.add(new MaxVertexInDegreeMetric());
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
         metrics.add(new NumberOfEdgesMetric());
         metrics.add(new NumberOfVerticesMetric());
         //metrics.add(new DiameterMetric());

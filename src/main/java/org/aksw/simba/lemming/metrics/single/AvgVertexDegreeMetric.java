@@ -10,10 +10,7 @@ import com.carrotsearch.hppc.IntArrayList;
  * 
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
- * @deprecated since it can be calculated automatically by the refinement engine
- *             using the number of vertices and the number of edges.
  */
-@Deprecated
 public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValueMetric {
 
     public AvgVertexDegreeMetric() {

@@ -2,6 +2,7 @@
 package org.aksw.simba.lemming.tools;
 
 import grph.Grph;
+import grph.Grph.DIRECTION;
 import grph.algo.topology.ClassicalGraphs;
 import grph.algo.topology.StarTopologyGenerator;
 import grph.in_memory.InMemoryGrph;
@@ -24,12 +25,12 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexInDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
@@ -59,9 +60,11 @@ public class PrecomputingValues {
         List<SingleValueMetric> metrics = new ArrayList<>();
         metrics.add(new NodeTriangleMetric());
         metrics.add(new EdgeTriangleMetric());
-        metrics.add(new AvgClusteringCoefficientMetric());
-        metrics.add(new MaxVertexOutDegreeMetric());
-        metrics.add(new MaxVertexInDegreeMetric());
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
         metrics.add(new NumberOfEdgesMetric());
         metrics.add(new NumberOfVerticesMetric());
 

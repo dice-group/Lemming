@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -27,8 +28,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
-	private int mMaxIteration = 200 ;
-	private int mMaxRepeatedSelection = 100;
+	private int mMaxIteration = 10000 ;
+	private int mMaxRepeatedSelection = 5000;
 	private boolean mProcessRandomly = false;
 	
 	private IGraphGeneration mGraphGenerator;
@@ -232,6 +233,8 @@ public class GraphOptimization {
 			
 			fWriter.write("#----------------------------------------------------------------------#\n");
 			
+			Map<String, String> mapGraphName = new HashMap<String, String>();
+			
 			// metric values of all graphs
 			fWriter.write("\n");
 			fWriter.write("- Metric Values\n");
@@ -246,10 +249,14 @@ public class GraphOptimization {
 					
 					int idxGraph = 1;
 					Set<String> setKeyGraphs = mapInputGraphMetricValues.keySet();
-					for(String key: setKeyGraphs){
-						Map<String, Double> mapInputGraphVal = mapInputGraphMetricValues.get(key);
+					for(String keyGraph: setKeyGraphs){
+						//generate name for each graph
+						String graphName = "Graph "+idxGraph;
+						mapGraphName.put(keyGraph, graphName);
+						
+						Map<String, Double> mapInputGraphVal = mapInputGraphMetricValues.get(keyGraph);
 						double inputGraphValue = mapInputGraphVal.containsKey(metricName)? mapInputGraphVal.get(metricName): Double.NaN;
-						fWriter.write("\t Graph "+idxGraph+": "+ inputGraphValue + "\n");
+						fWriter.write("\t "+ graphName +": "+ inputGraphValue + "\n");
 						idxGraph ++;
 					}
 					
@@ -269,11 +276,9 @@ public class GraphOptimization {
 				
 				Map<String, Double> mapGraphAndConstantValues = mapConstantValues.get(expr);
 				Set<String> setKeyGraphs = mapGraphAndConstantValues.keySet();
-				int idxGraph = 1;
-				for(String key: setKeyGraphs){
-					double constVal = mapGraphAndConstantValues.get(key);
-					fWriter.write("\t Graph "+idxGraph+": "+ constVal + "\n");
-					idxGraph ++;	
+				for(String keyGraph: setKeyGraphs){
+					double constVal = mapGraphAndConstantValues.get(keyGraph);
+					fWriter.write("\t "+mapGraphName.get(keyGraph)+": "+ constVal + "\n");
 				}
 				
 				double origConstantVal = expr.getValue(mOrigMetricValuesOfMimicGrpah);
@@ -281,6 +286,19 @@ public class GraphOptimization {
 				double optimizedConstantVal = expr.getValue(mOptimizedMetricValues);
 				fWriter.write("\t The opimized mimic graph: "+ optimizedConstantVal + "\n");
 			}
+			
+			fWriter.write("\n");
+			fWriter.write("- Sum error score\n");
+			// constant expressions and their values for each graphs 
+			Map<String, Double> mapSumErrorScores = mErrScoreCalculator.getMapSumErrorScore();
+			Set<String> setKeyGraphs = mapSumErrorScores.keySet();
+			for(String keyGraph: setKeyGraphs){
+				double errorScore = mapSumErrorScores.get(keyGraph);
+				fWriter.write("\t "+mapGraphName.get(keyGraph)+": "+ errorScore + "\n");
+
+			}
+			fWriter.write("\t The first mimic graph: "+ mLstErrorScore.get(0) + "\n");
+			fWriter.write("\t The opimized mimic graph: "+ mLstErrorScore.get(mLstErrorScore.size()-1) + "\n");			
 			
 			fWriter.write("\n");
 			fWriter.write("- Error score of "+ mMaxIteration + " iteration\n");
