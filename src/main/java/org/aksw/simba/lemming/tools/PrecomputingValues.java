@@ -45,8 +45,8 @@ public class PrecomputingValues {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static final boolean USE_SEMANTIC_DOG_FOOD = true;
-    private static final boolean USE_PERSON_GRAPH = false;
+    private static  boolean USE_SEMANTIC_DOG_FOOD = false;
+    private static  boolean USE_PERSON_GRAPH = true;
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String PERSON_GRAPH = "PersonGraph/";
     
@@ -57,6 +57,14 @@ public class PrecomputingValues {
         // For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
 
+        if(args[0].equals("pg")){
+        	USE_SEMANTIC_DOG_FOOD = false;
+        	USE_PERSON_GRAPH = true;
+        }else{
+        	USE_SEMANTIC_DOG_FOOD = true;
+        	USE_PERSON_GRAPH = false;
+        }
+        
         List<SingleValueMetric> metrics = new ArrayList<>();
         metrics.add(new NodeTriangleMetric());
         metrics.add(new EdgeTriangleMetric());
