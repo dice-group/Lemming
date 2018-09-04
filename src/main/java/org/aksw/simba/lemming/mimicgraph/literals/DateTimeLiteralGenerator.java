@@ -65,8 +65,8 @@ public class DateTimeLiteralGenerator extends AbstractLiteralGenerator implement
 								}
 								//only get the first part of date and time
 								date = LocalDateTime.parse(val);
-							}catch(Exception Ex){
-								LOGGER.warn("Cannot parse the data: " + val +". Exception: "+ Ex.getCause().toString() );
+							}catch(Exception ex){
+								LOGGER.warn("Cannot parse the date: " + val +". Exception: "+ ex.getMessage() );
 							}
 							if(date.isBefore(startDate)){
 								startDate = date;
