@@ -16,7 +16,7 @@ import org.aksw.simba.lemming.creation.SemanticWebDogFoodReader;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
 import org.aksw.simba.lemming.metrics.single.DiameterMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexOutDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
