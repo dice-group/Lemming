@@ -6,12 +6,11 @@ import com.carrotsearch.hppc.IntArrayList;
 
 import grph.Grph.DIRECTION;
 
-@SuppressWarnings("deprecation")
-public class StdDevVertexInDegree extends AvgVertexDegreeMetric {
+public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     protected DIRECTION direction;
 
-    public StdDevVertexInDegree(DIRECTION direction) {
+    public StdDevVertexDegree(DIRECTION direction) {
         super(direction == DIRECTION.in ? "stdDevInDegree" : "stdDevOutDegree");
         this.direction = direction;
     }
