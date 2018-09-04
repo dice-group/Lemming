@@ -28,8 +28,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
-	private int mMaxIteration = 10000 ;
-	private int mMaxRepeatedSelection = 5000;
+	private int mMaxIteration = 50000 ;
+	private int mMaxRepeatedSelection = 10000;
 	private boolean mProcessRandomly = false;
 	
 	private IGraphGeneration mGraphGenerator;
@@ -215,7 +215,7 @@ public class GraphOptimization {
 			fWriter.write("# Total number of input graphs: " + mErrScoreCalculator.getNumberOfGraphs() +".\n");
 			fWriter.write("# Generate a mimic graph of "+ mEdgeModifier.getGraph().getVertices().size()+" vertices and "+ mEdgeModifier.getGraph().getEdges().size()+" edges.\n");
 			fWriter.write("# Saved file: "+ savedFile +".\n");
-			fWriter.write("# Duration: "+ (mOptimizedTime - startingTime)+" (ms).\n");
+			fWriter.write("# Duration: "+ ((int)(mOptimizedTime - startingTime)/1000)+" (s).\n");
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){
@@ -289,6 +289,9 @@ public class GraphOptimization {
 			
 			fWriter.write("\n");
 			fWriter.write("- Sum error score\n");
+			fWriter.write("-- Average sum error score: "+ mErrScoreCalculator.getAverageErrorScore() + ":\n");
+			fWriter.write("-- Min sum error score: "+ mErrScoreCalculator.getMinErrorScore() + ":\n");
+			fWriter.write("-- Max sum error score: "+ mErrScoreCalculator.getMaxErrorScore() + ":\n");
 			// constant expressions and their values for each graphs 
 			Map<String, Double> mapSumErrorScores = mErrScoreCalculator.getMapSumErrorScore();
 			Set<String> setKeyGraphs = mapSumErrorScores.keySet();
