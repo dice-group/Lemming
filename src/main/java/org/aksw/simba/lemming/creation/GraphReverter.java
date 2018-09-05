@@ -45,7 +45,7 @@ public class GraphReverter {
 			 */
 			String tDummyURI = mapResourcesURLs.containsKey(tId)?  mapResourcesURLs.get(tId): mGraph.getResourceDummyURI(tId); 
 			Resource tRes = mDataModel.createResource(tDummyURI);
-			System.err.println("Connect " + tId +" to");
+			//System.err.println("Connect " + tId +" to");
 			IntSet setOfOEIds = mGraph.getOutEdges(tId);
 			if(setOfOEIds != null && setOfOEIds.size() > 0 ){
 				//array of out edges (object properties)
@@ -95,7 +95,7 @@ public class GraphReverter {
 					}
 					
 					
-					System.err.println("\t " + propRes +" --> " + hDummyURI);
+					//System.err.println("\t " + propRes +" --> " + hDummyURI);
 					
 					
 					if(hDummyURI == null || hDummyURI.isEmpty()){

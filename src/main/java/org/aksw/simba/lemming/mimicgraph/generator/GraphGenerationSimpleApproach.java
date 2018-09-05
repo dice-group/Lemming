@@ -85,7 +85,6 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 					if(headColo!=null && tailColo!= null){
 						// get tailIds based on the tailColo
 						IntSet tailIDs = mMapColourToVertexIDs.get(tailColo);
-						
 			    		
 			    		if(tailIDs!=null && !tailIDs.isEmpty()){
 			    			int[] arrTailVertices = tailIDs.toIntArray();

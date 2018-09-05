@@ -209,13 +209,23 @@ public class GraphOptimization {
 			LOGGER.warn("Output results to file!");
 			
 			fWriter = new BufferedWriter( new FileWriter("LemmingEx.result", true));
+			
+			BufferedWriter fErrorScoreWriter ;
+			String errorScoreFile = new String(savedFile);
+			errorScoreFile = "results/"+ errorScoreFile.replace(".rdf", ".scores");
+			
+			
+			fErrorScoreWriter = new BufferedWriter( new FileWriter(errorScoreFile, true));
+			
 			// number of input graphs
 			fWriter.write("#----------------------------------------------------------------------#\n");
 			fWriter.write("# Graph Generation: " + LocalDateTime.now().toString() +".\n");
 			fWriter.write("# Total number of input graphs: " + mErrScoreCalculator.getNumberOfGraphs() +".\n");
 			fWriter.write("# Generate a mimic graph of "+ mEdgeModifier.getGraph().getVertices().size()+" vertices and "+ mEdgeModifier.getGraph().getEdges().size()+" edges.\n");
 			fWriter.write("# Saved file: "+ savedFile +".\n");
+			fWriter.write("# Saved error score file: "+ errorScoreFile +".\n");
 			fWriter.write("# Duration: "+ ((int)(mOptimizedTime - startingTime)/1000)+" (s).\n");
+			fWriter.write("# Optimization: "+ mMaxIteration + " iterations\n");
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){
@@ -303,22 +313,22 @@ public class GraphOptimization {
 			fWriter.write("\t The first mimic graph: "+ mLstErrorScore.get(0) + "\n");
 			fWriter.write("\t The opimized mimic graph: "+ mLstErrorScore.get(mLstErrorScore.size()-1) + "\n");			
 			
-			fWriter.write("\n");
-			fWriter.write("- Error score of "+ mMaxIteration + " iteration\n");
-			// list of of error score
-			fWriter.write("\t [");
-			for(int i = 0 ; i < mLstErrorScore.size() ; i++){
-				if(i < mLstErrorScore.size() -1){
-					fWriter.write(mLstErrorScore.get(i) + "; ");
-				}else{
-					fWriter.write(mLstErrorScore.get(i)+"");
-				}
-			}
-			fWriter.write("]\n");
-			
-			
 			fWriter.write("\n\n\n");
 			fWriter.close();
+			
+			
+			
+			fErrorScoreWriter.write("# Error score of "+ mMaxIteration + " iteration\n");
+			// list of of error score
+			for(int i = 0 ; i < mLstErrorScore.size() ; i++){
+				if(i < mLstErrorScore.size() -1){
+					fErrorScoreWriter.write(mLstErrorScore.get(i) + ",");
+				}else{
+					fErrorScoreWriter.write(mLstErrorScore.get(i)+"");
+				}
+			}
+			fErrorScoreWriter.write("\n\n\n");
+			fErrorScoreWriter.close();
 			
 		}catch(Exception ex){
 			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
