@@ -223,10 +223,16 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 						BitSet tailColo = tailColourProposer.getPotentialItem();
 						Set<BitSet> setPossHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 						
+						if(setPossHeadColours.size() == 0 ){
+							continue;
+						}
+						
 						BitSet headColo = headColourProposer.getPotentialItem(setPossHeadColours);
 						
 						// get vertex's ids according to the vertex's colours
-						if(mMapColourToVertexIDs.get(tailColo) != null && mMapColourToVertexIDs.get(headColo) != null){
+						if(mMapColourToVertexIDs.get(tailColo) != null && mMapColourToVertexIDs.get(headColo) != null
+								&& mMapColourToVertexIDs.get(tailColo).size() > 0 
+								&& mMapColourToVertexIDs.get(headColo).size() > 0 ){
 							int[] arrTailIDs = mMapColourToVertexIDs.get(tailColo).toIntArray();
 							int[] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
 							

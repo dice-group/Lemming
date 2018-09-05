@@ -98,6 +98,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 					
 					BitSet tailColo = tailColourProposer.getPotentialItem();
 					Set<BitSet> setPossHeadColours = mColourMapper.getHeadColours(tailColo);
+					
+					if(setPossHeadColours.size() == 0 )
+						continue;
+					
 					BitSet headColo = headColourProposer.getPotentialItem(setPossHeadColours);
 										
 					if(headColo!=null && tailColo!= null){
@@ -339,6 +343,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						
 						BitSet tailColo = tailColourProposer.getPotentialItem();
 						Set<BitSet> setPossHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+						if(setPossHeadColours.size() == 0){
+							continue;
+						}
+						
 						BitSet headColo = headColourProposer.getPotentialItem(setPossHeadColours);
 						
 						IOfferedItem<Integer> tailIDsProposer = mapTailColoToTailIDs.get(tailColo);

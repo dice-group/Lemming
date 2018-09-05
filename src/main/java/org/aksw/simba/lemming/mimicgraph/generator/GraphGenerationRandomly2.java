@@ -191,6 +191,10 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						possOutEdgeColours.remove(mRdfTypePropertyColour);
 					}
 					
+					if(possOutEdgeColours.size() == 0){
+						continue;
+					}
+					
 					BitSet[] arrEdgeColours = possOutEdgeColours.toArray(new BitSet[]{});
 					
 					BitSet edgeColo = arrEdgeColours[mRandom.nextInt(arrEdgeColours.length)];
