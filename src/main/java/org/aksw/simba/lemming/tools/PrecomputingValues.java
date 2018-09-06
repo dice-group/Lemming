@@ -45,26 +45,27 @@ public class PrecomputingValues {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static  boolean USE_SEMANTIC_DOG_FOOD = false;
-    private static  boolean USE_PERSON_GRAPH = true;
+    private static boolean USE_SEMANTIC_DOG_FOOD = false;
+    private static boolean USE_PERSON_GRAPH = true;
+    private static boolean RECALCULATE_METRICS = true;
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String PERSON_GRAPH = "PersonGraph/";
-    
+
     public static void main(String[] args) {
-    	LOGGER.info("Start precomputing metric and constant expressions!");
+        LOGGER.info("Start precomputing metric and constant expressions!");
         // MultiThreadProcessing.defaultNumberOfThreads = 1;
 
         // For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
 
-        if(args[0].equals("pg")){
-        	USE_SEMANTIC_DOG_FOOD = false;
-        	USE_PERSON_GRAPH = true;
-        }else{
-        	USE_SEMANTIC_DOG_FOOD = true;
-        	USE_PERSON_GRAPH = false;
+        if (args[0].equals("pg")) {
+            USE_SEMANTIC_DOG_FOOD = false;
+            USE_PERSON_GRAPH = true;
+        } else {
+            USE_SEMANTIC_DOG_FOOD = true;
+            USE_PERSON_GRAPH = false;
         }
-        
+
         List<SingleValueMetric> metrics = new ArrayList<>();
         metrics.add(new NodeTriangleMetric());
         metrics.add(new EdgeTriangleMetric());
@@ -80,33 +81,42 @@ public class PrecomputingValues {
         IDatasetManager mDatasetManager = null;
         String datasetPath = "";
         if (USE_SEMANTIC_DOG_FOOD) {
-        	datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
-        	mDatasetManager = new SemanticWebDogFoodDataset();
-        } else if(USE_PERSON_GRAPH){
-        	datasetPath = PERSON_GRAPH;
-        	mDatasetManager = new PersonGraphDataset();
+            datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
+            mDatasetManager = new SemanticWebDogFoodDataset();
+        } else if (USE_PERSON_GRAPH) {
+            datasetPath = PERSON_GRAPH;
+            mDatasetManager = new PersonGraphDataset();
         }
-        
-        if(mDatasetManager==null){
-        	return ;
+
+        if (mDatasetManager == null) {
+            return;
         }
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
-        
-        //compute metrics for each graph here
+
+        // compute metrics for each graph here
         MetricAndConstantValuesCarrier valueCarrier = new MetricAndConstantValuesCarrier(datasetPath);
         boolean havingData = valueCarrier.havingData();
         LOGGER.info("Compute metric values for graph ......");
-         Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = getMapMetricValues(graphs, metrics);
-        if(mapMetricValues == null){
-        	valueCarrier.setMetricValues(mapMetricValues);
-        }else{
-        	valueCarrier.addMetricValues(mapMetricValues,false);
+        Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = null;
+        if (havingData && !RECALCULATE_METRICS) {
+            mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
+            for (ColouredGraph grph : graphs) {
+                mapMetricValues.put(MetricAndConstantValuesCarrier.generateGraphKey(grph), valueCarrier.getMetricValues(grph, metrics));
+            }
+        } else {
+            mapMetricValues = getMapMetricValues(graphs, metrics);
+            if (mapMetricValues == null) {
+                valueCarrier.setMetricValues(mapMetricValues);
+            } else {
+                valueCarrier.addMetricValues(mapMetricValues, false);
+            }
         }
         ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.getGraphMetricsVector(graphs, metrics);
-        
+
         LOGGER.info("Compute constant expressions ......");
         // FitnessFunction fitnessFunc = new MinSquaredError();
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();
+        // fitnessFunc = new DivisionCheckingFitnessDecorator();
         fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
                 createReferenceGraphVectors(graphs, metrics));
 
@@ -115,46 +125,47 @@ public class PrecomputingValues {
                 MAX_ITERATIONS);
         searcher.setDebug(true);
 
-        //SortedSet<RefinementNode> bestNodes = searcher.findExpression(graphs, 5);
+        // SortedSet<RefinementNode> bestNodes = searcher.findExpression(graphs, 5);
         SortedSet<RefinementNode> bestNodes = searcher.findExpression(graphVectors, 5);
-        
-        
+
         for (RefinementNode n : bestNodes) {
             System.out.print(n.getFitness());
             System.out.print(" --> ");
             System.out.println(n.toString());
 
             for (int i = 0; i < graphs.length; ++i) {
-            	ObjectDoubleOpenHashMap<String> metricValues = valueCarrier.getMetricValues(graphs[i], metrics);
-            	double constValue = n.getExpression().getValue(metricValues) ;
-            	System.out.print(constValue);
+                ObjectDoubleOpenHashMap<String> metricValues = valueCarrier.getMetricValues(graphs[i], metrics);
+                double constValue = n.getExpression().getValue(metricValues);
+                System.out.print(constValue);
                 System.out.print('\t');
                 valueCarrier.addConstantValue(n.getExpression(), graphs[i], constValue);
             }
             System.out.println();
         }
-        
+
         // save to file
         valueCarrier.storeValues();
-        LOGGER.info("Precomputation is DONE");        
+        LOGGER.info("Precomputation is DONE");
     }
 
     /**
-	 * create reference graph to compute constant expressions
-	 * 
-	 * @param graphs input dataset graphs
-	 * @param metrics list of exploited metrics
-	 * 
-	 * @return map of metric values of reference graphs 
-	 */
-	@SuppressWarnings("unchecked")
+     * create reference graph to compute constant expressions
+     * 
+     * @param graphs
+     *            input dataset graphs
+     * @param metrics
+     *            list of exploited metrics
+     * 
+     * @return map of metric values of reference graphs
+     */
+    @SuppressWarnings("unchecked")
     private static ObjectDoubleOpenHashMap<String>[] createReferenceGraphVectors(ColouredGraph[] graphs,
-                                                                                 List<SingleValueMetric> metrics) {
+            List<SingleValueMetric> metrics) {
         Grph temp;
         int numberOfNodes, partSize;
         List<ObjectDoubleOpenHashMap<String>> vectors = new ArrayList<ObjectDoubleOpenHashMap<String>>(
                 5 * graphs.length);
-        
+
         /*------------------
          * FILTER metrics
          * costly metrics: node triangles, edge triangles, clustering coefficient
@@ -162,24 +173,22 @@ public class PrecomputingValues {
          ------------------*/
         List<SingleValueMetric> costlyMetrics = new ArrayList<SingleValueMetric>();
         List<SingleValueMetric> naiveMetrics = new ArrayList<SingleValueMetric>();
-        for(SingleValueMetric metric : metrics){
-        	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-        			metric.getName().equalsIgnoreCase("#nodetriangles")||
-        			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-        		costlyMetrics.add(metric);
-        		LOGGER.info("Costly metric: " + metric.getName());
-        	} else {
-        		naiveMetrics.add(metric);
-        		LOGGER.info("Naive metric: " + metric.getName());
-        	}
+        for (SingleValueMetric metric : metrics) {
+            if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                    || metric.getName().equalsIgnoreCase("#nodetriangles")
+                    || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+                costlyMetrics.add(metric);
+                LOGGER.info("Costly metric: " + metric.getName());
+            } else {
+                naiveMetrics.add(metric);
+                LOGGER.info("Naive metric: " + metric.getName());
+            }
         }
-        
-        
-        
+
         for (int i = 0; i < graphs.length; ++i) {
             numberOfNodes = graphs[i].getGraph().getNumberOfVertices();
             partSize = (int) Math.sqrt(numberOfNodes);
-            
+
             LOGGER.info("Generating reference graphs with " + numberOfNodes + " nodes.");
             /*------------------
              *  Star
@@ -189,16 +198,17 @@ public class PrecomputingValues {
             temp.addNVertices(numberOfNodes);
             starGenerator.compute(temp);
             ColouredGraph startColouredGraph = new ColouredGraph(temp, null, null);
-            ObjectDoubleOpenHashMap<String> starGraphMetrics = MetricUtils.calculateGraphMetrics(startColouredGraph, naiveMetrics);
-            for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-            			metric.getName().equalsIgnoreCase("#nodetriangles")||
-            			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-            		starGraphMetrics.putOrAdd(metric.getName(), 0, 0);
-            	}else{
-            		double val = metric.apply(startColouredGraph);
-            		starGraphMetrics.putOrAdd(metric.getName(), val, val);
-            	}
+            ObjectDoubleOpenHashMap<String> starGraphMetrics = MetricUtils.calculateGraphMetrics(startColouredGraph,
+                    naiveMetrics);
+            for (SingleValueMetric metric : costlyMetrics) {
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                        || metric.getName().equalsIgnoreCase("#nodetriangles")
+                        || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+                    starGraphMetrics.putOrAdd(metric.getName(), 0, 0);
+                } else {
+                    double val = metric.apply(startColouredGraph);
+                    starGraphMetrics.putOrAdd(metric.getName(), val, val);
+                }
             }
             vectors.add(starGraphMetrics);
             temp = null;
@@ -206,70 +216,72 @@ public class PrecomputingValues {
             /*------------------
              *  Grid
              ------------------*/
-            
+
             ColouredGraph gridColouredGraph = new ColouredGraph(ClassicalGraphs.grid(partSize, partSize), null, null);
-            ObjectDoubleOpenHashMap<String> gridGraphMetrics = MetricUtils.calculateGraphMetrics(gridColouredGraph, naiveMetrics);
-            
-            for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-            			metric.getName().equalsIgnoreCase("#nodetriangles")||
-            			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-            		gridGraphMetrics.putOrAdd(metric.getName(), 0, 0);
-            	}else{
-            		double val = metric.apply(gridColouredGraph);
-            		gridGraphMetrics.putOrAdd(metric.getName(), val, val);
-            	}
+            ObjectDoubleOpenHashMap<String> gridGraphMetrics = MetricUtils.calculateGraphMetrics(gridColouredGraph,
+                    naiveMetrics);
+
+            for (SingleValueMetric metric : costlyMetrics) {
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                        || metric.getName().equalsIgnoreCase("#nodetriangles")
+                        || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+                    gridGraphMetrics.putOrAdd(metric.getName(), 0, 0);
+                } else {
+                    double val = metric.apply(gridColouredGraph);
+                    gridGraphMetrics.putOrAdd(metric.getName(), val, val);
+                }
             }
-            
+
             vectors.add(gridGraphMetrics);
-            
 
             /*------------------
              *  Ring
              ------------------*/
             ColouredGraph ringColouredGraph = new ColouredGraph(ClassicalGraphs.cycle(numberOfNodes), null, null);
-            ObjectDoubleOpenHashMap<String> ringGraphMetrics = MetricUtils.calculateGraphMetrics(ringColouredGraph, naiveMetrics);
-            
-            for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-            			metric.getName().equalsIgnoreCase("#nodetriangles")||
-            			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-            		if(numberOfNodes == 3){
-            			ringGraphMetrics.putOrAdd(metric.getName(), 1, 1);
-            		} else{
-            			ringGraphMetrics.putOrAdd(metric.getName(), 0, 0);
-            		}
-            	}else{
-            		double val = metric.apply(gridColouredGraph);
-            		ringGraphMetrics.putOrAdd(metric.getName(), val, val);
-            	}
+            ObjectDoubleOpenHashMap<String> ringGraphMetrics = MetricUtils.calculateGraphMetrics(ringColouredGraph,
+                    naiveMetrics);
+
+            for (SingleValueMetric metric : costlyMetrics) {
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                        || metric.getName().equalsIgnoreCase("#nodetriangles")
+                        || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+                    if (numberOfNodes == 3) {
+                        ringGraphMetrics.putOrAdd(metric.getName(), 1, 1);
+                    } else {
+                        ringGraphMetrics.putOrAdd(metric.getName(), 0, 0);
+                    }
+                } else {
+                    double val = metric.apply(gridColouredGraph);
+                    ringGraphMetrics.putOrAdd(metric.getName(), val, val);
+                }
             }
-            
+
             vectors.add(ringGraphMetrics);
 
             /*------------------
              *  Clique
              ------------------*/
             ColouredGraph cliqueColouredGraph = new ColouredGraph(ClassicalGraphs.completeGraph(partSize), null, null);
-            ObjectDoubleOpenHashMap<String> cliqueGraphMetrics = MetricUtils.calculateGraphMetrics(cliqueColouredGraph, naiveMetrics);
-            
-            for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-            			metric.getName().equalsIgnoreCase("#nodetriangles")||
-            			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-            		
-            			if(partSize <3){
-            				cliqueGraphMetrics.putOrAdd(metric.getName(), 0, 0);
-            			}else{
-            				int noOfValues = partSize *( partSize - 1 ) *( partSize - 2)/6;
-            				cliqueGraphMetrics.putOrAdd(metric.getName(), noOfValues, noOfValues);
-            			}
-            	}else{
-            		double val = metric.apply(gridColouredGraph);
-            		cliqueGraphMetrics.putOrAdd(metric.getName(), val, val);
-            	}
+            ObjectDoubleOpenHashMap<String> cliqueGraphMetrics = MetricUtils.calculateGraphMetrics(cliqueColouredGraph,
+                    naiveMetrics);
+
+            for (SingleValueMetric metric : costlyMetrics) {
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                        || metric.getName().equalsIgnoreCase("#nodetriangles")
+                        || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+
+                    if (partSize < 3) {
+                        cliqueGraphMetrics.putOrAdd(metric.getName(), 0, 0);
+                    } else {
+                        int noOfValues = partSize * (partSize - 1) * (partSize - 2) / 6;
+                        cliqueGraphMetrics.putOrAdd(metric.getName(), noOfValues, noOfValues);
+                    }
+                } else {
+                    double val = metric.apply(gridColouredGraph);
+                    cliqueGraphMetrics.putOrAdd(metric.getName(), val, val);
+                }
             }
-            
+
             vectors.add(cliqueGraphMetrics);
 
             /*------------------
@@ -277,41 +289,44 @@ public class PrecomputingValues {
              ------------------*/
             // partSize = numberOfNodes / 2;
             partSize = numberOfNodes / 8;
-            ColouredGraph bipartiteColouredGraph = new ColouredGraph(ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null);
-            ObjectDoubleOpenHashMap<String> bipartiteGraphMetrics = MetricUtils.calculateGraphMetrics(bipartiteColouredGraph, naiveMetrics);
-            
-            for(SingleValueMetric metric: costlyMetrics){
-            	if(metric.getName().equalsIgnoreCase("#edgetriangles")|| 
-            			metric.getName().equalsIgnoreCase("#nodetriangles")||
-            			metric.getName().equalsIgnoreCase("avgClusterCoefficient")){
-            		bipartiteGraphMetrics.putOrAdd(metric.getName(), 0, 0);
-            	}else{
-            		double val = metric.apply(gridColouredGraph);
-            		bipartiteGraphMetrics.putOrAdd(metric.getName(), val, val);
-            	}
+            ColouredGraph bipartiteColouredGraph = new ColouredGraph(
+                    ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null);
+            ObjectDoubleOpenHashMap<String> bipartiteGraphMetrics = MetricUtils
+                    .calculateGraphMetrics(bipartiteColouredGraph, naiveMetrics);
+
+            for (SingleValueMetric metric : costlyMetrics) {
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")
+                        || metric.getName().equalsIgnoreCase("#nodetriangles")
+                        || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
+                    bipartiteGraphMetrics.putOrAdd(metric.getName(), 0, 0);
+                } else {
+                    double val = metric.apply(gridColouredGraph);
+                    bipartiteGraphMetrics.putOrAdd(metric.getName(), val, val);
+                }
             }
             vectors.add(bipartiteGraphMetrics);
         }
         return vectors.toArray(new ObjectDoubleOpenHashMap[vectors.size()]);
-    }    
+    }
+
     /**
      * get value of each metric applied on each graph
+     * 
      * @param origGrphs
      * @param lstMetrics
      * @return
      */
-    private static Map<String, ObjectDoubleOpenHashMap<String>> getMapMetricValues(ColouredGraph origGrphs[], List<SingleValueMetric> lstMetrics){
-    	Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
-    	
-    	for(ColouredGraph grph : origGrphs){
-    		int noOfVertices  = grph.getGraph().getNumberOfVertices();
-    		int noOfEdges = grph.getGraph().getNumberOfEdges();
-    		String key = noOfVertices + "-" + noOfEdges;
-    		LOGGER.info("Consider graph: " + key);
-    		ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(grph, lstMetrics);
-    		mapMetricValues.put(key, metricValues);
-    	}
-    	return mapMetricValues;
+    private static Map<String, ObjectDoubleOpenHashMap<String>> getMapMetricValues(ColouredGraph origGrphs[],
+            List<SingleValueMetric> lstMetrics) {
+        Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
+
+        for (ColouredGraph grph : origGrphs) {
+            String key = MetricAndConstantValuesCarrier.generateGraphKey(grph);
+            LOGGER.info("Consider graph: " + key);
+            ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(grph, lstMetrics);
+            mapMetricValues.put(key, metricValues);
+        }
+        return mapMetricValues;
     }
-    
+
 }

@@ -131,7 +131,7 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 	}
 	
 	public ObjectDoubleOpenHashMap<String> getMetricValues(ColouredGraph grph, List<SingleValueMetric> metrics){
-		String keyOfGraph = grph.getGraph().getNumberOfVertices() +"-" + grph.getGraph().getNumberOfEdges();
+		String keyOfGraph = generateGraphKey(grph);
 		//get list of metric name
 		Set<String> metricNames = new HashSet<String>();
 		for (SingleValueMetric metric : metrics){
@@ -228,4 +228,8 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 		ValueStorage mValueStorage = mMapValueStorage.get(mDataSetPath);
 		return mValueStorage.getMapMetricValues();
 	} 
+	
+	public static String generateGraphKey(ColouredGraph graph) {
+	    return graph.getGraph().getNumberOfVertices() + "-" + graph.getGraph().getNumberOfEdges();
+	}
 }
