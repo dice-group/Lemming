@@ -1,7 +1,9 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -25,6 +27,7 @@ import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -77,6 +80,8 @@ public abstract class AbstractGraphGeneration {
 	protected Map<Integer, BitSet> mReversedMapClassVertices;
 	
 	protected ObjectIntOpenHashMap<BitSet> mEdgeColoursThreshold;
+	private Map<Integer, BitSet> mTmpColoureNormalEdges;
+	
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs){
 		//number of vertices
@@ -92,7 +97,7 @@ public abstract class AbstractGraphGeneration {
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
-		
+		mTmpColoureNormalEdges = new HashMap<Integer, BitSet>();
 		mMapEdgeColoursToConnectedVertices = new HashMap<BitSet, Map<Integer, IntSet>>();
 		
 		//compute average distribution of vertex's and edge's colors
@@ -297,7 +302,6 @@ public abstract class AbstractGraphGeneration {
 		
 		/*
 		 *  get restricted edge's colours can exist along with these created vertex's colours
-
 		 */
 		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
 		
@@ -350,18 +354,20 @@ public abstract class AbstractGraphGeneration {
 			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
 			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
 			if(definedColours!= null){
-				iNumberOfRdfTypeEdges += 	definedColours.size() * setOfVertices.size();
+				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
 			}
 		}
 		
-		// process normal edges
+		/*
+		 * 	process normal edges
+		 */
+			
 		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
 		
-		for(int i = 0 ; i< iNumberOfOtherEdges ; i++){
+		for(int i = 0 ; i< iNumberOfOtherEdges ; ){
 			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem();
 			
 			if(offeredColor.equals(mRdfTypePropertyColour)){
-				i--;
 				continue;
 			}
 			
@@ -369,7 +375,6 @@ public abstract class AbstractGraphGeneration {
 				LOGGER.warn("This edge colour: "
 								+ offeredColor
 								+ " won't be considered in the graph generation (since there is not approriate tail's colours and head's colours to connect)");
-				i--;
 				continue;
 			}
 			
@@ -389,8 +394,8 @@ public abstract class AbstractGraphGeneration {
 					setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
 				// fake edge's id
 				setEdgeIDs.add(i);
-			}else{
-				i--;
+				i++;
+				mTmpColoureNormalEdges.put(i,offeredColor);
 			}
 			
 		}
@@ -550,6 +555,15 @@ public abstract class AbstractGraphGeneration {
 		}
 	}
 	
+	public synchronized boolean connectIfPossible(int tailId, int headId, BitSet eColo) {
+		if(connectableVertices(tailId, headId, eColo)) {
+			// connect
+			mMimicGraph.addEdge(tailId, headId, eColo);
+			return true;
+		}
+		return false;
+	}
+	
 	public boolean connectableVertices(int tailId, int headId, BitSet eColo){
 		
 		if(mReversedMapClassVertices.containsKey(headId)){
@@ -594,5 +608,63 @@ public abstract class AbstractGraphGeneration {
 	
 	public void setMimicGraph(ColouredGraph refinedGraph){
 		mMimicGraph = refinedGraph;
+	}
+	
+	public int getDefaultNoOfThreads(){
+		return Runtime.getRuntime().availableProcessors() * 4;
+	}
+	
+	public List<IntSet> getAssignedListEdges(int numberOfThreads){
+		List<IntSet> lstAssingedEdges = new ArrayList<IntSet>();
+		
+		int iNoOfEdges = mTmpColoureNormalEdges.size();
+		
+		int iNoOfEdgesPerThread = 0;
+		int iNoOfSpareEdges = 0;
+		if(numberOfThreads == 1){
+			iNoOfEdgesPerThread = iNoOfEdges;
+		}else if(numberOfThreads > 1){
+			if(iNoOfEdges % numberOfThreads == 0 ){
+				iNoOfEdgesPerThread = iNoOfEdges/numberOfThreads;
+			}else{
+				iNoOfEdgesPerThread = iNoOfEdges/(numberOfThreads-1);
+				iNoOfSpareEdges = iNoOfEdges - ( iNoOfEdgesPerThread * (numberOfThreads-1));
+			}
+		}
+		
+		if(iNoOfSpareEdges == 0 ){
+			for(int i = 0 ; i< numberOfThreads ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssingedEdges.add(tmpSetEdges);
+			}
+		}else{
+			for(int i = 0 ; i< numberOfThreads -1 ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssingedEdges.add(tmpSetEdges);
+			}
+			IntSet spareSetEdges = new DefaultIntSet();
+			//add remaining edges
+			int iEdgeId = (numberOfThreads -1) *  iNoOfEdgesPerThread;
+			spareSetEdges.add(iEdgeId);
+			while(iEdgeId < iNoOfEdges){
+				iEdgeId ++;
+				spareSetEdges.add(iEdgeId);
+			}
+			lstAssingedEdges.add(spareSetEdges);
+		}
+		
+		return lstAssingedEdges;
+	}
+	
+	protected BitSet getEdgeColour(int fakeEdgeId){
+		return mTmpColoureNormalEdges.get(fakeEdgeId);
 	}
 }

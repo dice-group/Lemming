@@ -16,8 +16,8 @@ public class Constants {
 	public static final int ROUND_DECIMAL = 100;
 	
 	public static final boolean IS_EVALUATION_MODE = true;
-	
-	public static final int MAX_EXPLORING_TIME = 1000;
+	public static final boolean SINGLE_THREAD = false;
+	public static final int MAX_EXPLORING_TIME = 5000;
 	public static final String SIMULATED_URI= "http://aksw.simba.lemming.org/resouce#";
 	public static final String SIMULATED_CLASS_URI = "http://aksw.simba.lemming.org/class#";
 	public static final String SIMULATED_PROPERTY_URI = "http://aksw.simba.lemming.org/property#";
