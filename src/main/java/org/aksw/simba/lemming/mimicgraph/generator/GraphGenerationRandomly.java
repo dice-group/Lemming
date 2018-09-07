@@ -31,8 +31,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		 */
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+		int iColoCounter = 0;
 		for(BitSet edgeColo : keyEdgeColo){
-			
+			iColoCounter++;
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
 			setTailColours.retainAll(setAvailableVertexColours);
 			
@@ -43,6 +44,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
 			int i = 0 ;
+			LOGGER.info("Generated edges for "+edgeColo +" edge colour ("+iColoCounter+"/"+keyEdgeColo.size()+")");
 			while(i < setFakeEdgeIDs.size()){
 					
 				boolean isFoundVerticesConnected = false;
@@ -99,6 +101,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						mMimicGraph.addEdge(tailId, headId, edgeColo);
 						isFoundVerticesConnected = true;	
 						i++;
+						
+						LOGGER.info("   -- Add "+i+"/"+setFakeEdgeIDs.size()+" edges");
+						
 					}
 //						else{
 //							System.err.println("Found same vertices to connect");
