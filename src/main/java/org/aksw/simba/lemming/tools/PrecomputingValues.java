@@ -288,7 +288,7 @@ public class PrecomputingValues {
              *  Bipartite
              ------------------*/
             // partSize = numberOfNodes / 2;
-            partSize = numberOfNodes > 500000? numberOfNodes / 128 : numberOfNodes / 8;
+            partSize = numberOfNodes > 100000? numberOfNodes / 128 : numberOfNodes / 8;
             
             ColouredGraph bipartiteColouredGraph = new ColouredGraph(
                     ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null);
