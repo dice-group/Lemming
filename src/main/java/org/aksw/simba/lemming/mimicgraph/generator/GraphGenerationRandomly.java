@@ -75,6 +75,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						if(iOldIndex != j){
 							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 							iOldIndex = j;
+							LOGGER.info("Generate "+j+"/("+arrOfEdges.length+")");
 						}else{
 							if(maxIterationFor1Edge == 0){
 								LOGGER.error("Could not create an edge of "
