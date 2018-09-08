@@ -57,6 +57,8 @@ public class AbstractDatasetManager implements IDatasetManager{
 			} 
 			f = path.toFile();
 			
+			LOGGER.warn("Output file: " + path.toString());
+			
 			fileName = f.getName();
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, datasetModel);
