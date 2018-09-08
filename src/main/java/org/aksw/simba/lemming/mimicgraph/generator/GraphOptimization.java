@@ -107,8 +107,8 @@ public class GraphOptimization {
 				pErrScore = lErrScore;
 				
 				noOfRepeatedParent = 0;
-				mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
-				mEdgeModifier.executeRemovingAnEdge();
+				//mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
+				mEdgeModifier.executeRemovingAnEdge(metricValuesOfLeft);
 				continue;
 			}
 			if(minErrScore == rErrScore){
@@ -116,8 +116,8 @@ public class GraphOptimization {
 				pErrScore = rErrScore;
 				
 				noOfRepeatedParent = 0;
-				mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
-				mEdgeModifier.executeAddingAnEdge();
+				//mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
+				mEdgeModifier.executeAddingAnEdge(metricValuesOfRight);
 				continue;
 			}
 			
@@ -166,7 +166,7 @@ public class GraphOptimization {
 		BitSet edgeColour = null;
 		Random rand = new Random();
 		while(true){
-			LOGGER.info("Try to get an edge for removing!");
+			//LOGGER.info("Try to get an edge for removing!");
 			IntSet setOfEdges =	clonedGrph.getEdges();
 			int[] arrEdges = setOfEdges.toIntArray();
 			// randomly choose edge id to remove

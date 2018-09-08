@@ -58,7 +58,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
-					int iOldIndex = -1;
+					int iProcessingEdgeIndex = -1;
 					//set of process edges
 					int[] arrOfEdges = setOfEdges.toIntArray();
 					// set of failed edge colours
@@ -70,15 +70,21 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
 						
+						if(edgeColo == null){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
+						
 						if(failedEdgeColours.contains(edgeColo)){
 							//skip the edge that has failed edge colour
 							j++;
 							continue;
 						}
 						
-						if(iOldIndex != j){
+						if(iProcessingEdgeIndex != j){
 							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
-							iOldIndex = j;
+							iProcessingEdgeIndex = j;
 						}else{
 							if(maxIterationFor1Edge == 0){
 								LOGGER.error("Could not create an edge of "
@@ -203,7 +209,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		};
 	}
 	
-	
+	/**
+	 * Generate graph randomly with a single thread
+	 */
 	private void generateGraphSingleThread(){
 		
 		/*

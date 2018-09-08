@@ -245,6 +245,26 @@ public class EdgeModification {
         }
         return edgeId;
     }
+    
+    public void removeEdgeFromGraph(int edgeId, int newNodeTriangles, int newEdgeTriangles) {
+        if (this.newNodeTriangles != 0 && this.newEdgeTriangles != 0) {
+            oldNodeTriangles = this.newNodeTriangles;
+            oldEdgeTriangles = this.newEdgeTriangles;
+        }
+        this.newNodeTriangles = newNodeTriangles;
+        this.newEdgeTriangles = newEdgeTriangles;
+        this.graph.removeEdge(edgeId);
+    }
+
+   public int addEdgeToGraph(int tail, int head, BitSet color, int newNodeTriangles, int newEdgeTriangles) {
+        if (this.newNodeTriangles != 0 && this.newEdgeTriangles != 0) {
+            oldNodeTriangles = this.newNodeTriangles;
+            oldEdgeTriangles = this.newEdgeTriangles;
+        }
+        this.newNodeTriangles = newNodeTriangles;
+        this.newEdgeTriangles = newEdgeTriangles;
+        return graph.addEdge(tail, head, color);
+    }
 }
 
 

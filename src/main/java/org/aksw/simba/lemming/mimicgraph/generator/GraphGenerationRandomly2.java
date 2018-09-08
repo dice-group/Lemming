@@ -78,6 +78,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
 			
+			LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+			
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -96,6 +98,12 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						//get an edge id
 						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
+						
+						if(edgeColo == null){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
 						
 						if(failedEdgeColours.contains(edgeColo)){
 							//skip the edge that has failed edge colour

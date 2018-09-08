@@ -129,6 +129,13 @@ public class GraphCreator {
             			datatypedEdgePalette.addColour(propertyUri);
             		}
             		BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
+            		/*
+            		 * a trick for semantic web dog food
+            		 */
+            		String defaultDataType = "http://www.w3.org/2001/XMLSchema#string";
+            		if(propertyUri.contains("label"))
+            			datatype = defaultDataType;
+            		
             		//add to the coloured graph
             		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour, datatype);
             	}
