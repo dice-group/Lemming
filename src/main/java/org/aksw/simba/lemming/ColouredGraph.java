@@ -616,5 +616,9 @@ public class ColouredGraph{
 	public BitSet getRDFTypePropertyColour(){
 		return edgePalette.getColour(RDF.type.toString());
 	}
+	
+	public Set<String> getOrginalResourceURIs(BitSet vColo){
+		return vertexPalette.getURIs(vColo, false);
+	}
 }
 
