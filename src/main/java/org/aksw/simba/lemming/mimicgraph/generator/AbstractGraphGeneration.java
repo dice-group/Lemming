@@ -262,8 +262,6 @@ public abstract class AbstractGraphGeneration {
 //					System.err.println("There existing an edge in "+edgeColo+" connect the vertices");
 //				}
 			}
-			//}
-			//}
 		}
 	}
 	

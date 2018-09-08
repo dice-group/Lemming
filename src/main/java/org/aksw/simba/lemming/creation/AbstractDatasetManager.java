@@ -34,7 +34,7 @@ public class AbstractDatasetManager implements IDatasetManager{
 		Model datasetModel = ModelFactory.createDefaultModel();
 		String fileName= "";
 		
-		LOGGER.warn("Generate dataset: " + mDatasetName);
+		
 		
 		try {
 			new File("results").mkdirs();
@@ -64,13 +64,11 @@ public class AbstractDatasetManager implements IDatasetManager{
 			Model newModel = reverter.processGraph();
 
 			Writer writerforOutModel = new FileWriter(f);
-			// newDogFoodModel.write(writerforOutModel);
 			newModel.write(writerforOutModel, "TURTLE");
 			writerforOutModel.close();
 		} catch (Exception ex) {
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
 			ex.printStackTrace();
-			//System.err.println("Failed to write to file: " + ex.getMessage());
 		}
 		
 		return fileName;
