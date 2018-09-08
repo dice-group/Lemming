@@ -71,9 +71,9 @@ public class GraphReverter {
 					
 					int hId = mGraph.getHeadOfTheEdge(oeId);
 					// get resources associated with the colours
-					String hDummyURI = mapResourcesURLs.containsKey(hId)?  mapResourcesURLs.get(tId):"";
+					String hDummyURI = mapResourcesURLs.containsKey(hId)?  mapResourcesURLs.get(hId):"";
 					
-					if(hDummyURI.isEmpty()){
+					if(hDummyURI == null || hDummyURI.isEmpty()){
 						if(propRes.equals(RDF.type)){
 							List<String> lstClassURIs = new ArrayList<String>(setOfClassURIs);
 							
