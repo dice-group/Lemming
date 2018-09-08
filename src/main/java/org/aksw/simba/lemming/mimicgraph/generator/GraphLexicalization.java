@@ -65,7 +65,7 @@ public class GraphLexicalization {
 			
 			LOGGER.info("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
 			//System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
-			
+			iCounter++;
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
 				for (int i = 0; i < arrOfProcessedVColours.length; ++i) {
@@ -92,10 +92,10 @@ public class GraphLexicalization {
 								
 								// get a
 								int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
-								LOGGER.info("---- Generate literals for vertex" + vId +"("+counterVertices+"/"+numOfConsidedVertices+ ")...");
+								LOGGER.info("---- Generate literals for vertex " + vId +" ("+(counterVertices+1)+"/"+numOfConsidedVertices+ ")...");
 								// get literal
 								String literal = mLiteralProposer.getValue(vColo, dteColo);
-								
+
 								// add it to the coloured graph
 								mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
 								counterVertices++;
