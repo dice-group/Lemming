@@ -69,6 +69,7 @@ public class AbstractDatasetManager implements IDatasetManager{
 			writerforOutModel.close();
 		} catch (Exception ex) {
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
+			ex.printStackTrace();
 			//System.err.println("Failed to write to file: " + ex.getMessage());
 		}
 		
