@@ -67,7 +67,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	}
 			
 	
-	public ColouredGraph generateGraphMultiThreads(){
+	private void generateGraphMultiThreads(){
 		
 		//exploit all possible threads
 		int iNumberOfThreads = getDefaultNoOfThreads();
@@ -91,7 +91,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
 					
 					//iterate through each edge
-					for(int j = 0 ; j < arrOfEdges.length; ){
+					int j = 0;
+					while( j < arrOfEdges.length ){
 						//get an edge id
 						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
@@ -116,8 +117,6 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 								continue;
 							}
 						}
-						
-						boolean isFoundVerticesConnected = false;
 						
 						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapHeadColoToIDProposer = mapPossibleIDegreePerIEColo.get(edgeColo);
 						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapTailColoToIDProposer = mapPossibleODegreePerOEColo.get(edgeColo);
@@ -187,7 +186,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 							iAttemptToGetTailIds --;							
 						}
 						
-						if(tailId ==-1){
+						if(tailId == -1){
 							maxIterationFor1Edge--;
 							continue;
 						}
@@ -220,7 +219,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						
 						int headId = headIDProposer.getPotentialItem(setFilteredHeadIDs);
 						
-						isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
+						boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 						if(isFoundVerticesConnected){
 							j++;
 							continue;
@@ -238,7 +237,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 							failedEdgeColours.add(edgeColo);
 							j++;
 						}
-					}//end of for of edge ids
+					}//end iteration of edges
 				}
 			};
 			service.execute(worker);
@@ -251,11 +250,9 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			LOGGER.error("Could not shutdown the service executor! Be carefule");
 			e.printStackTrace();
 		};
-
-		return mMimicGraph;
 	}
 	
-	public ColouredGraph generateGraphSingleThread(){
+	private void generateGraphSingleThread(){
 		
 		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
@@ -372,7 +369,6 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						+ " edge's coloursince it could not find any distribution of edges.");
 			}
 		}
-		return mMimicGraph;
 	}
 	
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){

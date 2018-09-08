@@ -61,7 +61,8 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					// set of failed edge colours
 					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
 					
-					for(int j = 0 ; j < arrOfEdges.length; ){
+					int j = 0 ; 
+					while( j < arrOfEdges.length ){
 						//get an edge id
 						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
@@ -81,15 +82,13 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 								LOGGER.error("Could not create an edge of "
 										+ edgeColo
 										+ " colour since it could not find any approriate vertices to connect.");						
-								
+								//skip the edge that has failed attempt after MAX_EXPLORING_TIME
 								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
 						}
 						
-						
-						boolean isFoundVerticesConnected = false;
 						//get potential tail colours
 						Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
 						setTailColours.retainAll(setAvailableVertexColours);
@@ -170,7 +169,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							
 							int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
-							isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
+							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
 								j++;
 								continue;

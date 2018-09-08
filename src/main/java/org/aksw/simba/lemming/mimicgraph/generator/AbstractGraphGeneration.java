@@ -394,8 +394,8 @@ public abstract class AbstractGraphGeneration {
 					setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
 				// fake edge's id
 				setEdgeIDs.add(i);
-				i++;
 				mTmpColoureNormalEdges.put(i,offeredColor);
+				i++;
 			}
 			
 		}
