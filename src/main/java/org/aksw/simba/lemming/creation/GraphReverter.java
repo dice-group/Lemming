@@ -86,17 +86,9 @@ public class GraphReverter {
 						}else{
 							hDummyURI = mGraph.getResourceDummyURI(hId);
 						}	
-					}else{
-						if(propRes.equals(RDF.type)){
-							if(setOfClassURIs.size()> 0 && setOfClassURIs.contains(hDummyURI)){
-								setOfClassURIs.remove(hDummyURI);
-							}
-						}
-					}
-					
+					}				
 					
 					//System.err.println("\t " + propRes +" --> " + hDummyURI);
-					
 					
 					if(hDummyURI == null || hDummyURI.isEmpty()){
 						hDummyURI = Constants.SIMULATED_BLANK_OBJECT_RESOURCE;
@@ -104,14 +96,14 @@ public class GraphReverter {
 					}
 					
 					
-					if(mapResourcesURLs.containsKey(tId))
+					if(!mapResourcesURLs.containsKey(tId))
 						mapResourcesURLs.put(tId, tDummyURI);
-					if(mapResourcesURLs.containsKey(hId))
+					if(!mapResourcesURLs.containsKey(hId))
 						mapResourcesURLs.put(hId, hDummyURI);
 					
 					Resource hRes = mDataModel.createResource(hDummyURI);
 					mDataModel.add(tRes, propRes, hRes);
-					
+					System.err.println("\t " + tDummyURI +" <"+propURI+"> " + hDummyURI);
 					Triple triple = new Triple(tRes.asNode(), propRes.asNode(), hRes.asNode());
 					mDataModel.getGraph().add(triple);
 				}

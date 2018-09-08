@@ -381,7 +381,7 @@ public class ColouredGraph{
 		// TODO check this part again, since one literal may have different data type.
 		// this should load from the supporting file which contains all datatype of literal
 		String origDataType = mapLiteralTypes.get(dteColo);
-		if(origDataType == null || (origDataType != null && !origDataType.equals(datatype) && origDataType.contains("#string"))){
+		if(origDataType == null || (origDataType != null && !origDataType.equals(datatype) && !origDataType.contains("#string"))){
 			mapLiteralTypes.put(dteColo, datatype);
 		}
 	}
