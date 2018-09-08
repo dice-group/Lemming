@@ -45,6 +45,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		//int iNumberOfThreads = 4;
 		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
+		
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
