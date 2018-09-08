@@ -33,6 +33,10 @@ public class AbstractDatasetManager implements IDatasetManager{
 	public String writeGraphsToFile(ColouredGraph grph) {
 		Model datasetModel = ModelFactory.createDefaultModel();
 		String fileName= "";
+		
+		LOGGER.warn("Generate dataset: " + mDatasetName);
+		
+		
 		try {
 			new File("results").mkdirs();
 			
@@ -64,7 +68,7 @@ public class AbstractDatasetManager implements IDatasetManager{
 			writerforOutModel.close();
 		} catch (Exception ex) {
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
-			System.err.println("Failed to write to file: " + ex.getMessage());
+			//System.err.println("Failed to write to file: " + ex.getMessage());
 		}
 		
 		return fileName;

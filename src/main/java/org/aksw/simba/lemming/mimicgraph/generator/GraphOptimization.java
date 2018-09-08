@@ -28,8 +28,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
-	private int mMaxIteration = 50000 ;
-	private int mMaxRepeatedSelection = 10000;
+	private int mMaxIteration = 500 ;
+	private int mMaxRepeatedSelection = 100;
 	private boolean mProcessRandomly = false;
 	
 	private IGraphGeneration mGraphGenerator;
