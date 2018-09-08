@@ -284,6 +284,9 @@ public abstract class AbstractGraphGeneration {
 	 */
 	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
+		
+		System.err.println("Number of vertex Colour distribution: " + mVertColoDist.values.length);
+		
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist);
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
@@ -670,19 +673,21 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	private void printTestInfo(){
-		BitSet[] arrVertexColours = mVertColoDist.sampleSpace;
-		double[] arrNumberOfVertices = mVertColoDist.values;
-		 
-		for(int i = 0 ; i< arrVertexColours.length ; i++){
-			BitSet vColo = arrVertexColours[i];
-			double noOfVertices = arrNumberOfVertices[i];
+		
+		
+		Set<BitSet> setVColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVColours){
+			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
 			Set<String> uris = mMimicGraph.getOrginalResourceURIs(vColo);
-			System.out.println("There are " + noOfVertices +" vertices. URIs: ");
+			System.out.println("There are " + setVertices.size() +" vertices of URIs: ");
 			for(String uri: uris ){
 				System.out.println("\t" + uri);
 			}
 			System.out.println();
 			System.out.println();
 		}
+		
+		
+		
 	}
 }
