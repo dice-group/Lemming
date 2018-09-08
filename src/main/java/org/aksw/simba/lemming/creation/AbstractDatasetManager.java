@@ -36,7 +36,6 @@ public class AbstractDatasetManager implements IDatasetManager{
 		
 		LOGGER.warn("Generate dataset: " + mDatasetName);
 		
-		
 		try {
 			new File("results").mkdirs();
 			

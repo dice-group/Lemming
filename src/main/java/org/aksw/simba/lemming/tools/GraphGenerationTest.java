@@ -169,6 +169,7 @@ public class GraphGenerationTest {
         GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         
+        LOGGER.warn("Generate dataset: " + mDatasetManager.getClass());
         //output results to file "LemmingEx.result"       
         grphOptimizer.printResult(mapArgs, startTime, saveFiled);
         LOGGER.info("Application exits!!!");
