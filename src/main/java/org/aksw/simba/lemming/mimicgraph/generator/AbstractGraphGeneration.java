@@ -332,6 +332,9 @@ public abstract class AbstractGraphGeneration {
 				}
 			}
 		}
+		
+		printTestInfo();
+		System.exit(1);
 	}
 	
 	/**
@@ -664,5 +667,22 @@ public abstract class AbstractGraphGeneration {
 	
 	protected BitSet getEdgeColour(int fakeEdgeId){
 		return mTmpColoureNormalEdges.get(fakeEdgeId);
+	}
+	
+	private void printTestInfo(){
+		BitSet[] arrVertexColours = mVertColoDist.sampleSpace;
+		double[] arrNumberOfVertices = mVertColoDist.values;
+		 
+		for(int i = 0 ; i< arrVertexColours.length ; i++){
+			BitSet vColo = arrVertexColours[i];
+			double noOfVertices = arrNumberOfVertices[i];
+			Set<String> uris = mMimicGraph.getOrginalResourceURIs(vColo);
+			System.out.println("There are " + noOfVertices +" vertices. URIs: ");
+			for(String uri: uris ){
+				System.out.println("\t" + uri);
+			}
+			System.out.println();
+			System.out.println();
+		}
 	}
 }
