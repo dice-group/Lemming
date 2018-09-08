@@ -29,7 +29,7 @@ public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
 	private int mMaxIteration = 50000 ;
-	private int mMaxRepeatedSelection = 10000;
+	private int mMaxRepeatedSelection = 5000;
 	private boolean mProcessRandomly = false;
 	
 	private IGraphGeneration mGraphGenerator;
