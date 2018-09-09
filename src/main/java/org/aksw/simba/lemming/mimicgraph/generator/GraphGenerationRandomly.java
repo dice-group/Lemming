@@ -1,9 +1,11 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +55,8 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
 		
 		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
-		
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		 
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final Set<BitSet> setAvailableVertexColours = new HashSet<BitSet>(mMapColourToVertexIDs.keySet());
@@ -205,11 +208,12 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					}//end of for of edge ids
 				}
 			};
-			service.execute(worker);
+			tasks.add(Executors.callable(worker));
 		}
 		
-		service.shutdown();
 		try {
+			service.invokeAll(tasks);
+			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Could not shutdown the service executor! Be carefule");
