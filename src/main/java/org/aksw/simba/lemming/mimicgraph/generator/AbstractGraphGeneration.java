@@ -679,12 +679,11 @@ public abstract class AbstractGraphGeneration {
 		for(BitSet vColo: setVColours){
 			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
 			Set<String> uris = mMimicGraph.getOrginalResourceURIs(vColo);
-			System.out.println("There are " + setVertices.size() +" vertices of "+uris.size()+" URIs: ");
+			LOGGER.info("There are " + setVertices.size() +" vertices of "+ vColo+ " colour defined by" +uris.size()+" URIs: ");
 			for(String uri: uris ){
-				System.out.println("\t" + uri);
+				LOGGER.info("\t" + uri);
 			}
-			System.out.println();
-			System.out.println();
+			LOGGER.info("");			
 		}
 		
 		
