@@ -66,6 +66,20 @@ public class GraphOptimization {
 		mProcessRandomly = isRandom;
 	}
 	
+	private void printMetricValues(ObjectDoubleOpenHashMap<String> baseMetricValues){
+		
+		Object [] metricValues = baseMetricValues.keys;
+		for(int i = 0 ; i < metricValues.length ; i++){
+			if(baseMetricValues.allocated[i]){
+				String key = (String)metricValues[i];
+				System.out.print("\t Metric: " + key);
+				double val = baseMetricValues.get((String)metricValues[i]);
+				System.out.print(val);
+				System.out.println("");	
+			}
+			System.out.println("\n\n");
+		}
+	}
 	
 	public void refineGraph(){
 		
@@ -75,18 +89,9 @@ public class GraphOptimization {
 		double rErrScore = Double.NaN;
 		
 		ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
-
+		
 		//TODO test base metric values
-		Object [] metricValues = baseMetricValues.keys;
-		for(int i = 0 ; i < metricValues.length ; i++){
-			if(baseMetricValues.allocated[i]){
-				String key = (String)metricValues[i];
-				System.out.print("Metric: " + key);
-				double val = baseMetricValues.get((String)metricValues[i]);
-				System.out.print(val);
-				System.out.println();
-			}
-		}
+		printMetricValues(baseMetricValues);
 		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
@@ -97,6 +102,10 @@ public class GraphOptimization {
 			// go left by removing an edge
 			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
+			
+			//TODO test base metric values
+			printMetricValues(metricValuesOfLeft);
+			
 			System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 
@@ -105,6 +114,10 @@ public class GraphOptimization {
 			TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
 			System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
+			
+			//TODO test base metric values
+			printMetricValues(metricValuesOfRight);
+			
 			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
 			
 			// find min error score
