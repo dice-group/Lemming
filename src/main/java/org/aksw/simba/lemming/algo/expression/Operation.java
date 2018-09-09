@@ -15,6 +15,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  */
 public class Operation implements Expression, Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
     /**
      * The left {@link Expression} of this operation.
      */

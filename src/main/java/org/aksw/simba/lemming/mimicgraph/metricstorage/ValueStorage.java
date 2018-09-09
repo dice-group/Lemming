@@ -11,7 +11,7 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class ValueStorage implements Serializable{
 	
-	private static final long serialVersionUID = 8421535321899822119L;
+	private static final long serialVersionUID = 1L;
 	
 	//1st key: expression, 2nd key: key of graph, value is the constant value of the graph
 	private Map<Expression, Map<String, Double>> mMapConstantValues;

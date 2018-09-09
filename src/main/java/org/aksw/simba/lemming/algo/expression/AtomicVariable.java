@@ -16,6 +16,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  */
 public class AtomicVariable implements Expression, Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
     private final String metricName;
 
     public AtomicVariable(SingleValueMetric metric) {

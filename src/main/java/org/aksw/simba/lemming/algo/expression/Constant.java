@@ -16,6 +16,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  */
 public class Constant implements Expression, Serializable {
 
+	private static final long serialVersionUID = 1L;
+	
     private final double constantValue;
 
     public Constant(double value) {

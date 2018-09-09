@@ -25,7 +25,7 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(MetricAndConstantValuesCarrier.class);
 	
-	private static final long serialVersionUID = 4123435321899822119L;
+	private static final long serialVersionUID = 1L;
 	
 	private static final String METRIC_CACHE_NAME = "value_store.val"; 
 	private Map<String, ValueStorage> mMapValueStorage ;
