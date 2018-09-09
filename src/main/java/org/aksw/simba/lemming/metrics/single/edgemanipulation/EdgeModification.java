@@ -94,10 +94,10 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        if (oldNodeTriangles == 0)
-            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-        if (oldEdgeTriangles == 0)
-            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+//        if (oldNodeTriangles == 0)
+//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+//        if (oldEdgeTriangles == 0)
+//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 //        newNodeTriangles = 0;
 //        newEdgeTriangles = 0;
 
@@ -126,12 +126,12 @@ public class EdgeModification {
         int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId);
         if (subGraphTrianglesAfterRemovingEdge == 0){
             newEdgeTriangles = oldEdgeTriangles - oldSubGraphEdgeTriangles;
-        	newEdgeTriangles = newEdgeTriangles >= 0 ? newNodeTriangles: 0;
+        	newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles: 0;
         }
         else {
             int difference = oldSubGraphEdgeTriangles - subGraphTrianglesAfterRemovingEdge;
             newEdgeTriangles = oldEdgeTriangles - difference;
-            newEdgeTriangles = newEdgeTriangles >= 0 ? newNodeTriangles: 0;
+            newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles: 0;
         }
         subGraphTrianglesAfterRemovingEdge = 0;
 
@@ -207,10 +207,10 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        if (oldNodeTriangles == 0)
-            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-        if (oldEdgeTriangles == 0)
-            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+//        if (oldNodeTriangles == 0)
+//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+//        if (oldEdgeTriangles == 0)
+//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
         Grph grph = graph.getGraph();
         int numEdgesBetweenVertices = IntSets.intersection(grph.getEdgesIncidentTo(tail),
