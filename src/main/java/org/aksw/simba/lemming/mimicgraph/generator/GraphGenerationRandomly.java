@@ -244,8 +244,9 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			 * in a specific edge's colour*/ 
 			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
+			LOGGER.info("Generate edges for "+edgeColo +" edge colour ("+iColoCounter+"/"+keyEdgeColo.size()+")");
+			
 			int i = 0 ;
-			LOGGER.info("Generated edges for "+edgeColo +" edge colour ("+iColoCounter+"/"+keyEdgeColo.size()+")");
 			while(i < setFakeEdgeIDs.size()){
 					
 				boolean isFoundVerticesConnected = false;
