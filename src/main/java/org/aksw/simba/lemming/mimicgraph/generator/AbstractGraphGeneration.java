@@ -393,9 +393,12 @@ public abstract class AbstractGraphGeneration {
 			if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
 					setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
 				// fake edge's id
+				LOGGER.info("Assing colour " + offeredColor + " to an edge ("+i+"/" +iNumberOfOtherEdges+")");
+				
 				setEdgeIDs.add(i);
 				mTmpColoureNormalEdges.put(i,offeredColor);
 				i++;
+				
 			}
 			
 		}
