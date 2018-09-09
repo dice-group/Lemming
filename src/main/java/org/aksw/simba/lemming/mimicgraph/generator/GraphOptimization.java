@@ -102,22 +102,13 @@ public class GraphOptimization {
 			// go left by removing an edge
 			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-			
-			//TODO test base metric values
-			printMetricValues(metricValuesOfLeft);
-			
-			System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
+			//System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 
-			
 			 // go right by adding a new edge
 			TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
-			System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
-			
-			//TODO test base metric values
-			printMetricValues(metricValuesOfRight);
-			
+			//System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
 			
 			// find min error score
