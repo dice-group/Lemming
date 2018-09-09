@@ -300,6 +300,10 @@ public class ConstantValuesComputation {
 					}
 				}
 			}
+			if(sumOfErrorScore == Double.NaN) 
+					LOGGER.warn("The map metric values is invalid");
+			else
+					LOGGER.warn("SumErrorScore: " + sumOfErrorScore);
 			
 			return sumOfErrorScore;
 		}
