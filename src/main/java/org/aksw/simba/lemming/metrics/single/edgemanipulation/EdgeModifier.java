@@ -100,7 +100,7 @@ public class EdgeModifier {
 	        }
 	        
 	        //reverse the graph
-	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
+	        //mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
 	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, (int)mMapMetricValues.get("#nodetriangles"),(int) mMapMetricValues.get("#edgetriangles"));
 	        
 	        return mapChangedMetricValues;
