@@ -284,9 +284,6 @@ public abstract class AbstractGraphGeneration {
 	 */
 	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
-		
-		System.err.println("Number of vertex Colour distribution: " + mVertColoDist.values.length);
-		
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist);
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
@@ -335,9 +332,6 @@ public abstract class AbstractGraphGeneration {
 				}
 			}
 		}
-		
-		printTestInfo();
-		System.exit(1);
 	}
 	
 	/**
@@ -670,23 +664,5 @@ public abstract class AbstractGraphGeneration {
 	
 	protected BitSet getEdgeColour(int fakeEdgeId){
 		return mTmpColoureNormalEdges.get(fakeEdgeId);
-	}
-	
-	private void printTestInfo(){
-		
-		
-		Set<BitSet> setVColours = mMapColourToVertexIDs.keySet();
-		for(BitSet vColo: setVColours){
-			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
-			Set<String> uris = mMimicGraph.getOrginalResourceURIs(vColo);
-			LOGGER.info("There are " + setVertices.size() +" vertices of "+ vColo+ " colour defined by" +uris.size()+" URIs: ");
-			for(String uri: uris ){
-				LOGGER.info("\t" + uri);
-			}
-			LOGGER.info("");			
-		}
-		
-		
-		
 	}
 }

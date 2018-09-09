@@ -3,10 +3,14 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -35,7 +39,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	
 	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
-	private int maxIterationFor1EdgeColo ;
+	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
+	
 	/*
 	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
 	 * to each vertex's id
@@ -53,7 +58,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
-		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
 		
 		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
@@ -70,13 +75,289 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		computeAverageEVColoDistribution();
 		
 		// assign specific number of edges to each grouped triple
-		assignEdgesToGroupedTriple();
+		computeNoOfEdgesInTriples();
 		
 		//assign specific number of vertices to each grouped triple
-		assignVerticesToGroupedTriple();
+		computeNoOfVerticesInTriples();
 	}
 
 	public ColouredGraph generateGraph(){
+		if(Constants.SINGLE_THREAD){
+			generateGraphSingleThread();
+		}else{
+			//get vertices for tails and heads first
+			assignVerticesToTriples();
+			//generate graph with multi threads
+			generateGraphMultiThreads();
+		}
+		return mMimicGraph;
+	}
+	
+	private void assignVerticesToTriples(){
+		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
+		
+		for(BitSet tailColo: setVertColo){
+			
+			if(!mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)){
+				continue;
+			}
+			
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> 
+					mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
+			
+			
+			for(BitSet headColo : setVertColo){
+				
+				if(!mapHeadEdgeToGrpTriples.containsKey(headColo)){
+					continue;
+				}
+				
+				Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
+				
+				Set<BitSet> setEdgeColours = mapEdgeToGrpTriples.keySet();
+				
+				for(BitSet edgeColo: setEdgeColours){
+					
+					TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
+					
+					if(triple == null){
+						LOGGER.warn("Found an invalid triple of ("+tailColo+","+edgeColo+","+headColo+") colour");
+						continue;
+					}
+					
+					if(triple.edgeIDs.size() > 0 ){
+						double noOfEdges = triple.edgeIDs.size();
+						
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>
+									mapTailIdProposers = mapPossibleODegreePerOEColo.get(edgeColo);
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> 
+									mapHeadIdProposers = mapPossibleIDegreePerIEColo.get(edgeColo);
+						
+						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails, mapTailIdProposers);
+						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads, mapHeadIdProposers);
+						
+						if(setOfRandomHeadIds == null || setOfRandomTailIds == null){
+							LOGGER.warn("There exists no vertices in " + triple.headColour +" or " 
+											+ triple.tailColour +" colour. Skip: " + noOfEdges +" edges!");
+							continue;
+						}
+						
+						
+						int[] arrTailIDs = setOfRandomTailIds.toIntArray();
+						triple.tailIDs.addAll(arrTailIDs);
+						int[] arrHeadIDs = setOfRandomHeadIds.toIntArray();
+						triple.headIDs.addAll(arrHeadIDs);
+						/*
+						 *  standardize the amount of edges and vertices
+						 *  this makes sure there is no pair of vertices are connected by 
+						 *  2 edges in same colour 
+						 */
+						if(arrHeadIDs.length * arrTailIDs.length < noOfEdges){
+							LOGGER.warn("Not generate " + (noOfEdges - (arrHeadIDs.length * arrTailIDs.length)) + " edges in "+ edgeColo );
+							noOfEdges = arrHeadIDs.length * arrTailIDs.length;
+						}
+						
+						triple.noOfEdges = noOfEdges;
+					}
+				}
+			}
+		}
+	}
+	
+	private void generateGraphMultiThreads(){
+		//exploit all possible threads
+		int iNumberOfThreads = getDefaultNoOfThreads();
+		//int iNumberOfThreads = 4;
+		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
+		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
+		
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		
+		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
+			final IntSet setOfEdges = lstAssignedEdges.get(i);
+			
+			Runnable worker = new Runnable() {
+				@Override
+				public void run() {
+					Random rand = new Random();
+					//max iteration of 1 edge
+					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+					//track the index of previous iteration
+					int iIndexOfProcessingEdge = -1;
+					//set of process edges
+					int[] arrOfEdges = setOfEdges.toIntArray();
+					
+					/*
+					 *  set of failed edge colours. A failed edge colour is 
+					 *  the colour that are not used to connect any 
+					 *  vertices
+					 */
+					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
+					
+					//iterate through all edge
+					int j = 0 ;
+					while(j < arrOfEdges.length){
+						//get an edge id
+						int fakeEdgeId = arrOfEdges[j];
+						BitSet edgeColo = getEdgeColour(fakeEdgeId);
+						
+						if(edgeColo == null){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
+						
+						if(failedEdgeColours.contains(edgeColo)){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
+						
+						if(iIndexOfProcessingEdge != j){
+							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+							iIndexOfProcessingEdge = j;
+						}else{
+							if(maxIterationFor1Edge == 0){
+								LOGGER.error("Could not create an edge of "
+										+ edgeColo
+										+ " colour since it could not find any approriate vertices to connect.");						
+								
+								failedEdgeColours.add(edgeColo);
+								j++;
+								continue;
+							}
+						}
+						
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> 
+										mapTailIdProposers = mapPossibleODegreePerOEColo.get(edgeColo);
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> 
+										mapHeadIdProposers = mapPossibleIDegreePerIEColo.get(edgeColo);
+						
+						if(mapTailIdProposers == null || mapHeadIdProposers == null){
+							LOGGER.error("The "
+									+ edgeColo
+									+ " edge colour does not hold any verties proposers.");
+							failedEdgeColours.add(edgeColo);
+							j++;
+							continue;
+						}
+						
+						List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
+						if(tripleColours == null || tripleColours.size() != 3){
+							failedEdgeColours.add(edgeColo);
+							j++;
+							continue;
+						}
+						
+						BitSet tailColo = tripleColours.get(0);
+						BitSet checkedColo = tripleColours.get(1);
+						BitSet headColo = tripleColours.get(2);
+						
+						if(checkedColo.equals(edgeColo)){
+							
+							Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
+							
+							if(mapHeadEdgeTriples == null){
+								failedEdgeColours.add(edgeColo);
+								j++;
+								continue;
+							}
+							
+							Map<BitSet, TripleBaseSetOfIDs> mapEdgeTriples = mapHeadEdgeTriples.get(headColo);
+							if(mapEdgeTriples == null){
+								failedEdgeColours.add(edgeColo);
+								j++;
+								continue;
+							}
+							
+							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(tailColo);
+							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(headColo);
+							
+							TripleBaseSetOfIDs triples = mapEdgeTriples.get(edgeColo);
+							
+							if(triples == null){
+								failedEdgeColours.add(edgeColo);
+								j++;
+								continue;
+							}
+							
+							Set<Integer> setTailIds = new HashSet<Integer>();
+							setTailIds.addAll(triples.tailIDs.toIntegerArrayList());
+							
+							
+							// select a random tail
+							int tailId = -1;
+							int iAttemptToGetTailIds = 1000;
+							while(iAttemptToGetTailIds > 0){
+								tailId = tailIdsProposer.getPotentialItem(setTailIds);
+								if(!mReversedMapClassVertices.containsKey(tailColo))
+									break;
+								tailId = -1;
+								iAttemptToGetTailIds --;	
+							}
+							
+							if(tailId ==-1){
+								maxIterationFor1Edge--;
+								continue;
+							}
+							
+							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
+							IntSet setHeadIDs = triples.headIDs.clone();
+							if(tmpSetOfConnectedHeads!= null && tmpSetOfConnectedHeads.size() >0  ){
+								//int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray(); 
+								for(int connectedHead: tmpSetOfConnectedHeads.toIntegerArrayList()){
+									if(setHeadIDs.contains(connectedHead))
+										setHeadIDs.remove(connectedHead);
+								}
+							}
+							
+							if(setHeadIDs.size() == 0 ){
+								maxIterationFor1Edge--;
+								continue;
+							}
+							
+							Set<Integer> setHeadIds = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							int headId = headIdsProposer.getPotentialItem(setHeadIds);
+							
+							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
+							if(isFoundVerticesConnected){
+								j++;
+								continue;
+							}
+							
+						}else{
+							LOGGER.error("Not match edge colour: " + checkedColo + " and "+ edgeColo);
+						}
+						
+						maxIterationFor1Edge--;
+						
+						if (maxIterationFor1Edge == 0) {
+							LOGGER.error("Could not create "
+									+ (arrOfEdges.length - j)
+									+ " edges in the "
+									+ edgeColo
+									+ " colour since it could not find any approriate vertices to connect.");						
+							
+							failedEdgeColours.add(edgeColo);
+							j++;
+						}
+						
+					}//end iteration of edges
+				}
+			};
+			service.execute(worker);
+		}
+		
+		service.shutdown();
+		try {
+			service.awaitTermination(48, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			LOGGER.error("Could not shutdown the service executor! Be carefule");
+			e.printStackTrace();
+		};
+	}
+	
+	private void generateGraphSingleThread(){
 		
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
@@ -169,18 +450,21 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				}
 			}
 		}
-		//printInfo();
-		
-		return mMimicGraph;
 	}
 	
 	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo).clone();
+		
+		//invalid setVertices
+		if(setVertices == null || setVertices.size() ==0)
+			return null;
+		
+		Set<Integer> tmpSetOfVertices = new HashSet<Integer>(setVertices.toIntegerArrayList());
 		IOfferedItem<Integer> vertexIdsProposer= mapVertexIdsProposers.get(vertColo);
-		if(setVertices != null && vertexIdsProposer!= null){
-			
+		
+		
+		if(vertexIdsProposer!= null){
 			int[] arrVertices= setVertices.toIntArray();
-			
 			IntSet res = new DefaultIntSet();
 			
 			if(iNoOfVertices >= arrVertices.length){
@@ -188,18 +472,26 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				return setVertices;
 			}
 			
-			int iCounter = 0 ;
 			while(iNoOfVertices > 0){
-				int vertId = vertexIdsProposer.getPotentialItem();
+				int vertId = vertexIdsProposer.getPotentialItem(tmpSetOfVertices);
 				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
 					res.add(vertId);
 					iNoOfVertices --;
-					setVertices.remove(vertId);
+					tmpSetOfVertices.remove(vertId);
 				}
+				
+				if(tmpSetOfVertices.size()==0){
+					LOGGER.warn("Could not found more " + iNoOfVertices + " vertices of "+ vertColo);
+					break;
+				}
+				
+				
 				boolean havingMore = false;
-				int[] arrAvailableVertices = setVertices.toIntArray();
-				for(int availableId : arrAvailableVertices){
-					if(!mReversedMapClassVertices.containsKey(availableId)){
+				Iterator<Integer> iter = tmpSetOfVertices.iterator();
+				while(iter.hasNext()){
+					int availableId = iter.next();
+					if(!mReversedMapClassVertices.containsKey(availableId)
+							&& !res.contains(availableId)){
 						havingMore = true;
 						break;
 					}
@@ -309,7 +601,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void assignEdgesToGroupedTriple() {
+	private void computeNoOfEdgesInTriples() {
 		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
@@ -365,7 +657,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		LOGGER.info("Done assing edges to grouped triples");
 	}
 	
-	private void assignVerticesToGroupedTriple(){
+	private void computeNoOfVerticesInTriples(){
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
 		
@@ -528,7 +820,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 
 	@Override
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
-
+		int maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		if(!isRandom){
 			LOGGER.info("Using the override function getProposedTriple");
 			// build a proposer of all cluster of triples
@@ -547,8 +839,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						if(tripleGroup.edgeIDs.size() == 0 )
 							continue;
 						double gap = (tripleGroup.noOfHeads * tripleGroup.noOfTails) - tripleGroup.noOfEdges;
-						
-						
 						
 						if(gap > 0 ){
 							lstTripleGroups.add(tripleGroup);

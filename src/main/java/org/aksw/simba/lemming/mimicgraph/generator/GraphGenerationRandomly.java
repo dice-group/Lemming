@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -55,6 +56,8 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
+					//random
+					Random random = new Random(); 
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
@@ -113,7 +116,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						//get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-						BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
+						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
 						Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 						
 						if(setHeadColours == null || setHeadColours.size() == 0){
@@ -129,7 +132,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
 						
-						BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
+						BitSet headColo = arrHeadColours[random.nextInt(arrHeadColours.length)];
 						
 						//get set of tail ids and head ids
 						IntSet setTailIDs = new DefaultIntSet();
@@ -148,7 +151,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							int tailId = -1;
 							int iAttemptToGetTailIds = 1000;
 							while(iAttemptToGetTailIds > 0){
-								tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
+								tailId = arrTailIDs[random.nextInt(arrTailIDs.length)];
 								if(!mReversedMapClassVertices.containsKey(tailColo))
 									break;
 								tailId = -1;
@@ -176,7 +179,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							
-							int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+							int headId = arrHeadIDs[random.nextInt(arrHeadIDs.length)];
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
 								j++;

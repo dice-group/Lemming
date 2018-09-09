@@ -74,15 +74,17 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 		//int iNumberOfThreads = 4;
 		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
+		
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
 			
-			LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
-			
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
+					Random random = new Random();
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
@@ -154,7 +156,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						
 						//get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-						BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
+						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
 						Set<BitSet> setRestrictedHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 						
 						if(setRestrictedHeadColours == null || setRestrictedHeadColours.size() ==0){
@@ -171,7 +173,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						
 						BitSet [] arrHeadColours = setRestrictedHeadColours.toArray(new BitSet[0]);
 						
-						BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
+						BitSet headColo = arrHeadColours[random.nextInt(arrHeadColours.length)];
 						
 						//add id proposers here
 						IOfferedItem<Integer> tailIDProposer = mapTailColoToIDProposer.get(tailColo);
@@ -217,7 +219,6 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 									setHeadIDs.remove(connectedHead);
 							}
 						}
-						
 						
 						if(setHeadIDs.size() == 0){
 							continue;

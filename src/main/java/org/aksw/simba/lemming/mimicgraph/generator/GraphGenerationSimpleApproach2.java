@@ -2,9 +2,13 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -15,7 +19,6 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgOutDegreeDistBaseVECo
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
-import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
@@ -74,6 +77,213 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	}
 
 	public ColouredGraph generateGraph(){
+		if(Constants.SINGLE_THREAD){
+			generateGraphSingleThread();
+		}else{
+			generateGraphMultiThreads();
+		}
+		return mMimicGraph;
+	}
+	
+	private void generateGraphMultiThreads(){
+		//exploit all possible threads
+		int iNumberOfThreads = getDefaultNoOfThreads();
+		//int iNumberOfThreads = 4;
+		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
+		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
+		final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		
+		//for each set of edges ==> create a worker
+		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
+			final IntSet setOfEdges = lstAssignedEdges.get(i);
+			//worker
+			Runnable worker = new Runnable() {
+				@Override
+				public void run() {
+					//max iteration of 1 edge
+					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+					//track the index of previous iteration
+					int iIndexOfProcessingEdge = -1;
+					//set of process edges
+					int[] arrOfEdges = setOfEdges.toIntArray();
+
+					/*
+					 *  set of failed edge colours. A failed edge colour is 
+					 *  the colour that has are not used to connect any 
+					 *  vertices
+					 */
+					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
+					
+					int j = 0 ;
+					while( j < arrOfEdges.length ){
+						//get an edge id
+						int fakeEdgeId = arrOfEdges[j];
+						BitSet edgeColo = getEdgeColour(fakeEdgeId);
+						
+						if(edgeColo == null){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
+						
+						if(failedEdgeColours.contains(edgeColo)){
+							//skip the edge that has failed edge colour
+							j++;
+							continue;
+						}
+						
+						if(iIndexOfProcessingEdge != j){
+							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+							iIndexOfProcessingEdge = j;
+						}else{
+							if(maxIterationFor1Edge == 0){
+								LOGGER.error("Could not create an edge of "
+										+ edgeColo
+										+ " colour since it could not find any approriate vertices to connect.");						
+								
+								failedEdgeColours.add(edgeColo);
+								j++;
+								continue;
+							}
+						}
+						
+						//these proposers help to select a potential tail colour and a head colour
+						IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColo);
+						IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColo);
+						
+						if(headColourProposer == null || tailColourProposer == null){
+							failedEdgeColours.add(edgeColo);
+							j++;
+							continue;
+						}
+						
+						// these proposers provide a potential degree for each of tails and heads
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  
+											mapTailColoToTailIDs = mapPossibleODegreePerOEColo.get(edgeColo);
+						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  
+											mapHeadColoToHeadIDs = mapPossibleIDegreePerIEColo.get(edgeColo);
+						
+						if(mapTailColoToTailIDs == null || mapHeadColoToHeadIDs == null){
+							failedEdgeColours.add(edgeColo);
+							j++;
+							continue;
+						}
+						
+						BitSet tailColo = tailColourProposer.getPotentialItem();
+						
+						if(tailColo == null){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						// get a set of head colours associated with the edge colour and the tail colour
+						Set<BitSet> setRestrictedHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+						if(setRestrictedHeadColours== null || setRestrictedHeadColours.size() ==0){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						setRestrictedHeadColours.retainAll(setAvailableVertexColours);
+												
+						if(setRestrictedHeadColours.size() == 0){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						// base on the possible linked head's colours got from the tailColo we get the potential headColo
+						BitSet headColo = headColourProposer.getPotentialItem(setRestrictedHeadColours);
+						if(headColo == null){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						IOfferedItem<Integer> tailIDsProposer = mapTailColoToTailIDs.get(tailColo);
+						IOfferedItem<Integer> headIDsProposer = mapHeadColoToHeadIDs.get(headColo);
+						
+						if(tailIDsProposer == null || headIDsProposer == null){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						int tailId = -1;
+						int iAttemptToGetTailIds = 1000;
+						//quite sure that we can always find a tail ID
+						while(iAttemptToGetTailIds > 0 ){
+							tailId = tailIDsProposer.getPotentialItem();	
+							if(!mReversedMapClassVertices.containsKey(tailId))
+								break;
+							tailId = -1;
+							iAttemptToGetTailIds --;							
+						}
+						
+						if(tailId ==-1){
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						//get set of tail ids and head ids
+						IntSet setHeadIDs = new DefaultIntSet();
+						
+						if(mMapColourToVertexIDs.containsKey(headColo)){
+							setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+						}
+						
+						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+							continue;
+						}
+						
+						IntSet tmpConnectedHeadIds = getConnectedHeads(tailId, edgeColo);
+						if(tmpConnectedHeadIds!= null && tmpConnectedHeadIds.size() >0 ){
+							for(int connectedHead: tmpConnectedHeadIds.toIntegerArrayList()){
+								if(setHeadIDs.contains(connectedHead))
+									setHeadIDs.remove(connectedHead);
+							}
+						}
+						
+						if(setHeadIDs.size() == 0){
+							continue;
+						}
+						
+						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+						
+						int headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
+						
+						boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
+						if(isFoundVerticesConnected){
+							j++;
+							continue;
+						}
+						
+						maxIterationFor1Edge--;
+						
+						if (maxIterationFor1Edge == 0) {
+							LOGGER.error("Could not create "
+									+ (arrOfEdges.length - j)
+									+ " edges in the "
+									+ edgeColo
+									+ " colour since it could not find any approriate vertices to connect.");						
+							
+							failedEdgeColours.add(edgeColo);
+							j++;
+						}
+						
+					}//end iteration of edges
+				}
+			};
+			service.execute(worker);
+		}
+		
+		service.shutdown();
+		try {
+			service.awaitTermination(48, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			LOGGER.error("Could not shutdown the service executor! Be carefule");
+			e.printStackTrace();
+		};
+	}
+	
+	private void generateGraphSingleThread(){
 		
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for(BitSet edgeColo : keyEdgeColo){
@@ -193,8 +403,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						+ " edge's coloursince it could not find any approriate vertices to connect");
 			}
 		}
-		
-		return mMimicGraph;
 	}
 	
 	/**
