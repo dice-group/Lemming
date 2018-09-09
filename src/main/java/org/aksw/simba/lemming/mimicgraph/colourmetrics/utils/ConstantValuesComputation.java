@@ -290,6 +290,8 @@ public class ConstantValuesComputation {
 					double standardDeviation = mMapOfStandardDeviations.get(key);
 					
 					double constVal = expr.getValue(mapMetricValues);
+					LOGGER.info("Exp: " + expr.toString()+" - M = "+ meanValue + ", SD = " 
+										+ standardDeviation + ", Constant Val =" + constVal);
 					
 					double singleErrorScore = computeSingleErrorScore(meanValue, standardDeviation, constVal);
 					if(singleErrorScore != Double.NaN){
@@ -300,10 +302,6 @@ public class ConstantValuesComputation {
 					}
 				}
 			}
-			if(sumOfErrorScore == Double.NaN) 
-					LOGGER.warn("The map metric values is invalid");
-			else
-					LOGGER.warn("SumErrorScore: " + sumOfErrorScore);
 			
 			return sumOfErrorScore;
 		}
@@ -324,7 +322,6 @@ public class ConstantValuesComputation {
 	 * @return
 	 */
 	private double computeSingleErrorScore(double avrgConstVal, double standardDeviation, double constVal){
-		LOGGER.info("Mean= " + avrgConstVal + " SD = " + standardDeviation + " Const Val =" + constVal);
 		
 		double res = Math.pow(avrgConstVal - constVal, 2);
 		if(standardDeviation != 0){
