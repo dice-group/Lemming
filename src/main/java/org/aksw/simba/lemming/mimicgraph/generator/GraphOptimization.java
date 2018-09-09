@@ -29,6 +29,7 @@ public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
 	
 	private int mMaxIteration = 50000 ;
+	private int mTrueNoOfIteration = 0;
 	private int mMaxRepeatedSelection = 5000;
 	private boolean mProcessRandomly = false;
 	
@@ -96,7 +97,7 @@ public class GraphOptimization {
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 			
-			System.out.println("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
+			LOGGER.info("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
 					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
 			
 			if(minErrScore == lErrScore){
@@ -121,6 +122,7 @@ public class GraphOptimization {
 			noOfRepeatedParent ++;
 			
 			if(noOfRepeatedParent == mMaxRepeatedSelection){
+				mTrueNoOfIteration = i+1;
 				LOGGER.info("Cannot find better refined graph! Break the loop!");
 				break;
 			}
@@ -181,7 +183,7 @@ public class GraphOptimization {
 		triple.edgeId = edgeId;
 		triple.edgeColour = edgeColour;
 		
-		LOGGER.info("Proposed removed triple: ("+triple.tailId +","+triple.headId +","+triple.edgeId+")");
+		//LOGGER.info("Proposed removed triple: ("+triple.tailId +","+triple.headId +","+triple.edgeId+")");
 		return triple;
 	}
 	
@@ -223,7 +225,7 @@ public class GraphOptimization {
 			fWriter.write("# Saved file: "+ savedFile +".\n");
 			fWriter.write("# Saved error score file: "+ errorScoreFile +".\n");
 			fWriter.write("# Duration: "+ ((int)(mOptimizedTime - startingTime)/1000)+" (s).\n");
-			fWriter.write("# Optimization: "+ mMaxIteration + " iterations\n");
+			fWriter.write("# Optimization: "+ mTrueNoOfIteration + "/" + mMaxIteration + " iterations\n");
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){
