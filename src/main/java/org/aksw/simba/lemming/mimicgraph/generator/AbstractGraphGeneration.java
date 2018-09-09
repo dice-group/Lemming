@@ -357,12 +357,15 @@ public abstract class AbstractGraphGeneration {
 				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
 			}
 		}
+		LOGGER.info("There are "+ iNumberOfRdfTypeEdges + " edges of rdf:type!");
 		
+		// fake edge's id
 		/*
 		 * 	process normal edges
 		 */
 			
 		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
 		
 		for(int i = 0 ; i< iNumberOfOtherEdges ; ){
 			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem();
@@ -392,8 +395,6 @@ public abstract class AbstractGraphGeneration {
 			
 			if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
 					setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
-				// fake edge's id
-				LOGGER.info("Assing colour " + offeredColor + " to an edge ("+i+"/" +iNumberOfOtherEdges+")");
 				
 				setEdgeIDs.add(i);
 				mTmpColoureNormalEdges.put(i,offeredColor);
@@ -402,6 +403,7 @@ public abstract class AbstractGraphGeneration {
 			}
 			
 		}
+		LOGGER.info("DONE assigning colours to "+iNumberOfOtherEdges + "!");
 	}
 	
 	/**
