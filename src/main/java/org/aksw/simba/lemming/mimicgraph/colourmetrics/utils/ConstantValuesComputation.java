@@ -303,7 +303,7 @@ public class ConstantValuesComputation {
 			
 			return sumOfErrorScore;
 		}
-		
+		LOGGER.warn("The map metric values is invalid");
 		return Double.NaN;
 	}
 	
@@ -324,6 +324,7 @@ public class ConstantValuesComputation {
 		if(standardDeviation != 0){
 			res = res/standardDeviation;
 		}else{
+			LOGGER.warn("Standard deviation is 0");
 			res = Double.NaN;
 		}
 		return res;

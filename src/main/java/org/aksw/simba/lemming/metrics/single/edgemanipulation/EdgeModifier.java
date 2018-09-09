@@ -71,9 +71,7 @@ public class EdgeModifier {
 	
 	public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple){
 		
-		if(triple != null && triple.edgeId != -1 
-				&&	triple.edgeColour!= null && triple.headId !=-1 
-				&& 	triple.tailId != -1){
+		if(triple != null && triple.edgeId != -1){
 			
 			//add to list of removed edges
 			mLstRemovedEdges.add(triple);

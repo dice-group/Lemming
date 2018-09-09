@@ -184,6 +184,7 @@ public class GraphOptimization {
 		triple.edgeId = edgeId;
 		triple.edgeColour = edgeColour;
 		
+		LOGGER.info("Removed triple: ("+triple.tailId +","+triple.headId +","+triple.edgeId+")");
 		return triple;
 	}
 	
