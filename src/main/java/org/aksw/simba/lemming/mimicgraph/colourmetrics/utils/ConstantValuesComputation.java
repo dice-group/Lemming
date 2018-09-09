@@ -290,8 +290,6 @@ public class ConstantValuesComputation {
 					double standardDeviation = mMapOfStandardDeviations.get(key);
 					
 					double constVal = expr.getValue(mapMetricValues);
-					LOGGER.info("Exp: " + expr.toString()+" - M = "+ meanValue + ", SD = " 
-										+ standardDeviation + ", Constant Val =" + constVal);
 					
 					double singleErrorScore = computeSingleErrorScore(meanValue, standardDeviation, constVal);
 					if(singleErrorScore != Double.NaN){

@@ -66,21 +66,6 @@ public class GraphOptimization {
 		mProcessRandomly = isRandom;
 	}
 	
-	private void printMetricValues(ObjectDoubleOpenHashMap<String> baseMetricValues){
-		
-		Object [] metricValues = baseMetricValues.keys;
-		for(int i = 0 ; i < metricValues.length ; i++){
-			if(baseMetricValues.allocated[i]){
-				String key = (String)metricValues[i];
-				System.out.print("\t Metric: " + key);
-				double val = baseMetricValues.get((String)metricValues[i]);
-				System.out.print(val);
-				System.out.println("");	
-			}
-		}
-		System.out.println("");	
-	}
-	
 	public void refineGraph(){
 		
 		int noOfRepeatedParent = 0;
@@ -89,9 +74,6 @@ public class GraphOptimization {
 		double rErrScore = Double.NaN;
 		
 		ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
-		
-		//TODO test base metric values
-		printMetricValues(baseMetricValues);
 		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
