@@ -409,7 +409,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		
 		if(!isRandom){
 			//System.out.println("using override function getProposedTriple(");
-			LOGGER.info("Using the override function getProposedTriple");
+			
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
 				if(edgeColo != null && !edgeColo.equals(mRdfTypePropertyColour)){
@@ -446,7 +446,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 								triple.headId = headId;
 								triple.headColour = headColo;
 								triple.edgeColour = edgeColo;
-								
+								LOGGER.info("Proposed triple: ("+tailId+","+headId+","+edgeColo+")");
 								return triple;
 							}
 						}

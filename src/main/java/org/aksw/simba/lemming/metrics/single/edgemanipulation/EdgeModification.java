@@ -104,7 +104,7 @@ public class EdgeModification {
         int numEdgesBetweenConnectedVertices = IntSets.intersection(grph.getEdgesIncidentTo(tailId),
                 grph.getEdgesIncidentTo(headId)).size();
 
-        LOGGER.info(String.format("Removed edge id:\t%s", edgeId));
+        //LOGGER.info(String.format("Removed edge id:\t%s", edgeId));
         if (numEdgesBetweenConnectedVertices > 1) {
             /* Same number of node triangles */
             newNodeTriangles = oldNodeTriangles;
