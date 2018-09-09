@@ -92,16 +92,8 @@ public class EdgeModifier {
 	        for(SingleValueMetric metric: mLstMetrics){
 	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
 	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
-	        		
-	        		if(metric.getName().equalsIgnoreCase("avgDegree")){
-	        			int noOfEdges = graph.getGraph().getNumberOfEdges();
-	        			int noOfVertices = graph.getGraph().getNumberOfVertices();
-	        			double metVal = noOfEdges/ noOfVertices;
-		        		mapChangedMetricValues.put(metric.getName(), metVal);
-	        		}else{
-	        			double metVal = metric.apply(graph);
-		        		mapChangedMetricValues.put(metric.getName(), metVal);   
-	        		}
+        			double metVal = metric.apply(graph);
+	        		mapChangedMetricValues.put(metric.getName(), metVal);   
 	        	}
 	        }
 	        
@@ -139,15 +131,8 @@ public class EdgeModifier {
 	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
 	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
 	        		
-	        		if(metric.getName().equalsIgnoreCase("avgDegree")){
-	        			int noOfEdges = graph.getGraph().getNumberOfEdges();
-	        			int noOfVertices = graph.getGraph().getNumberOfVertices();
-	        			double metVal = noOfEdges/ noOfVertices;
-	        			mapMetricValues.put(metric.getName(), metVal);
-	        		}else{
-	        			double metVal = metric.apply(graph);
-		        		mapMetricValues.put(metric.getName(), metVal);   
-	        		}
+        			double metVal = metric.apply(graph);
+	        		mapMetricValues.put(metric.getName(), metVal);   
 	        	}
 	        }
 		    

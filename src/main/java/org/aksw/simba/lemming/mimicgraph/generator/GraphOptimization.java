@@ -77,8 +77,8 @@ public class GraphOptimization {
 				System.out.print(val);
 				System.out.println("");	
 			}
-			System.out.println("\n\n");
 		}
+		System.out.println("");	
 	}
 	
 	public void refineGraph(){
