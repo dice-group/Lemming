@@ -100,8 +100,8 @@ public class EdgeModifier {
 	        }
 	        
 	        //reverse the graph
-	        //mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
-	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, (int)mMapMetricValues.get("#nodetriangles"),(int) mMapMetricValues.get("#edgetriangles"));
+	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
+	        //mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, (int)mMapMetricValues.get("#nodetriangles"),(int) mMapMetricValues.get("#edgetriangles"));
 	        
 	        return mapChangedMetricValues;
 		}else{
@@ -138,8 +138,8 @@ public class EdgeModifier {
 	        	}
 	        }
 		    
-		    //mEdgeModification.removeEdgeFromGraph(triple.edgeId);
-		   mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int)mMapMetricValues.get("#nodetriangles"), (int)mMapMetricValues.get("#edgetriangles"));
+		    mEdgeModification.removeEdgeFromGraph(triple.edgeId);
+		   //mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int)mMapMetricValues.get("#nodetriangles"), (int)mMapMetricValues.get("#edgetriangles"));
 			return mapMetricValues;
 		}else{
 			LOGGER.warn("Invalid triple for adding an edge!");

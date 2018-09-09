@@ -94,12 +94,10 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        
-        //TODO TEST 
-//        if (oldNodeTriangles == 0)
-//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-//        if (oldEdgeTriangles == 0)
-//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        if (oldNodeTriangles == 0)
+            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        if (oldEdgeTriangles == 0)
+            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 //        newNodeTriangles = 0;
 //        newEdgeTriangles = 0;
 
@@ -209,11 +207,10 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        //TODO TEST
-//        if (oldNodeTriangles == 0)
-//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-//        if (oldEdgeTriangles == 0)
-//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        if (oldNodeTriangles == 0)
+            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        if (oldEdgeTriangles == 0)
+            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
         Grph grph = graph.getGraph();
         int numEdgesBetweenVertices = IntSets.intersection(grph.getEdgesIncidentTo(tail),
