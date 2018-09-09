@@ -27,7 +27,6 @@ import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -40,6 +39,7 @@ public abstract class AbstractGraphGeneration {
 	protected ObjectDistribution<BitSet> mVertColoDist;
 	protected ObjectDistribution<BitSet> mEdgeColoDist;
 	
+	protected int mNumberOfThreads =1;
 	/*
 	 * the keys are the vertex's color and the values are the set of vertex's ids
 	 */
@@ -72,7 +72,7 @@ public abstract class AbstractGraphGeneration {
 	
 	protected IOfferedItem<BitSet> mEdgeColoProposer;
 	
-	protected Random mRandom ;
+	private Random mRandom ;
 	
 	protected BitSet mRdfTypePropertyColour;
 	
@@ -665,4 +665,16 @@ public abstract class AbstractGraphGeneration {
 	protected BitSet getEdgeColour(int fakeEdgeId){
 		return mTmpColoureNormalEdges.get(fakeEdgeId);
 	}
+	
+	public void setNumberOfThreadsForGenerationProcess(int iNumberOfThreads){
+		mNumberOfThreads = iNumberOfThreads;
+		if(mNumberOfThreads == 0){
+			mNumberOfThreads =1;
+		}
+		int iAvailableThreads = getDefaultNoOfThreads();
+		if(mNumberOfThreads > iAvailableThreads){
+			mNumberOfThreads = iAvailableThreads;
+		}
+	}
+	
 }

@@ -82,7 +82,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 
 	public ColouredGraph generateGraph(){
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads == 1){
 			generateGraphSingleThread();
 		}else{
 			//get vertices for tails and heads first

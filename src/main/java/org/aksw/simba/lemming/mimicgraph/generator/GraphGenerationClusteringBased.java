@@ -46,7 +46,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
 	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
-	
+	private Random mRandom ;
 	/*
 	 * Constructor
 	 */
@@ -54,6 +54,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
 		
+		mRandom = new Random();
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
@@ -315,7 +316,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 
 	public ColouredGraph generateGraph(){
 		
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads == 1){
 			generateGraphSingleThread();
 		}else{
 			//get vertices for tails and heads first

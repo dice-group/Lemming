@@ -42,27 +42,27 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	private Map<BitSet, IOfferedItem<BitSet>> mMapIEColoToHeadColoProposer;
 	
 	private int maxIterationFor1EdgeColo ;
+	private Random mRandom;
 	
 	public GraphGenerationSimpleApproach(int iNumberOfVertices,
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
 		
+		mRandom = new Random();
+		
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
-		
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
-
+		
 		computeAvrgIOEdgeDistPerVertColo(origGrphs);
 	}
 
 	public ColouredGraph generateGraph(){
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads == 1){
 			generateGraphSingleThread();
 		}else{
 			generateGraphMultiThreads();
 		}
-		
-		
 		return mMimicGraph;
 	}
 	

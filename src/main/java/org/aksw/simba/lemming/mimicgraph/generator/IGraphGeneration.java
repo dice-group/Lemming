@@ -24,4 +24,5 @@ public interface IGraphGeneration {
 	public ColouredGraph getMimicGraph();
 	public String getLiteralType(BitSet dteColo);
 	public void setMimicGraph(ColouredGraph refinedGraph);
+	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
 }

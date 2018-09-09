@@ -77,7 +77,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	}
 
 	public ColouredGraph generateGraph(){
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads ==1){
 			generateGraphSingleThread();
 		}else{
 			generateGraphMultiThreads();

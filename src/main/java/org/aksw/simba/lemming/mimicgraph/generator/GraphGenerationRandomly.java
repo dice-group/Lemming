@@ -22,15 +22,18 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationRandomly.class);
 	private int maxIterationFor1EdgeColo ;
+	private Random mRandom; 
+	
 	
 	public GraphGenerationRandomly(int iNumberOfVertices,
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
+		mRandom = new Random();
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 	}
 
 	public ColouredGraph generateGraph(){
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads==1){
 			generateGraphSingleThread();
 		}else{
 			generateGraphMultiThreads();

@@ -57,6 +57,9 @@ public class GraphGenerationTest {
 		 * -nv: number of vertices
 		 * 		value: integer number - denoting number of given vertices
 		 * 
+		 * -thr: number of threads using
+		 * 		value: integer number - denoting number of threads used/
+		 * 
 		 * -t: methods of generator
 		 * 		value: 	R: random approach, 
 		 * 				RD: random with degree approach
@@ -144,10 +147,19 @@ public class GraphGenerationTest {
         } else{
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs);
         }
+        
+        String numberOfThreads = mapArgs.get("tr");
+        int iNumberOfThreads = 1;
+        if(numberOfThreads!= null){
+        	try{
+        		iNumberOfThreads = Integer.parseInt(numberOfThreads);
+        	}catch(Exception e){}
+        }
 
         LOGGER.info("Generating a first version of mimic graph ...");
         //create a draft graph
         double startTime = System.currentTimeMillis();
+        mGrphGenerator.setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
         // generate the new graph
         mGrphGenerator.generateGraph();
         // estimate the costed time for generation
@@ -214,6 +226,9 @@ public class GraphGenerationTest {
 					}
 					else if(param.equalsIgnoreCase("-r")){	
 						mapArgs.put("-r", value);
+					} 
+					else if(param.equalsIgnoreCase("-tr")){
+						mapArgs.put("-tr", value);
 					}
 				}
 			}

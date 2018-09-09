@@ -30,7 +30,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationRandomly2.class);
 	private int maxIterationFor1EdgeColo ;
-	
+	private Random mRandom;
 	/*
 	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
 	 * to each vertex's id
@@ -48,7 +48,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			ColouredGraph[] origGrphs) {
 		super(iNumberOfVertices, origGrphs);
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;;
-		
+		mRandom = new Random();
 		// initilize variable
 		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
@@ -58,7 +58,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	}
 
 	public ColouredGraph generateGraph(){
-		if(Constants.SINGLE_THREAD){
+		if(mNumberOfThreads == 1){
 			generateGraphSingleThread();
 		}else{
 			generateGraphMultiThreads();
