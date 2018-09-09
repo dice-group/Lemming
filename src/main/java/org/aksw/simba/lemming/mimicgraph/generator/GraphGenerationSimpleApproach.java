@@ -151,7 +151,8 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 							continue;
 						}
 						// get a set of head colours associated with the edge colour and the tail colour
-						Set<BitSet> setRestrictedHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+						Set<BitSet> setRestrictedHeadColours =
+									new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						if(setRestrictedHeadColours== null || setRestrictedHeadColours.size() ==0){
 							maxIterationFor1Edge--;
 							continue;
@@ -408,7 +409,6 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		
 		if(!isRandom){
-			//System.out.println("using override function getProposedTriple(");
 			
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
@@ -446,7 +446,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 								triple.headId = headId;
 								triple.headColour = headColo;
 								triple.edgeColour = edgeColo;
-								LOGGER.info("Proposed triple: ("+tailId+","+headId+","+edgeColo+")");
+								LOGGER.info("Proposed added triple: ("+tailId+","+headId+","+edgeColo+")");
 								return triple;
 							}
 						}

@@ -2,11 +2,16 @@ package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
+
 import grph.Grph;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import toools.set.IntSet;
 import toools.set.IntSets;
 
@@ -74,11 +79,13 @@ public class EdgeModification {
     }
 
     private double getNumberOfNodeTriangles() {
-        return nodeMetric.apply(graph);
+    	NodeTriangleMetric metric = new NodeTriangleMetric();
+        return metric.apply(graph);
     }
 
     private double getNumberOfEdgeTriangles() {
-        return edgeMetric.apply(graph);
+    	EdgeTriangleMetric metric = new EdgeTriangleMetric();
+        return metric.apply(graph);
     }
 
     void removeEdgeFromGraph(int edgeId) {
@@ -87,10 +94,12 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        if (oldNodeTriangles == 0)
-            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-        if (oldEdgeTriangles == 0)
-            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        
+        //TODO TEST 
+//        if (oldNodeTriangles == 0)
+//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+//        if (oldEdgeTriangles == 0)
+//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 //        newNodeTriangles = 0;
 //        newEdgeTriangles = 0;
 
@@ -113,14 +122,18 @@ public class EdgeModification {
             /* remove number of triangles formed by subgraph*/
             int oldSubGraphNodeTriangles = calculateSubGraphNodeTriangles(edgeId);
             newNodeTriangles = oldNodeTriangles - oldSubGraphNodeTriangles;
+            newNodeTriangles = newNodeTriangles >= 0 ? newNodeTriangles: 0;
         }
 
         int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId);
-        if (subGraphTrianglesAfterRemovingEdge == 0)
+        if (subGraphTrianglesAfterRemovingEdge == 0){
             newEdgeTriangles = oldEdgeTriangles - oldSubGraphEdgeTriangles;
+        	newEdgeTriangles = newEdgeTriangles >= 0 ? newNodeTriangles: 0;
+        }
         else {
             int difference = oldSubGraphEdgeTriangles - subGraphTrianglesAfterRemovingEdge;
             newEdgeTriangles = oldEdgeTriangles - difference;
+            newEdgeTriangles = newEdgeTriangles >= 0 ? newNodeTriangles: 0;
         }
         subGraphTrianglesAfterRemovingEdge = 0;
 
@@ -196,10 +209,11 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-        if (oldNodeTriangles == 0)
-            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-        if (oldEdgeTriangles == 0)
-            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        //TODO TEST
+//        if (oldNodeTriangles == 0)
+//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
+//        if (oldEdgeTriangles == 0)
+//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
         Grph grph = graph.getGraph();
         int numEdgesBetweenVertices = IntSets.intersection(grph.getEdgesIncidentTo(tail),

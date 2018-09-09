@@ -182,7 +182,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
-					Random rand = new Random();
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration

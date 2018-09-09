@@ -180,7 +180,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 							continue;
 						}
 						// get a set of head colours associated with the edge colour and the tail colour
-						Set<BitSet> setRestrictedHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+						Set<BitSet> setRestrictedHeadColours =
+										new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						if(setRestrictedHeadColours== null || setRestrictedHeadColours.size() ==0){
 							maxIterationFor1Edge--;
 							continue;

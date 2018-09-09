@@ -106,7 +106,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						}
 						
 						//get potential tail colours
-						Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
+						Set<BitSet> setTailColours = new HashSet<BitSet>(mColourMapper.getTailColoursFromEdgeColour(edgeColo));
 						setTailColours.retainAll(setAvailableVertexColours);
 
 						/*
@@ -298,9 +298,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					if(isFoundVerticesConnected){
 						isFoundVerticesConnected = true;	
 						i++;
-						
-						LOGGER.info("   -- Add "+i+"/"+setFakeEdgeIDs.size()+" edges");
-						
 					}
 //						else{
 //							System.err.println("Found same vertices to connect");
