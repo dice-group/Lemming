@@ -173,6 +173,16 @@ public class GraphGenerationTest {
         LOGGER.info("Optimizing the mimic graph ...");
         // TODO check if it is necessary to randomly refine graph 
         grphOptimizer.setRefineGraphRandomly(false);
+        //number of optimizations
+        String strNoOfOptimizations = mapArgs.get("-op");
+        if(strNoOfOptimizations!= null){
+        	try{
+        		int iNumberOfOptimizationSteps = Integer.parseInt(strNoOfOptimizations);
+        		grphOptimizer.setNumberOfOptimizations(iNumberOfOptimizationSteps);
+        	}catch(Exception e){}
+        }
+        
+        //optimize graph
         grphOptimizer.refineGraph();
         
         /*---------------------------------------------------
@@ -229,6 +239,9 @@ public class GraphGenerationTest {
 					} 
 					else if(param.equalsIgnoreCase("-tr")){
 						mapArgs.put("-tr", value);
+					}
+					else if(param.equalsIgnoreCase("-op")){
+						mapArgs.put("-op", value);
 					}
 				}
 			}

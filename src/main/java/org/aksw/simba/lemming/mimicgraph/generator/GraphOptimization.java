@@ -334,6 +334,11 @@ public class GraphOptimization {
 			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
 		}
 	}
+	
+	public void setNumberOfOptimizations(int iNumberOfOptimizations){
+		if(iNumberOfOptimizations > 0 )
+			mMaxIteration = iNumberOfOptimizations; 		
+	}
 }
 
 
