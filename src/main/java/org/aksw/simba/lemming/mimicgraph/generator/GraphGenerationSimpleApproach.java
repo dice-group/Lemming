@@ -76,7 +76,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		//int iNumberOfThreads = 4;
 		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
-		final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+		final Set<BitSet> setAvailableVertexColours = new HashSet<BitSet>(mMapColourToVertexIDs.keySet());
 		
 		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
 		

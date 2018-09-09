@@ -56,7 +56,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			final Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+			final Set<BitSet> setAvailableVertexColours = new HashSet<BitSet>(mMapColourToVertexIDs.keySet());
 			
 			Runnable worker = new Runnable() {
 				@Override
