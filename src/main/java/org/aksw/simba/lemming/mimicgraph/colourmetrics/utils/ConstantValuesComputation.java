@@ -324,6 +324,8 @@ public class ConstantValuesComputation {
 	 * @return
 	 */
 	private double computeSingleErrorScore(double avrgConstVal, double standardDeviation, double constVal){
+		LOGGER.info("Mean= " + avrgConstVal + " SD = " + standardDeviation + " Const Val =" + constVal);
+		
 		double res = Math.pow(avrgConstVal - constVal, 2);
 		if(standardDeviation != 0){
 			res = res/standardDeviation;
