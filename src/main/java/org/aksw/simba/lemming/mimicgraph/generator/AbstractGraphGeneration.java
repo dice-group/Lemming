@@ -258,6 +258,8 @@ public abstract class AbstractGraphGeneration {
 					triple.headColour = headColo;
 					triple.edgeColour = edgeColo;
 					
+					LOGGER.info("Proposed added triple: ("+triple.tailId +","+triple.headId +","+ edgeColo +")");
+					
 					return triple;	
 				}
 //				else{

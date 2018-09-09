@@ -47,7 +47,6 @@ public class GraphOptimization {
 	public GraphOptimization(ColouredGraph[] origGrphs,
 			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  MetricAndConstantValuesCarrier valueCarriers) {
 		
-		
 		mLstErrorScore = new ArrayList<Double>();
 		/*
 		 *  mErrScoreCalculator is used to compute the error score compared to original
@@ -77,6 +76,18 @@ public class GraphOptimization {
 		
 		ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
 
+		//TODO test base metric values
+		Object [] metricValues = baseMetricValues.keys;
+		for(int i = 0 ; i < metricValues.length ; i++){
+			if(baseMetricValues.allocated[i]){
+				String key = (String)metricValues[i];
+				System.out.print("Metric: " + key);
+				double val = baseMetricValues.get((String)metricValues[i]);
+				System.out.print(val);
+				System.out.println();
+			}
+		}
+		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
 			
@@ -86,13 +97,13 @@ public class GraphOptimization {
 			// go left by removing an edge
 			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-			//System.out.println("[L]Aft -Number of edges: "+ parentGrph.getEdges().size());
+			System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 
 			
 			 // go right by adding a new edge
 			TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
-			//System.out.println("[R]Aft -Number of edges: "+ parentGrph.getEdges().size());
+			System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
 			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
 			
@@ -184,7 +195,7 @@ public class GraphOptimization {
 		triple.edgeId = edgeId;
 		triple.edgeColour = edgeColour;
 		
-		LOGGER.info("Removed triple: ("+triple.tailId +","+triple.headId +","+triple.edgeId+")");
+		LOGGER.info("Proposed removed triple: ("+triple.tailId +","+triple.headId +","+triple.edgeId+")");
 		return triple;
 	}
 	
