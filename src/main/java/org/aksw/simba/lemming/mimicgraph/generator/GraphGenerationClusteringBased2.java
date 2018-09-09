@@ -83,13 +83,16 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 
 	public ColouredGraph generateGraph(){
 		if(mNumberOfThreads == 1){
+			LOGGER.info("Run graph generation with single thread!");
 			generateGraphSingleThread();
 		}else{
+			LOGGER.info("Run graph generation with "+mNumberOfThreads+ " threads!");
 			//get vertices for tails and heads first
 			assignVerticesToTriples();
 			//generate graph with multi threads
 			generateGraphMultiThreads();
 		}
+		
 		return mMimicGraph;
 	}
 	
@@ -166,7 +169,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	
 	private void generateGraphMultiThreads(){
 		//exploit all possible threads
-		int iNumberOfThreads = getDefaultNoOfThreads();
+		int iNumberOfThreads = mNumberOfThreads;
 		//int iNumberOfThreads = 4;
 		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);

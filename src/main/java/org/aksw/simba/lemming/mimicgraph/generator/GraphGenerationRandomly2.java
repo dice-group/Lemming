@@ -58,9 +58,11 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	}
 
 	public ColouredGraph generateGraph(){
-		if(mNumberOfThreads == 1){
+		if(mNumberOfThreads==1){
+			LOGGER.info("Run graph generation with single thread!");
 			generateGraphSingleThread();
 		}else{
+			LOGGER.info("Run graph generation with "+mNumberOfThreads+ " threads!");
 			generateGraphMultiThreads();
 		}
 		return mMimicGraph;
@@ -70,7 +72,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	private void generateGraphMultiThreads(){
 		
 		//exploit all possible threads
-		int iNumberOfThreads = getDefaultNoOfThreads();
+		int iNumberOfThreads = mNumberOfThreads;
 		//int iNumberOfThreads = 4;
 		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
