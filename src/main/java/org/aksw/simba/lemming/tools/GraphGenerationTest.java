@@ -148,19 +148,19 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs);
         }
         
-        String numberOfThreads = mapArgs.get("tr");
-        int iNumberOfThreads = 1;
+        String numberOfThreads = mapArgs.get("-thrs");
         if(numberOfThreads!= null){
         	try{
-        		iNumberOfThreads = Integer.parseInt(numberOfThreads);
+        		int iNumberOfThreads = Integer.parseInt(numberOfThreads);
+        		mGrphGenerator.setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
+                // generate the new graph
         	}catch(Exception e){}
         }
 
         LOGGER.info("Generating a first version of mimic graph ...");
         //create a draft graph
         double startTime = System.currentTimeMillis();
-        mGrphGenerator.setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
-        // generate the new graph
+        
         mGrphGenerator.generateGraph();
         // estimate the costed time for generation
         double duration = System.currentTimeMillis() - startTime;
@@ -237,8 +237,8 @@ public class GraphGenerationTest {
 					else if(param.equalsIgnoreCase("-r")){	
 						mapArgs.put("-r", value);
 					} 
-					else if(param.equalsIgnoreCase("-tr")){
-						mapArgs.put("-tr", value);
+					else if(param.equalsIgnoreCase("-thrs")){
+						mapArgs.put("-thrs", value);
 					}
 					else if(param.equalsIgnoreCase("-op")){
 						mapArgs.put("-op", value);

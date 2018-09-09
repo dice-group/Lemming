@@ -39,7 +39,7 @@ public abstract class AbstractGraphGeneration {
 	protected ObjectDistribution<BitSet> mVertColoDist;
 	protected ObjectDistribution<BitSet> mEdgeColoDist;
 	
-	protected int mNumberOfThreads =1;
+	protected int mNumberOfThreads;
 	/*
 	 * the keys are the vertex's color and the values are the set of vertex's ids
 	 */
@@ -94,6 +94,8 @@ public abstract class AbstractGraphGeneration {
 		
 		// random
 		mRandom = new Random();
+		//number of threads 
+		mNumberOfThreads = getDefaultNoOfThreads();
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
@@ -669,12 +671,11 @@ public abstract class AbstractGraphGeneration {
 	public void setNumberOfThreadsForGenerationProcess(int iNumberOfThreads){
 		mNumberOfThreads = iNumberOfThreads;
 		if(mNumberOfThreads == 0){
-			mNumberOfThreads =1;
+			mNumberOfThreads = 1;
 		}
 		int iAvailableThreads = getDefaultNoOfThreads();
 		if(mNumberOfThreads > iAvailableThreads){
 			mNumberOfThreads = iAvailableThreads;
 		}
 	}
-	
 }
