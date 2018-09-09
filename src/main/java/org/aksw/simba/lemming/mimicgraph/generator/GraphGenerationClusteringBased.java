@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -409,6 +410,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
 		
 		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
@@ -565,11 +567,12 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					}//end iteration of edges
 				}
 			};
-			service.execute(worker);
+			tasks.add(Executors.callable(worker));
 		}
 		
-		service.shutdown();
 		try {
+			service.invokeAll(tasks);
+			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Could not shutdown the service executor! Be carefule");
