@@ -849,9 +849,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							lstTripleGroups.add(tripleGroup);
 							lstGapRequiredEdges.add(gap);
 							
-							if(1> gap ){
-								System.err.println("Break here");
-							}
+							//if(1> gap ){
+							//	System.err.println("Break here");
+							//}
 						}
 					}
 				}

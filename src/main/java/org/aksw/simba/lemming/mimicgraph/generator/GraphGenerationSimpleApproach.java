@@ -450,7 +450,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 								triple.headId = headId;
 								triple.headColour = headColo;
 								triple.edgeColour = edgeColo;
-								LOGGER.info("Proposed added triple: ("+tailId+","+headId+","+edgeColo+")");
+								//LOGGER.info("Proposed added triple: ("+tailId+","+headId+","+edgeColo+")");
 								return triple;
 							}
 						}

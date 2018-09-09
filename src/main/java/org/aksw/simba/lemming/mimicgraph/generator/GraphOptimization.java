@@ -97,7 +97,7 @@ public class GraphOptimization {
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 			
-			LOGGER.info("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
+			System.out.println("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
 					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
 			
 			if(minErrScore == lErrScore){
@@ -126,6 +126,10 @@ public class GraphOptimization {
 				LOGGER.info("Cannot find better refined graph! Break the loop!");
 				break;
 			}
+		}
+		
+		if(mTrueNoOfIteration == 0 ){
+			mTrueNoOfIteration = mMaxIteration;
 		}
 		
 		mGraphGenerator.setMimicGraph(mEdgeModifier.getGraph());
