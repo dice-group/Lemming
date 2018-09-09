@@ -122,7 +122,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						//get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
 						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
-						Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
+						Set<BitSet> setHeadColours = new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						
 						if(setHeadColours == null || setHeadColours.size() == 0){
 							maxIterationFor1Edge--;
