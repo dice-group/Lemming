@@ -52,8 +52,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 	 * Constructor
 	 */
 	public GraphGenerationClusteringBased(int iNumberOfVertices,
-			ColouredGraph[] origGrphs) {
-		super(iNumberOfVertices, origGrphs);
+			ColouredGraph[] origGrphs, int iNumberOfThreads) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
 		
 		mRandom = new Random();
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();

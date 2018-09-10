@@ -47,8 +47,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	
 	
 	public GraphGenerationRandomly2(int iNumberOfVertices,
-			ColouredGraph[] origGrphs) {
-		super(iNumberOfVertices, origGrphs);
+			ColouredGraph[] origGrphs, int iNumberOfThreads) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;;
 		mRandom = new Random();
 		// initilize variable

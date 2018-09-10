@@ -87,7 +87,7 @@ public abstract class AbstractGraphGeneration {
 	private Map<Integer, BitSet> mTmpColoureNormalEdges;
 	
 	
-	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs){
+	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads){
 		//number of vertices
 		mIDesiredNoOfVertices = iNumberOfVertices;
 		
@@ -99,7 +99,7 @@ public abstract class AbstractGraphGeneration {
 		// random
 		mRandom = new Random();
 		//number of threads 
-		mNumberOfThreads = getDefaultNoOfThreads();
+		setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
@@ -426,38 +426,23 @@ public abstract class AbstractGraphGeneration {
 		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for painting edges !");
 		
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-		 
+		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
+		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
+		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			final int indexOfThread  = i;
+			final int indexOfThread  = i+1;
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
 					//set of edges for painting
 					int[] arrOfEdges = setOfEdges.toIntArray();
 					
-					LOGGER.info("Thread " + indexOfThread +" is painting " +arrOfEdges.length +" edges ..." );
+					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
+											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					while(j < arrOfEdges.length){
-						BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem();
-						
-						if(offeredColor.equals(mRdfTypePropertyColour)){
-							continue;
-						}
-						
-						if (!mSetOfRestrictedEdgeColours.contains(offeredColor)) {
-							LOGGER.warn("This edge colour: "
-											+ offeredColor
-											+ " won't be considered in the graph generation (since there is not approriate tail's colours and head's colours to connect)");
-							continue;
-						}
-						
-						
-						/**
-						 * not add edge with the offered color to the graph
-						 * since we have to determine the head and tail for the connection
-						 * ==> just track the edge's color
-						 */
+						BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
 						
 						/**
 						 * not add edge with the offered color to the graph
@@ -524,19 +509,10 @@ public abstract class AbstractGraphGeneration {
 		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
 		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
 		
+		Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
+		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
 		for(int i = 0 ; i< iNumberOfOtherEdges ; ){
-			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem();
-			
-			if(offeredColor.equals(mRdfTypePropertyColour)){
-				continue;
-			}
-			
-			if (!mSetOfRestrictedEdgeColours.contains(offeredColor)) {
-				LOGGER.warn("This edge colour: "
-								+ offeredColor
-								+ " won't be considered in the graph generation (since there is not approriate tail's colours and head's colours to connect)");
-				continue;
-			}
+			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
 			
 			/**
 			 * not add edge with the offered color to the graph
@@ -832,7 +808,7 @@ public abstract class AbstractGraphGeneration {
 	
 	public void setNumberOfThreadsForGenerationProcess(int iNumberOfThreads){
 		mNumberOfThreads = iNumberOfThreads;
-		if(mNumberOfThreads == 0){
+		if(mNumberOfThreads <= 0){
 			mNumberOfThreads = 1;
 		}
 		int iAvailableThreads = getDefaultNoOfThreads();

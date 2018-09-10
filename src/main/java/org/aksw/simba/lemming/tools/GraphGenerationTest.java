@@ -130,30 +130,31 @@ public class GraphGenerationTest {
         	}catch(Exception e){}
         }
         
+        
+        String numberOfThreads = mapArgs.get("-thrs");
+        int iNumberOfThreads = -1;
+        if(numberOfThreads!= null){
+        	try{
+        		iNumberOfThreads = Integer.parseInt(numberOfThreads);        		
+        	}catch(Exception e){}
+        }
+        
         //define generator
         String typeGenerator = mapArgs.get("-t");
         if(typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("R")){
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs);        	
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);       	
         }else if(typeGenerator.equalsIgnoreCase("RD")){
-        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs);
+        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         }else if(typeGenerator.equalsIgnoreCase("D")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs);
+        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         }else if(typeGenerator.equalsIgnoreCase("DD")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs);
+        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         }else if(typeGenerator.equalsIgnoreCase("C")){
-        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs);        	
+        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
-        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs);
+        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs);
-        }
-        
-        String numberOfThreads = mapArgs.get("-thrs");
-        if(numberOfThreads!= null){
-        	try{
-        		int iNumberOfThreads = Integer.parseInt(numberOfThreads);
-        		mGrphGenerator.setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
-        	}catch(Exception e){}
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         }
 
         LOGGER.info("Generating a first version of mimic graph ...");

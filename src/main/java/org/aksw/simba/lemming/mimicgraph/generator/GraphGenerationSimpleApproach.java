@@ -47,8 +47,8 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	private Random mRandom;
 	
 	public GraphGenerationSimpleApproach(int iNumberOfVertices,
-			ColouredGraph[] origGrphs) {
-		super(iNumberOfVertices, origGrphs);
+			ColouredGraph[] origGrphs, int iNumberOfThreads) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
 		
 		mRandom = new Random();
 		

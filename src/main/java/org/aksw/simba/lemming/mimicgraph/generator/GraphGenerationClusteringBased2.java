@@ -54,8 +54,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	 */
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
 	
-	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs) {
-		super(iNumberOfVertices, origGrphs);
+	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();

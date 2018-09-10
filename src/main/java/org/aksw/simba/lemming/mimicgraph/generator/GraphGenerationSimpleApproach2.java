@@ -61,8 +61,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	private int maxIterationFor1EdgeColo ;
 	
 	public GraphGenerationSimpleApproach2(int iNumberOfVertices,
-			ColouredGraph[] origGrphs) {
-		super(iNumberOfVertices, origGrphs);
+			ColouredGraph[] origGrphs, int iNumberOfThreads) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
 		
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		
