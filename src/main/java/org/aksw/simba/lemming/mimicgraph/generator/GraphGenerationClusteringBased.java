@@ -706,9 +706,9 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 
 		if(!isRandom){
-			LOGGER.info("Using the override function getProposedTriple");
+			//LOGGER.info("Using the override function getProposedTriple");
+
 			// build a proposer of all cluster of triples
-			
 			Set<BitSet> setTailColours = mTrippleMapOfTailHeadEdgeRates.keySet();
 			
 			List<TripleBaseSetOfIDs> lstTripleGroups = new ArrayList<TripleBaseSetOfIDs>();

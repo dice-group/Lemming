@@ -826,8 +826,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	@Override
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		int maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+		
 		if(!isRandom){
-			LOGGER.info("Using the override function getProposedTriple");
+			//LOGGER.info("Using the override function getProposedTriple");
 			// build a proposer of all cluster of triples
 			
 			Set<BitSet> setTailColours = mTrippleMapOfTailHeadEdgeRates.keySet();

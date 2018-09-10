@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
@@ -430,9 +429,6 @@ public abstract class AbstractGraphGeneration {
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
 		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
 		
-		final Map<BitSet, IntSet> tmpSetOfColouredEdges = new HashMap<BitSet, IntSet>();
-		
-		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final int indexOfThread  = i+1;
@@ -448,8 +444,6 @@ public abstract class AbstractGraphGeneration {
 					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
 											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
-					//Map<BitSet, AtomicInteger> currentCounts;
-					//AtomicInteger a;
 					while(j < arrOfEdges.length){
 						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
 						
@@ -459,27 +453,11 @@ public abstract class AbstractGraphGeneration {
 						 * ==> just track the edge's color
 						 */
 						
-//						synchronized(mMapColourToEdgeIDs){
-//							IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
-//							if(setEdgeIDs == null){
-//								setEdgeIDs = new DefaultIntSet();
-//								mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
-//							}
-//							
-//							if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
-//									setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
-//								
-//								setEdgeIDs.add(arrOfEdges[j]);
-//								mTmpColoureNormalEdges.put(arrOfEdges[j],offeredColor);
-//								j++;
-//							}
-//						}
-						
-						synchronized(tmpSetOfColouredEdges){
-							IntSet setEdgeIDs = tmpSetOfColouredEdges.get(offeredColor);
+						synchronized(mMapColourToEdgeIDs){
+							IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
 							if(setEdgeIDs == null){
 								setEdgeIDs = new DefaultIntSet();
-								tmpSetOfColouredEdges.put(offeredColor, setEdgeIDs);
+								mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 							}
 							
 							if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
@@ -490,13 +468,8 @@ public abstract class AbstractGraphGeneration {
 								j++;
 							}
 						}
-						
-//						a = currentCounts.get(offeredColor);
-//						synchronized(a){
-//							a.incrementAndGet()
-//						}
 					}
-					// join maps
+					
 				}
 			};
 			tasks.add(Executors.callable(worker));
@@ -506,12 +479,6 @@ public abstract class AbstractGraphGeneration {
 			service.invokeAll(tasks);
 			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
-			
-			//copy map
-			if(tmpSetOfColouredEdges != null && tmpSetOfColouredEdges.size() > 0){
-				mMapColourToEdgeIDs = new HashMap<BitSet, IntSet>(tmpSetOfColouredEdges);
-			}
-			
 		} catch (InterruptedException e) {
 			LOGGER.error("Could not shutdown the service executor!");
 			e.printStackTrace();

@@ -543,7 +543,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		
 		if(!isRandom){
-			LOGGER.info("Using the override function getProposedTriple");
+			//LOGGER.info("Using the override function getProposedTriple");
 			while(true){
 				BitSet edgeColo = mEdgeColoProposer.getPotentialItem();
 				if(edgeColo != null && !edgeColo.equals(mRdfTypePropertyColour)){
