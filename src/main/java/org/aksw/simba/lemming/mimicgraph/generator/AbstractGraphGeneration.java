@@ -807,11 +807,16 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	public void setNumberOfThreadsForGenerationProcess(int iNumberOfThreads){
-		mNumberOfThreads = iNumberOfThreads;
-		if(mNumberOfThreads <= 0){
-			mNumberOfThreads = 1;
-		}
 		int iAvailableThreads = getDefaultNoOfThreads();
+		
+		if(iNumberOfThreads == 0 || iNumberOfThreads == 1){
+			mNumberOfThreads = 1;
+		}else if(iNumberOfThreads <= -1){
+			mNumberOfThreads = iAvailableThreads;
+		}else{
+			mNumberOfThreads = iNumberOfThreads;
+		}
+		
 		if(mNumberOfThreads > iAvailableThreads){
 			mNumberOfThreads = iAvailableThreads;
 		}
