@@ -153,7 +153,6 @@ public class GraphGenerationTest {
         	try{
         		int iNumberOfThreads = Integer.parseInt(numberOfThreads);
         		mGrphGenerator.setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
-                // generate the new graph
         	}catch(Exception e){}
         }
 
