@@ -24,6 +24,9 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	private double mLowerBound = 0 ;
 	private double mUpperBound = 0 ;
 	
+	private double[] mSubArrBaseItemProb;
+	private T[] mSubArrBaseItems;
+	
 	
 	public OfferedItemByRandomProb(ObjectDistribution<T> objDist){
 		mArrBaseItems = objDist.sampleSpace;
@@ -282,5 +285,95 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		
 		return null;
 	}
-	
+
+	@Override
+	public T getPotentialItem(Set<T> setOfFilteredItems, boolean reusedProbability) {
+		
+		if(reusedProbability){
+			if(mSubArrBaseItems != null && mSubArrBaseItemProb!= null){
+				
+				double lowerBound = 0 ;
+				double upperBound = mSubArrBaseItemProb[mSubArrBaseItemProb.length -1];
+				
+				T baseItem = null;
+				double randomX = 0;
+				int potentialIndex = -1;
+				do{
+					randomX = lowerBound +  mRandom.nextDouble()* (upperBound - lowerBound);
+					potentialIndex = indexOf(randomX, mSubArrBaseItemProb);					
+					if(potentialIndex != -1){
+						 baseItem = mSubArrBaseItems[potentialIndex];
+						 if(setOfFilteredItems.contains(baseItem))
+							 return baseItem;
+					}	
+				}while(potentialIndex == -1);
+			}
+		}
+
+		/**
+		 * ccompute everything again for the setOfFilteredItems
+		 */
+		
+		
+		if(setOfFilteredItems != null){
+			
+			// find the intersection of 2 set
+			
+			Set<T> intersectionSet = new HashSet<T> ();
+			for(T item: mArrBaseItems){
+				intersectionSet.add(item);
+			}
+			
+			// now the intersectionSet contains only items existing in both set
+			intersectionSet.retainAll(setOfFilteredItems);
+			
+			if(intersectionSet.size() == 1){
+				Object[] arrItems = intersectionSet.toArray(new Object[0]);
+				return (T) arrItems[0];
+				
+			}else{
+				if(intersectionSet.size() > 1){
+					mSubArrBaseItems = (T[]) (new Object[intersectionSet.size()]);
+					mSubArrBaseItemProb = new double[intersectionSet.size()];
+					
+					int iNoOfBaseItems = mArrBaseItems.length;
+					int jIndex = 0;
+					
+					for(int i = 0 ; i < iNoOfBaseItems ; i++){
+						T baseItem = mArrBaseItems[i];
+						if(intersectionSet.contains(baseItem)){
+							mSubArrBaseItems[jIndex] = baseItem;
+							if(jIndex == 0){
+								mSubArrBaseItemProb[jIndex] = mArrBaseItemProb[i];
+							}else{
+								mSubArrBaseItemProb[jIndex] = mSubArrBaseItemProb[jIndex -1] + mArrBaseItemProb[i];
+							}
+							jIndex++;
+						}
+					}
+
+					double lowerBound = 0 ;
+					double upperBound = mSubArrBaseItemProb[mSubArrBaseItemProb.length -1];
+					
+					
+					T baseItem = null;
+					double randomX = 0;
+					int potentialIndex = -1;
+					do{
+						randomX = lowerBound +  mRandom.nextDouble()* (upperBound - lowerBound);
+						potentialIndex = indexOf(randomX, mSubArrBaseItemProb);					
+						if(potentialIndex != -1){
+							 baseItem = mArrBaseItems[potentialIndex];
+							 if(setOfFilteredItems.contains(baseItem))
+								 return baseItem;
+						}	
+					}while(potentialIndex == -1);
+				}
+			}
+		}else{
+			return getPotentialItem();
+		}
+		
+		return null;
+	}
 }

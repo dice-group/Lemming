@@ -189,4 +189,10 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 		}
 		return null;
 	}
+
+	@Override
+	public T getPotentialItem(Set<T> setOfRestrictedItems,
+			boolean reusedProbability) {
+		return null;
+	}
 }

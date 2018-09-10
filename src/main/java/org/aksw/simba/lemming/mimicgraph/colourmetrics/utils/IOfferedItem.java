@@ -5,6 +5,8 @@ import java.util.Set;
 public interface IOfferedItem <T>{
 	public T getPotentialItem();
 	public T getPotentialItem(Set<T> setOfRestrictedItems );
+	public T getPotentialItem(Set<T> setOfRestrictedItems , boolean reusedProbability);
+	
 	//public double getPotentialProb();
 	//public int getPotentialIndex();
 }
