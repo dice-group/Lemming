@@ -432,6 +432,9 @@ public abstract class AbstractGraphGeneration {
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final int indexOfThread  = i+1;
+			
+			final IOfferedItem<BitSet> eColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist);
+			
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -442,7 +445,7 @@ public abstract class AbstractGraphGeneration {
 											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					while(j < arrOfEdges.length){
-						BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
+						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
 						
 						/**
 						 * not add edge with the offered color to the graph
