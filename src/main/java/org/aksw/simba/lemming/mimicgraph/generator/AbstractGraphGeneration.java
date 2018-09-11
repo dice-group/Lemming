@@ -333,8 +333,12 @@ public abstract class AbstractGraphGeneration {
 					for(BitSet headColo : setHeadColours){
 						if(setVertColours.contains(headColo)){
 							IntSet setHeadIds = mMapColourToVertexIDs.get(headColo);
+							mEdgeColoursThreshold.putOrAdd(edgeColo, 0,	0);
 							mEdgeColoursThreshold.putOrAdd(edgeColo, setTailIds.size() * setHeadIds.size(), 
 									setTailIds.size() * setHeadIds.size());
+							
+							int curVla = mEdgeColoursThreshold.get(edgeColo);
+							System.out.println("\t "+edgeColo + " colour currently has" + curVla + " edges: ");
 						}
 					}
 				}
