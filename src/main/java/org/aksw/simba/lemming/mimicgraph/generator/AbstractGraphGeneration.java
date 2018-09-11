@@ -411,6 +411,22 @@ public abstract class AbstractGraphGeneration {
 							j++;
 							continue;
 						}
+						
+						
+						System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
+						Object[] keys = tmpEdgeThreshold.keys;
+						for(int k = 0 ; k < keys.length ; k++ ){
+							if(tmpEdgeThreshold.allocated[k]){
+								BitSet c = (BitSet)keys[k];
+								System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
+							}
+						}
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 						/**
 						 * not add edge with the offered color to the graph
 						 * since we have to determine the head and tail for the connection
@@ -422,21 +438,11 @@ public abstract class AbstractGraphGeneration {
 							if(curVal < tmpEdgeThreshold.get(offeredColor)){
 								System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
 								j++;
-							}
-							else{
-								System.out.println("Thread: " + indexOfThread +" decrease number of edges: " + curVal);
-								counter.decrementAndGet();
-							}
-						}else{
-							System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
-							Object[] keys = tmpEdgeThreshold.keys;
-							for(int k = 0 ; k < keys.length ; k++ ){
-								if(tmpEdgeThreshold.allocated[k]){
-									BitSet c = (BitSet)keys[k];
-									System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
-								}
+								continue;
 							}
 						}
+						System.out.println("Thread: " + indexOfThread +" decrease number of edges: " + curVal);
+						counter.decrementAndGet();
 					}
 				}
 			};
