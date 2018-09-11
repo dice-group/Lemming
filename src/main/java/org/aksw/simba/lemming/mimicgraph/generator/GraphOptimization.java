@@ -69,6 +69,8 @@ public class GraphOptimization {
 	
 	public void refineGraph(){
 		
+		LOGGER.info("Start optimize the mimic graph!");
+		
 		int noOfRepeatedParent = 0;
 
 		double lErrScore = Double.NaN; 

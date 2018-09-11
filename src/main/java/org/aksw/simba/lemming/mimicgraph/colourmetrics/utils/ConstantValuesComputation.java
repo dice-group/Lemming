@@ -96,6 +96,8 @@ public class ConstantValuesComputation {
 		if( mMapConstantValues != null && mMapConstantValues.size() > 0 && 
 				orgiGrphs != null && orgiGrphs.length >0 ) {
 			
+			LOGGER.info("Compute error score for all input grpahs!");
+			
 			Set<String> setOfKeyGraph = new HashSet<String>();
 			
 			/*
@@ -184,7 +186,7 @@ public class ConstantValuesComputation {
 	 */
 	private void computeMeanAndStandardDeviation(ColouredGraph[] origGrphs){
 		if(origGrphs != null && mValueCarrier!=null){
-			
+			LOGGER.info("Compute mean value vector and standard deviation vector!");
 			Map<Expression, Map<String, Double>> mapConstantValues = mValueCarrier.getMapConstantValues();
 			if(mapConstantValues != null){
 				Set<Expression> setExpressions = mapConstantValues.keySet();

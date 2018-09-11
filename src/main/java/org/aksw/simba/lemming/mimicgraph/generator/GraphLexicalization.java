@@ -37,7 +37,7 @@ public class GraphLexicalization {
 	}
 
 	public ColouredGraph lexicalizeGraph() {
-		LOGGER.info("Start Lexicalizing the mimic graph");
+		LOGGER.info("Start lexicalizing the mimic graph");
 		/*
 		 * get the already refined graph
 		 */

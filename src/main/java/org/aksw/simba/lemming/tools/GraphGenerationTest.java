@@ -188,6 +188,7 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Lexicalization with word2vec
         ----------------------------------------------------*/
+        LOGGER.info("Lexicalize the mimic graph ...");
         GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         

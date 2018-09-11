@@ -40,6 +40,8 @@ public class EdgeModifier {
 	
 	private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics){
 		
+		LOGGER.info("Compute metrics on the current mimic graph!");
+		
 		mMapMetricValues  = new ObjectDoubleOpenHashMap<String>();
 		if(lstMetrics != null && lstMetrics.size()> 0 ){
 			
@@ -50,8 +52,11 @@ public class EdgeModifier {
 					isCountingNodeTriangles = true;
 				}
 				
+				double metVal = metric.apply(clonedGraph);
+				String name = metric.getName();
+				LOGGER.info("Value of "+ metric.getName() + " is " + metVal);
 				//compute value for each of metrics
-				mMapMetricValues.put(metric.getName(), metric.apply(clonedGraph));
+				mMapMetricValues.put(name, metVal);
 			}
 		}
 		if(!isCountingNodeTriangles){
