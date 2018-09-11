@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.metrics.dist.IntDistribution;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -325,14 +326,14 @@ public class MapUtil {
     
     
     public static Map<BitSet, Integer> cloneHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
-    	Map<BitSet, Integer> newMap =new HashMap<BitSet, Integer>(); 
+    	final Map<BitSet, Integer> newMap =new HashMap<BitSet, Integer>(); 
     	if(originalMap != null){
     		Object[] arrItemColours = originalMap.keys;
     		
     		for(int j =0 ; j < arrItemColours.length ; j++){
     			if(originalMap.allocated[j]){
 	    			BitSet itemColo = (BitSet)arrItemColours[j];
-	    			int value =  originalMap.get(itemColo);
+	    			final int value =  originalMap.get(itemColo);
 	    			newMap.put(itemColo, value);
     			}
     		}

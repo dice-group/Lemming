@@ -406,11 +406,9 @@ public abstract class AbstractGraphGeneration {
 					
 					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.size());
 					for(BitSet c : tmpEdgeThreshold.keySet() ){
-							System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
-					}
-					
-					for(BitSet tmpE: setOfRestrictedEdgeColours){
-						System.out.println("Colour: " +tmpE );
+							System.out.println("Colour: " +c+" - threshold:" +
+										tmpEdgeThreshold.get(c) +" - in original map: "+ mEdgeColoursThreshold.get(c));
+							
 					}
 					
 					try {
@@ -428,8 +426,6 @@ public abstract class AbstractGraphGeneration {
 							j++;
 							continue;
 						}
-						
-						System.out.println("Colour: " +offeredColor );
 						
 						/**
 						 * not add edge with the offered color to the graph
