@@ -328,7 +328,7 @@ public abstract class AbstractGraphGeneration {
 			for(BitSet tailColo: setVertColours){
 				Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 				IntSet setTailIds = mMapColourToVertexIDs.get(tailColo);
-				if(setHeadColours!= null){
+				if(setHeadColours!= null && setHeadColours.size() > 0){
 					for(BitSet headColo : setHeadColours){
 						if(setVertColours.contains(headColo)){
 							IntSet setHeadIds = mMapColourToVertexIDs.get(headColo);
@@ -418,13 +418,24 @@ public abstract class AbstractGraphGeneration {
 						 */
 						AtomicInteger counter =  mapEdgeColourCounter.get(offeredColor);
 						int curVal = counter.incrementAndGet();
-						if(tmpEdgeThreshold.containsKey(offeredColor) &&  
-								curVal < tmpEdgeThreshold.get(offeredColor)){
-							System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
-							j++;
+						if(tmpEdgeThreshold.containsKey(offeredColor) ){
+							if(curVal < tmpEdgeThreshold.get(offeredColor)){
+								System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
+								j++;
+							}
+							else{
+								System.out.println("Thread: " + indexOfThread +" decrease number of edges: " + curVal);
+								counter.decrementAndGet();
+							}
 						}else{
-							System.out.println("Thread: " + indexOfThread +" decrease number of edges: " + curVal);
-							counter.decrementAndGet();
+							System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
+							Object[] keys = tmpEdgeThreshold.keys;
+							for(int k = 0 ; k < keys.length ; k++ ){
+								if(tmpEdgeThreshold.allocated[k]){
+									BitSet c = (BitSet)keys[k];
+									System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
+								}
+							}
 						}
 					}
 				}
