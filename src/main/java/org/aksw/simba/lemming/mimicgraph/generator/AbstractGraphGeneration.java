@@ -356,68 +356,7 @@ public abstract class AbstractGraphGeneration {
 	
 	private void testAtomicNumber(){
 
-		/*
-		 * calculate number of [rdf:type] edges first. these edges will be used to define 
-		 * classes of resources in vertices.
-		 */
-		int iNumberOfRdfTypeEdges = 0 ;
-		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
-		for(BitSet vColo: setVertexColours ){
-			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
-			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
-			if(definedColours!= null){
-				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
-			}
-		}
-		
-		LOGGER.info("There are "+ iNumberOfRdfTypeEdges + " edges of rdf:type!");
-		
-		/*
-		 * 	process normal edges
-		 */
-			
-		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
-		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
-		
-		int iNoOfEdgesPerThread = 0;
-		int iNoOfSpareEdges = 0;
-		if(iNumberOfOtherEdges % mNumberOfThreads == 0 ){
-			iNoOfEdgesPerThread = iNumberOfOtherEdges/mNumberOfThreads;
-		}else{
-			iNoOfEdgesPerThread = iNumberOfOtherEdges/(mNumberOfThreads-1);
-			iNoOfSpareEdges = iNumberOfOtherEdges - ( iNoOfEdgesPerThread * (mNumberOfThreads-1));
-		}
-		
-		List<IntSet> lstAssignedEdges = new ArrayList<IntSet>();
-		
-		if(iNoOfSpareEdges == 0 ){
-			for(int i = 0 ; i< mNumberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
-				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
-					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
-					tmpSetEdges.add(iEdgeId);
-				}
-				lstAssignedEdges.add(tmpSetEdges);
-			}
-		}else{
-			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
-				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
-					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
-					tmpSetEdges.add(iEdgeId);
-				}
-				lstAssignedEdges.add(tmpSetEdges);
-			}
-			IntSet spareSetEdges = new DefaultIntSet();
-			//add remaining edges
-			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
-			spareSetEdges.add(iEdgeId);
-			while(iEdgeId < iNumberOfOtherEdges){
-				iEdgeId ++;
-				spareSetEdges.add(iEdgeId);
-			}
-			lstAssignedEdges.add(spareSetEdges);
-		}
+		List<IntSet> lstAssignedEdges = getLstTransparenEdgesForPainting();
 		
 		/*
 		 * assign edges to each thread and run
@@ -481,8 +420,10 @@ public abstract class AbstractGraphGeneration {
 						int curVal = counter.incrementAndGet();
 						if(tmpEdgeThreshold.containsKey(offeredColor) &&  
 								curVal < tmpEdgeThreshold.get(offeredColor)){
+							System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
 							j++;
 						}else{
+							System.out.println("Thread: " + indexOfThread +" decrease number of edges: " + curVal);
 							counter.decrementAndGet();
 						}
 					}
@@ -956,7 +897,7 @@ public abstract class AbstractGraphGeneration {
 		return Runtime.getRuntime().availableProcessors() * 4;
 	}
 	
-	public List<IntSet> getAssignedListEdges(int numberOfThreads){
+	public List<IntSet> getColouredEdgesForConnecting(int numberOfThreads){
 		List<IntSet> lstAssingedEdges = new ArrayList<IntSet>();
 		
 		int iNoOfEdges = mTmpColoureNormalEdges.size();
@@ -1025,6 +966,74 @@ public abstract class AbstractGraphGeneration {
 			mNumberOfThreads = iAvailableThreads;
 		}
 	}
+	
+	private List<IntSet> getLstTransparenEdgesForPainting(){
+		/*
+		 * calculate number of [rdf:type] edges first. these edges will be used to define 
+		 * classes of resources in vertices.
+		 */
+		int iNumberOfRdfTypeEdges = 0 ;
+		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVertexColours ){
+			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
+			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
+			if(definedColours!= null){
+				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
+			}
+		}
+		
+		LOGGER.info("There are "+ iNumberOfRdfTypeEdges + " edges of rdf:type!");
+		
+		/*
+		 * 	process normal edges
+		 */
+			
+		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
+		
+		int iNoOfEdgesPerThread = 0;
+		int iNoOfSpareEdges = 0;
+		if(iNumberOfOtherEdges % mNumberOfThreads == 0 ){
+			iNoOfEdgesPerThread = iNumberOfOtherEdges/mNumberOfThreads;
+		}else{
+			iNoOfEdgesPerThread = iNumberOfOtherEdges/(mNumberOfThreads-1);
+			iNoOfSpareEdges = iNumberOfOtherEdges - ( iNoOfEdgesPerThread * (mNumberOfThreads-1));
+		}
+		
+		List<IntSet> lstAssignedEdges = new ArrayList<IntSet>();
+		
+		if(iNoOfSpareEdges == 0 ){
+			for(int i = 0 ; i< mNumberOfThreads ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssignedEdges.add(tmpSetEdges);
+			}
+		}else{
+			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssignedEdges.add(tmpSetEdges);
+			}
+			IntSet spareSetEdges = new DefaultIntSet();
+			//add remaining edges
+			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
+			spareSetEdges.add(iEdgeId);
+			while(iEdgeId < iNumberOfOtherEdges){
+				iEdgeId ++;
+				spareSetEdges.add(iEdgeId);
+			}
+			lstAssignedEdges.add(spareSetEdges);
+		}
+		
+		return lstAssignedEdges;
+	}
+	
 	
 //	private void paintEdgesMultiThreads_orig(){
 //		

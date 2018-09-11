@@ -147,7 +147,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	 */
 	private int indexOf(double randomX, double[] arrProbability){
 		
-		if(randomX < getLowerbound())
+		if(randomX < getLowerbound() || arrProbability.length == 0)
 			return -1;
 		
 		if(arrProbability[0] >= randomX && randomX >= getLowerbound())
@@ -155,6 +155,17 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		
 		if(randomX > getUpperbound())
 			return -1;
+		
+		if(arrProbability.length == 1 && randomX >= 0 && randomX<= arrProbability[0])
+			return 0;
+		
+		if(arrProbability.length == 2 && randomX >= 0 ){
+			if(randomX <= arrProbability[0])
+				return 0;
+			else{
+				return 1;
+			}
+		}
 		
 		int lIndex = 0;
 		int rIndex = arrProbability.length -1;
@@ -333,6 +344,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 				
 			}else{
 				if(intersectionSet.size() > 1){
+					
 					mSubArrBaseItems = (T[]) (new Object[intersectionSet.size()]);
 					mSubArrBaseItemProb = new double[intersectionSet.size()];
 					

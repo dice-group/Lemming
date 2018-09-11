@@ -51,7 +51,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 		//exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
 		//int iNumberOfThreads = 4;
-		List<IntSet> lstAssignedEdges = getAssignedListEdges(iNumberOfThreads);
+		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(iNumberOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
 		
 		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
