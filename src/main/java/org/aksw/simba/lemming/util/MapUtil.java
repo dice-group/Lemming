@@ -325,15 +325,15 @@ public class MapUtil {
     }
     
     
-    public static Map<BitSet, Integer> cloneHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
-    	final Map<BitSet, Integer> newMap =new HashMap<BitSet, Integer>(); 
+    public static Map<BitSet, Long> cloneHashMap(ObjectDoubleOpenHashMap<BitSet> originalMap){
+    	final Map<BitSet, Long> newMap =new HashMap<BitSet, Long>(); 
     	if(originalMap != null){
     		Object[] arrItemColours = originalMap.keys;
     		
     		for(int j =0 ; j < arrItemColours.length ; j++){
     			if(originalMap.allocated[j]){
 	    			BitSet itemColo = (BitSet)arrItemColours[j];
-	    			final int value =  originalMap.get(itemColo);
+	    			final long value = (long) originalMap.get(itemColo);
 	    			newMap.put(itemColo, value);
     			}
     		}

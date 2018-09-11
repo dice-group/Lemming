@@ -34,6 +34,7 @@ import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -86,7 +87,7 @@ public abstract class AbstractGraphGeneration {
 	protected Map<BitSet, Integer> mMapClassVertices;
 	protected Map<Integer, BitSet> mReversedMapClassVertices;
 	
-	protected final ObjectIntOpenHashMap<BitSet> mEdgeColoursThreshold;
+	protected final ObjectDoubleOpenHashMap<BitSet> mEdgeColoursThreshold;
 	private Map<Integer, BitSet> mTmpColoureNormalEdges;
 	
 	
@@ -118,7 +119,7 @@ public abstract class AbstractGraphGeneration {
 		mMapClassVertices = new HashMap<BitSet, Integer>();
 		mReversedMapClassVertices = new HashMap<Integer, BitSet>();
 		
-		mEdgeColoursThreshold = new ObjectIntOpenHashMap<BitSet>();
+		mEdgeColoursThreshold = new ObjectDoubleOpenHashMap<BitSet>();
 		
 		// colour of rdf:type edge
 		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
@@ -334,10 +335,14 @@ public abstract class AbstractGraphGeneration {
 						if(setVertColours.contains(headColo)){
 							IntSet setHeadIds = mMapColourToVertexIDs.get(headColo);
 							mEdgeColoursThreshold.putOrAdd(edgeColo, 0,	0);
+							
+							System.out.println("\t T "+tailColo + ":" + setTailIds.size() + 
+									" - H "+ headColo + ":"+setHeadIds.size());
+							
 							mEdgeColoursThreshold.putOrAdd(edgeColo, setTailIds.size() * setHeadIds.size(), 
 									setTailIds.size() * setHeadIds.size());
 							
-							int curVla = mEdgeColoursThreshold.get(edgeColo);
+							long curVla = (long)mEdgeColoursThreshold.get(edgeColo);
 							System.out.println("\t "+edgeColo + " colour currently has" + curVla + " edges: ");
 						}
 					}
@@ -349,7 +354,7 @@ public abstract class AbstractGraphGeneration {
 		for(int i = 0  ; i< arrObjs.length ; i++){
 			if(mEdgeColoursThreshold.allocated[i]){
 				BitSet keyColo = (BitSet)arrObjs[i];
-				int number = mEdgeColoursThreshold.get(keyColo);
+				long number = (long)mEdgeColoursThreshold.get(keyColo);
 				System.out.println("Edge colour: " + keyColo + " has max edges: " + number);
 			}
 		}
@@ -405,7 +410,7 @@ public abstract class AbstractGraphGeneration {
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
 			
-			final Map<BitSet, Integer> tmpEdgeThreshold = MapUtil.cloneHashMap(mEdgeColoursThreshold);
+			final Map<BitSet, Long> tmpEdgeThreshold = MapUtil.cloneHashMap(mEdgeColoursThreshold);
 			
 			Runnable worker = new Runnable() {
 				@Override
@@ -587,7 +592,7 @@ public abstract class AbstractGraphGeneration {
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
 			
-			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
+			final ObjectDoubleOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
 			
 			
 			Runnable worker = new Runnable() {
