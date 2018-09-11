@@ -404,14 +404,14 @@ public abstract class AbstractGraphGeneration {
 											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					
-//					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
-//					Object[] keys = tmpEdgeThreshold.keys;
-//					for(int k = 0 ; k < keys.length ; k++ ){
-//						if(tmpEdgeThreshold.allocated[k]){
-//							BitSet c = (BitSet)keys[k];
-//							System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
-//						}
-//					}
+					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
+					Object[] keys = tmpEdgeThreshold.keys;
+					for(int k = 0 ; k < keys.length ; k++ ){
+						if(tmpEdgeThreshold.allocated[k]){
+							BitSet c = (BitSet)keys[k];
+							System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
+						}
+					}
 					
 					for(BitSet tmpE: setOfRestrictedEdgeColours){
 						System.out.println("Colour: " +tmpE );
@@ -445,7 +445,7 @@ public abstract class AbstractGraphGeneration {
 						
 						System.out.println("Current number of edges : " +curVal );
 						System.out.println("Threshod: "+ tmpEdgeThreshold.get(offeredColor));
-						System.out.println("Containt: " + tmpEdgeThreshold.containsKey(offeredColor));
+						System.out.println("Contain: " + tmpEdgeThreshold.containsKey(offeredColor));
 						if(tmpEdgeThreshold.containsKey(offeredColor) ){
 							if(curVal < tmpEdgeThreshold.get(offeredColor)){
 								System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
