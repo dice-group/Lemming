@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
@@ -348,9 +349,182 @@ public abstract class AbstractGraphGeneration {
 		if(mNumberOfThreads <= 1 ){
 			paintEdgesSingleThread();
 		}else{
-			paintEdgesMultiThreads();
+			//paintEdgesMultiThreads();
+			testAtomicNumber();
 		}
 	}
+	
+	private void testAtomicNumber(){
+
+		/*
+		 * calculate number of [rdf:type] edges first. these edges will be used to define 
+		 * classes of resources in vertices.
+		 */
+		int iNumberOfRdfTypeEdges = 0 ;
+		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVertexColours ){
+			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
+			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
+			if(definedColours!= null){
+				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
+			}
+		}
+		
+		LOGGER.info("There are "+ iNumberOfRdfTypeEdges + " edges of rdf:type!");
+		
+		/*
+		 * 	process normal edges
+		 */
+			
+		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
+		
+		int iNoOfEdgesPerThread = 0;
+		int iNoOfSpareEdges = 0;
+		if(iNumberOfOtherEdges % mNumberOfThreads == 0 ){
+			iNoOfEdgesPerThread = iNumberOfOtherEdges/mNumberOfThreads;
+		}else{
+			iNoOfEdgesPerThread = iNumberOfOtherEdges/(mNumberOfThreads-1);
+			iNoOfSpareEdges = iNumberOfOtherEdges - ( iNoOfEdgesPerThread * (mNumberOfThreads-1));
+		}
+		
+		List<IntSet> lstAssignedEdges = new ArrayList<IntSet>();
+		
+		if(iNoOfSpareEdges == 0 ){
+			for(int i = 0 ; i< mNumberOfThreads ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssignedEdges.add(tmpSetEdges);
+			}
+		}else{
+			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
+				IntSet tmpSetEdges = new DefaultIntSet();
+				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
+					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
+					tmpSetEdges.add(iEdgeId);
+				}
+				lstAssignedEdges.add(tmpSetEdges);
+			}
+			IntSet spareSetEdges = new DefaultIntSet();
+			//add remaining edges
+			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
+			spareSetEdges.add(iEdgeId);
+			while(iEdgeId < iNumberOfOtherEdges){
+				iEdgeId ++;
+				spareSetEdges.add(iEdgeId);
+			}
+			lstAssignedEdges.add(spareSetEdges);
+		}
+		
+		/*
+		 * assign edges to each thread and run
+		 */
+		
+		ExecutorService service = Executors.newFixedThreadPool(mNumberOfThreads);
+		
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for painting edges !");
+		
+		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
+		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
+		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
+		
+		//concurrent hash map shared between multi-threads
+		//final Map<BitSet, IntSet> mapColouredEdgeIds = new ConcurrentHashMap<BitSet, IntSet>();
+		final Map<BitSet, AtomicInteger> mapEdgeColourCounter = new HashMap<BitSet, AtomicInteger>();
+		
+		if(setOfRestrictedEdgeColours.size() == 0){
+			LOGGER.error("Cound not found any edge colour except rdf:type edges!");
+			return;
+		}
+		
+		for(BitSet eColo: setOfRestrictedEdgeColours){
+			mapEdgeColourCounter.put(eColo, new AtomicInteger());
+		}
+		
+		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
+			final IntSet setOfEdges = lstAssignedEdges.get(i);
+			final int indexOfThread  = i+1;
+			
+			final IOfferedItem<BitSet> eColoProposer = 
+					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
+			
+			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
+			
+			
+			Runnable worker = new Runnable() {
+				@Override
+				public void run() {
+					//set of edges for painting
+					int[] arrOfEdges = setOfEdges.toIntArray();
+					
+					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
+											+ setOfRestrictedEdgeColours.size()+" colours... ");
+					int j = 0 ; 
+					while(j < arrOfEdges.length){
+						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
+						
+						if(offeredColor == null){
+							LOGGER.warn("Skip edge "+ arrOfEdges[j]);
+							j++;
+							continue;
+						}
+						/**
+						 * not add edge with the offered color to the graph
+						 * since we have to determine the head and tail for the connection
+						 * ==> just track the edge's color
+						 */
+						AtomicInteger counter =  mapEdgeColourCounter.get(offeredColor);
+						
+						synchronized(counter){
+							if(tmpEdgeThreshold.containsKey(offeredColor) &&  
+									counter.get() < tmpEdgeThreshold.get(offeredColor)){
+								
+								counter.incrementAndGet();			
+								j++;
+							}	
+						}
+					}
+				}
+			};
+			tasks.add(Executors.callable(worker));
+		}
+		
+		try {
+			service.invokeAll(tasks);
+			service.shutdown();
+			service.awaitTermination(48, TimeUnit.HOURS);
+			LOGGER.info("All threads are finised --> Copy result back to map");
+			
+			/*
+			 * copy back to global variable
+			 */
+			Set<BitSet> setEdgeColours = mapEdgeColourCounter.keySet();
+			int fakeEdgeID = 0 ;
+			for(BitSet eColo: setEdgeColours){
+				int j= 0;
+				AtomicInteger counter = mapEdgeColourCounter.get(eColo);
+				while(j < counter.get()){
+					mTmpColoureNormalEdges.put(fakeEdgeID,eColo);
+					IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
+					if(setEdges == null ){
+						setEdges = new DefaultIntSet();
+						mMapColourToEdgeIDs.put(eColo, setEdges);
+					}
+					setEdges.add(fakeEdgeID	);
+					j++;
+					fakeEdgeID++;
+				}
+			}
+			
+		} catch (InterruptedException e) {
+			LOGGER.error("Could not shutdown the service executor!");
+			e.printStackTrace();
+		}
+	}
+	
 	
 	private void paintEdgesMultiThreads(){
 		
@@ -417,7 +591,9 @@ public abstract class AbstractGraphGeneration {
 			lstAssignedEdges.add(spareSetEdges);
 		}
 		
-		//assign edges to each thread and run
+		/*
+		 * assign edges to each thread and run
+		 */
 		
 		ExecutorService service = Executors.newFixedThreadPool(mNumberOfThreads);
 		
@@ -436,6 +612,9 @@ public abstract class AbstractGraphGeneration {
 			
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
+			
+			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
+			
 			
 			Runnable worker = new Runnable() {
 				@Override
@@ -466,10 +645,11 @@ public abstract class AbstractGraphGeneration {
 							mapColouredEdgeIds.put(offeredColor, setEdgeIDs);
 						}
 						
-						if(mEdgeColoursThreshold.containsKey(offeredColor) &&  
-								setEdgeIDs.size() < mEdgeColoursThreshold.get(offeredColor)){
+						if(tmpEdgeThreshold.containsKey(offeredColor) &&  
+								setEdgeIDs.size() < tmpEdgeThreshold.get(offeredColor)){
 							
 							setEdgeIDs.add(arrOfEdges[j]);
+							LOGGER.warn("Thread- "+indexOfThread+" painted edge "+ arrOfEdges[j] + "("+j+"/"+arrOfEdges.length+")");
 							j++;
 						}
 					}
@@ -483,7 +663,10 @@ public abstract class AbstractGraphGeneration {
 			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
 			LOGGER.info("All threads are finised --> Copy result back to map");
-			//copy back to global variable
+			
+			/*
+			 * copy back to global variable
+			 */
 			Set<BitSet> setEdgeColours = mapColouredEdgeIds.keySet();
 			for(BitSet eColo: setEdgeColours){
 				int [] arrEdgeIds = mapColouredEdgeIds.get(eColo).toIntArray();
@@ -530,7 +713,11 @@ public abstract class AbstractGraphGeneration {
 		Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
 		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
 		for(int i = 0 ; i< iNumberOfOtherEdges ; ){
-			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem(setOfRestrictedEdgeColours);
+			BitSet offeredColor = (BitSet) mEdgeColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
+			
+			if(offeredColor == null){
+				continue;
+			}
 			
 			/**
 			 * not add edge with the offered color to the graph
