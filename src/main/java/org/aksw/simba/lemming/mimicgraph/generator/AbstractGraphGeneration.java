@@ -86,7 +86,7 @@ public abstract class AbstractGraphGeneration {
 	protected Map<BitSet, Integer> mMapClassVertices;
 	protected Map<Integer, BitSet> mReversedMapClassVertices;
 	
-	protected ObjectIntOpenHashMap<BitSet> mEdgeColoursThreshold;
+	protected final ObjectIntOpenHashMap<BitSet> mEdgeColoursThreshold;
 	private Map<Integer, BitSet> mTmpColoureNormalEdges;
 	
 	
@@ -338,6 +338,15 @@ public abstract class AbstractGraphGeneration {
 						}
 					}
 				}
+			}
+		}
+		
+		Object[] arrObjs = mEdgeColoursThreshold.keys;
+		for(int i = 0  ; i< arrObjs.length ; i++){
+			if(mEdgeColoursThreshold.allocated[i]){
+				BitSet keyColo = (BitSet)arrObjs[i];
+				int number = mEdgeColoursThreshold.get(keyColo);
+				System.out.println("Edge colour: " + keyColo + " has max edges: " + number);
 			}
 		}
 	}
