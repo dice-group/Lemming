@@ -403,6 +403,27 @@ public abstract class AbstractGraphGeneration {
 					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
 											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
+					
+//					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
+//					Object[] keys = tmpEdgeThreshold.keys;
+//					for(int k = 0 ; k < keys.length ; k++ ){
+//						if(tmpEdgeThreshold.allocated[k]){
+//							BitSet c = (BitSet)keys[k];
+//							System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
+//						}
+//					}
+					
+					for(BitSet tmpE: setOfRestrictedEdgeColours){
+						System.out.println("Colour: " +tmpE );
+					}
+					
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					while(j < arrOfEdges.length){
 						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
 						
@@ -412,21 +433,8 @@ public abstract class AbstractGraphGeneration {
 							continue;
 						}
 						
+						System.out.println("Colour: " +offeredColor );
 						
-						System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
-						Object[] keys = tmpEdgeThreshold.keys;
-						for(int k = 0 ; k < keys.length ; k++ ){
-							if(tmpEdgeThreshold.allocated[k]){
-								BitSet c = (BitSet)keys[k];
-								System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
-							}
-						}
-						try {
-							Thread.sleep(5000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
 						/**
 						 * not add edge with the offered color to the graph
 						 * since we have to determine the head and tail for the connection
