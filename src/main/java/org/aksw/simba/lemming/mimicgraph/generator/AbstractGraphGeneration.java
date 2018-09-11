@@ -431,14 +431,15 @@ public abstract class AbstractGraphGeneration {
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
 		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
 		
+		if(setOfRestrictedEdgeColours.size() == 0){
+			LOGGER.error("Cound not find any edge colour except rdf:type edges!");
+			return;
+		}
+		
+		
 		//concurrent hash map shared between multi-threads
 		//final Map<BitSet, IntSet> mapColouredEdgeIds = new ConcurrentHashMap<BitSet, IntSet>();
 		final Map<BitSet, AtomicInteger> mapEdgeColourCounter = new HashMap<BitSet, AtomicInteger>();
-		
-		if(setOfRestrictedEdgeColours.size() == 0){
-			LOGGER.error("Cound not found any edge colour except rdf:type edges!");
-			return;
-		}
 		
 		for(BitSet eColo: setOfRestrictedEdgeColours){
 			mapEdgeColourCounter.put(eColo, new AtomicInteger());
@@ -477,14 +478,12 @@ public abstract class AbstractGraphGeneration {
 						 * ==> just track the edge's color
 						 */
 						AtomicInteger counter =  mapEdgeColourCounter.get(offeredColor);
-						
-						synchronized(counter){
-							if(tmpEdgeThreshold.containsKey(offeredColor) &&  
-									counter.get() < tmpEdgeThreshold.get(offeredColor)){
-								
-								counter.incrementAndGet();			
-								j++;
-							}	
+						int curVal = counter.incrementAndGet();
+						if(tmpEdgeThreshold.containsKey(offeredColor) &&  
+								curVal < tmpEdgeThreshold.get(offeredColor)){
+							j++;
+						}else{
+							counter.decrementAndGet();
 						}
 					}
 				}
