@@ -305,4 +305,21 @@ public class MapUtil {
     	}
     }
     
+    public static ObjectIntOpenHashMap<BitSet> cloneMap(ObjectIntOpenHashMap<BitSet> originalMap){
+    	ObjectIntOpenHashMap<BitSet> newMap =new ObjectIntOpenHashMap<BitSet>(); 
+    	if(originalMap != null){
+    		Object[] arrItemColours = originalMap.keys;
+    		
+    		for(int j =0 ; j < arrItemColours.length ; j++){
+    			if(originalMap.allocated[j]){
+	    			BitSet itemColo = (BitSet)arrItemColours[j];
+	    			int value =  originalMap.get(itemColo);
+	    			newMap.putOrAdd(itemColo, value, value);
+    			}
+    		}
+    	}
+    	
+    	return newMap;
+    }
+    
 }

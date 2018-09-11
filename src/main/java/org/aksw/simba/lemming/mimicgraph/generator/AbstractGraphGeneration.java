@@ -26,6 +26,7 @@ import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -391,8 +392,7 @@ public abstract class AbstractGraphGeneration {
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
 			
-			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
-			
+			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = MapUtil.cloneMap(mEdgeColoursThreshold);
 			
 			Runnable worker = new Runnable() {
 				@Override
