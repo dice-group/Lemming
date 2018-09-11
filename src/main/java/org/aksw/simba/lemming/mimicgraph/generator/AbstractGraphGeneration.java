@@ -547,8 +547,7 @@ public abstract class AbstractGraphGeneration {
 				IntSet setEdgeIds = mMapColourToEdgeIDs.get(eColo);
 				if(setEdgeIds!=null && setEdgeIds.size() > 0){
 					
-					int [] arrEdgeIds = mMapColourToEdgeIDs.get(eColo).toIntArray();
-					for(int eId: arrEdgeIds){
+					for(int eId: mMapColourToEdgeIDs.get(eColo).toIntegerArrayList()){
 						mMapEdgeIdsToColour.put(eId,eColo);
 					}
 				}else{

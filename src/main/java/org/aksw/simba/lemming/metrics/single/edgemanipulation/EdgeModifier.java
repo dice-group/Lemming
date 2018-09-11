@@ -40,7 +40,7 @@ public class EdgeModifier {
 	
 	private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics){
 		
-		LOGGER.info("Compute metrics on the current mimic graph!");
+		LOGGER.info("Compute "+lstMetrics.size()+ " metrics on the current mimic graph!");
 		
 		mMapMetricValues  = new ObjectDoubleOpenHashMap<String>();
 		if(lstMetrics != null && lstMetrics.size()> 0 ){

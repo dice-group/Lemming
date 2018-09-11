@@ -438,7 +438,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 								}
 								
 								if(setOfRandomHeadIds.size() == 0 ){
-									LOGGER.warn("No heads any more! Consider another tail colour");
+									LOGGER.warn("No heads any more! Consider another tail");
 									continue;
 								}
 								Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setOfRandomHeadIds.toIntegerArrayList());
