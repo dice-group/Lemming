@@ -392,7 +392,7 @@ public abstract class AbstractGraphGeneration {
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
 			
-			final ObjectIntOpenHashMap<BitSet> tmpEdgeThreshold = MapUtil.cloneMap(mEdgeColoursThreshold);
+			final Map<BitSet, Integer> tmpEdgeThreshold = MapUtil.cloneHashMap(mEdgeColoursThreshold);
 			
 			Runnable worker = new Runnable() {
 				@Override
@@ -404,13 +404,9 @@ public abstract class AbstractGraphGeneration {
 											+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					
-					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.assigned);
-					Object[] keys = tmpEdgeThreshold.keys;
-					for(int k = 0 ; k < keys.length ; k++ ){
-						if(tmpEdgeThreshold.allocated[k]){
-							BitSet c = (BitSet)keys[k];
+					System.out.println("Number of key colour in threshod: " +tmpEdgeThreshold.size());
+					for(BitSet c : tmpEdgeThreshold.keySet() ){
 							System.out.println("Colour: " +c+" - threshold:" + tmpEdgeThreshold.get(c) );
-						}
 					}
 					
 					for(BitSet tmpE: setOfRestrictedEdgeColours){

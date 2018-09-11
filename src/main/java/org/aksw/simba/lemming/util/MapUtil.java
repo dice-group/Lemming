@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -305,7 +306,7 @@ public class MapUtil {
     	}
     }
     
-    public static ObjectIntOpenHashMap<BitSet> cloneMap(ObjectIntOpenHashMap<BitSet> originalMap){
+    public static ObjectIntOpenHashMap<BitSet> cloneObjectIntHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
     	ObjectIntOpenHashMap<BitSet> newMap =new ObjectIntOpenHashMap<BitSet>(); 
     	if(originalMap != null){
     		Object[] arrItemColours = originalMap.keys;
@@ -315,6 +316,24 @@ public class MapUtil {
 	    			BitSet itemColo = (BitSet)arrItemColours[j];
 	    			int value =  originalMap.get(itemColo);
 	    			newMap.putOrAdd(itemColo, value, value);
+    			}
+    		}
+    	}
+    	
+    	return newMap;
+    }
+    
+    
+    public static Map<BitSet, Integer> cloneHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
+    	Map<BitSet, Integer> newMap =new HashMap<BitSet, Integer>(); 
+    	if(originalMap != null){
+    		Object[] arrItemColours = originalMap.keys;
+    		
+    		for(int j =0 ; j < arrItemColours.length ; j++){
+    			if(originalMap.allocated[j]){
+	    			BitSet itemColo = (BitSet)arrItemColours[j];
+	    			int value =  originalMap.get(itemColo);
+	    			newMap.put(itemColo, value);
     			}
     		}
     	}
