@@ -442,6 +442,10 @@ public abstract class AbstractGraphGeneration {
 						 */
 						AtomicInteger counter =  mapEdgeColourCounter.get(offeredColor);
 						int curVal = counter.incrementAndGet();
+						
+						System.out.println("Current number of edges : " +curVal );
+						System.out.println("Threshod: "+ tmpEdgeThreshold.get(offeredColor));
+						System.out.println("Containt: " + tmpEdgeThreshold.containsKey(offeredColor));
 						if(tmpEdgeThreshold.containsKey(offeredColor) ){
 							if(curVal < tmpEdgeThreshold.get(offeredColor)){
 								System.out.println("Thread: " + indexOfThread +" number of edges: " + curVal + " - index "+ j);
