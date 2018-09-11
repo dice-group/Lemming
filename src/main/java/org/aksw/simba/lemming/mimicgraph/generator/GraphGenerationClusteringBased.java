@@ -234,10 +234,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				
 				if(setEdges!=null && setEdges.size() >0){
 					
-					int[] arrEdges = setEdges.toIntArray();
-					for (int i = 0 ; i < arrEdges.length ; i++){
+					for(int eId: setEdges.toIntegerArrayList()){
 						TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
-						int eId = arrEdges[i];
 						offeredGrpTriple.edgeIDs.add(eId);
 						
 						// add to map fake edge ids and triple colours
@@ -378,18 +376,19 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 						}
 						
 						
-						int[] arrTailIDs = setOfRandomTailIds.toIntArray();
-						triple.tailIDs.addAll(arrTailIDs);
-						int[] arrHeadIDs = setOfRandomHeadIds.toIntArray();
-						triple.headIDs.addAll(arrHeadIDs);
+						
+						triple.tailIDs.addAll(setOfRandomTailIds);
+						triple.headIDs.addAll(setOfRandomHeadIds);
 						/*
 						 *  standardize the amount of edges and vertices
 						 *  this makes sure there is no pair of vertices are connected by 
 						 *  2 edges in same colour 
 						 */
-						if(arrHeadIDs.length * arrTailIDs.length < noOfEdges){
-							LOGGER.warn("Not generate " + (noOfEdges - (arrHeadIDs.length * arrTailIDs.length)) + " edges in "+ edgeColo );
-							noOfEdges = arrHeadIDs.length * arrTailIDs.length;
+						double totalEdges = (double)(setOfRandomTailIds.size() * setOfRandomHeadIds.size());
+						
+						if( totalEdges < noOfEdges){
+							LOGGER.warn("Not generate " + (noOfEdges - totalEdges) 	+ " edges in "+ edgeColo );
+							noOfEdges = totalEdges;
 						}
 						
 						triple.noOfEdges = noOfEdges;
@@ -424,7 +423,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					//track the index of previous iteration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
-					int[] arrOfEdges = setOfEdges.toIntArray();
+					ArrayList<Integer> lstEdgeIds = setOfEdges.toIntegerArrayList();
 					
 					/*
 					 *  set of failed edge colours. A failed edge colour is 
@@ -435,9 +434,9 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					
 					//iterate through all edge
 					int j = 0 ;
-					while(j < arrOfEdges.length){
+					while(j < lstEdgeIds.size()){
 						//get an edge id
-						int fakeEdgeId = arrOfEdges[j];
+						int fakeEdgeId = lstEdgeIds.get(j);
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
 						
 						if(edgeColo == null){
@@ -555,7 +554,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 						
 						if (maxIterationFor1Edge == 0) {
 							LOGGER.error("Could not create "
-									+ (arrOfEdges.length - j)
+									+ (lstEdgeIds.size() - j)
 									+ " edges in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate vertices to connect.");						
