@@ -79,7 +79,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	}
 
 	public ColouredGraph generateGraph(){
-		if(mNumberOfThreads==1){
+		if(mNumberOfThreads<=1){
 			LOGGER.info("Run graph generation with single thread!");
 			generateGraphSingleThread();
 		}else{

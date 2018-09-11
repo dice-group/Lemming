@@ -51,13 +51,13 @@ public abstract class AbstractGraphGeneration {
 	/*
 	 * the keys are the vertex's color and the values are the set of vertex's ids
 	 */
-	protected Map<BitSet, IntSet> mMapColourToVertexIDs = new HashMap<BitSet, IntSet>();
+	protected Map<BitSet, IntSet> mMapColourToVertexIDs = new ConcurrentHashMap<BitSet, IntSet>();
 	
 	/*
 	 * the keys are the edge's color and the values are the set of edge's ids
 	 * (note: fake id)
 	 */
-	protected Map<BitSet, IntSet> mMapColourToEdgeIDs = new HashMap<BitSet, IntSet>();
+	protected Map<BitSet, IntSet> mMapColourToEdgeIDs = new ConcurrentHashMap<BitSet, IntSet>();
 
 	protected ColouredGraph mMimicGraph;
 	
@@ -88,7 +88,7 @@ public abstract class AbstractGraphGeneration {
 	protected Map<Integer, BitSet> mReversedMapClassVertices;
 	
 	//protected final ObjectDoubleOpenHashMap<BitSet> mEdgeColoursThreshold;
-	private Map<Integer, BitSet> mTmpColoureNormalEdges;
+	private Map<Integer, BitSet> mMapEdgeIdsToColour;
 	
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads){
@@ -107,14 +107,14 @@ public abstract class AbstractGraphGeneration {
 		
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
-		mTmpColoureNormalEdges = new HashMap<Integer, BitSet>();
+		mMapEdgeIdsToColour = new HashMap<Integer, BitSet>();
 		mMapEdgeColoursToConnectedVertices = new HashMap<BitSet, Map<Integer, IntSet>>();
 		
 		//compute average distribution of vertex's and edge's colors
 		mVertColoDist = AvrgVertColoDistMetric.apply(origGrphs);
 		mEdgeColoDist = AvrgEdgeColoDistMetric.apply(origGrphs);
 		
-		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist);
+		//mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist);
 		
 		mMapClassVertices = new HashMap<BitSet, Integer>();
 		mReversedMapClassVertices = new HashMap<Integer, BitSet>();
@@ -130,14 +130,14 @@ public abstract class AbstractGraphGeneration {
 		//assign colors to vertices
 		paintVertices();
 		
+		//initialize edge colour proposer
+		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours);
+		
 		//assign colors to edges
 		paintEdges();
 		
-		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours);
-		
 		//defining type of resource vertices
 		connectVerticesWithRDFTypeEdges();
-		
 	}
 
 	public Map<BitSet,IntSet> getMappingColoursAndVertices(){
@@ -352,8 +352,8 @@ public abstract class AbstractGraphGeneration {
 		if(mNumberOfThreads <= 1 ){
 			paintEdgesSingleThread();
 		}else{
-			//paintEdgesMultiThreads();
-			testAtomicNumber();
+			paintEdgesMultiThreads();
+			//testAtomicNumber();
 		}
 	}
 	
@@ -443,7 +443,7 @@ public abstract class AbstractGraphGeneration {
 				int j= 0;
 				AtomicInteger counter = mapEdgeColourCounter.get(eColo);
 				while(j < counter.get()){
-					mTmpColoureNormalEdges.put(fakeEdgeID,eColo);
+					mMapEdgeIdsToColour.put(fakeEdgeID,eColo);
 					IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
 					if(setEdges == null ){
 						setEdges = new DefaultIntSet();
@@ -464,68 +464,7 @@ public abstract class AbstractGraphGeneration {
 	
 	private void paintEdgesMultiThreads(){
 		
-		/*
-		 * calculate number of [rdf:type] edges first. these edges will be used to define 
-		 * classes of resources in vertices.
-		 */
-		int iNumberOfRdfTypeEdges = 0 ;
-		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
-		for(BitSet vColo: setVertexColours ){
-			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
-			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
-			if(definedColours!= null){
-				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
-			}
-		}
-		
-		LOGGER.info("There are "+ iNumberOfRdfTypeEdges + " edges of rdf:type!");
-		
-		/*
-		 * 	process normal edges
-		 */
-			
-		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
-		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
-		
-		int iNoOfEdgesPerThread = 0;
-		int iNoOfSpareEdges = 0;
-		if(iNumberOfOtherEdges % mNumberOfThreads == 0 ){
-			iNoOfEdgesPerThread = iNumberOfOtherEdges/mNumberOfThreads;
-		}else{
-			iNoOfEdgesPerThread = iNumberOfOtherEdges/(mNumberOfThreads-1);
-			iNoOfSpareEdges = iNumberOfOtherEdges - ( iNoOfEdgesPerThread * (mNumberOfThreads-1));
-		}
-		
-		List<IntSet> lstAssignedEdges = new ArrayList<IntSet>();
-		
-		if(iNoOfSpareEdges == 0 ){
-			for(int i = 0 ; i< mNumberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
-				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
-					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
-					tmpSetEdges.add(iEdgeId);
-				}
-				lstAssignedEdges.add(tmpSetEdges);
-			}
-		}else{
-			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
-				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
-					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
-					tmpSetEdges.add(iEdgeId);
-				}
-				lstAssignedEdges.add(tmpSetEdges);
-			}
-			IntSet spareSetEdges = new DefaultIntSet();
-			//add remaining edges
-			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
-			spareSetEdges.add(iEdgeId);
-			while(iEdgeId < iNumberOfOtherEdges){
-				iEdgeId ++;
-				spareSetEdges.add(iEdgeId);
-			}
-			lstAssignedEdges.add(spareSetEdges);
-		}
+		List<IntSet> lstAssignedEdges = getLstTransparenEdgesForPainting();
 		
 		/*
 		 * assign edges to each thread and run
@@ -539,8 +478,17 @@ public abstract class AbstractGraphGeneration {
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
 		setOfRestrictedEdgeColours.remove(mRdfTypePropertyColour);
 		
+		if(setOfRestrictedEdgeColours.size() == 0 ){
+			LOGGER.error("Could not find any other edge colour except rdf:type edge colour");
+			return ;
+		}
+		
 		//concurrent hash map shared between multi-threads
-		final Map<BitSet, IntSet> mapColouredEdgeIds = new ConcurrentHashMap<BitSet, IntSet>();
+		
+		for(BitSet eColo: setOfRestrictedEdgeColours){
+			IntSet setEdges = new DefaultIntSet();
+			mMapColourToEdgeIDs.put(eColo, setEdges);
+		}
 		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
@@ -565,7 +513,7 @@ public abstract class AbstractGraphGeneration {
 						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
 						
 						if(offeredColor == null){
-							LOGGER.warn("Skip edge "+ arrOfEdges[j]);
+							LOGGER.error("Skip edge "+ arrOfEdges[j] +" because of null colour!");
 							j++;
 							continue;
 						}
@@ -575,12 +523,7 @@ public abstract class AbstractGraphGeneration {
 						 * ==> just track the edge's color
 						 */
 						
-						IntSet setEdgeIDs = mapColouredEdgeIds.get(offeredColor);
-						if(setEdgeIDs == null){
-							setEdgeIDs = new DefaultIntSet();
-							mapColouredEdgeIds.put(offeredColor, setEdgeIDs);
-						}
-							
+						IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
 						setEdgeIDs.add(arrOfEdges[j]);
 						LOGGER.warn("Thread- "+indexOfThread+" painted edge "+ arrOfEdges[j] + "("+j+"/"+arrOfEdges.length+")");
 						j++;
@@ -599,11 +542,18 @@ public abstract class AbstractGraphGeneration {
 			/*
 			 * copy back to global variable
 			 */
-			Set<BitSet> setEdgeColours = mapColouredEdgeIds.keySet();
+			Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 			for(BitSet eColo: setEdgeColours){
-				int [] arrEdgeIds = mapColouredEdgeIds.get(eColo).toIntArray();
-				for(int eId: arrEdgeIds){
-					mTmpColoureNormalEdges.put(eId,eColo);
+				IntSet setEdgeIds = mMapColourToEdgeIDs.get(eColo);
+				if(setEdgeIds!=null && setEdgeIds.size() > 0){
+					
+					int [] arrEdgeIds = mMapColourToEdgeIDs.get(eColo).toIntArray();
+					for(int eId: arrEdgeIds){
+						mMapEdgeIdsToColour.put(eId,eColo);
+					}
+				}else{
+					mMapColourToEdgeIDs.remove(eColo);
+					LOGGER.warn("Remove " + eColo +" edge colour, since there is no edges having this colour!");
 				}
 			}
 			
@@ -664,7 +614,7 @@ public abstract class AbstractGraphGeneration {
 			}
 				
 			setEdgeIDs.add(i);
-			mTmpColoureNormalEdges.put(i,offeredColor);
+			mMapEdgeIdsToColour.put(i,offeredColor);
 			i++;
 			
 		}
@@ -887,7 +837,7 @@ public abstract class AbstractGraphGeneration {
 	public List<IntSet> getColouredEdgesForConnecting(int numberOfThreads){
 		List<IntSet> lstAssingedEdges = new ArrayList<IntSet>();
 		
-		int iNoOfEdges = mTmpColoureNormalEdges.size();
+		int iNoOfEdges = mMapEdgeIdsToColour.size();
 		
 		int iNoOfEdgesPerThread = 0;
 		int iNoOfSpareEdges = 0;
@@ -935,7 +885,7 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	protected BitSet getEdgeColour(int fakeEdgeId){
-		return mTmpColoureNormalEdges.get(fakeEdgeId);
+		return mMapEdgeIdsToColour.get(fakeEdgeId);
 	}
 	
 	public void setNumberOfThreadsForGenerationProcess(int iNumberOfThreads){

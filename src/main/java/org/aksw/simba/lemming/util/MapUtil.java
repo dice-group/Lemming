@@ -306,40 +306,40 @@ public class MapUtil {
     		System.out.println();
     	}
     }
-    
-    public static ObjectIntOpenHashMap<BitSet> cloneObjectIntHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
-    	ObjectIntOpenHashMap<BitSet> newMap =new ObjectIntOpenHashMap<BitSet>(); 
-    	if(originalMap != null){
-    		Object[] arrItemColours = originalMap.keys;
-    		
-    		for(int j =0 ; j < arrItemColours.length ; j++){
-    			if(originalMap.allocated[j]){
-	    			BitSet itemColo = (BitSet)arrItemColours[j];
-	    			int value =  originalMap.get(itemColo);
-	    			newMap.putOrAdd(itemColo, value, value);
-    			}
-    		}
-    	}
-    	
-    	return newMap;
-    }
-    
-    
-    public static Map<BitSet, Long> cloneHashMap(ObjectDoubleOpenHashMap<BitSet> originalMap){
-    	final Map<BitSet, Long> newMap =new HashMap<BitSet, Long>(); 
-    	if(originalMap != null){
-    		Object[] arrItemColours = originalMap.keys;
-    		
-    		for(int j =0 ; j < arrItemColours.length ; j++){
-    			if(originalMap.allocated[j]){
-	    			BitSet itemColo = (BitSet)arrItemColours[j];
-	    			final long value = (long) originalMap.get(itemColo);
-	    			newMap.put(itemColo, value);
-    			}
-    		}
-    	}
-    	
-    	return newMap;
-    }
+//    
+//    public static ObjectIntOpenHashMap<BitSet> cloneObjectIntHashMap(ObjectIntOpenHashMap<BitSet> originalMap){
+//    	ObjectIntOpenHashMap<BitSet> newMap =new ObjectIntOpenHashMap<BitSet>(); 
+//    	if(originalMap != null){
+//    		Object[] arrItemColours = originalMap.keys;
+//    		
+//    		for(int j =0 ; j < arrItemColours.length ; j++){
+//    			if(originalMap.allocated[j]){
+//	    			BitSet itemColo = (BitSet)arrItemColours[j];
+//	    			int value =  originalMap.get(itemColo);
+//	    			newMap.putOrAdd(itemColo, value, value);
+//    			}
+//    		}
+//    	}
+//    	
+//    	return newMap;
+//    }
+//    
+//    
+//    public static Map<BitSet, Long> cloneHashMap(ObjectDoubleOpenHashMap<BitSet> originalMap){
+//    	final Map<BitSet, Long> newMap =new HashMap<BitSet, Long>(); 
+//    	if(originalMap != null){
+//    		Object[] arrItemColours = originalMap.keys;
+//    		
+//    		for(int j =0 ; j < arrItemColours.length ; j++){
+//    			if(originalMap.allocated[j]){
+//	    			BitSet itemColo = (BitSet)arrItemColours[j];
+//	    			final long value = (long) originalMap.get(itemColo);
+//	    			newMap.put(itemColo, value);
+//    			}
+//    		}
+//    	}
+//    	
+//    	return newMap;
+//    }
     
 }
