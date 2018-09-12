@@ -373,7 +373,7 @@ public abstract class AbstractGraphGeneration {
 		 */
 		Set<BitSet> setEColours = mMapColourToEdgeIDs.keySet();
 		for(BitSet eColo: setEColours){
-			IntSet setOfEdges = mMapColourToVertexIDs.get(eColo);
+			IntSet setOfEdges = mMapColourToEdgeIDs.get(eColo);
 			System.out.println("-- EColour " + eColo + " has " + setOfEdges.size() + " edges");
 		}
 		System.exit(1);
