@@ -323,6 +323,18 @@ public abstract class AbstractGraphGeneration {
 			}
 		}
 		
+		
+		/*
+		 * TODO TESTING assigning colours to vertices and set of restricted edge colour
+		 */
+		Set<BitSet> setVColours = mMapColourToVertexIDs.keySet();
+		for(BitSet vColo: setVColours){
+			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
+			System.out.println("Colour " + vColo + " has " + setOfVertices.size() + " vertices");
+		}
+		
+		
+		
 		/*
 		 * get a threshold number of edges for each edge colours 
 		 */
@@ -355,6 +367,16 @@ public abstract class AbstractGraphGeneration {
 			paintEdgesMultiThreads();
 			//testAtomicNumber();
 		}
+		
+		/*
+		 * TODO TESTING assigning colours to vertices and set of restricted edge colour
+		 */
+		Set<BitSet> setEColours = mMapColourToEdgeIDs.keySet();
+		for(BitSet eColo: setEColours){
+			IntSet setOfEdges = mMapColourToVertexIDs.get(eColo);
+			System.out.println("-- EColour " + eColo + " has " + setOfEdges.size() + " edges");
+		}
+		System.exit(1);
 	}
 	
 	private void testAtomicNumber(){
