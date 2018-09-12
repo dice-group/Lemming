@@ -323,18 +323,6 @@ public abstract class AbstractGraphGeneration {
 			}
 		}
 		
-		
-		/*
-		 * TODO TESTING assigning colours to vertices and set of restricted edge colour
-		 */
-		Set<BitSet> setVColours = mMapColourToVertexIDs.keySet();
-		for(BitSet vColo: setVColours){
-			IntSet setOfVertices = mMapColourToVertexIDs.get(vColo);
-			System.out.println("Colour " + vColo + " has " + setOfVertices.size() + " vertices");
-		}
-		
-		
-		
 		/*
 		 * get a threshold number of edges for each edge colours 
 		 */
@@ -365,21 +353,11 @@ public abstract class AbstractGraphGeneration {
 			paintEdgesSingleThread();
 		}else{
 			//paintEdgesMultiThreads();
-			testAtomicNumber();
+			paintEdgesMultiThreads();
 		}
-		
-		/*
-		 * TODO TESTING assigning colours to vertices and set of restricted edge colour
-		 */
-		Set<BitSet> setEColours = mMapColourToEdgeIDs.keySet();
-		for(BitSet eColo: setEColours){
-			IntSet setOfEdges = mMapColourToEdgeIDs.get(eColo);
-			System.out.println("-- EColour " + eColo + " has " + setOfEdges.size() + " edges");
-		}
-		System.exit(1);
 	}
 	
-	private void testAtomicNumber(){
+	private void paintEdgesMultiThreads(){
 
 		List<IntSet> lstAssignedEdges = getLstTransparenEdgesForPainting();
 		
@@ -484,7 +462,7 @@ public abstract class AbstractGraphGeneration {
 	}
 	
 	
-	private void paintEdgesMultiThreads(){
+	private void paintEdgesWithConcurrentHashMap_NG(){
 		
 		List<IntSet> lstAssignedEdges = getLstTransparenEdgesForPainting();
 		
@@ -810,9 +788,9 @@ public abstract class AbstractGraphGeneration {
 		if(mReversedMapClassVertices.containsKey(headId)){
 			return false;
 		}
+		boolean canConnect = false;
 		
 		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
-		boolean canConnect = false;
 		if(mapTailToHeads == null){
 			mapTailToHeads = new HashMap<Integer, IntSet>();
 			mMapEdgeColoursToConnectedVertices.put(eColo, mapTailToHeads);
