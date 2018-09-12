@@ -494,7 +494,7 @@ public abstract class AbstractGraphGeneration {
 		
 		ExecutorService service = Executors.newFixedThreadPool(mNumberOfThreads);
 		
-		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for painting edges !");
+		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for painting edges....!");
 		
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
@@ -528,8 +528,8 @@ public abstract class AbstractGraphGeneration {
 					//set of edges for painting
 					int[] arrOfEdges = setOfEdges.toIntArray();
 					
-					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
-											+ setOfRestrictedEdgeColours.size()+" colours... ");
+					//LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
+					//						+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					while(j < arrOfEdges.length){
 						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
