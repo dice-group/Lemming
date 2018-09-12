@@ -364,8 +364,8 @@ public abstract class AbstractGraphGeneration {
 		if(mNumberOfThreads <= 1 ){
 			paintEdgesSingleThread();
 		}else{
-			paintEdgesMultiThreads();
-			//testAtomicNumber();
+			//paintEdgesMultiThreads();
+			testAtomicNumber();
 		}
 		
 		/*
@@ -422,8 +422,8 @@ public abstract class AbstractGraphGeneration {
 					//set of edges for painting
 					int[] arrOfEdges = setOfEdges.toIntArray();
 					
-					LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
-											+ setOfRestrictedEdgeColours.size()+" colours... ");
+					//LOGGER.info("Thread " + indexOfThread +" is painting " + arrOfEdges.length +" edges with "
+					//						+ setOfRestrictedEdgeColours.size()+" colours... ");
 					int j = 0 ; 
 					
 					
@@ -465,7 +465,7 @@ public abstract class AbstractGraphGeneration {
 				int j= 0;
 				AtomicInteger counter = mapEdgeColourCounter.get(eColo);
 				while(j < counter.get()){
-					mMapEdgeIdsToColour.put(fakeEdgeID,eColo);
+					mMapEdgeIdsToColour.put(fakeEdgeID, eColo);
 					IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
 					if(setEdges == null ){
 						setEdges = new DefaultIntSet();
