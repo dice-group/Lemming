@@ -355,6 +355,33 @@ public abstract class AbstractGraphGeneration {
 			//paintEdgesMultiThreads();
 			paintEdgesMultiThreads();
 		}
+		
+		//TODO test number of assigned edges to each colours 
+		// as well as tell colour mapping rule
+		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
+		Set<BitSet> eColours = mMapColourToEdgeIDs.keySet();
+		for(BitSet eColo : eColours){
+			IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
+			System.out.println("Edge colour: " + eColo +" has " + setEdges.size() +" edges");
+			
+			
+			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(eColo);
+			System.out.println("\t [T] has tail colours: " + setTailColours);
+			
+			Set<BitSet> setHeadColours = mColourMapper.getHeadColoursFromEdgeColour(eColo);
+			System.out.println("\t [H] has tail colours: " + setHeadColours);
+			
+			Set<BitSet> setTailColours2 = mColourMapper.getTailColoursFromEdgeColour(eColo);
+			setTailColours2.retainAll(setAvailableVertexColours);
+			System.out.println("\t [T2] intersection: " + setTailColours2);
+			
+			Set<BitSet> setHeadColours2 = mColourMapper.getHeadColoursFromEdgeColour(eColo);
+			setHeadColours2.retainAll(setAvailableVertexColours);
+			System.out.println("\t [H2] intersection: " + setHeadColours2);
+			
+		}
+		
+		System.exit(-1);
 	}
 	
 	private void paintEdgesMultiThreads(){
