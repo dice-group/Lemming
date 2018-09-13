@@ -370,6 +370,15 @@ public abstract class AbstractGraphGeneration {
 			
 			Set<BitSet> setHeadColours = mColourMapper.getHeadColoursFromEdgeColour(eColo);
 			System.out.println("\t [H] has tail colours: " + setHeadColours);
+			
+			Set<BitSet> setTailColours2 = mColourMapper.getTailColoursFromEdgeColour(eColo);
+			setTailColours2.retainAll(setHeadColours);
+			System.out.println("\t [TH] intersection: " + setTailColours2);
+			
+			Set<BitSet> setHeadColours2 = mColourMapper.getHeadColoursFromEdgeColour(eColo);
+			setHeadColours2.retainAll(setTailColours);
+			System.out.println("\t [TH] intersection: " + setHeadColours2);
+			
 		}
 		
 		System.exit(-1);
