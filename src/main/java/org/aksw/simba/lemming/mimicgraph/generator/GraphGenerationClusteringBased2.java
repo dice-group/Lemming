@@ -189,7 +189,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					//track the index of previous iteration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
-					int[] arrOfEdges = setOfEdges.toIntArray();
+					ArrayList<Integer> arrOfEdges = setOfEdges.toIntegerArrayList();
 					
 					/*
 					 *  set of failed edge colours. A failed edge colour is 
@@ -200,9 +200,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					
 					//iterate through all edge
 					int j = 0 ;
-					while(j < arrOfEdges.length){
+					while(j < arrOfEdges.size()){
 						//get an edge id
-						int fakeEdgeId = arrOfEdges[j];
+						int fakeEdgeId = arrOfEdges.get(j);
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
 						
 						if(edgeColo == null){
@@ -337,7 +337,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						
 						if (maxIterationFor1Edge == 0) {
 							LOGGER.error("Could not create "
-									+ (arrOfEdges.length - j)
+									+ (arrOfEdges.size() - j)
 									+ " edges in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate vertices to connect.");						
@@ -650,10 +650,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				if(setEdges!=null && setEdges.size() >0){
 					
-					int[] arrEdges = setEdges.toIntArray();
-					for (int i = 0 ; i < arrEdges.length ; i++){
+					for (int eId: setEdges.toIntegerArrayList()){
 						TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
-						offeredGrpTriple.edgeIDs.add(arrEdges[i]);
+						offeredGrpTriple.edgeIDs.add(eId);
 					}
 				}
 			}
