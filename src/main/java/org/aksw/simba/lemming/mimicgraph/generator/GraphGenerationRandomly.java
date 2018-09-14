@@ -112,6 +112,13 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						Set<BitSet> setTailColours = new HashSet<BitSet>(mColourMapper.getTailColoursFromEdgeColour(edgeColo));
 						setTailColours.retainAll(setAvailableVertexColours);
 
+						
+						//TODO test bug triangles
+						if(j%200 != 0)
+							System.out.println("\t"+edgeColo +" [T] has tail colours: " + setTailColours);
+													
+						
+						
 						/*
 						 * in case there is no tail colours => the edge colour should not 
 						 * be considered again
@@ -132,6 +139,11 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							continue;
 						}
 						setHeadColours.retainAll(setAvailableVertexColours);
+						
+						//TODO test bug triangles
+						if(j%200 != 0)
+							System.out.println("\t"+edgeColo +" [H] has tail colours: " + setTailColours);
+						
 						
 						if(setHeadColours.size() == 0){
 							maxIterationFor1Edge--;
