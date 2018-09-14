@@ -292,6 +292,13 @@ public abstract class AbstractGraphGeneration {
 	 * per colour over all versions of a graph
 	 */
 	private void paintVertices(){
+		BitSet[] arrVertexColours = mVertColoDist.sampleSpace;
+		for(int i = 0 ; i < arrVertexColours.length ; i++){
+			System.out.println("Colour: " + arrVertexColours[i] + " has rate: " + mVertColoDist.values[i] );
+		}
+		
+		System.exit(-1);
+		
 		LOGGER.info("Assign colors to vertices.");
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist);
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
