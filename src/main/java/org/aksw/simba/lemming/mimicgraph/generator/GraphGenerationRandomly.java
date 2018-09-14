@@ -112,11 +112,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						//get potential tail colours
 						Set<BitSet> setTailColours = new HashSet<BitSet>(mColourMapper.getTailColoursFromEdgeColour(edgeColo));
 						setTailColours.retainAll(setAvailableVertexColours);
-
-						
-					
-													
-						
 						
 						/*
 						 * in case there is no tail colours => the edge colour should not 
@@ -134,7 +129,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						//TODO test bug triangles
 						if(j%200 != 0)
-							System.out.println("\t"+edgeColo +" [T="+tailColo+"] has tail colours: " + setTailColours);
+							System.out.println("\t"+edgeColo +" chooses [T="+tailColo+"] among " + setTailColours.size() +" colours");
 						
 						Set<BitSet> setHeadColours = new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						
@@ -155,7 +150,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						//TODO test bug triangles
 						if(j%200 != 0)
-							System.out.println("\t"+edgeColo +" [H ="+headColo+"] has tail colours: " + setHeadColours);
+							System.out.println("\t"+edgeColo +" chooses [H ="+headColo+"] among " + setHeadColours.size() +" colours");
 						
 						
 						//get set of tail ids and head ids
@@ -207,18 +202,12 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							
 							//TODO test bug triangles
 							if(j%200 != 0){
-								System.out.println("\t"+edgeColo +" T: "+tailId+" H: "+ headId + " #headIDs=" + setHeadIDs.size());
-								
+								System.out.println("\t"+edgeColo +" T:"+tailId+"("+setTailIDs.size()+") H:"+ headId + "("+ + setHeadIDs.size()+")");
 								try{
 									Threads.sleep(5000,"Wait for debugging");
 								}catch(Exception e){
-									
 								}
-								
 							}
-							
-							
-							
 							
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
