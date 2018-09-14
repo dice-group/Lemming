@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import toools.set.DefaultIntSet;
 import toools.set.IntSet;
+import toools.thread.Threads;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -113,9 +114,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						setTailColours.retainAll(setAvailableVertexColours);
 
 						
-						//TODO test bug triangles
-						if(j%200 != 0)
-							System.out.println("\t"+edgeColo +" [T] has tail colours: " + setTailColours);
+					
 													
 						
 						
@@ -131,7 +130,12 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						//get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
+						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];
+						
+						//TODO test bug triangles
+						if(j%200 != 0)
+							System.out.println("\t"+edgeColo +" [T="+tailColo+"] has tail colours: " + setTailColours);
+						
 						Set<BitSet> setHeadColours = new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						
 						if(setHeadColours == null || setHeadColours.size() == 0){
@@ -139,11 +143,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							continue;
 						}
 						setHeadColours.retainAll(setAvailableVertexColours);
-						
-						//TODO test bug triangles
-						if(j%200 != 0)
-							System.out.println("\t"+edgeColo +" [H] has tail colours: " + setTailColours);
-						
 						
 						if(setHeadColours.size() == 0){
 							maxIterationFor1Edge--;
@@ -153,6 +152,11 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
 						
 						BitSet headColo = arrHeadColours[random.nextInt(arrHeadColours.length)];
+						
+						//TODO test bug triangles
+						if(j%200 != 0)
+							System.out.println("\t"+edgeColo +" [H ="+headColo+"] has tail colours: " + setHeadColours);
+						
 						
 						//get set of tail ids and head ids
 						IntSet setTailIDs = new DefaultIntSet();
@@ -200,6 +204,22 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							
 							int headId = arrHeadIDs[random.nextInt(arrHeadIDs.length)];
+							
+							//TODO test bug triangles
+							if(j%200 != 0){
+								System.out.println("\t"+edgeColo +" T: "+tailId+" H: "+ headId + " #headIDs=" + setHeadIDs.size());
+								
+								try{
+									Threads.sleep(5000,"Wait for debugging");
+								}catch(Exception e){
+									
+								}
+								
+							}
+							
+							
+							
+							
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
 								j++;
