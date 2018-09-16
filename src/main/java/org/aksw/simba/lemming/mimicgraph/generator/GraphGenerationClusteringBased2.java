@@ -682,14 +682,14 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 	
 	private void computeNoOfEdgesInTriples() {
-		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
-		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
+		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
-		for (BitSet edgeColo : setEdgeColours) {
+		for (BitSet edgeColo : setEdgeColo) {
 
 			List<TripleBaseSetOfIDs> lstGrpTriples = new ArrayList<TripleBaseSetOfIDs>();
 			List<Double> lstEdgeRatePerGrpTriple = new ArrayList<Double>();
-			for (BitSet tailColo : setVertColours) {
+			for (BitSet tailColo : setVertColo) {
 				if (mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
 					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
 							.get(tailColo);
@@ -697,6 +697,10 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					Set<BitSet> setHeadColours = mapHeadEdgeToGrpTriples.keySet();
 					
 					for (BitSet headColo : setHeadColours) {
+						
+						if(!mapHeadEdgeToGrpTriples.containsKey(headColo))
+							continue;
+						
 						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples
 								.get(headColo);
 						
@@ -725,9 +729,18 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				if(setEdges!=null && setEdges.size() >0){
 					
-					for (int eId: setEdges.toIntegerArrayList()){
+					for(int eId: setEdges.toIntegerArrayList()){
 						TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 						offeredGrpTriple.edgeIDs.add(eId);
+						
+						// add to map fake edge ids and triple colours
+						List<BitSet> setTripleColours = mMapEdgeIdsToTripleColours.get(eId);
+						setTripleColours = new ArrayList<BitSet>();
+						mMapEdgeIdsToTripleColours.put(eId, setTripleColours);
+						
+						setTripleColours.add(offeredGrpTriple.tailColour);
+						setTripleColours.add(offeredGrpTriple.edgeColour);
+						setTripleColours.add(offeredGrpTriple.headColour);
 					}
 				}
 			}
