@@ -265,7 +265,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 										+ edgeColo
 										+ " colour since it could not find any approriate vertices to connect.");						
 								
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -287,7 +286,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						
 						List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
 						if(tripleColours == null || tripleColours.size() != 3){
-							failedEdgeColours.add(edgeColo);
 							j++;
 							continue;
 						}
@@ -301,14 +299,12 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
 							
 							if(mapHeadEdgeTriples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
 							
 							Map<BitSet, TripleBaseSetOfIDs> mapEdgeTriples = mapHeadEdgeTriples.get(headColo);
 							if(mapEdgeTriples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -319,7 +315,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							TripleBaseSetOfIDs triples = mapEdgeTriples.get(edgeColo);
 							
 							if(triples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -381,7 +376,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 									+ edgeColo
 									+ " colour since it could not find any approriate vertices to connect.");						
 							
-							failedEdgeColours.add(edgeColo);
 							j++;
 						}
 						

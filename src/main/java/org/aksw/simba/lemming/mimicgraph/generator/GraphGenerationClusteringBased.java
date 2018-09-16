@@ -424,14 +424,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
 					ArrayList<Integer> lstEdgeIds = setOfEdges.toIntegerArrayList();
-					
-					/*
-					 *  set of failed edge colours. A failed edge colour is 
-					 *  the colour that are not used to connect any 
-					 *  vertices
-					 */
-					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
-					
+
 					//iterate through all edge
 					int j = 0 ;
 					while(j < lstEdgeIds.size()){
@@ -445,11 +438,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							continue;
 						}
 						
-						if(failedEdgeColours.contains(edgeColo)){
-							//skip the edge that has failed edge colour
-							j++;
-							continue;
-						}
 						
 						if(iIndexOfProcessingEdge != j){
 							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
@@ -460,7 +448,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 										+ edgeColo
 										+ " colour since it could not find any approriate vertices to connect.");						
 								
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -468,7 +455,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 						
 						List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
 						if(tripleColours == null || tripleColours.size() !=3){
-							failedEdgeColours.add(edgeColo);
 							j++;
 							continue;
 						}
@@ -482,14 +468,12 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
 							
 							if(mapHeadEdgeTriples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
 							
 							Map<BitSet, TripleBaseSetOfIDs> mapEdgeTriples = mapHeadEdgeTriples.get(headColo);
 							if(mapEdgeTriples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -497,7 +481,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							TripleBaseSetOfIDs triples = mapEdgeTriples.get(edgeColo);
 							
 							if(triples == null){
-								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
@@ -559,7 +542,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 									+ edgeColo
 									+ " colour since it could not find any approriate vertices to connect.");						
 							
-							failedEdgeColours.add(edgeColo);
 							j++;
 						}
 						
