@@ -224,7 +224,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				@Override
 				public void run() {
 					//max iteration of 1 edge
-					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME1;
 					//track the index of previous iteration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
@@ -257,13 +257,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						}
 						
 						if(iIndexOfProcessingEdge != j){
-							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
+							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME1;
 							iIndexOfProcessingEdge = j;
 						}else{
 							if(maxIterationFor1Edge == 0){
-								LOGGER.error("Could not create an edge of "
+								LOGGER.error("Could not connect edge "+arrOfEdges.get(j)+" of"
 										+ edgeColo
-										+ " colour since it could not find any approriate vertices to connect.");						
+										+ " colour since there is no approriate vertices to connect.");						
 								
 								j++;
 								continue;
@@ -309,9 +309,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 								continue;
 							}
 							
-							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(tailColo);
-							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(headColo);
-							
+						
 							TripleBaseSetOfIDs triples = mapEdgeTriples.get(edgeColo);
 							
 							if(triples == null){
@@ -322,6 +320,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							Set<Integer> setTailIds = new HashSet<Integer>();
 							setTailIds.addAll(triples.tailIDs.toIntegerArrayList());
 							
+							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(tailColo);
+							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(headColo);
 							
 							// select a random tail
 							int tailId = -1;
@@ -369,16 +369,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						
 						maxIterationFor1Edge--;
 						
-						if (maxIterationFor1Edge == 0) {
-							LOGGER.error("Could not create "
-									+ (arrOfEdges.size() - j)
-									+ " edges in the "
+						if(maxIterationFor1Edge == 0){
+							LOGGER.error("Could not connect edge "+arrOfEdges.get(j)+" of"
 									+ edgeColo
-									+ " colour since it could not find any approriate vertices to connect.");						
+									+ " colour since there is no approriate vertices to connect.");						
 							
 							j++;
 						}
-						
 					}//end iteration of edges
 				}
 			};
