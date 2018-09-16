@@ -91,9 +91,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			//get vertices for tails and heads first
 			assignVerticesToTriples();
 			
-			//TODO test deadlock here
-			testInfo();
-			
 			//generate graph with multi threads
 			generateGraphMultiThreads();
 		}
