@@ -181,15 +181,14 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> 
 									mapHeadIdProposers = mapPossibleIDegreePerIEColo.get(edgeColo);
 						
-						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails, mapTailIdProposers);
-						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads, mapHeadIdProposers);
+						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails);
+						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads);
 						
 						if(setOfRandomHeadIds == null || setOfRandomTailIds == null){
 							LOGGER.warn("There exists no vertices in " + triple.headColour +" or " 
 											+ triple.tailColour +" colour. Skip: " + noOfEdges +" edges!");
 							continue;
-						}
-						
+						}						
 						
 						int[] arrTailIDs = setOfRandomTailIds.toIntArray();
 						triple.tailIDs.addAll(arrTailIDs);
@@ -436,8 +435,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapTailIdProposers = mapPossibleODegreePerOEColo.get(edgeColo);
 							ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapHeadIdProposers = mapPossibleIDegreePerIEColo.get(edgeColo);
 							
-							IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails, mapTailIdProposers);
-							IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads, mapHeadIdProposers);
+							IntSet setOfRandomTailIds = getRandomVerticesWithDegree(triple.tailColour, triple.noOfTails, mapTailIdProposers);
+							IntSet setOfRandomHeadIds = getRandomVerticesWithDegree(triple.headColour, triple.noOfHeads, mapHeadIdProposers);
 							
 							if((setOfRandomHeadIds == null || setOfRandomHeadIds.size() == 0 ) || 
 									(setOfRandomTailIds == null || setOfRandomTailIds.size() == 0)){
@@ -501,7 +500,42 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
+	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices){
+		IntSet setVertices = mMapColourToVertexIDs.get(vertColo);
+		if(setVertices != null){
+			
+			Random rand = new Random();
+			
+			int[] arrVertices= setVertices.toIntArray();
+			
+			IntSet res = new DefaultIntSet();
+			
+			if(iNoOfVertices >= arrVertices.length){
+				iNoOfVertices = arrVertices.length;
+				return setVertices;
+			}
+			
+			while(iNoOfVertices > 0 ){
+				int vertId = arrVertices[rand.nextInt(arrVertices.length)];
+				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
+					res.add(vertId);
+					iNoOfVertices --;
+				}
+				
+				if(res.size() == (arrVertices.length -1)){
+					if(iNoOfVertices!=0)
+						LOGGER.warn("Could not get " + iNoOfVertices + " vertices of "+ vertColo);
+					break;
+				}
+			}
+			
+			return res;
+		}
+		return null;
+	}
+	
+	
+	private IntSet getRandomVerticesWithDegree(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo).clone();
 		
 		//invalid setVertices
