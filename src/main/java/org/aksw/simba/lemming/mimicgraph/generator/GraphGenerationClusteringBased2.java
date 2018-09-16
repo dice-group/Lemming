@@ -90,11 +90,55 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			LOGGER.info("Run graph generation with "+mNumberOfThreads+ " threads!");
 			//get vertices for tails and heads first
 			assignVerticesToTriples();
+			
+			//TODO test deadlock here
+			testInfo();
+			
 			//generate graph with multi threads
 			generateGraphMultiThreads();
 		}
 		
 		return mMimicGraph;
+	}
+	
+	private void testInfo(){
+		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
+		for(BitSet tailColo: setVertColo){
+					
+			if(!mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)){
+				continue;
+			}
+
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> 
+					mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
+			
+			for(BitSet headColo : setVertColo){
+				
+				if(!mapHeadEdgeToGrpTriples.containsKey(headColo)){
+					continue;
+				}
+				
+				Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
+				
+				Set<BitSet> setEdgeColours = mapEdgeToGrpTriples.keySet();
+				
+				for(BitSet edgeColo: setEdgeColours){
+					
+					TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
+					
+					if(triple == null){
+						LOGGER.warn("Found an invalid triple of ("+tailColo+","+edgeColo+","+headColo+") colour");
+						continue;
+					}
+					
+					System.out.println("[T:"+tailColo+"]="+triple.tailIDs.size()+
+							" [E:"+edgeColo+"]="+triple.edgeIDs.size()+ " [H:"+headColo+"]="+triple.headIDs.size());
+				}
+			}
+		}
+		
+		
+		System.exit(-1);
 	}
 	
 	private void assignVerticesToTriples(){
@@ -522,12 +566,12 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 	
 	private void computeAverageEVColoDistribution(){
-		Set<BitSet> vertColors = mMapColourToVertexIDs.keySet();
-		Set<BitSet> edgeColors = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		
-		for (BitSet tailColo : vertColors) {
-			for (BitSet headColo : vertColors) {
-				for (BitSet edgeColo : edgeColors) {
+		for (BitSet tailColo : setVertColours) {
+			for (BitSet headColo : setVertColours) {
+				for (BitSet edgeColo : setEdgeColours) {
 
 					int avrgDenominator = 0;
 					double totalTailPercentage = 0;
@@ -607,14 +651,14 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 	
 	private void computeNoOfEdgesInTriples() {
-		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
-		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
 		
-		for (BitSet edgeColo : setEdgeColo) {
+		for (BitSet edgeColo : setEdgeColours) {
 
 			List<TripleBaseSetOfIDs> lstGrpTriples = new ArrayList<TripleBaseSetOfIDs>();
 			List<Double> lstEdgeRatePerGrpTriple = new ArrayList<Double>();
-			for (BitSet tailColo : setVertColo) {
+			for (BitSet tailColo : setVertColours) {
 				if (mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
 					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
 							.get(tailColo);
@@ -662,10 +706,10 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 	
 	private void computeNoOfVerticesInTriples(){
-		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
-		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		
-		for(BitSet tailColo : setVertColo){
+		for(BitSet tailColo : setVertColours){
 			//get all tails
 			IntSet setTails = mMapColourToVertexIDs.get(tailColo);
 			// tail distribution
@@ -674,20 +718,20 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			if(mapHeadEdgeToGrpTriples == null)
 				continue;
 			
-			for(BitSet headColo: setVertColo){
+			for(BitSet headColo: setVertColours){
 				
 				if(mapHeadEdgeToGrpTriples.containsKey(headColo)){
 					
 					// get all heads
 					IntSet setHeads = mMapColourToVertexIDs.get(headColo);
 					
-					for(BitSet edgeColo: setEdgeColo){
+					for(BitSet edgeColo: setEdgeColours){
 						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
 						TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
 						if(triple != null && triple.edgeIDs.size() > 0){
 								
 							/// tails
-							double noOfTails = Math.round(triple.noOfTails * setTails.size() + 0.5);
+							double noOfTails = Math.round(triple.noOfTails * setTails.size() + 0.1);
 							if(noOfTails > triple.edgeIDs.size()){
 								noOfTails  = triple.edgeIDs.size();
 							}
@@ -698,7 +742,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							triple.noOfTails = noOfTails;
 							
 							/// heads
-							double noOfHeads = Math.round(triple.noOfHeads * setHeads.size() + 0.5);
+							double noOfHeads = Math.round(triple.noOfHeads * setHeads.size() + 0.1);
 							
 							if(noOfHeads > triple.edgeIDs.size()){
 								noOfHeads  = triple.edgeIDs.size();
@@ -789,7 +833,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				int [] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
 				
-				double[] possOutDegreePerHeadDs = new double[arrHeadIDs.length];
+				double[] possInDegreePerHeadDs = new double[arrHeadIDs.length];
 				Integer[] objHeadIDs = new Integer[arrHeadIDs.length];
 				
 				// for each head id, we compute the potential in degree for it
@@ -799,10 +843,10 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					int possDeg = PoissonDistribution.randomXJunhao(avrgInDegree, random);
 					if(possDeg == 0)
 						possDeg = 1;
-					possOutDegreePerHeadDs[i] = (double)possDeg;
+					possInDegreePerHeadDs[i] = (double)possDeg;
 				}
 				
-				ObjectDistribution<Integer> potentialInDegree = new ObjectDistribution<Integer>(objHeadIDs, possOutDegreePerHeadDs);
+				ObjectDistribution<Integer> potentialInDegree = new ObjectDistribution<Integer>(objHeadIDs, possInDegreePerHeadDs);
 				OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialInDegree, random);
 				
 				ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossIDegree = mapPossibleIDegreePerIEColo.get(edgeColo);

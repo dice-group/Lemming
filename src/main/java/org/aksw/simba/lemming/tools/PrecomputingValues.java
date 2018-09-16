@@ -33,7 +33,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,14 +94,14 @@ public class PrecomputingValues {
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
 
         // compute metrics for each graph here
-        MetricAndConstantValuesCarrier valueCarrier = new MetricAndConstantValuesCarrier(datasetPath);
+        ConstantValueStorage valueCarrier = new ConstantValueStorage(datasetPath);
         boolean havingData = valueCarrier.havingData();
         LOGGER.info("Compute metric values for graph ......");
         Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = null;
         if (havingData && !RECALCULATE_METRICS) {
             mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
             for (ColouredGraph grph : graphs) {
-                mapMetricValues.put(MetricAndConstantValuesCarrier.generateGraphKey(grph), valueCarrier.getMetricValues(grph, metrics));
+                mapMetricValues.put(ConstantValueStorage.generateGraphKey(grph), valueCarrier.getMetricValues(grph, metrics));
             }
         } else {
             mapMetricValues = getMapMetricValues(graphs, metrics);
@@ -144,7 +144,7 @@ public class PrecomputingValues {
         }
 
         // save to file
-        valueCarrier.storeValues();
+        valueCarrier.storeData();
         LOGGER.info("Precomputation is DONE");
     }
 
@@ -322,7 +322,7 @@ public class PrecomputingValues {
         Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
 
         for (ColouredGraph grph : origGrphs) {
-            String key = MetricAndConstantValuesCarrier.generateGraphKey(grph);
+            String key = ConstantValueStorage.generateGraphKey(grph);
             LOGGER.info("Consider graph: " + key);
             ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(grph, lstMetrics);
             mapMetricValues.put(key, metricValues);

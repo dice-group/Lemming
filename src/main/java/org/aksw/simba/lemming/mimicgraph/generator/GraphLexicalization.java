@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredVDistPerDTEColour;
-import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralProposer;
+import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralGenertor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class GraphLexicalization {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphLexicalization.class);
 
-	private RDFLiteralProposer mLiteralProposer;
+	private RDFLiteralGenertor mLiteralProposer;
 	private IGraphGeneration mGraphGenerator;
 	private AvrgColouredVDistPerDTEColour mAvrgVDistPerDREColourMetric;
 
@@ -33,7 +33,7 @@ public class GraphLexicalization {
 		mAvrgVDistPerDREColourMetric = new AvrgColouredVDistPerDTEColour(origGrphs);
 
 		// literal proposer
-		mLiteralProposer = new RDFLiteralProposer(origGrphs);
+		mLiteralProposer = new RDFLiteralGenertor(origGrphs);
 	}
 
 	public ColouredGraph lexicalizeGraph() {

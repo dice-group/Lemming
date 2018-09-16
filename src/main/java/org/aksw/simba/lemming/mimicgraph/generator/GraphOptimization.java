@@ -14,9 +14,9 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ConstantValuesComputation;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class GraphOptimization {
 	
 	private IGraphGeneration mGraphGenerator;
 	private EdgeModifier mEdgeModifier;
-	private ConstantValuesComputation mErrScoreCalculator;
+	private ErrorScoreCalculator mErrScoreCalculator;
 	private List<Double> mLstErrorScore; 
 	private double mOptimizedTime =0;
 	
@@ -46,14 +46,14 @@ public class GraphOptimization {
 	
 	
 	public GraphOptimization(ColouredGraph[] origGrphs,
-			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  MetricAndConstantValuesCarrier valueCarriers) {
+			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers) {
 		
 		mLstErrorScore = new ArrayList<Double>();
 		/*
 		 *  mErrScoreCalculator is used to compute the error score compared to original
 		 *  constant values of the original graphs
 		 */
-		mErrScoreCalculator = new ConstantValuesComputation(origGrphs, valueCarriers);
+		mErrScoreCalculator = new ErrorScoreCalculator(origGrphs, valueCarriers);
 		
 		// the graph generator
 		mGraphGenerator = graphGenerator;

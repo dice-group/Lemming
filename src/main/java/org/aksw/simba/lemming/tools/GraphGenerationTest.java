@@ -28,7 +28,7 @@ import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +112,7 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Loading metrics values and constant expressions 
         ----------------------------------------------------*/
-        MetricAndConstantValuesCarrier valuesCarrier = new MetricAndConstantValuesCarrier(datasetPath);
+        ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
         	LOGGER.warn("Please generate the file [value_store.val] again!");

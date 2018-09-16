@@ -21,9 +21,9 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-public class MetricAndConstantValuesCarrier implements Serializable	{
+public class ConstantValueStorage implements Serializable	{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(MetricAndConstantValuesCarrier.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ConstantValueStorage.class);
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -32,11 +32,11 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 	
 	private String mDataSetPath;
 	
-	public MetricAndConstantValuesCarrier(String datasetPath){
+	public ConstantValueStorage(String datasetPath){
 		//load value from file
 		LOGGER.info("Load metric values and constants values from file: " + METRIC_CACHE_NAME);
 		mDataSetPath = datasetPath;
-		loadValues();
+		loadData();
 		if(mMapValueStorage == null){
 			mMapValueStorage = new HashMap<String, ValueStorage>();	
 		}
@@ -182,7 +182,7 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 		return mValueStorage.getMapConstantValues().keySet();
 	}
 	
-	public void storeValues() {
+	public void storeData() {
 		// Serialization
 		try {
 
@@ -202,7 +202,7 @@ public class MetricAndConstantValuesCarrier implements Serializable	{
 		}
 	}
 	
-	public void loadValues(){
+	public void loadData(){
 		try
         {   
             // Reading the object from a file

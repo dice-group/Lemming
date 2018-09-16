@@ -7,15 +7,15 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.MetricAndConstantValuesCarrier;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-public class ConstantValuesComputation {
+public class ErrorScoreCalculator {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ConstantValuesComputation.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ErrorScoreCalculator.class);
 	
 	/*
 	 * mean value of each expression
@@ -55,14 +55,14 @@ public class ConstantValuesComputation {
 	private double mMinErrorScore;
 	
 	
-	private MetricAndConstantValuesCarrier mValueCarrier;
+	private ConstantValueStorage mValueCarrier;
 	private int mINoOfGraphs = 0 ;
 	/**
 	 * Constructor
 	 * @param sampleGraphs the array of sampled graph
 	 * @param constExprs the set of constant expressions
 	 */
-	public ConstantValuesComputation(ColouredGraph[] sampleGraphs, MetricAndConstantValuesCarrier valueCarrier){
+	public ErrorScoreCalculator(ColouredGraph[] sampleGraphs, ConstantValueStorage valueCarrier){
 		mValueCarrier = valueCarrier;
 		mINoOfGraphs = sampleGraphs.length;
 		

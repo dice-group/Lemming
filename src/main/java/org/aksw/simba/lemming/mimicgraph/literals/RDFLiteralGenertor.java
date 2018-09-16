@@ -5,17 +5,15 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 
-public class RDFLiteralProposer {
+public class RDFLiteralGenertor {
 	
 	private LiteralAnalysis mLiteralAnalysis;
 	private Map<String , ILiteralGenerator> mMapOfDataTypesAndGenerators;
 	
-	public RDFLiteralProposer(ColouredGraph[] origGrphs){
+	public RDFLiteralGenertor(ColouredGraph[] origGrphs){
 		// literal collection
 		mLiteralAnalysis = new LiteralAnalysis(origGrphs);
 		mMapOfDataTypesAndGenerators = new HashMap<String, ILiteralGenerator>();
@@ -72,6 +70,7 @@ public class RDFLiteralProposer {
 		if(vColo != null && dteColo !=null){
 			double numOfValues = mLiteralAnalysis.getAvrgNoOfWords(vColo, dteColo);
 			String typeOfData = mLiteralAnalysis.getDataTypes(dteColo);
+			
 			//System.out.println("\t\tGet "+numOfValues+" word(s) of type:" + typeOfData );
 			ILiteralGenerator literalGenerator = mMapOfDataTypesAndGenerators.get(typeOfData);
 			//double currentTime = System.currentTimeMillis();
