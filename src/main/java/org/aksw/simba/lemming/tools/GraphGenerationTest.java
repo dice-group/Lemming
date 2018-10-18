@@ -2,6 +2,8 @@ package org.aksw.simba.lemming.tools;
 
 import grph.Grph.DIRECTION;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +110,15 @@ public class GraphGenerationTest {
         }
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
+        
+        /*
+         * calculate metrics for the latest graph
+         */
+        printMetricResults(metrics, graphs);
+        
+        if(isStop){
+        	return;
+        }       
         
         /*---------------------------------------------------
         Loading metrics values and constant expressions 
@@ -249,6 +260,33 @@ public class GraphGenerationTest {
 		}
 		return mapArgs;
 	}
+
 	
+	private static void printMetricResults(List<SingleValueMetric> lstMetrics, ColouredGraph[] origGraphs ){
+		BufferedWriter fWriter ;
+		try{
+			LOGGER.warn("Output results to file!");
+			
+			fWriter = new BufferedWriter( new FileWriter("MetricsOfLatestGraph.result", true));
+			
+			int iIndex = 1;
+			
+			
+			for(ColouredGraph grph : origGraphs){
+				fWriter.write("#----------------------------------------------------------------------#\n");
+				fWriter.write("# Graph "+iIndex +".\n");
+				for(SingleValueMetric metric : lstMetrics){
+					double val = metric.apply(grph);				
+					fWriter.write("\t Metric: "+metric.getName() +": "+ val+"\n");					
+				}
+				iIndex ++;
+				fWriter.write("#----------------------------------------------------------------------#\n");
+			}
+			// metric values of all graphs
+			fWriter.close();
+		}catch(Exception ex){
+			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
+		}
+	}
 }
 
