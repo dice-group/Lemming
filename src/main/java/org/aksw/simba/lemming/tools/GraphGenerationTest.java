@@ -14,6 +14,7 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.EmptyVertices;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
@@ -80,7 +81,7 @@ public class GraphGenerationTest {
         //these are two fixed metrics: NodeTriangleMetric and EdgeTriangleMetric
         metrics.add(new NodeTriangleMetric());
         metrics.add(new EdgeTriangleMetric());
-        
+        metrics.add(new EmptyVertices());
         //these are optional metrics
         metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
         metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
@@ -118,7 +119,7 @@ public class GraphGenerationTest {
         
         if(isStop){
         	return;
-        }       
+        }
         
         /*---------------------------------------------------
         Loading metrics values and constant expressions 
@@ -269,8 +270,7 @@ public class GraphGenerationTest {
 			
 			fWriter = new BufferedWriter( new FileWriter("MetricsOfLatestGraph.result", true));
 			
-			int iIndex = 1;
-			
+			int iIndex = 1;			
 			
 			for(ColouredGraph grph : origGraphs){
 				fWriter.write("#----------------------------------------------------------------------#\n");
