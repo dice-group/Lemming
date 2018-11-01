@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
@@ -34,6 +36,8 @@ import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class GraphGenerationTest {
 	
@@ -81,7 +85,7 @@ public class GraphGenerationTest {
         //these are two fixed metrics: NodeTriangleMetric and EdgeTriangleMetric
         metrics.add(new NodeTriangleMetric());
         metrics.add(new EdgeTriangleMetric());
-        metrics.add(new EmptyVertices());
+       
         //these are optional metrics
         metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
         metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
@@ -112,14 +116,7 @@ public class GraphGenerationTest {
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
         
-        /*
-         * calculate metrics for the latest graph
-         */
-        printMetricResults(metrics, graphs);
-        
-        if(isStop){
-        	return;
-        }
+      
         
         /*---------------------------------------------------
         Loading metrics values and constant expressions 
@@ -129,6 +126,16 @@ public class GraphGenerationTest {
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
         	LOGGER.warn("Please generate the file [value_store.val] again!");
         	return ;
+        }
+        
+        
+        /*
+         * calculate metrics for the latest graph
+         */
+        printConstantResults(metrics,valuesCarrier, graphs);
+        
+        if(isStop){
+        	return;
         }
         
         /*---------------------------------------------------
@@ -262,6 +269,43 @@ public class GraphGenerationTest {
 		return mapArgs;
 	}
 
+	private static void printConstantResults(List<SingleValueMetric> lstMetrics, ConstantValueStorage constStorage, ColouredGraph[] origGraphs ){
+		BufferedWriter fWriter ;
+		try{
+			LOGGER.warn("Output results to file!");
+			
+			fWriter = new BufferedWriter( new FileWriter("ConstantOfLatestGraph.result", true));
+			
+			for(ColouredGraph grph : origGraphs){
+				if(grph.getVertices().size() == 45387 || grph.getVertices().size()==792921){
+					
+					ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<String>();
+					//compute list of metrics
+					
+					for(SingleValueMetric metric: lstMetrics){
+						double val = metric.apply(grph);
+						mapMetricValues.putOrAdd(metric.getName(), 0, 0);
+						mapMetricValues.put(metric.getName(), val);
+					}
+					
+					Set<Expression> setExpressions = constStorage.getConstantExpressions();
+					
+					fWriter.write("#----------------------------------------------------------------------#\n");
+					fWriter.write("# Graph "+ 45387 +".\n");
+					for(Expression expr: setExpressions){
+						double constVal = expr.getValue(mapMetricValues);
+						fWriter.write("\t Expr: "+ expr.toString() +":"+constVal +"\n");
+					}
+					fWriter.write("#----------------------------------------------------------------------#\n");
+				}			
+			}
+			// metric values of all graphs
+			fWriter.close();
+		}catch(Exception ex){
+			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
+		}
+	}
+	
 	
 	private static void printMetricResults(List<SingleValueMetric> lstMetrics, ColouredGraph[] origGraphs ){
 		BufferedWriter fWriter ;
