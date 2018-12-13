@@ -16,7 +16,6 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.EmptyVertices;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
@@ -74,6 +73,9 @@ public class GraphGenerationTest {
 		 * 				DD: disitrbution and degree approach
 		 * 		value: 	C: clustering approach, 
 		 * 				CD: clustering and degree approach
+		 * 
+		 * -r: random optimization 
+		 * -op: (optional) number of optimization steps 
 		 * 
         ----------------------------------------------------*/
         Map<String, String> mapArgs = parseArguments(args);
@@ -223,7 +225,11 @@ public class GraphGenerationTest {
 		 * 		value: D: distribution approach, DD: disitrbution and degree approach
 		 * 		value: C: clustering approach, CD: clustering and degree approach
 		 * 
-		 * -r: is random optimization 
+		 * -r: random optimization 
+		 * -thrs: 	the number of threads
+		 * 			by default, the application runs with a single thread
+		 * 
+		 * -op: (optional) number of optimization steps 
 		 */
 		Map<String, String> mapArgs = new HashMap<String, String>();
 		
