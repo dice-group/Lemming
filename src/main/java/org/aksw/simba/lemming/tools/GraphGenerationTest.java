@@ -128,16 +128,6 @@ public class GraphGenerationTest {
         	return ;
         }
         
-        
-        /*
-         * calculate metrics for the latest graph
-         */
-        printConstantResults(metrics,valuesCarrier, graphs);
-        
-        if(isStop){
-        	return;
-        }
-        
         /*---------------------------------------------------
         Generation for a draft graph
         ----------------------------------------------------*/
