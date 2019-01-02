@@ -22,13 +22,23 @@
 			<name>Luc Hogie Maven repository</name>
 			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
 		</repository>
+        <repository>
+            <id>maven.aksw.internal</id>
+            <name>University Leipzig, AKSW Maven2 Repository</name>
+            <url>http://maven.aksw.org/repository/internal</url>
+        </repository>
+        <repository>
+            <id>maven.aksw.snapshots</id>
+            <name>University Leipzig, AKSW Maven2 Repository</name>
+            <url>http://maven.aksw.org/repository/snapshots</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.aksw.word2vecrestful.word2vec</groupId>
-			<artifactId>word2vec</artifactId>
-			<version>t1</version>			
+			<groupId>org.aksw</groupId>
+			<artifactId>word2vec-restful-webservice</artifactId>
+			<version>0.0.1</version>			
 		</dependency>
 		<dependency>
 			<groupId>grph</groupId>
