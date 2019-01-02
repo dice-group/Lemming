@@ -46,7 +46,8 @@ public class GenModelBasedAlgo {
                 / (double) source.getGraph().getNumberOfVertices();
         int numberOfEdges = (int) Math.round(edgesPerNode * numberOfVertices);
 
-        ColouredGraph target = new ColouredGraph(source.getVertexPalette(), source.getEdgePalette());
+        //ColouredGraph target = new ColouredGraph(source.getVertexPalette(), source.getEdgePalette());
+        ColouredGraph target = new ColouredGraph(source.getVertexPalette(), source.getEdgePalette(), null);
 
         Random random = new Random(seed);
         ColouringSheme vertexColouringSheme = sampleVertices(random, source, target, numberOfVertices);

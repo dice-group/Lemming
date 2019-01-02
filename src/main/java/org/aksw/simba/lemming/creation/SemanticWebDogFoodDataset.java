@@ -10,21 +10,21 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SemanticWebDogFoodReader {
+public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements IDatasetManager{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodReader.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodDataset.class);
 
-    private static final String DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final int START_YEAR = 2001;
     private static final int END_YEAR = 2015;
 
-    public static ColouredGraph[] readGraphsFromFile() {
-        return readGraphsFromFile(DATA_FOLDER_PATH);
-    }
-
-    public static ColouredGraph[] readGraphsFromFile(String dataFolderPath) {
+    public SemanticWebDogFoodDataset() {
+		super("SemanticWebDogFood");
+	}
+    
+    @Override
+    public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
         Model dogFoodModel = ModelFactory.createDefaultModel();
-
+        
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
         ColouredGraph graph;
         GraphCreator creator = new GraphCreator();
@@ -52,6 +52,11 @@ public class SemanticWebDogFoodReader {
                 LOGGER.error("The folder {} does not exist.", folder.toString());
             }
         }
+        
+        // try-and-error analysis of data typed literals in the current dataset.
+        //LiteralDatatypeAnalyser literalAnalyser = new LiteralDatatypeAnalyser(SemanticWebDogFoodReader.class.getName());
+        //literalAnalyser.analyzeDatatype(dogFoodModel);
+        
         return graphs.toArray(new ColouredGraph[graphs.size()]);
     }
 
@@ -66,7 +71,8 @@ public class SemanticWebDogFoodReader {
         }
     }
 
-    public static void main(String[] args) {
-        SemanticWebDogFoodReader.readGraphsFromFile();
-    }
+//    public static void main(String[] args) {
+//        String DATA_FOLDER_PATH = "SemanticWebDogFood/";
+//        new SemanticWebDogFoodDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//    }
 }

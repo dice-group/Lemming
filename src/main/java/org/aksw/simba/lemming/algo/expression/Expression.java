@@ -5,9 +5,6 @@
  */
 package org.aksw.simba.lemming.algo.expression;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 /**
@@ -24,7 +21,7 @@ public interface Expression {
      * 
      * @return the {@link SingleValueMetric} or <code>null</code>
      */
-    public SingleValueMetric getMetric();
+    //public SingleValueMetric getMetric();
 
     /**
      * Returns the left part of the expression if it is an operation. Otherwise
@@ -87,7 +84,7 @@ public interface Expression {
      *            Coloured Graph
      * @return Double value of expression
      */
-    public double getValue(ColouredGraph cg);
+    //public double getValue(ColouredGraph cg);
 
     /**
      * Get the value of this expression for the given precomputed values of the
@@ -112,5 +109,4 @@ public interface Expression {
      * @return 
      */
     public int getSize();
-
 }

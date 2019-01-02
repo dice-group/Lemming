@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.colour;
 import java.util.Set;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
  * A colour palette is a mapping of class or property URIs to colours.
@@ -95,4 +96,30 @@ public interface ColourPalette {
      */
     public void setColour(String uri, BitSet colour);
 
+    
+    /**
+     * Get the URIs corresponding to the given colour.
+     * @param colour a given colour (possible mixture colours) whose URIs should be returned
+     * @param isProperty 
+     * 				if the colour is the colour of properties (or of edges)
+     * @return a set of URIS
+     */
+    public Set<String> getURIs(BitSet colour, boolean isProperty);
+    
+    /**
+     * Update colour for an existing URI. If the URI is not existing ==> create new
+     * 
+     * @param colour the colour of the updated URI
+     * @param uri the URI that would be updated
+     */
+    public void updateColour(BitSet colour, String uri);
+    
+    /**
+     * Get the map of URIs and colours. This function supports for the evaluation process only.
+     * @return the map of URIs and colours
+     */
+    public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour();
+    
+    public boolean isColourOfRDFType(BitSet colour);
+    
 }

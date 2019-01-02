@@ -1,10 +1,16 @@
 package org.aksw.simba.lemming.creation;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
@@ -16,6 +22,7 @@ import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -26,7 +33,10 @@ public class GraphCreator {
     protected ObjectObjectOpenHashMap<Resource, HierarchyNode> properties;
     protected ColourPalette vertexPalette;
     protected ColourPalette edgePalette;
-
+    
+    protected ColourPalette datatypedEdgePalette;
+    protected Map<Resource, Set<RDFDatatype>>dataTypedProperties;
+    
     public GraphCreator() {
         // Initialize the classes
         classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
@@ -42,6 +52,9 @@ public class GraphCreator {
         properties.put(RDF.type, new HierarchyNode());
         edgePalette = new InMemoryPalette();
         edgePalette.addColour(RDF.type.getURI());
+        
+        dataTypedProperties = new HashMap<Resource, Set<RDFDatatype>>();
+        datatypedEdgePalette = new InMemoryPalette();
     }
 
     public ColouredGraph processModel(Model model) {
@@ -92,10 +105,48 @@ public class GraphCreator {
                             vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
                 }
             }
+            
+            /*
+             * -------------------------------------------------
+             * if this statement has an object as a literal
+             * -------------------------------------------------
+             */
+            else{
+            	
+            	//data typed property
+        		property = statement.getPredicate();
+        		propertyUri = property.getURI();
+            	
+            	if(statement.getObject().isLiteral()){
+            		//literal
+            		Literal literal = statement.getObject().asLiteral();
+            		RDFDatatype litType= literal.getDatatype();
+
+            		String datatype = litType != null ? litType.getURI() : ""; 
+            		
+            		//put datatype property to the palette
+            		if(!datatypedEdgePalette.containsUri(propertyUri)){
+            			datatypedEdgePalette.addColour(propertyUri);
+            		}
+            		BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
+            		/*
+            		 * a trick for semantic web dog food
+            		 */
+            		String defaultDataType = "http://www.w3.org/2001/XMLSchema#string";
+            		if(propertyUri.contains("label"))
+            			datatype = defaultDataType;
+            		
+            		//add to the coloured graph
+            		graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour, datatype);
+            	}
+            }
         }
+        
+        // set the datatypedEdgePalette to the graph
+        graph.setDataTypeEdgePalette(datatypedEdgePalette);
         return graph;
     }
-
+   
     protected ColourPalette createVertexPalette(Model model) {
         NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
         RDFNode node;
@@ -274,5 +325,41 @@ public class GraphCreator {
             }
         }
     }
-
+    
+    
+//    protected ColourPalette createDatatypedPalette(Model model){
+//    	RDFNode object;
+//        Resource subject;
+//        Literal resource2 ;
+//        Property property;
+//        StmtIterator sIterator = model.listStatements();
+//        Statement statement;
+//        // Iterate over the class hierarchy triples
+//        while (sIterator.hasNext()) {
+//            statement = sIterator.next();
+//            subject = statement.getSubject();
+//            object = statement.getObject();
+//            property = statement.getPredicate();
+//            if (object.isLiteral()) {
+//            	
+//            	Set<RDFDatatype> setDatatypes = dataTypedProperties.get(property);
+//            	if(setDatatypes == null){
+//            		setDatatypes = new HashSet<RDFDatatype>();
+//            		dataTypedProperties.put(property, setDatatypes);
+//            	}
+//            	RDFDatatype type = object.asLiteral().getDatatype();
+//            	// get data type 
+//            	setDatatypes.add(type);
+//            }
+//        }
+//
+//     // All properties have been collected
+//        // The colours can be defined
+//        Set<Resource> setOfResources = dataTypedProperties.keySet();
+//        for (Resource res : setOfResources) {
+//        	datatypedEdgePalette.addColour(res.getURI());
+//        }
+//        
+//    	return datatypedEdgePalette;
+//    }
 }

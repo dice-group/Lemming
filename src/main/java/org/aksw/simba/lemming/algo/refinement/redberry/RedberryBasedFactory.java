@@ -78,7 +78,8 @@ public class RedberryBasedFactory implements RefinementNodeFactory {
                 return new Complex(value);
             }
         } else if (expression.isAtomic()) {
-            String metricName = expression.getMetric().getName();
+            //String metricName = expression.getMetric().getName();
+        	String metricName = expression.toString();
             SimpleTensor variable = Tensors.parseSimple(metricName);
             if (!knownMetrics.containsKey(metricName)) {
                 knownMetrics.put(metricName, variable);

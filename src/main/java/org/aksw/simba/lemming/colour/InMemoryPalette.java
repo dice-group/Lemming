@@ -1,6 +1,9 @@
 package org.aksw.simba.lemming.colour;
 
+import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.jena.vocabulary.RDF;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
@@ -53,10 +56,10 @@ public class InMemoryPalette implements ColourPalette {
 
     @Override
     public BitSet addToColour(BitSet colour, String uri) {
-        if (uriColourMap.containsKey(uri)) {
-            colour.or(uriColourMap.get(uri));
-        }
-        return colour;
+		if (uriColourMap.containsKey(uri)) {
+			colour.or(uriColourMap.get(uri));
+		}
+		return colour;
     }
 
     @Override
@@ -81,5 +84,59 @@ public class InMemoryPalette implements ColourPalette {
     public void setColour(String uri, BitSet colour) {
         uriColourMap.put(uri, colour);
     }
+    
+    @Override
+    public Set<String> getURIs(BitSet inColour, boolean isProperty){
+    	Set<String> setOfURIs = new HashSet<String>();
+    	if(inColour != null){
+	    	Object[] arrOfURIs = uriColourMap.keys;
+	    	for(int i = 0 ; i < arrOfURIs.length ; i++){
+	    		if(uriColourMap.allocated[i]){
+	    			String uri = (String) arrOfURIs[i];
+	    			BitSet colo =(BitSet) uriColourMap.get(uri).clone();
+	    			if(isProperty){
+	    				// just compare if 2 bitsets are really equal
+	    				if(colo.equals(inColour)){
+	    					setOfURIs.add(uri);
+	    					break;
+	    				}
+	    			}else{
+	    				//and 2 bitsets
+	    				colo.and(inColour);
+	    				
+	    				//check if they have matching bits 1
+	    				if(colo.cardinality() <= inColour.cardinality() && !colo.isEmpty()){
+	    					setOfURIs.add(uri);
+	    				}
+	    			}
+	    		}
+	    	}
+    	}
+    	return setOfURIs;
+    }
 
+    @Override
+    public boolean isColourOfRDFType(BitSet colour){
+    	BitSet rdfTypeColour = uriColourMap.get(RDF.type.toString());
+    	return colour.equals(rdfTypeColour);
+    }
+    
+	@Override
+	public void updateColour(BitSet colour, String uri) {
+		if(colour!= null){
+			if(uriColourMap.containsKey(uri)){
+				BitSet tmpColo = uriColourMap.get(uri);
+				if(!tmpColo.equals(colour)){
+					colour.or(uriColourMap.get(uri));
+					System.err.println("Same URI but different colours");
+				}
+			}
+			uriColourMap.put(uri, colour);
+		}
+	}
+
+	@Override
+	public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour() {
+		return uriColourMap; 
+	}
 }

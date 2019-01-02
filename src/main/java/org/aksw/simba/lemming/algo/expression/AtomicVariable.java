@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.algo.expression;
 
+import java.io.Serializable;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
@@ -12,18 +14,20 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-public class AtomicVariable implements Expression {
+public class AtomicVariable implements Expression, Serializable {
 
-    private final SingleValueMetric metric;
+	private static final long serialVersionUID = 1L;
+	
+    private final String metricName;
 
     public AtomicVariable(SingleValueMetric metric) {
-        this.metric = metric;
+        this.metricName = metric.getName();
     }
 
-    @Override
-    public SingleValueMetric getMetric() {
-        return metric;
-    }
+//    @Override
+//    public SingleValueMetric getMetric() {
+//        return metric;
+//    }
 
     @Override
     public Expression getLeft() {
@@ -60,15 +64,15 @@ public class AtomicVariable implements Expression {
         return false;
     }
 
-    @Override
-    public double getValue(ColouredGraph cg) {
-        return metric.apply(cg);
-    }
+//    @Override
+//    public double getValue(ColouredGraph cg) {
+//        return metric.apply(cg);
+//    }
 
     @Override
     public double getValue(ObjectDoubleOpenHashMap<String> graphMetrics) {
-        if (graphMetrics.containsKey(metric.getName())) {
-            return graphMetrics.get(metric.getName());
+        if (graphMetrics.containsKey(metricName)) {
+            return graphMetrics.get(metricName);
         } else {
             // this is an error.
             return Double.NaN;
@@ -81,12 +85,12 @@ public class AtomicVariable implements Expression {
      * @return
      */
     public String toString() {
-        return metric.getName();
+        return metricName;
     }
 
     @Override
     public int hashCode() {
-        return (metric == null) ? 0 : metric.hashCode();
+        return (metricName == null) ? 0 : metricName.hashCode();
     }
 
     @Override
@@ -98,10 +102,10 @@ public class AtomicVariable implements Expression {
         if (getClass() != obj.getClass())
             return false;
         AtomicVariable other = (AtomicVariable) obj;
-        if (metric == null) {
-            if (other.metric != null)
+        if (metricName == null) {
+            if (other.metricName != null)
                 return false;
-        } else if (!metric.equals(other.metric))
+        } else if (!metricName.equals(other.metricName))
             return false;
         return true;
     }
@@ -109,5 +113,4 @@ public class AtomicVariable implements Expression {
     public int getSize() {
         return 0;
     }
-
 }
