@@ -1,0 +1,13 @@
+<http://example.org/class> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/entity1> .
+<http://example.org/class> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/entity2> .
+
+<http://example.org/entity1> <http://example.org/relation1> <http://example.org/entity2> .
+<http://example.org/entity2> <http://example.org/relation1> <http://example.org/entity1> .
+
+<http://example.org/class> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/class> .
+
+<http://example.org/entity3> <http://example.org/relation1> <http://example.org/entity2> .
+<http://example.org/entity3> <http://example.org/relation1> <http://example.org/entity1> .
+
+<http://example.org/entity4> <http://example.org/relation1> <http://example.org/entity2> .
+<http://example.org/entity4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://example.org/class> .
