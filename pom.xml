@@ -22,9 +22,24 @@
 			<name>Luc Hogie Maven repository</name>
 			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
 		</repository>
+        <repository>
+            <id>maven.aksw.internal</id>
+            <name>University Leipzig, AKSW Maven2 Repository</name>
+            <url>http://maven.aksw.org/repository/internal</url>
+        </repository>
+        <repository>
+            <id>maven.aksw.snapshots</id>
+            <name>University Leipzig, AKSW Maven2 Repository</name>
+            <url>http://maven.aksw.org/repository/snapshots</url>
+        </repository>
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.aksw</groupId>
+			<artifactId>word2vec-restful-webservice</artifactId>
+			<version>0.0.1</version>			
+		</dependency>
 		<dependency>
 			<groupId>grph</groupId>
 			<artifactId>grph</artifactId>
@@ -49,6 +64,19 @@
 			<artifactId>guava</artifactId>
 			<version>23.6-jre</version>
 		</dependency>
+
+		<!-- JMH Benchmark -->
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-core</artifactId>
+			<version>1.19</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-generator-annprocess</artifactId>
+			<version>1.19</version>
+		</dependency>
+		<!-- End JMH Benchmark -->
 
 		<!-- ~~~~~~~~~~~~~~~~~~~ Logging ~~~~~~~~~~~~~~~~~~~~~~ -->
 		<!-- slf4j: Logging API -->
@@ -119,7 +147,7 @@
 					<transformers>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<mainClass>org.aksw.simba.lemming.tools.RefinementTest</mainClass>
+							<mainClass>org.aksw.simba.lemming.tools.GraphGenerationTest</mainClass>
 						</transformer>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />

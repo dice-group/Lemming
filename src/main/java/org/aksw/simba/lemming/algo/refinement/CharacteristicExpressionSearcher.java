@@ -290,4 +290,57 @@ public class CharacteristicExpressionSearcher {
         this.debug = debug;
     }
 
+    
+    public SortedSet<RefinementNode> findExpression(ObjectDoubleOpenHashMap<String> graphVectors[], int k) {
+        SortedSet<RefinementNode> bestNodes = new TreeSet<RefinementNode>();
+        // precalculate the metrics values
+        if (debug) {
+            LOGGER.warn("Refinement Tree:\n{}\n", printGraphMetrics(graphVectors));
+        }
+        // initialize the tree
+        Set<RefinementNode> nodes = generateMetricNodes();
+        RefinementTree tree = new RefinementTree(nodes);
+        // initialize the queue
+        SortedSet<RefinementNode> queue = new TreeSet<RefinementNode>();
+        for (RefinementNode node : nodes) {
+            node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
+            if (Double.isNaN(node.getFitness())) {
+                LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
+            } else {
+                queue.add(node);
+                addToBestNodes(bestNodes, node, k);
+            }
+        }
+        // start refinement
+        RefinementNode nextNode = queue.last();
+        queue.remove(nextNode);
+        bestNodes.add(nextNode);
+        int iteration = 0;
+        // While we haven't reached the maximum number of iterations and the
+        // fitness of the worst best node is not good enough, refine the
+        // expression
+        while ((iteration < maxIterations) && (bestNodes.first().getFitness() < minFitness)) {
+            // refine the best node
+            nodes = refine(nextNode, tree);
+            // calculate the fitness of all new nodes and add them to the queue
+            for (RefinementNode node : nodes) {
+                node.setFitness(fitnessFunc.getFitness(node.getExpression(), graphVectors));
+                if (Double.isNaN(node.getFitness())) {
+                    LOGGER.warn("Got a node with an undefined fitness: " + node.toString());
+                } else {
+                    queue.add(node);
+                    addToBestNodes(bestNodes, node, k);
+                }
+            }
+            // pick a new best node
+            nextNode = queue.last();
+            queue.remove(nextNode);
+            addToBestNodes(bestNodes, nextNode, k);
+            ++iteration;
+        }
+        // if (debug) {
+        // LOGGER.warn("Refinement Tree:\n{}\n", printTree(tree));
+        // }
+        return bestNodes;
+    }
 }

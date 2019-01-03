@@ -31,31 +31,37 @@ public class DiameterMetricTest {
 		gridGenerator.setWidth(10);
 		gridGenerator.setHeight(10);
 		gridGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 18 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 18 });
+		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 18 });
 		graph = new InMemoryGrph();
 		gridGenerator.setWidth(20);
 		gridGenerator.setHeight(20);
 		gridGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 38 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 38 });
+		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 38 });
 		graph = new InMemoryGrph();
 		gridGenerator.setWidth(101);
 		gridGenerator.setHeight(101);
 		gridGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 200 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 200 });
+		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 200 });
 
         RingTopologyGenerator ringGenerator = new RingTopologyGenerator();
 		graph = new InMemoryGrph();
 		graph.addNVertices(10);
         ringGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 5 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 5 });
+        testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 5 });
 		graph = new InMemoryGrph();
 		graph.addNVertices(100);
         ringGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 50 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 50 });
+        //testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 50 });
 		graph = new InMemoryGrph();
 		graph.addNVertices(1000);
         ringGenerator.compute(graph);
-		testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 500 });
+		//testConfigs.add(new Object[] { new ColouredGraph(graph, null, null), 500 });
+        testConfigs.add(new Object[] { new ColouredGraph(graph, null, null, null), 500 });
 
 		return testConfigs;
 	}

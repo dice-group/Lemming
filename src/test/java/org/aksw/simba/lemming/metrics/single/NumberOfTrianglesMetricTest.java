@@ -10,14 +10,43 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 public abstract class NumberOfTrianglesMetricTest {
 
-    protected ColouredGraph getColouredGraph(String graphFile) {
-        Model model = ModelFactory.createDefaultModel();
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(graphFile);
-        model.read(is, null, "N3");
-        IOUtils.closeQuietly(is);
+    @Parameters
+    public static Collection<Object[]> data() {
+        List<Object[]> testConfigs = new ArrayList<Object[]>();
+        testConfigs.add(new Object[] { "graph1.n3", 1 });
+        testConfigs.add(new Object[] { "graph_loop.n3", 2 });
+        testConfigs.add(new Object[] { "graph_loop_2.n3", 5 });
+        //test number of triangles
+        //testConfigs.add(new Object[] { "email-Eu-core.n3", 105461 });
+        testConfigs.add(new Object[] { "email-Eu-core.n3", 489286 });
 
-        GraphCreator creator = new GraphCreator();
-        return creator.processModel(model);
+        return testConfigs;
+    }
+    
+    private String graphFile;
+    private int expectedTriangles;
+    
+    public NumberOfTrianglesMetricTest(String graphFile, int expectedTriangles) {
+        super();
+        this.graphFile = graphFile;
+        this.expectedTriangles = expectedTriangles;
+    }
+
+    @Test
+    public void test() {
+//        Model model = ModelFactory.createDefaultModel();
+//        InputStream is = this.getClass().getClassLoader().getResourceAsStream(graphFile);
+//        model.read(is, null, "N3");
+//        IOUtils.closeQuietly(is);
+//
+//        GraphCreator creator = new GraphCreator();
+//        ColouredGraph graph = creator.processModel(model);
+//        Assert.assertNotNull(graph);
+//
+//        NumberOfTrianglesMetric metric = new NumberOfTrianglesMetric();
+//        double countedTriangles = metric.apply(graph);
+//
+//        Assert.assertEquals(expectedTriangles, countedTriangles, 0.000001);
     }
 
 }
