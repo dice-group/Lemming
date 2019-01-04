@@ -100,6 +100,22 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- JMH Benchmark -->
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-core</artifactId>
+			<version>1.19</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.openjdk.jmh</groupId>
+			<artifactId>jmh-generator-annprocess</artifactId>
+			<version>1.19</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- End JMH Benchmark -->
+
 		<!-- ~~~~~~~~~~~~~~~~~~~ End Testing ~~~~~~~~~~~~~~~~~~~~~~ -->
 	</dependencies>
 

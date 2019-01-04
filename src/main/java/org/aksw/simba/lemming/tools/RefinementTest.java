@@ -1,11 +1,5 @@
 package org.aksw.simba.lemming.tools;
 
-import grph.Grph;
-import grph.algo.topology.ClassicalGraphs;
-import grph.algo.topology.GridTopologyGenerator;
-import grph.algo.topology.StarTopologyGenerator;
-import grph.in_memory.InMemoryGrph;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -20,12 +14,6 @@ import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinem
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.aksw.simba.lemming.metrics.single.AvgClusteringCoefficientMetric;
-import org.aksw.simba.lemming.metrics.single.DiameterMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.junit.Ignore;
@@ -33,6 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
+
+import grph.Grph;
+import grph.algo.topology.ClassicalGraphs;
+import grph.algo.topology.GridTopologyGenerator;
+import grph.algo.topology.StarTopologyGenerator;
+import grph.in_memory.InMemoryGrph;
 
 @Ignore
 public class RefinementTest {
@@ -113,7 +107,7 @@ public class RefinementTest {
 
     @SuppressWarnings("unchecked")
     private static ObjectDoubleOpenHashMap<String>[] createReferenceGraphVectors(ColouredGraph[] graphs,
-            List<SingleValueMetric> metrics) {
+                                                                                 List<SingleValueMetric> metrics) {
         Grph temp;
         int numberOfNodes, partSize;
         List<ObjectDoubleOpenHashMap<String>> vectors = new ArrayList<ObjectDoubleOpenHashMap<String>>(

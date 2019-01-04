@@ -79,13 +79,11 @@ public class EdgeModification {
     }
 
     private double getNumberOfNodeTriangles() {
-    	NodeTriangleMetric metric = new NodeTriangleMetric();
-        return metric.apply(graph);
+        return nodeMetric.apply(graph);
     }
 
     private double getNumberOfEdgeTriangles() {
-    	EdgeTriangleMetric metric = new EdgeTriangleMetric();
-        return metric.apply(graph);
+        return edgeMetric.apply(graph);
     }
 
     void removeEdgeFromGraph(int edgeId) {
@@ -277,6 +275,4 @@ public class EdgeModification {
         return graph.addEdge(tail, head, color);
     }
 }
-
-
 
