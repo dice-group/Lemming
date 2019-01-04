@@ -1,27 +1,21 @@
 package org.aksw.simba.lemming.metrics.single.numberoftriangles;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardEdgeTriangleMetric;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
 @RunWith(Parameterized.class)
 public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTest {
-
-    private int expectedTriangles;
-    private static final double DOUBLE_COMPARISON_DELTA = 0.000001;
-    private ColouredGraph graph;
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -36,61 +30,36 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     public EdgeNumberOfTrianglesMetricTests(String graphFile, int expectedTriangles) {
-        super();
-        this.expectedTriangles = expectedTriangles;
-        if (this.graph != null)
-            this.graph = null;
-
-        this.graph = getColouredGraph(graphFile);
+        super(graphFile, expectedTriangles);
     }
 
     @Test
     public void nodeIteratorMetric() {
-        Assert.assertNotNull(graph);
-
-        NodeIteratorMetric metric = new NodeIteratorMetric();
-        double countedTriangles = metric.apply(graph);
-
-        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+        this.metric = new NodeIteratorMetric();
+        test();
     }
 
     @Test
     public void edgeNumberOfSimpleTrianglesMetric() {
-        Assert.assertNotNull(graph);
-
-        EdgeNumberOfSimpleTrianglesMetric metric = new EdgeNumberOfSimpleTrianglesMetric();
-        double countedTriangles = metric.apply(graph);
-
-        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+        this.metric = new EdgeNumberOfSimpleTrianglesMetric();
+        test();
     }
 
     @Test
     public void multiThreadedNodeNeighborsCommonEdgesMetric() {
-        Assert.assertNotNull(graph);
-
-        MultiThreadedNodeNeighborsCommonEdgesMetric metric = new MultiThreadedNodeNeighborsCommonEdgesMetric();
-        double countedTriangles = metric.apply(graph);
-
-        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+        this.metric = new MultiThreadedNodeNeighborsCommonEdgesMetric();
+        test();
     }
 
     @Test
     public void forwardMetric() {
-        Assert.assertNotNull(graph);
-
-        ForwardMetric metric = new ForwardMetric();
-        double countedTriangles = metric.apply(graph);
-
-        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+        this.metric = new ForwardEdgeTriangleMetric();
+        test();
     }
 
     @Test
     public void edgeIteratorMetric() {
-        Assert.assertNotNull(graph);
-
-        EdgeIteratorMetric metric = new EdgeIteratorMetric();
-        double countedTriangles = metric.apply(graph);
-
-        Assert.assertEquals(expectedTriangles, countedTriangles, DOUBLE_COMPARISON_DELTA);
+        this.metric = new EdgeIteratorMetric();
+        test();
     }
 }

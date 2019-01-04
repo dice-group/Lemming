@@ -7,7 +7,7 @@ import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardMetric;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardEdgeTriangleMetric;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class EdgeTriangleMetricSelection{
         int vertices = graph.getGraph().getNumberOfVertices();
 
         List<TriangleMetric> edgeTriangleMetrics = new ArrayList<>();
-        edgeTriangleMetrics.add(new ForwardMetric());
+        edgeTriangleMetrics.add(new ForwardEdgeTriangleMetric());
         edgeTriangleMetrics.add(new EdgeIteratorMetric());
         edgeTriangleMetrics.add(new EdgeNumberOfSimpleTrianglesMetric());
         edgeTriangleMetrics.add(new NodeIteratorMetric());

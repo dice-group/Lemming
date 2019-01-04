@@ -80,14 +80,6 @@ public class ColouredGraph{
 		mapLiteralTypes = new HashMap<BitSet, String>();
 	}
 	
-	public void removeEdge(int edgeId){
-		edgeColours.set(edgeId, null);
-		IntSet edgeIDs = graph.getEdges();
-		if(edgeIDs.contains(edgeId)){
-			graph.removeEdge(edgeId);
-		}
-	}
-	
 	public Grph getGraph() {
 		return graph;
 	}
@@ -105,9 +97,6 @@ public class ColouredGraph{
 		return edgeColours;
 	}
 	
-	
-	
-
 	public int addVertex() {
 		return addVertex(new BitSet());
 	}

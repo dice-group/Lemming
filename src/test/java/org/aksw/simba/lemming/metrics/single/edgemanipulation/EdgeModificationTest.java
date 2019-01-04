@@ -1,26 +1,25 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
-import grph.Grph;
-import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
 import org.junit.Assert;
 import org.junit.Test;
-import toools.set.IntSet;
 
-import java.util.BitSet;
+import grph.Grph;
+import toools.set.IntSet;
 
 /**
  * @author DANISH AHMED on 8/10/2018
  */
 public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
-    private int numNodes = 5;
-    private int numEdges = 9;
+    
+    public EdgeModificationTest() {
+        super("graph_loop_2.n3", 0);
+    }
 
     @Test
     public void edgeRemoval() {
-        ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
         Assert.assertNotNull(graph);
 
         EdgeModification edgeModification = new EdgeModification(graph,
@@ -37,7 +36,6 @@ public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
 
     @Test
     public void edgeAddition() {
-        ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
         Assert.assertNotNull(graph);
 
         EdgeModification edgeModification = new EdgeModification(graph,
@@ -55,7 +53,6 @@ public class EdgeModificationTest extends NumberOfTrianglesMetricTest {
 
     @Test
     public void demo() {
-        ColouredGraph graph = getColouredGraph("graph_loop_2.n3");
         EdgeModification edgeModification = new EdgeModification(graph,
                 new MultiThreadedNodeNeighborTrianglesMetric(),
                 new MultiThreadedNodeNeighborsCommonEdgesMetric());
