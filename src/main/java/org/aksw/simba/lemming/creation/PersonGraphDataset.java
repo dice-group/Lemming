@@ -32,7 +32,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 			 Collections.sort(lstSortedFilesByName);		
 			 
 			 Inferer inferer = new Inferer();
-			 Map <String, String> map = inferer.mapModel2Ontology(dataFolderPath);
+			 Map <String, String> map = inferer.mapModel2Ontology();
 			 
 			 for (String fileName : lstSortedFilesByName) {
 				 File file = new File(dataFolderPath+"/"+fileName);
@@ -43,6 +43,8 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
+					 //returns a new model with the added triples
+					 //Model newModel = 
 					 inferer.process(personModel, map, fileName, dataFolderPath);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
