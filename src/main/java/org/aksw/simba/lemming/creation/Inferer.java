@@ -43,7 +43,7 @@ public class Inferer {
 		try {
 			ontModel = readOntology(map, fileName, dataFolderPath);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.info(e.getMessage());
 		}
 		if (ontModel != null) {
 			extractProperties(newModel, ontModel);
@@ -71,11 +71,9 @@ public class Inferer {
 	private void checkEmptyTypes(Set<Resource> set, Model personModel) {
 		Property type = ResourceFactory.createProperty("https://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 		for (Resource resource : set) {
-			if (personModel.contains(resource, type)) {
-
-			} else {
+			if (!personModel.contains(resource, type)) {
 				counter++;
-			}
+			} 
 		}
 		LOGGER.info("Number of resources without type : " + counter);
 		counter = 0;
@@ -121,7 +119,7 @@ public class Inferer {
 
 	public Map<String, String> mapModel2Ontology() {
 		Map<String, String> modelOwlMap = new HashMap<String, String>();
-		modelOwlMap.put("test.ttl", "dbpedia_2015-04.owl");
+		modelOwlMap.put("test.ttl", "dbpedia_test.owl");
 		modelOwlMap.put("outputfile_2015-2004.ttl", "dbpedia_2015-04.owl");
 		modelOwlMap.put("outputfile_2015-2010.ttl", "dbpedia_2015-10.owl");
 		modelOwlMap.put("outputfile_2016-2004.ttl", "dbpedia_2016-04.owl");
@@ -131,7 +129,13 @@ public class Inferer {
 
 	public OntModel readOntology(Map<String, String> map, String fileName, String dataFolderPath) throws IOException {
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		String fullPath = dataFolderPath + "\\ontologies\\" + map.get(fileName);
+		String fullPath = null;
+		//if no path is provided, it's a test
+		if(dataFolderPath == null) {
+			fullPath = map.get(fileName);
+		} else {
+			fullPath = dataFolderPath + "\\ontologies\\" + map.get(fileName);
+		}
 		InputStream inputStream = FileManager.get().open(fullPath);
 		if (inputStream != null) {
 			ontModel.read(inputStream, "RDF/XML");

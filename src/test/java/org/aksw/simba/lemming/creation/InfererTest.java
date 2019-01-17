@@ -12,9 +12,6 @@ public class InfererTest {
 	@Test
 	public void test() {
 		String ttlFileName = "test.ttl";
-		//using the full dbpedia_2015-04.owl 
-		String folderPath = "person_graph";
-		
 		Inferer inferer = new Inferer();
 
 		Model personModel = ModelFactory.createDefaultModel();
@@ -22,7 +19,7 @@ public class InfererTest {
 		
 		Map <String, String> map = inferer.mapModel2Ontology();
 		
-		Model actualModel = inferer.process(personModel, map, ttlFileName, folderPath);
+		Model actualModel = inferer.process(personModel, map, ttlFileName, null);
 		Model expModel = ModelFactory.createDefaultModel();
 		
 		expModel.read("expected.ttl", "TTL");
