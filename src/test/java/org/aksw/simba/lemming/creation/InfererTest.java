@@ -27,7 +27,7 @@ public class InfererTest {
 		
 		expModel.read("expected.ttl", "TTL");
 		
-		Assert.assertEquals(true, actualModel.isIsomorphicWith(expModel));
+		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
 
 	}
 }
