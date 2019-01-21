@@ -23,8 +23,10 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	
 	@Override
 	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
+		
 		 List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
-		 GraphCreator creator = new GraphCreator();		 
+		 GraphCreator creator = new GraphCreator();		
+		 
 		 File folder = new File(dataFolderPath);
 		 if(folder != null && folder.isDirectory() && folder.listFiles().length > 0){
 			 List<String> lstSortedFilesByName = Arrays.asList(folder.list());
@@ -63,9 +65,8 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	}
 	
 	
-	public static void main(String[] args) {
+//	public static void main(String[] args) {
 //		String DATA_FOLDER_PATH = "PersonGraph/";
-		String DATA_FOLDER_PATH = "C:\\Users\\Ana\\Downloads\\person_graph";
-		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-    }
+//		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//    }
 }
