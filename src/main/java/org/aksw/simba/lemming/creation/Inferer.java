@@ -3,10 +3,8 @@ package org.aksw.simba.lemming.creation;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.ontology.OntModel;
@@ -20,127 +18,163 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.FileManager;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The Inferer class implements an inference of the type of subjects and objects of a given RDF Model 
+ * from a given Ontology.
+ * To use this class, one could first use the readOntology() method and then use the process() method.
+ * @author Ana
+ *
+ */
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
-	private int counter;
 
 	public Inferer() {
-		this.counter = 0;
+		
 	}
-
-	public Model process(Model personModel, Map<String, String> map, String fileName, String dataFolderPath) {
+	
+	/**
+	 * This method creates a new model with all the statements as sourceModel and
+	 * goes on to populate it further with inferred triples
+	 * @param sourceModel RDF Model where we want the inference to take place
+	 * @param ontModel Ontology Model
+	 * @return The new model with the same triples as the sourceModel plus
+	 * the inferred triples. 
+	 */
+	public Model process(Model sourceModel, OntModel ontModel) {
 		Model newModel = ModelFactory.createDefaultModel();
-		newModel.add(personModel);
+		newModel.add(sourceModel);
 
 		Set<Resource> set = extractUniqueResources(newModel);
-
-		OntModel ontModel = null;
-		try {
-			ontModel = readOntology(map, fileName, dataFolderPath);
-		} catch (IOException e) {
-			LOGGER.info(e.getMessage());
-		}
 		if (ontModel != null) {
-			extractProperties(newModel, ontModel);
+			iterateStmts(newModel, sourceModel, ontModel);
 			checkEmptyTypes(set, newModel);
 		}
 		return newModel;
 	}
 
-	private Set<Resource> extractUniqueResources(Model newModel) {
+	/**
+	 * 
+	 * This method gets all the unique subjects and objects of a model
+	 * with the exception of the objects that are part of a triple in which
+	 * the predicate is type.
+	 * It is mainly used to do a before and after count of how many resources 
+	 * do not have a type.
+	 * @param newModel RDF Model from where the resources are extracted
+	 * @return the set of resources of the given model
+	 */
+	private Set<Resource> extractUniqueResources(Model model) {
 		Set<Resource> set = new HashSet<>();
-		List<Statement> statements = newModel.listStatements().toList();
-		Property type = ResourceFactory.createProperty("https://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-		for (Statement statement : statements) {
-			if (statement.getPredicate().equals(type)) {
-
-			} else {
-				set.add(statement.getSubject());
-				set.add(statement.getObject().asResource());
-			}
-		}
-		checkEmptyTypes(set, newModel);
-		return set;
-	}
-
-	private void checkEmptyTypes(Set<Resource> set, Model personModel) {
-		Property type = ResourceFactory.createProperty("https://www.w3.org/1999/02/22-rdf-syntax-ns#type");
-		for (Resource resource : set) {
-			if (!personModel.contains(resource, type)) {
-				counter++;
+		StmtIterator statements = model.listStatements();
+		while(statements.hasNext()) {
+			Statement curStat = statements.next();
+			set.add(curStat.getSubject());
+			if(curStat.getObject().isResource() && !curStat.getPredicate().equals(RDF.type)) {
+				set.add(curStat.getObject().asResource());
 			} 
 		}
-		LOGGER.info("Number of resources without type : " + counter);
-		counter = 0;
-		LOGGER.info("Counter Reset");
+		checkEmptyTypes(set, model);
+		return set;
 	}
-
-	public void extractProperties(Model model, OntModel ontModel) {
-		List<Statement> curModelList = model.listStatements().toList();
-		for (Statement statement : curModelList) {
-			List<Statement> statements = searchType(statement, ontModel, model);
-			model.add(statements);
+	
+	/**
+	 * This method simply logs the count of how many resources without a type exist in a given 
+	 * model
+	 * @param set group of resources that we want to check in the model
+	 * if a type relation is existing or not
+	 * @param model RDF Model where this needs to be checked in
+	 */
+	private void checkEmptyTypes(Set<Resource> set, Model model) {
+		int emptyTypeCount = 0;
+		for (Resource resource : set) {
+			if (!model.contains(resource, RDF.type)) {
+				emptyTypeCount++;
+			} 
+		}
+		LOGGER.info("Number of resources without type : " + emptyTypeCount);
+	}
+	
+	/**
+	 * This method iterates through the model's statements, continuously searching for each 
+	 * property in the ontology and adding the inferred triples to the new model
+	 * @param newModel model where we will add the new triples
+	 * @param sourceModel provided model where we iterate through the statements
+	 * @param ontModel the ontology model
+	 */
+	public void iterateStmts(Model newModel, Model sourceModel, OntModel ontModel) {
+		StmtIterator stmts = sourceModel.listStatements();
+		while(stmts.hasNext()) {
+			Statement curStatement = stmts.next();
+			List<Statement> stmtsList = new ArrayList<>();
+			Set<Statement> newStmts = searchType(curStatement, ontModel, newModel);
+			stmtsList.addAll(newStmts);
+			newModel.add(stmtsList);
 		}
 	}
 
-	private List<Statement> searchType(Statement statement, OntModel ontModel, Model model) {
-		List<Statement> stList = new ArrayList<>();
+	/**
+	 * For a given statement, this method searches for the predicate of a model inside 
+	 * the Ontology. If found in the Ontology, it then extracts the domain and range.
+	 * Creating and adding a new triple with the inferred type to the model.
+	 * @param statement statement in which we want to check the predicate in the ontology
+	 * @param ontModel the ontology model
+	 * @param newModel where we add the new triples and therefore, where we check if the 
+	 * statement is already existing in the model or not
+	 * @return a set of statements inferred from one property
+	 */
+	private Set<Statement> searchType(Statement statement, OntModel ontModel, Model newModel) {
+		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
 		RDFNode object = statement.getObject();
-		Property type = ResourceFactory.createProperty("https://www.w3.org/1999/02/22-rdf-syntax-ns#type");
 
 		// search for the predicate of the model in the ontology
 		OntProperty temp = ontModel.getOntProperty(predicate.toString());
 		if (temp != null) {
 			List<? extends OntResource> domain = temp.listDomain().toList();
-			for (int i = 0; i < domain.size(); i++) {
-				Statement subjType = ResourceFactory.createStatement(subject, type, domain.get(i));
-				if (!model.contains(subjType)) {
-					stList.add(subjType);
+			for(OntResource curResource: domain){
+				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
+				if (!newModel.contains(subjType)) {
+					newStmts.add(subjType);
 				}
 			}
 			
 			List<? extends OntResource> range = temp.listRange().toList();
-			for (int i = 0; i < range.size(); i++) {
-				Statement objType = ResourceFactory.createStatement(object.asResource(), type, range.get(i));
-				if (!model.contains(objType)) {
-					stList.add(objType);
-				}
+			for(OntResource curResource: range){
+				if(object.isResource()) {
+					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
+					if (!newModel.contains(objType)) {
+						newStmts.add(objType);
+					}
+				} 
 			}
 		}
-		return stList;
+		return newStmts;
 	}
 
-	public Map<String, String> mapModel2Ontology() {
-		Map<String, String> modelOwlMap = new HashMap<String, String>();
-		modelOwlMap.put("test.ttl", "dbpedia_test.owl");
-		modelOwlMap.put("outputfile_2015-2004.ttl", "dbpedia_2015-04.owl");
-		modelOwlMap.put("outputfile_2015-2010.ttl", "dbpedia_2015-10.owl");
-		modelOwlMap.put("outputfile_2016-2004.ttl", "dbpedia_2016-04.owl");
-		modelOwlMap.put("outputfile_2016-2010.ttl", "dbpedia_2016-10.owl");
-		return modelOwlMap;
-	}
-
-	public OntModel readOntology(Map<String, String> map, String fileName, String dataFolderPath) throws IOException {
+	/**
+	 * This method reads the ontology file 
+	 * @param filePath full path to the ontology file 
+	 * @return OntModel Object
+	 */
+	public OntModel readOntology(String filePath) {
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-		String fullPath = null;
-		//if no path is provided, it's a test
-		if(dataFolderPath == null) {
-			fullPath = map.get(fileName);
-		} else {
-			fullPath = dataFolderPath + "\\ontologies\\" + map.get(fileName);
+		
+		try(InputStream inputStream = FileManager.get().open(filePath)) {
+			if (inputStream != null) {
+				ontModel.read(inputStream, "RDF/XML");
+			}
+		} catch (IOException e) {
+		    LOGGER.error("Couldn't read ontology file. Returning empty ontology model.",e);
 		}
-		InputStream inputStream = FileManager.get().open(fullPath);
-		if (inputStream != null) {
-			ontModel.read(inputStream, "RDF/XML");
-			inputStream.close();
-		}
+		
+		
 		return ontModel;
 	}
 }

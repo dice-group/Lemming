@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -33,9 +33,6 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 			 //sort ascendently
 			 Collections.sort(lstSortedFilesByName);		
 			 
-			 Inferer inferer = new Inferer();
-			 Map <String, String> map = inferer.mapModel2Ontology();
-			 
 			 for (String fileName : lstSortedFilesByName) {
 				 File file = new File(dataFolderPath+"/"+fileName);
 				 
@@ -45,9 +42,12 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
-					 //returns a new model with the added triples
+					 Inferer inferer = new Inferer();
+					 String ontFilePath = "dbpedia_2015-04.owl";
+					 OntModel ontModel = inferer.readOntology(ontFilePath);
+					//returns a new model with the added triples
 					 //Model newModel = 
-					 inferer.process(personModel, map, fileName, dataFolderPath);
+					 inferer.process(personModel, ontModel);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
 					if (graph != null) {
