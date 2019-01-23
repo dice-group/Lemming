@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.apache.jena.ontology.OntModel;
@@ -31,7 +33,14 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 		 if(folder != null && folder.isDirectory() && folder.listFiles().length > 0){
 			 List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			 //sort ascendently
-			 Collections.sort(lstSortedFilesByName);		
+			 Collections.sort(lstSortedFilesByName);
+			 
+			 //key needs only the file name, whereas value needs the full path to the corresponding Ontology
+			 Map<String, String> modelOntMap = new HashMap<>();	
+			 modelOntMap.put("outputfile_2015-2004.ttl", "dbpedia_2015-04.owl");
+			 modelOntMap.put("outputfile_2015-2010.ttl", "dbpedia_2015-10.owl");
+			 modelOntMap.put("outputfile_2016-2004.ttl", "dbpedia_2016-04.owl");
+			 modelOntMap.put("outputfile_2016-2010.ttl", "dbpedia_2016-10.owl");
 			 
 			 for (String fileName : lstSortedFilesByName) {
 				 File file = new File(dataFolderPath+"/"+fileName);
@@ -43,11 +52,13 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
 					 Inferer inferer = new Inferer();
-					 String ontFilePath = "dbpedia_2015-04.owl";
-					 OntModel ontModel = inferer.readOntology(ontFilePath);
-					//returns a new model with the added triples
-					 //Model newModel = 
-					 inferer.process(personModel, ontModel);
+					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName));
+					 if (ontModel != null) {
+						 //returns a new model with the added triples
+						 personModel = inferer.process(personModel, ontModel);
+					 } else {
+						 LOGGER.info("Ontology for "+fileName+" not found.");
+					 }
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
 					if (graph != null) {
@@ -65,8 +76,9 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	}
 	
 	
-//	public static void main(String[] args) {
+	public static void main(String[] args) {
 //		String DATA_FOLDER_PATH = "PersonGraph/";
-//		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-//    }
+		String DATA_FOLDER_PATH = "C:\\Users\\Ana\\Downloads\\person_graph";
+		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+    }
 }

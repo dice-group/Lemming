@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -109,10 +108,9 @@ public class Inferer {
 		StmtIterator stmts = sourceModel.listStatements();
 		while(stmts.hasNext()) {
 			Statement curStatement = stmts.next();
-			List<Statement> stmtsList = new ArrayList<>();
 			Set<Statement> newStmts = searchType(curStatement, ontModel, newModel);
-			stmtsList.addAll(newStmts);
-			newModel.add(stmtsList);
+			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
+			
 		}
 	}
 
@@ -142,7 +140,7 @@ public class Inferer {
 					newStmts.add(subjType);
 				}
 			}
-			
+			if(object.isResource()) {
 			List<? extends OntResource> range = temp.listRange().toList();
 			for(OntResource curResource: range){
 				if(object.isResource()) {
@@ -151,6 +149,7 @@ public class Inferer {
 						newStmts.add(objType);
 					}
 				} 
+			}
 			}
 		}
 		return newStmts;
