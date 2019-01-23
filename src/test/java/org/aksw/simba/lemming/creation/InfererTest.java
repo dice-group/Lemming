@@ -11,8 +11,7 @@ public class InfererTest {
 
 	@Test
 	public void test() {		
-//		String ttlFileName = "test_literal.ttl";
-		String ttlFileName = "test.ttl";
+		String ttlFileName = "test_literal.ttl";
 		Inferer inferer = new Inferer();
 
 		Model personModel = ModelFactory.createDefaultModel();
@@ -23,8 +22,7 @@ public class InfererTest {
 		Model actualModel = inferer.process(personModel,ontModel);
 		
 		Model expModel = ModelFactory.createDefaultModel();
-		expModel.read("expected.ttl", "TTL");
-//		expModel.read("expected_literal.ttl", "TTL");
+		expModel.read("expected_literal.ttl", "TTL");
 		
 		//checks if the two models have the same set of statements
 		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));

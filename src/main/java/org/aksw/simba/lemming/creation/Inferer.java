@@ -61,8 +61,7 @@ public class Inferer {
 	/**
 	 * 
 	 * This method gets all the unique subjects and objects of a model
-	 * with the exception of the objects that are part of a triple in which
-	 * the predicate is type.
+	 * with the exception of the objects that are not resources.
 	 * It is mainly used to do a before and after count of how many resources 
 	 * do not have a type.
 	 * @param newModel RDF Model from where the resources are extracted
@@ -74,7 +73,7 @@ public class Inferer {
 		while(statements.hasNext()) {
 			Statement curStat = statements.next();
 			set.add(curStat.getSubject());
-			if(curStat.getObject().isResource() && !curStat.getPredicate().equals(RDF.type)) {
+			if(curStat.getObject().isResource()) {
 				set.add(curStat.getObject().asResource());
 			} 
 		}
