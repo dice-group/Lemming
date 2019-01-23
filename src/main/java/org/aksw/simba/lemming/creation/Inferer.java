@@ -28,7 +28,6 @@ import org.slf4j.LoggerFactory;
  * The Inferer class implements an inference of the type of subjects and objects of a given RDF Model 
  * from a given Ontology.
  * To use this class, one could first use the readOntology() method and then use the process() method.
- * @author Ana
  *
  */
 public class Inferer {
