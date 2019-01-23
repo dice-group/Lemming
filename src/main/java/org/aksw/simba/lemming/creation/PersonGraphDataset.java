@@ -76,9 +76,8 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	}
 	
 	
-	public static void main(String[] args) {
+//	public static void main(String[] args) {
 //		String DATA_FOLDER_PATH = "PersonGraph/";
-		String DATA_FOLDER_PATH = "C:\\Users\\Ana\\Downloads\\person_graph";
-		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-    }
+//		new PersonGraphDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//    }
 }

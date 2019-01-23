@@ -141,15 +141,15 @@ public class Inferer {
 				}
 			}
 			if(object.isResource()) {
-			List<? extends OntResource> range = temp.listRange().toList();
-			for(OntResource curResource: range){
-				if(object.isResource()) {
-					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!newModel.contains(objType)) {
-						newStmts.add(objType);
-					}
-				} 
-			}
+				List<? extends OntResource> range = temp.listRange().toList();
+				for(OntResource curResource: range){
+					if(object.isResource()) {
+						Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
+						if (!newModel.contains(objType)) {
+							newStmts.add(objType);
+						}
+					} 
+				}
 			}
 		}
 		return newStmts;
