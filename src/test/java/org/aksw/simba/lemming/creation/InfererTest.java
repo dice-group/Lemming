@@ -10,21 +10,24 @@ import junit.framework.Assert;
 public class InfererTest {
 
 	@Test
-	public void test() {		
+	public void test() {
 		String ttlFileName = "test_literal.ttl";
-		Inferer inferer = new Inferer();
-
+		String ontFilePath = "dbpedia_test.owl";
+		
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
-		
-		String ontFilePath = "dbpedia_test.owl";
+
+		Inferer inferer = new Inferer();
 		OntModel ontModel = inferer.readOntology(ontFilePath);
-		Model actualModel = inferer.process(personModel,ontModel);
-		
+		ontModel.read("22-rdf-syntax-ns", "TURTLE");
+		ontModel.read("rdf-schema", "TURTLE");
+
+		Model actualModel = inferer.process(personModel, ontModel);
+
 		Model expModel = ModelFactory.createDefaultModel();
 		expModel.read("expected_literal.ttl", "TTL");
-		
-		//checks if the two models have the same set of statements
+
+		// checks if the two models have the same set of statements
 		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
 
 	}

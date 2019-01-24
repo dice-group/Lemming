@@ -53,12 +53,11 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 
 					 Inferer inferer = new Inferer();
 					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName));
-					 if (ontModel != null) {
-						 //returns a new model with the added triples
-						 personModel = inferer.process(personModel, ontModel);
-					 } else {
-						 LOGGER.info("Ontology for "+fileName+" not found.");
-					 }
+					 ontModel.read("22-rdf-syntax-ns", "TTL");
+					 ontModel.read("rdf-schema", "TTL");
+					 
+					 //returns a new model with the added triples
+					 personModel = inferer.process(personModel, ontModel);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
 					if (graph != null) {
