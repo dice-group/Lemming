@@ -4,9 +4,12 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -22,15 +25,23 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	
 	@Override
 	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
-		 
+		
 		 List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
-		 GraphCreator creator = new GraphCreator();
+		 GraphCreator creator = new GraphCreator();		
 		 
 		 File folder = new File(dataFolderPath);
 		 if(folder != null && folder.isDirectory() && folder.listFiles().length > 0){
 			 List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			 //sort ascendently
 			 Collections.sort(lstSortedFilesByName);
+			 
+			 //key needs only the file name, whereas value needs the full path to the corresponding Ontology
+			 Map<String, String> modelOntMap = new HashMap<>();	
+			 modelOntMap.put("outputfile_2015-2004.ttl", "dbpedia_2015-04.owl");
+			 modelOntMap.put("outputfile_2015-2010.ttl", "dbpedia_2015-10.owl");
+			 modelOntMap.put("outputfile_2016-2004.ttl", "dbpedia_2016-04.owl");
+			 modelOntMap.put("outputfile_2016-2010.ttl", "dbpedia_2016-10.owl");
+			 
 			 for (String fileName : lstSortedFilesByName) {
 				 File file = new File(dataFolderPath+"/"+fileName);
 				 
@@ -38,7 +49,15 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 Model personModel = ModelFactory.createDefaultModel();
 					 //read file to model
 					 personModel.read(file.getAbsolutePath(), "TTL");
-					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");
+					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
+					 
+					 Inferer inferer = new Inferer();
+					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName));
+					 ontModel.read("22-rdf-syntax-ns", "TTL");
+					 ontModel.read("rdf-schema", "TTL");
+					 
+					 //returns a new model with the added triples
+					 personModel = inferer.process(personModel, ontModel);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
 					if (graph != null) {
