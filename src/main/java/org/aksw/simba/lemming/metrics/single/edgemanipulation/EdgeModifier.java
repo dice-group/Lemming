@@ -112,7 +112,7 @@ public class EdgeModifier {
 	        return mapChangedMetricValues;
 		}else{
 			LOGGER.warn("Invalid triple for removing an edge!");
-			return mMapMetricValues;
+			return null;
 		}
 	}
 	
@@ -150,7 +150,7 @@ public class EdgeModifier {
 			return mapMetricValues;
 		}else{
 			LOGGER.warn("Invalid triple for adding an edge!");
-			return mMapMetricValues;
+			return null;
 		}
 	}
 	

@@ -177,6 +177,11 @@ public class GraphGenerationTest {
         double duration = System.currentTimeMillis() - startTime;
         LOGGER.info("Finished graph generation process in " + duration +" ms");
         
+        LOGGER.info("Storing the graph prior to optimization");
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
+        String preSaveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+        LOGGER.info("Saved under: "+preSaveFiled);
+        
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
@@ -200,7 +205,7 @@ public class GraphGenerationTest {
         Lexicalization with word2vec
         ----------------------------------------------------*/
         LOGGER.info("Lexicalize the mimic graph ...");
-        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
+        graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         
         //output results to file "LemmingEx.result"       
