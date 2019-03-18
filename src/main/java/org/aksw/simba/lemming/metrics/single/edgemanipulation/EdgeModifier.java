@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+import toools.set.IntSet;
+
 public class EdgeModifier {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
@@ -76,13 +78,18 @@ public class EdgeModifier {
 	
 	public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple){
 		
+		// check if the edge is existing before even attempting to remove it?
+		IntSet curEdges = mEdgeModification.getGraph().getEdges();
+
 		if(triple != null && triple.edgeId != -1 &&
 				triple.edgeColour != null &&
-				triple.tailId != -1 && triple.headId !=-1){
+				triple.tailId != -1 && triple.headId !=-1 &&
+				curEdges.contains(triple.edgeId)){
 			
 			//add to list of removed edges
 			mLstRemovedEdges.add(triple);
 			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
+			
 			mEdgeModification.removeEdgeFromGraph(triple.edgeId);
 			if(isCountingNodeTriangles){
 				int newNodeTri = mEdgeModification.getNewNodeTriangles();
