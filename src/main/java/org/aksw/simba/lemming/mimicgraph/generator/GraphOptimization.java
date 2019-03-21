@@ -92,6 +92,7 @@ public class GraphOptimization {
 			//if the removal cannot happen, the error is set to max as not to be chosen
 			if(metricValuesOfLeft == null) {
 				lErrScore = Double.MAX_VALUE;
+				LOGGER.warn("Edge Removal Prevented. Setting lErrScore: "+lErrScore);
 			} else {
 				lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 			}
