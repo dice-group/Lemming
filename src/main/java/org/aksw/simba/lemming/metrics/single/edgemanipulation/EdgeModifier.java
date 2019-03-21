@@ -168,14 +168,22 @@ public class EdgeModifier {
 	 */
 	public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues){
 		if(mLstRemovedEdges.size() > 0 ){
-			//store metric values got from trial
-			updateMapMetricValues(newMetricValues);
+			
 			//get the last removed edge
 			TripleBaseSingleID lastTriple = mLstRemovedEdges.get(mLstRemovedEdges.size() -1);
 			//remove the edge from graph again
 			//mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId);
-			mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
-									(int) newMetricValues.get("#edgetriangles"));
+			
+			try {
+				mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
+						(int) newMetricValues.get("#edgetriangles"));
+				
+				//store metric values got from trial
+				updateMapMetricValues(newMetricValues);
+			} catch (IllegalArgumentException e) {
+				LOGGER.error("An edge removal has failed");
+			}
+			
 		}
 	}
 	
