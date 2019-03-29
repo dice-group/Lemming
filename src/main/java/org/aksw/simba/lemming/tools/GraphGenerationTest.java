@@ -77,6 +77,9 @@ public class GraphGenerationTest {
 		 * -r: random optimization 
 		 * -op: (optional) number of optimization steps 
 		 * 
+		 * -l: (optional) path to the mimic graph to be loaded,
+		 * this skips the mimic graph generation process and loads it directly from file
+		 * 
         ----------------------------------------------------*/
         Map<String, String> mapArgs = parseArguments(args);
         
@@ -168,19 +171,31 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
         }
 
-        LOGGER.info("Generating a first version of mimic graph ...");
-        //create a draft graph
         double startTime = System.currentTimeMillis();
-        
-        mGrphGenerator.generateGraph();
-        // estimate the costed time for generation
-        double duration = System.currentTimeMillis() - startTime;
-        LOGGER.info("Finished graph generation process in " + duration +" ms");
-        
-        LOGGER.info("Storing the graph prior to optimization");
-        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
-        String preSaveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
-        LOGGER.info("Saved under: "+preSaveFiled);
+		String loadMimicGraph = mapArgs.get("-l");
+		boolean isLoaded = false;
+		if (loadMimicGraph != null) {
+			LOGGER.info("Loading previously determined Mimic Graph from file.");
+			ColouredGraph colouredGraph = mDatasetManager.readIntResults(loadMimicGraph);
+			if (colouredGraph != null) {
+				mGrphGenerator.setMimicGraph(colouredGraph);
+				isLoaded = true;
+			} 
+		} 
+		
+		// in case the mimic graph is not loaded, regenerate it anyways
+		if (isLoaded == false) {
+			LOGGER.info("Generating a first version of mimic graph ...");
+			// create a draft graph
+			mGrphGenerator.generateGraph();
+			// estimate the costed time for generation
+			double duration = System.currentTimeMillis() - startTime;
+			LOGGER.info("Finished graph generation process in " + duration + " ms");
+			String filePath = "Initialized_MimicGraph.ser";
+			mDatasetManager.persistIntResults(mGrphGenerator.getMimicGraph(), filePath);
+			LOGGER.info("Intermediate results saved under: "+filePath);
+
+		}
         
         /*---------------------------------------------------
         Optimization with constant expressions
@@ -205,7 +220,7 @@ public class GraphGenerationTest {
         Lexicalization with word2vec
         ----------------------------------------------------*/
         LOGGER.info("Lexicalize the mimic graph ...");
-        graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         
         //output results to file "LemmingEx.result"       
@@ -263,6 +278,9 @@ public class GraphGenerationTest {
 					}
 					else if(param.equalsIgnoreCase("-op")){
 						mapArgs.put("-op", value);
+					}
+					else if (param.equalsIgnoreCase("-l")) {
+						mapArgs.put("-l", value);
 					}
 				}
 			}
@@ -334,4 +352,3 @@ public class GraphGenerationTest {
 		}
 	}
 }
-

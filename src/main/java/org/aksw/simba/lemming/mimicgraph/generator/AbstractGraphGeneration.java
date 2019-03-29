@@ -743,17 +743,17 @@ public abstract class AbstractGraphGeneration {
 			for(ColouredGraph grph: origGraphs){
 				// merge vertex colours
 				ColourPalette vPalette = grph.getVertexPalette();
-				ObjectObjectOpenHashMap<String, BitSet>mapVertexURIsToColours =  vPalette.getMapOfURIAndColour();
+				Map<String, BitSet>mapVertexURIsToColours =  vPalette.getMapOfURIAndColour();
 				fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
 				
 				// merge edge colours
 				ColourPalette ePalette = grph.getEdgePalette();
-				ObjectObjectOpenHashMap<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
+				Map<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
 				fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
 				
 				// merge data typed edge colours
 				ColourPalette dtePalette = grph.getDataTypedEdgePalette();
-				ObjectObjectOpenHashMap<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
+				Map<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
 				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
 			}
 			
@@ -763,14 +763,15 @@ public abstract class AbstractGraphGeneration {
 		}
 	}
 	
-	private void fillColourToPalette(ColourPalette palette, ObjectObjectOpenHashMap<String, BitSet> mapOfURIsAndColours){
-		Object[]arrObjURIs = mapOfURIsAndColours.keys;
+	private void fillColourToPalette(ColourPalette palette, Map<String, BitSet> mapOfURIsAndColours){
+//		Object[]arrObjURIs = mapOfURIsAndColours.keys;
+		Object[]arrObjURIs = mapOfURIsAndColours.keySet().toArray();
 		for(int i = 0 ; i < arrObjURIs.length ; i++){
-			if(mapOfURIsAndColours.allocated[i]){
+//			if(mapOfURIsAndColours.allocated[i]){
 				String uri = (String) arrObjURIs[i];
 				BitSet colour = mapOfURIsAndColours.get(uri);
 				palette.updateColour(colour, uri);
-			}
+//			}
 		}
 	}
 	
