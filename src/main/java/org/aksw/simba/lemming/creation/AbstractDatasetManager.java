@@ -120,27 +120,33 @@ public class AbstractDatasetManager implements IDatasetManager{
 	public ColouredGraph readIntResults(String filePath) {
 		ColouredGraph colouredGraph = null;
 		try {
-			FileInputStream fileIn = new FileInputStream(filePath);
-			ObjectInputStream in = new ObjectInputStream(fileIn);
-			ColouredGraphWrapper colouredGraphWrapper = (ColouredGraphWrapper) in.readObject();
-			in.close();
-			fileIn.close();
-			
-			if(colouredGraphWrapper != null) {
-				ColourPalette vertexPalette = PersHelper.convertCP(colouredGraphWrapper.getVertexPalette());
-				ColourPalette edgePalette = PersHelper.convertCP(colouredGraphWrapper.getEdgePalette());
-				ColourPalette dtEdgePalette = PersHelper.convertCP(colouredGraphWrapper.getDtEdgePalette());
+			Path path = Paths.get(filePath);
+
+			if (Files.exists(path)) {
+				FileInputStream fileIn = new FileInputStream(filePath);
+				ObjectInputStream in = new ObjectInputStream(fileIn);
+				ColouredGraphWrapper colouredGraphWrapper = (ColouredGraphWrapper) in.readObject();
+				in.close();
+				fileIn.close();
 				
-				ObjectArrayList<BitSet> vertexColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getVertexColours());
-				ObjectArrayList<BitSet> edgeColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getEdgeColours());
-				
-				colouredGraph = new ColouredGraph(
-						colouredGraphWrapper.getGraph(), 
-						vertexPalette, 
-						edgePalette,
-						dtEdgePalette);
-				colouredGraph.setVertexColours(vertexColours);
-				colouredGraph.setEdgeColours(edgeColours);
+				if(colouredGraphWrapper != null) {
+					ColourPalette vertexPalette = PersHelper.convertCP(colouredGraphWrapper.getVertexPalette());
+					ColourPalette edgePalette = PersHelper.convertCP(colouredGraphWrapper.getEdgePalette());
+					ColourPalette dtEdgePalette = PersHelper.convertCP(colouredGraphWrapper.getDtEdgePalette());
+					
+					ObjectArrayList<BitSet> vertexColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getVertexColours());
+					ObjectArrayList<BitSet> edgeColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getEdgeColours());
+					
+					colouredGraph = new ColouredGraph(
+							colouredGraphWrapper.getGraph(), 
+							vertexPalette, 
+							edgePalette,
+							dtEdgePalette);
+					colouredGraph.setVertexColours(vertexColours);
+					colouredGraph.setEdgeColours(edgeColours);
+				}
+			} else {
+				LOGGER.warn("Specified file does not exist");
 			}
 			
 		} catch (IOException i) {
