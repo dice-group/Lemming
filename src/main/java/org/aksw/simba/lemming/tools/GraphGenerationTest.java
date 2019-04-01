@@ -174,6 +174,7 @@ public class GraphGenerationTest {
         double startTime = System.currentTimeMillis();
 		String loadMimicGraph = mapArgs.get("-l");
 		boolean isLoaded = false;
+		//if the file path exists, it will read from it otherwise, it will write on it
 		if (loadMimicGraph != null) {
 			LOGGER.info("Loading previously determined Mimic Graph from file.");
 			ColouredGraph colouredGraph = mDatasetManager.readIntResults(loadMimicGraph);
@@ -191,9 +192,11 @@ public class GraphGenerationTest {
 			// estimate the costed time for generation
 			double duration = System.currentTimeMillis() - startTime;
 			LOGGER.info("Finished graph generation process in " + duration + " ms");
-			String filePath = "Initialized_MimicGraph.ser";
-			mDatasetManager.persistIntResults(mGrphGenerator.getMimicGraph(), filePath);
-			LOGGER.info("Intermediate results saved under: "+filePath);
+			if(loadMimicGraph == null) {
+				loadMimicGraph = "Initialized_MimicGraph.ser";
+			}
+			mDatasetManager.persistIntResults(mGrphGenerator.getMimicGraph(), loadMimicGraph);
+			LOGGER.info("Intermediate results saved under: "+loadMimicGraph);
 
 		}
         
