@@ -195,4 +195,14 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 			boolean reusedProbability) {
 		return null;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem#getSeed()
+	 */
+	@Override
+	public long getSeed() {
+		return 0;
+	}
+	
+	
 }
