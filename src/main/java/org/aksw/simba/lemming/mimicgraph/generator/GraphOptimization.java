@@ -223,7 +223,7 @@ public class GraphOptimization {
 	 * @param startingTime the starting time of generation process
 	 * @param savedFile the saved file's name of the mimic dataset
 	 */
-	public void printResult(Map<String, String> args, double startingTime, String savedFile){
+	public void printResult(Map<String, String> args, double startingTime, String savedFile, long seed){
 		BufferedWriter fWriter ;
 		try{
 			LOGGER.warn("Output results to file!");
@@ -246,6 +246,7 @@ public class GraphOptimization {
 			fWriter.write("# Saved error score file: "+ errorScoreFile +".\n");
 			fWriter.write("# Duration: "+ ((int)(mOptimizedTime - startingTime)/1000)+" (s).\n");
 			fWriter.write("# Optimization: "+ mTrueNoOfIteration + "/" + mMaxIteration + " iterations\n");
+			fWriter.write("# Seed: "+ seed +"\n");
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){

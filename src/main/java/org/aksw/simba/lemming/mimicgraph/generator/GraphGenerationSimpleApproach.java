@@ -393,6 +393,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if(outEdgeDistPerVertColo != null){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
+				seed += vertColoProposer.getSeed() - seed +1;
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -405,6 +406,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if(inEdgeDistPerVertColo != null){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
+				seed += vertColoProposer.getSeed() - seed;
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}

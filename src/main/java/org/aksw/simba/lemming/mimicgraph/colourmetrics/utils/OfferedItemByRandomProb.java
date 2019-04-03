@@ -400,4 +400,20 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		
 		return null;
 	}
+
+	/**
+	 * @return the seed
+	 */
+	public long getSeed() {
+		return seed;
+	}
+
+	/**
+	 * @param seed the seed to set
+	 */
+	public void setSeed(long seed) {
+		this.seed = seed;
+	}
+	
+	
 }

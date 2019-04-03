@@ -155,7 +155,8 @@ public class GraphGenerationTest {
         }
         
         String seedString = mapArgs.get("-s");
-        long seed = new Random().nextLong();
+        long seed = System.currentTimeMillis();
+//        		new Random().nextLong();
         if(seedString!= null){
         	try{
         		seed = Long.parseLong(seedString);        		
@@ -213,7 +214,7 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
-		long secSeed = seed+500;
+		long secSeed = mGrphGenerator.getSeed()+1;
         GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier, secSeed);
         LOGGER.info("Optimizing the mimic graph ...");
         // TODO check if it is necessary to randomly refine graph 
@@ -238,7 +239,7 @@ public class GraphGenerationTest {
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         
         //output results to file "LemmingEx.result"       
-        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
+        grphOptimizer.printResult(mapArgs, startTime, saveFiled, seed);
         LOGGER.info("Application exits!!!");
 	}
 	
