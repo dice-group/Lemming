@@ -233,13 +233,13 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Lexicalization with word2vec
         ----------------------------------------------------*/
-//        LOGGER.info("Lexicalize the mimic graph ...");
-//        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
-//        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
-//        
-//        //output results to file "LemmingEx.result"       
-//        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
-//        LOGGER.info("Application exits!!!");
+        LOGGER.info("Lexicalize the mimic graph ...");
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
+        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+        
+        //output results to file "LemmingEx.result"       
+        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
+        LOGGER.info("Application exits!!!");
 	}
 	
 	/**
