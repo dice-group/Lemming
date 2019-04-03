@@ -41,6 +41,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
 	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
+//	private long seed;
 	
 	/*
 	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
@@ -54,8 +55,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	 */
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
 	
-	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads) {
-		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
+	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
@@ -491,7 +492,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo);
 		if(setVertices != null){
 			
-			Random rand = new Random();
+			Random rand = new Random(seed);
+			seed++;
 			
 			int[] arrVertices= setVertices.toIntArray();
 			
@@ -712,8 +714,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				
-				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist);
-				
+				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
+				seed++;
 				IntSet setEdges = mMapColourToEdgeIDs.get(edgeColo);
 				
 				if(setEdges!=null && setEdges.size() >0){
@@ -814,7 +816,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			
 			for(BitSet tailColo : setTailColours){
 				
-				Random random = new Random();
+				Random random = new Random(seed);
+				seed++;
 				
 				double avrgOutDegree = avrgOutDegreeAnalyzer.getAvarageOutDegreeOf(tailColo, edgeColo);
 				
@@ -860,7 +863,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 
 			for(BitSet headColo : setHeadColours){
 				
-				Random random = new Random();
+				Random random = new Random(seed);
+				seed++;
 				
 				double avrgInDegree = avrgInDegreeAnalyzer.getAvarageInDegreeOf(edgeColo, headColo);
 				
@@ -939,7 +943,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				double[] arrEdgeRatePerTriple = Doubles.toArray(lstGapRequiredEdges);
 				
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
-				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist);
+				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
 				
 				while(maxIterationFor1EdgeColo > 0 ){
 					TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();

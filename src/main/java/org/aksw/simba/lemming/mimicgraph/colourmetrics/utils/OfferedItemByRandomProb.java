@@ -19,6 +19,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	private double[] mSimulatedArr;
 
 	private Random mRandom;
+	private long seed;
 	
 	private int mLengthOfArr = 0 ;
 	private double mLowerBound = 0 ;
@@ -28,16 +29,18 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	private T[] mSubArrBaseItems;
 	
 	
-	public OfferedItemByRandomProb(ObjectDistribution<T> objDist){
+	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, long seed){
 		mArrBaseItems = objDist.sampleSpace;
 		mArrBaseItemProb = objDist.values;
 		mLengthOfArr = mArrBaseItemProb.length;
-		mRandom = new Random();
+		this.seed = seed+1;
+		mRandom = new Random(this.seed);
+		
 		// build the cumulative distribution array
 		buildSimulatedArray();
 	}
 	
-	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, Set<T> setOfFilteredItems){
+	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, Set<T> setOfFilteredItems, long seed){
 			
 			// find the intersection of 2 set
 		if(setOfFilteredItems!= null && setOfFilteredItems.size() > 0){
@@ -77,8 +80,8 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 			mArrBaseItems = objDist.sampleSpace;
 			mArrBaseItemProb = objDist.values;
 		}
-		
-		mRandom = new Random();
+		this.seed = seed +1; 
+		mRandom = new Random(this.seed);
 		mLengthOfArr = mArrBaseItemProb.length;
 		// build the cumulative distribution array
 		buildSimulatedArray();
@@ -217,6 +220,8 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 			/*
 			 * random value is within an interval [mLowerBound, mUpperBound] 
 			 */
+			
+
 			double randomX = mLowerBound +  mRandom.nextDouble()* (mUpperBound - mLowerBound);
 			int potentialIndex = indexOf(randomX, mSimulatedArr);
 			if(potentialIndex != -1){
@@ -279,7 +284,9 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 					T baseItem = null;
 					double randomX = 0;
 					int potentialIndex = -1;
+					
 					do{
+						
 						randomX = lowerBound +  mRandom.nextDouble()* (upperBound - lowerBound);
 						potentialIndex = indexOf(randomX, arrProbabilities);					
 						if(potentialIndex != -1){
@@ -301,6 +308,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	public T getPotentialItem(Set<T> setOfFilteredItems, boolean reusedProbability) {
 		
 		if(reusedProbability){
+			
 			if(mSubArrBaseItems != null && mSubArrBaseItemProb!= null){
 				
 				double lowerBound = 0 ;
@@ -309,7 +317,9 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 				T baseItem = null;
 				double randomX = 0;
 				int potentialIndex = -1;
+				
 				do{
+					
 					randomX = lowerBound +  mRandom.nextDouble()* (upperBound - lowerBound);
 					potentialIndex = indexOf(randomX, mSubArrBaseItemProb);					
 					if(potentialIndex != -1){
@@ -371,7 +381,9 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 					T baseItem = null;
 					double randomX = 0;
 					int potentialIndex = -1;
+					
 					do{
+						
 						randomX = lowerBound +  mRandom.nextDouble()* (upperBound - lowerBound);
 						potentialIndex = indexOf(randomX, mSubArrBaseItemProb);					
 						if(potentialIndex != -1){

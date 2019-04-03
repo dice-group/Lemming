@@ -47,10 +47,9 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 	private Random mRandom;
 	
 	public GraphGenerationSimpleApproach(int iNumberOfVertices,
-			ColouredGraph[] origGrphs, int iNumberOfThreads) {
-		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
-		
-		mRandom = new Random();
+			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
+		mRandom = new Random(this.seed);
 		
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
@@ -90,7 +89,8 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
-					Random random = new Random();
+					Random random = new Random(seed);
+					seed++;
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
@@ -392,7 +392,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		for(BitSet edgeColo : outEdgeColours){
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if(outEdgeDistPerVertColo != null){
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -404,7 +404,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 		for(BitSet edgeColo : inEdgeColours){
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if(inEdgeDistPerVertColo != null){
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}

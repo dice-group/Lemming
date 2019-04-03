@@ -39,6 +39,8 @@ public class GraphOptimization {
 	private List<Double> mLstErrorScore; 
 	private double mOptimizedTime =0;
 	
+	private long seed;
+	
 	
 	/*-----------------------------------------------
 	 * Variable for storing calculation information *
@@ -46,8 +48,8 @@ public class GraphOptimization {
 	
 	
 	public GraphOptimization(ColouredGraph[] origGrphs,
-			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers) {
-		
+			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers, long seed) {
+		this.seed = seed;
 		mLstErrorScore = new ArrayList<Double>();
 		/*
 		 *  mErrScoreCalculator is used to compute the error score compared to original
@@ -180,7 +182,8 @@ public class GraphOptimization {
 	private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraph clonedGrph){
 		int edgeId = -1;
 		BitSet edgeColour = null;
-		Random rand = new Random();
+		Random rand = new Random(seed);
+		seed++;
 		while(true){
 			//LOGGER.info("Try to get an edge for removing!");
 			IntSet setOfEdges =	clonedGrph.getEdges();

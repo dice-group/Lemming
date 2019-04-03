@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -153,22 +154,31 @@ public class GraphGenerationTest {
         	}catch(Exception e){}
         }
         
+        String seedString = mapArgs.get("-s");
+        long seed = new Random().nextLong();
+        if(seedString!= null){
+        	try{
+        		seed = Long.parseLong(seedString);        		
+        	}catch(Exception e){}
+        }
+        LOGGER.info("Current Seed is "+seed);
+       
         //define generator
         String typeGenerator = mapArgs.get("-t");
         if(typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("R")){
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);       	
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }else if(typeGenerator.equalsIgnoreCase("RD")){
-        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("D")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("DD")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("C")){
-        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads);        	
+        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
-        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }
 
         double startTime = System.currentTimeMillis();
@@ -203,7 +213,8 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
-        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier);
+		long secSeed = seed+500;
+        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier, secSeed);
         LOGGER.info("Optimizing the mimic graph ...");
         // TODO check if it is necessary to randomly refine graph 
         grphOptimizer.setRefineGraphRandomly(false);
@@ -222,13 +233,13 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Lexicalization with word2vec
         ----------------------------------------------------*/
-        LOGGER.info("Lexicalize the mimic graph ...");
-        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
-        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
-        
-        //output results to file "LemmingEx.result"       
-        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
-        LOGGER.info("Application exits!!!");
+//        LOGGER.info("Lexicalize the mimic graph ...");
+//        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
+//        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+//        
+//        //output results to file "LemmingEx.result"       
+//        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
+//        LOGGER.info("Application exits!!!");
 	}
 	
 	/**
@@ -284,6 +295,9 @@ public class GraphGenerationTest {
 					}
 					else if (param.equalsIgnoreCase("-l")) {
 						mapArgs.put("-l", value);
+					}
+					else if (param.equalsIgnoreCase("-s")) {
+						mapArgs.put("-s", value);
 					}
 				}
 			}

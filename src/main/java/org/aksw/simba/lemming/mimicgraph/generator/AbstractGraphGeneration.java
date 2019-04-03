@@ -81,6 +81,7 @@ public abstract class AbstractGraphGeneration {
 	protected IOfferedItem<BitSet> mEdgeColoProposer;
 	
 	private Random mRandom ;
+	protected long seed;
 	
 	protected BitSet mRdfTypePropertyColour;
 	
@@ -91,17 +92,17 @@ public abstract class AbstractGraphGeneration {
 	private Map<Integer, BitSet> mMapEdgeIdsToColour;
 	
 	
-	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads){
+	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed){
 		//number of vertices
 		mIDesiredNoOfVertices = iNumberOfVertices;
-		
+		this.seed = seed+1;
 		// mimic grpah
 		mMimicGraph = new ColouredGraph();
 		//copy all colour palette to the mimic graph
 		copyColourPalette(origGrphs);
 		
 		// random
-		mRandom = new Random();
+		mRandom = new Random(this.seed);
 		//number of threads 
 		setNumberOfThreadsForGenerationProcess(iNumberOfThreads);
 		
@@ -131,7 +132,7 @@ public abstract class AbstractGraphGeneration {
 		paintVertices();
 		
 		//initialize edge colour proposer
-		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours);
+		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours, seed);
 		
 		//assign colors to edges
 		paintEdges();
@@ -154,7 +155,8 @@ public abstract class AbstractGraphGeneration {
 
 	protected BitSet getProposedEdgeColour(BitSet headColour, BitSet tailColour){
 		if(mColourMapper != null){
-			Random rand = new Random();
+			Random rand = new Random(seed);
+			seed++;
 			Set<BitSet> possEdgeColours = mColourMapper.getPossibleLinkingEdgeColours(tailColour, headColour );
 			if(possEdgeColours !=null && !possEdgeColours.isEmpty()){
 				
@@ -169,7 +171,8 @@ public abstract class AbstractGraphGeneration {
 	
 	protected BitSet getProposedHeadColour(BitSet edgeColour, BitSet tailColour){
 		if(mColourMapper != null){
-			Random rand = new Random();
+			Random rand = new Random(seed);
+			seed++;
 			Set<BitSet> possHeadColours = mColourMapper.getHeadColours(tailColour, edgeColour);
 			if(possHeadColours !=null && !possHeadColours.isEmpty()){
 				BitSet[] arrHeadColours = possHeadColours.toArray(new BitSet[0]);
@@ -183,7 +186,8 @@ public abstract class AbstractGraphGeneration {
 	
 	protected BitSet getProposedTailColour(BitSet headColour, BitSet edgeColour){
 		if(mColourMapper != null){
-			Random rand = new Random();
+			Random rand = new Random(seed);
+			seed++;
 			Set<BitSet> possTailColours = mColourMapper.getTailColours(headColour, edgeColour);
 			if(possTailColours !=null && !possTailColours.isEmpty()){
 				BitSet[] arrTailColours = possTailColours.toArray(new BitSet[0]);
@@ -293,7 +297,7 @@ public abstract class AbstractGraphGeneration {
 	 */
 	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
-		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist);
+		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist, seed);
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
@@ -392,7 +396,7 @@ public abstract class AbstractGraphGeneration {
 			final int indexOfThread  = i+1;
 			
 			final IOfferedItem<BitSet> eColoProposer = 
-					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
+					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
 			
 			Runnable worker = new Runnable() {
 				@Override
@@ -495,7 +499,7 @@ public abstract class AbstractGraphGeneration {
 			final int indexOfThread  = i+1;
 			
 			final IOfferedItem<BitSet> eColoProposer = 
-					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values));
+					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
 			
 			//final ObjectDoubleOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
 			

@@ -61,8 +61,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 	private int maxIterationFor1EdgeColo ;
 	
 	public GraphGenerationSimpleApproach2(int iNumberOfVertices,
-			ColouredGraph[] origGrphs, int iNumberOfThreads) {
-		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
+			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		
@@ -426,7 +426,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		for(BitSet edgeColo : outEdgeColours){
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if(outEdgeDistPerVertColo != null){
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -439,7 +439,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		for(BitSet edgeColo : inEdgeColours){
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if(inEdgeDistPerVertColo != null){
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -466,8 +466,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 					double[] possOutDegreePerTailIDs = new double[arrTailIDs.length];
 					Integer[] objTailIDs = new Integer[arrTailIDs.length];
 					// for each tail id, we compute the potential out degree for it
-					Random random = new Random();
-					
+					Random random = new Random(seed);
+					seed++;
 					for(int i = 0 ; i < arrTailIDs.length ; i++){
 						objTailIDs[i] = arrTailIDs[i];
 						// generate a random out degree for each vertex in its set based on the computed average out-degree
