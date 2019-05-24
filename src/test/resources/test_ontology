@@ -1,0 +1,130 @@
+@prefix :      <http://purl.org/ontology/bibo/> .
+@prefix grddl: <http://www.w3.org/2003/g/data-view#> .
+@prefix ns:    <http://www.w3.org/2003/06/sw-vocab-status/ns#> .
+@prefix dcam:  <http://purl.org/dc/dcam/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix conf:  <https://w3id.org/scholarlydata/ontology/conference-ontology.owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix d0:    <http://www.ontologydesignpatterns.org/ont/d0.owl#> .
+@prefix degrees: <http://purl.org/ontology/bibo/degrees/> .
+@prefix spec:  <http://www.w3.org/2002/12/cal/icalSpec#> .
+@prefix cal:   <http://www.w3.org/2002/12/cal/ical#> .
+@prefix dt:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix terms: <http://purl.org/dc/terms/> .
+@prefix xml:   <http://www.w3.org/XML/1998/namespace> .
+@prefix doco:  <http://purl.org/spar/doco/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix event: <http://purl.org/NET/c4dm/event.owl#> .
+@prefix vann:  <http://purl.org/vocab/vann/> .
+@prefix prism: <http://prismstandard.org/namespaces/1.2/basic/> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix scoro: <http://purl.org/spar/scoro/> .
+@prefix swrc:  <http://swrc.ontoware.org/ontology#> .
+@prefix org:   <http://www.w3.org/ns/org#> .
+@prefix fabio: <http://purl.org/spar/fabio/> .
+@prefix h:     <http://www.w3.org/1999/xhtml> .
+@prefix co:    <http://purl.org/co/> .
+@prefix pro:   <http://purl.org/spar/pro/> .
+@prefix dc11:  <http://purl.org/dc/elements/1.1/> .
+@prefix ical:  <http://www.w3.org/2002/12/cal/icaltzd#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix schor: <https://w3id.org/scholarlydata/role/> .
+@prefix dul:   <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+@prefix bibo:  <http://purl.org/ontology/bibo/> .
+@prefix swc:   <http://data.semanticweb.org/ns/swc/ontology#> .
+@prefix status: <http://purl.org/ontology/bibo/status/> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+
+foaf:maker  a                   rdf:Property , owl:ObjectProperty ;
+        rdfs:comment            "An agent that made this thing." ;
+        rdfs:domain             owl:Thing ;
+        rdfs:isDefinedBy        foaf: ;
+        rdfs:label              "maker" ;
+        rdfs:range              foaf:Agent ;
+        owl:equivalentProperty  dcterms:creator ;
+        owl:inverseOf           foaf:made ;
+        ns:term_status          "stable" .
+		
+dcterms:creator  a              rdf:Property , owl:AnnotationProperty ;
+        rdfs:comment            "An entity primarily responsible for making the resource."@en-US ;
+        rdfs:isDefinedBy        dcterms: ;
+        rdfs:label              "Creator"@en-US ;
+        rdfs:range              dcterms:Agent ;
+        rdfs:subPropertyOf      dcterms:contributor , dc:creator ;
+        dcterms:description     "Examples of a Creator include a person, an organization, or a service."@en-US ;
+        dcterms:hasVersion      <http://dublincore.org/usage/terms/history/#creatorT-002> ;
+        dcterms:issued          "2008-01-14" ;
+        dcterms:modified        "2010-10-11" ;
+        owl:equivalentProperty  foaf:maker .
+
+dc:creator  a                   owl:ObjectProperty , rdf:Property , owl:AnnotationProperty ;
+        rdfs:comment            "An entity primarily responsible for making the resource."@en ;
+        rdfs:isDefinedBy        dc: ;
+        rdfs:label              "Creator"@en ;
+        dcterms:description     "Examples of a Creator include a person, an organization, or a service. Typically, the name of a Creator should be used to indicate the entity."@en ;
+        dcterms:hasVersion      <http://dublincore.org/usage/terms/history/#creator-006> ;
+        dcterms:issued          "1999-07-02"^^dt:date ;
+        dcterms:modified        "2008-01-14"^^dt:date ;
+        skos:note               "A second property with the same name as this property has been declared in the dcterms: namespace (http://purl.org/dc/terms/).  See the Introduction to the document \"DCMI Metadata Terms\" (http://dublincore.org/documents/dcmi-terms/) for an explanation."@en .
+
+
+swc:isSuperEventOf  a           owl:ObjectProperty ;
+        owl:equivalentProperty  conf:hasSubEvent .
+		
+		
+conf:hasSubEvent  a         owl:ObjectProperty ;
+        rdfs:comment        "has sub event"@en ;
+        rdfs:domain         conf:OrganisedEvent ;
+        rdfs:label          "has sub event"@en ;
+        rdfs:range          conf:OrganisedEvent ;
+        rdfs:subPropertyOf  conf:hasPart .
+		
+conf:hasLocation  a   owl:ObjectProperty ;
+        rdfs:comment  "has location"@en ;
+        rdfs:domain   conf:OrganisedEvent ;
+        rdfs:label    "has location"@en ;
+        rdfs:range    conf:Site .
+		
+swc:hasLocation  a              owl:ObjectProperty ;
+        owl:equivalentProperty  conf:hasLocation .
+		
+cal:dtend  a            owl:ObjectProperty ;
+        rdfs:comment    "This property specifies the date and time that a calendar component ends." , "\n\t    default value type: DATE-TIME" ;
+        rdfs:domain     [ a            owl:Class ;
+                          owl:unionOf  ( cal:Vevent cal:Vfreebusy cal:Vevent cal:Vfreebusy )
+                        ] ;
+        rdfs:label      "DTEND" ;
+        rdfs:range      [ a            owl:Class ;
+                          owl:unionOf  ( cal:Value_DATE-TIME cal:Value_DATE )
+                        ] ;
+        spec:valueType  "DATE-TIME" .
+		
+ical:dtstart  a                 owl:DatatypeProperty ;
+        owl:equivalentProperty  conf:startDate .
+		
+conf:startDate  a     owl:DatatypeProperty ;
+        rdfs:comment  "start date"@en ;
+        rdfs:domain   conf:OrganisedEvent ;
+        rdfs:label    "start date"@en ;
+        rdfs:range    dt:dateTime .
+
+cal:tzid  a             owl:DatatypeProperty ;
+        rdfs:comment    "This property specifies the text value that uniquely identifies the \"VTIMEZONE\" calendar component." , "\n\t    value type: TEXT" ;
+        rdfs:domain     cal:Vtimezone ;
+        rdfs:label      "TZID" ;
+        rdfs:range      dt:string ;
+        spec:valueType  "TEXT" .
+		
+bibo:authorList  a          owl:ObjectProperty ;
+        rdfs:comment        "An ordered list of authors. Normally, this list is seen as a priority list that order authors by importance."@en ;
+        rdfs:domain         bibo:Document ;
+        rdfs:isDefinedBy    "http://purl.org/ontology/bibo/"^^dt:anyURI ;
+        rdfs:label          "list of authors"@en ;
+        rdfs:range          [ a            owl:Class ;
+                              owl:unionOf  ( rdf:List rdf:Seq )
+                            ] ;
+        rdfs:subPropertyOf  bibo:contributorList ;
+        ns:term_status      "stable" .

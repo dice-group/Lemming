@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.creation;
 
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Test;
@@ -31,4 +32,20 @@ public class InfererTest {
 		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
 
 	}
+	
+	@Test
+	public void testSwdf() {
+		String ttlFileName = "snippet_swdf_2001.ttl";
+		
+	    OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+    	ontModel.read("src/test/resources/test_ontology","TTL");
+
+		Model confModel = ModelFactory.createDefaultModel();
+		confModel.read(ttlFileName, "TTL");
+
+		Inferer inferer = new Inferer();
+		Model actualModel = inferer.process(confModel, ontModel);
+
+	}
+	
 }
