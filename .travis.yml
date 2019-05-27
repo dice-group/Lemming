@@ -4,7 +4,7 @@ language: java
 sudo: false
       
 jdk:  
-  - oraclejdk9
+  - openjdk10
 
 install:
   - mvn clean compile -DskipTests=true -Dmaven.javadoc.skip=true -B -V
