@@ -1,5 +1,8 @@
 package org.aksw.simba.lemming.creation;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
@@ -14,12 +17,12 @@ public class InfererTest {
 	public void test() {
 		String ttlFileName = "test_literal.ttl";
 		String ontFilePath = "dbpedia_test.owl";
-		
+
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
 
 		Inferer inferer = new Inferer();
-		OntModel ontModel = inferer.readOntology(ontFilePath);
+		OntModel ontModel = inferer.readOntology(ontFilePath, null);
 		ontModel.read("22-rdf-syntax-ns", "TURTLE");
 		ontModel.read("rdf-schema", "TURTLE");
 
@@ -32,13 +35,13 @@ public class InfererTest {
 		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
 
 	}
-	
+
 	@Test
 	public void testSwdf() {
 		String ttlFileName = "snippet_swdf_2001.ttl";
-		
-	    OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-    	ontModel.read("src/test/resources/test_ontology","TTL");
+
+		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+		ontModel.read("src/test/resources/test_ontology", "TTL");
 
 		Model confModel = ModelFactory.createDefaultModel();
 		confModel.read(ttlFileName, "TTL");
@@ -46,6 +49,27 @@ public class InfererTest {
 		Inferer inferer = new Inferer();
 		Model actualModel = inferer.process(confModel, ontModel);
 
+//		printModel(actualModel, "after");
+
 	}
-	
+
+	// for testing
+	private void printModel(Model model, String name) {
+		FileWriter out = null;
+		try {
+			out = new FileWriter(name);
+			model.write(out, "TTL");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				try {
+					out.close();
+				} catch (IOException ignore) {
+				}
+			}
+		}
+	}
+
 }

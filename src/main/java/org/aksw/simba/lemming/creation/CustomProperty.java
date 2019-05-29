@@ -10,22 +10,21 @@ import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
 import org.apache.jena.util.iterator.ExtendedIterator;
 
-/**
- * 
- * 
- */
+//TODO: needs restructuring
+
 public class CustomProperty {
-	
+
 	/**
 	 * Uniform name to be used in the generated graph
 	 */
 	private String name;
-	
+
 	/**
-	 * Property with all the updated information of itself and of the equivalent properties
+	 * Property with all the updated information of itself and of the equivalent
+	 * properties
 	 */
 	private OntProperty property;
-	
+
 	/**
 	 * URIs of the equivalent properties and of the first property to be added
 	 */
@@ -36,7 +35,7 @@ public class CustomProperty {
 		this.name = property.getURI();
 		this.property = property;
 		equivalentProperties.add(name);
-		
+
 	}
 
 	/**
@@ -49,10 +48,10 @@ public class CustomProperty {
 	}
 
 	/**
-	 * This method does the following
-	 * 1. Updates the OnProperty object by adding the domain and range of all the equivalent 
-	 * properties
-	 * 2. Updates the name to be used
+	 * This method does the following 1. Updates the OnProperty object by adding the
+	 * domain and range of all the equivalent properties 2. Updates the name to be
+	 * used
+	 * 
 	 * @param ontProperty property to add to the node
 	 */
 	public void addEquivalent(OntProperty ontProperty) {
@@ -60,34 +59,37 @@ public class CustomProperty {
 
 		List<? extends OntResource> domainList = ontProperty.listDomain().toList();
 		for (OntResource domain : domainList) {
-			if(!property.hasDomain(domain)) {
+			if (!property.hasDomain(domain)) {
 				property.addDomain(domain);
 			}
 		}
 
 		List<? extends OntResource> rangeList = ontProperty.listRange().toList();
 		for (OntResource range : rangeList) {
-			if(!property.hasRange(range)) {
+			if (!property.hasRange(range)) {
 				property.addRange(range);
 			}
 		}
 
-		// if the property name is "smaller" than the current name, we take it as the new name
+		// if the property name is "smaller" than the current name, we take it as the
+		// new name
 		String newName = ontProperty.getURI();
 		if (newName.compareTo(name) < 0) {
 			setName(newName);
 		}
 	}
-	
+
 	public boolean isEquivalent(String uri) {
 		if (equivalentProperties.contains(uri)) {
 			return true;
 		}
 		return false;
 	}
+
 	/**
-	 * Returns true if node already contains a given property or if that given's 
+	 * Returns true if node already contains a given property or if that given's
 	 * property equivalents match the node's equivalents
+	 * 
 	 * @param ontProperty
 	 * @return
 	 */
@@ -99,15 +101,15 @@ public class CustomProperty {
 		try {
 			list = ontProperty.listEquivalentProperties().toList();
 		} catch (ConversionException e) {
-			
+
 		}
-		if(list != null && !list.isEmpty()) {
-			for(OntProperty property: list) {
-				if(equivalentProperties.contains(property.toString())) {
+		if (list != null && !list.isEmpty()) {
+			for (OntProperty property : list) {
+				if (equivalentProperties.contains(property.toString())) {
 					return true;
 				}
 			}
-		}		
+		}
 		return false;
 	}
 
