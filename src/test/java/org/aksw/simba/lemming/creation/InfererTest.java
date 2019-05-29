@@ -39,17 +39,27 @@ public class InfererTest {
 	@Test
 	public void testSwdf() {
 		String ttlFileName = "snippet_swdf_2001.ttl";
+//		String ttlFileName = "iswc-2002-complete.rdf";
 
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		ontModel.read("src/test/resources/test_ontology", "TTL");
+//		ontModel.read("22-rdf-syntax-ns", "TTL");
+//    	ontModel.read("rdf-schema", "TTL");
+//    	ontModel.read("swdf-owls/foaf", "TTL");
+//    	ontModel.read("swdf-owls/elements-1.1", "TTL");
+//    	ontModel.read("swdf-owls/ical", "TTL");
+//    	ontModel.read("swdf-owls/owl", "TTL");
+//    	ontModel.read("swdf-owls/conference-ontology", "TTL" );
+//    	ontModel.read("swdf-owls/swrc", "TTL");
+//    	ontModel.read("swdf-owls/conference-ontology-alignments", "TTL");
 
 		Model confModel = ModelFactory.createDefaultModel();
-		confModel.read(ttlFileName, "TTL");
+		confModel.read(ttlFileName);
 
 		Inferer inferer = new Inferer();
 		Model actualModel = inferer.process(confModel, ontModel);
 
-//		printModel(actualModel, "after");
+		printModel(actualModel, "after");
 
 	}
 

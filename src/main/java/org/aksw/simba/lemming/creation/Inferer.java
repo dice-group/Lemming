@@ -69,8 +69,8 @@ public class Inferer {
 		Set<Resource> set = extractUniqueResources(newModel);
 		if (ontModel != null) {
 			// collect the equivalent properties and classes information from the ontology
-			Map<String, CustomEquivClass> classes = searchClassesInOntology(ontModel);
-			Map<String, CustomProperty> uriNodeMap = searchEqPropertiesInOnt(ontModel);
+			Map<String, Equivalent> classes = searchClassesInOntology(ontModel);
+			Map<String, Equivalent> uriNodeMap = searchEqPropertiesInOnt(ontModel);
 
 			// infer type statements, a single property name is also enforced here
 			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
@@ -133,7 +133,7 @@ public class Inferer {
 	 * @param ontModel    the ontology model
 	 */
 	public void iterateStmts(Model newModel, Model sourceModel, OntModel ontModel,
-			Map<String, CustomProperty> uriNodeMap) {
+			Map<String, Equivalent> uriNodeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
 			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
@@ -199,17 +199,17 @@ public class Inferer {
 	 * @param uriNodeMap
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model newModel, Map<String, CustomProperty> uriNodeMap) {
+	private Set<Statement> searchType(Statement statement, Model newModel, Map<String, Equivalent> uriNodeMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
 		RDFNode object = statement.getObject();
 
-		CustomProperty node = uriNodeMap.get(predicate.toString());
+		Equivalent<?> node = uriNodeMap.get(predicate.toString());
 		OntProperty property = null;
 
 		if (node != null) {
-			property = node.getProperty();
+			property = (OntProperty) node.getAttribute();
 			Property newPredicate = ResourceFactory.createProperty(node.getName());
 
 			ModelUtil.replaceStatement(newModel, statement,
@@ -275,9 +275,9 @@ public class Inferer {
 	 * @param ontModel the ontology model
 	 * @return the map between each URI and the respective object
 	 */
-	public Map<String, CustomProperty> searchEqPropertiesInOnt(OntModel ontModel) {
+	public Map<String, Equivalent> searchEqPropertiesInOnt(OntModel ontModel) {
 
-		Map<String, CustomProperty> uriNodeMap = new HashMap<String, CustomProperty>();
+		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
 
 		List<OntProperty> ontProperties = ontModel.listAllOntProperties().toList();
 
@@ -287,7 +287,7 @@ public class Inferer {
 		Map<String, Boolean> visitedMap = ontProperties.stream()
 				.collect(Collectors.toMap(OntProperty::toString, visited -> false));
 
-		Set<CustomProperty> properties = new HashSet<CustomProperty>();
+		Set<Equivalent> properties = new HashSet<Equivalent>();
 
 		while (stack.size() > 0) {
 			OntProperty curProperty = stack.pop();
@@ -310,9 +310,9 @@ public class Inferer {
 				}
 
 				// check to which node do we need to add this info to
-				Iterator<CustomProperty> propIterator = properties.iterator();
+				Iterator<Equivalent> propIterator = properties.iterator();
 				while (propIterator.hasNext()) {
-					CustomProperty curNode = propIterator.next();
+					Equivalent<OntResource> curNode = propIterator.next();
 					isSame = curNode.isSameProperty(curProperty);
 					if (isSame) {
 						curNode.addEquivalent(curProperty);
@@ -323,9 +323,9 @@ public class Inferer {
 
 				// if not, create new one
 				if (!isSame) {
-					CustomProperty node = new CustomProperty(curProperty);
+					Equivalent<OntResource> node = new Equivalent<OntResource>(curProperty);
 					if (eqsList != null) {
-						node.addEquivalentGroup(eqsList);
+						node.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
 					}
 					properties.add(node);
 					uriNodeMap.put(curProperty.toString(), node);
@@ -344,11 +344,13 @@ public class Inferer {
 	 * @param ontModel the ontology model
 	 * @return the map between each resource URI and the respective object
 	 */
-	public Map<String, CustomEquivClass> searchClassesInOntology(OntModel ontModel) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public Map<String, Equivalent> searchClassesInOntology(OntModel ontModel) {
 
 		Set<OntClass> classSet = ontModel.listClasses().toSet();
 
-		Map<String, CustomEquivClass> equivalentsMap = new HashMap<String, CustomEquivClass>();
+//		Map<String, CustomEquivClass> equivalentsMap = new HashMap<String, CustomEquivClass>();
+		Map<String, Equivalent> equivalentsMap = new HashMap<String, Equivalent>();
 
 		Map<String, Boolean> visitedMap = classSet.stream()
 				.collect(Collectors.toMap(OntClass::toString, visited -> false));
@@ -383,12 +385,13 @@ public class Inferer {
 
 				// does it exist already?
 				for (String key : equivalentsMap.keySet()) {
-					CustomEquivClass curEquivalent = equivalentsMap.get(key);
-					if (curEquivalent.containsClass(curClass)) {
+//					CustomEquivClass curEquivalent = equivalentsMap.get(key);
+					Equivalent<OntResource> curEquivalent = equivalentsMap.get(key);
+					if (curEquivalent.containsElement(curClass)) {
 						isExisting = true;
-						curEquivalent.addEquivalentClass(curClass);
+						curEquivalent.addEquivalent(curClass);
 						if (eqsList != null && !eqsList.isEmpty()) {
-							curEquivalent.addEquivalentClass(eqsList.stream().collect(Collectors.toSet()));
+							curEquivalent.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
 						}
 						equivalentsMap.put(curName, curEquivalent);
 						break;
@@ -397,7 +400,8 @@ public class Inferer {
 
 				// no? then, create it
 				if (!isExisting) {
-					CustomEquivClass equivalent = new CustomEquivClass(curClass);
+//					CustomEquivClass equivalent = new CustomEquivClass(curClass);
+					Equivalent<OntResource> equivalent = new Equivalent<OntResource>(curClass);
 					equivalentsMap.put(curName, equivalent);
 				}
 			}
@@ -412,12 +416,12 @@ public class Inferer {
 	 * @param model   the RDF Model
 	 * @param classes the map between the different URIs and the class object
 	 */
-	public void renameClasses(Model model, Map<String, CustomEquivClass> classes) {
+	public void renameClasses(Model model, Map<String, Equivalent> classes) {
 		ResIterator iterator = model.listResourcesWithProperty(RDF.type, RDFS.Class);
 		while (iterator.hasNext()) {
 			Resource curResource = iterator.next();
 			String curResourceURI = curResource.getURI();
-			CustomEquivClass equiv = classes.get(curResourceURI);
+			Equivalent equiv = classes.get(curResourceURI);
 
 			if (equiv != null && curResourceURI != null && !curResourceURI.equals(equiv.getName())) {
 				ResourceUtils.renameResource(curResource, equiv.getName());
