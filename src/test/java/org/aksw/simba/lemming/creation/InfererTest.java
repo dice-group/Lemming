@@ -39,7 +39,7 @@ public class InfererTest {
 	@Test
 	public void testSwdf() {
 		String ttlFileName = "snippet_swdf_2001.ttl";
-//		String ttlFileName = "iswc-2002-complete.rdf";
+//		String ttlFileName = "iswc-2001-complete.rdf";
 
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		ontModel.read("src/test/resources/test_ontology", "TTL");

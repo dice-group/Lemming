@@ -14,44 +14,50 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
- * @author ana
+ * Represents an OntClass or an OntProperty and its equivalent classes or
+ * properties, respectively.
  *
- * @param <T>  OntProperty, OntClass
+ * @param <T> OntProperty, OntClass
  */
-public class Equivalent<T> {
+public class Equivalent<T extends OntResource> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Equivalent.class);
-	
+
 	/**
 	 * single name to characterize all its equivalents
 	 */
 	private String name;
-	
+
 	/**
-	 * should be instanceof OntProperty / OntClass
+	 * should be instanceof OntProperty or OntClass
 	 */
 	private T attribute;
-	
+
 	/**
 	 * URIs of all equivalents
 	 */
 	private Set<String> equivalents = new HashSet<>();
-	
-	
+
 	public Equivalent(T attribute) {
 		super();
 		this.name = ((Resource) attribute).getURI();
 		this.attribute = attribute;
 		this.equivalents.add(name);
 	}
-	
+
+	/**
+	 * This method adds the URI to the this.equivalents set and updates the object's
+	 * own name. If the object is an OntProperty, the domain and range information
+	 * is also added to the class' object
+	 * 
+	 * @param attribute OntProperty / OntClass object
+	 */
 	public void addEquivalent(T attribute) {
-		String classURI = ((Resource) attribute).getURI();
-		if (classURI != null) {
-			this.equivalents.add(classURI);
-			setName(getStandardName(classURI, name));
-			
-			if(attribute instanceof OntProperty) {
+		String uri = ((Resource) attribute).getURI();
+		if (uri != null) {
+			this.equivalents.add(uri);
+			setName(compareNames(uri, name));
+
+			if (attribute instanceof OntProperty) {
 				List<? extends OntResource> domainList = ((OntProperty) attribute).listDomain().toList();
 				for (OntResource domain : domainList) {
 					if (!((OntProperty) this.attribute).hasDomain(domain)) {
@@ -65,33 +71,48 @@ public class Equivalent<T> {
 						((OntProperty) this.attribute).addRange(range);
 					}
 				}
-			}			
+			}
 		}
 	}
-	
+
+	/**
+	 * Adds the elements of a set to object's own set
+	 * 
+	 * @see addEquivalent(T attribute)
+	 * @param set set of OntProperty / OntClass objects to be added
+	 */
 	public void addEquivalentGroup(Set<T> set) {
-		for(T element: set) {
+		for (T element : set) {
 			addEquivalent(element);
 		}
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if the object contains any relation to the given
+	 * element.
+	 * 
+	 * @param element given element to check for comparison
+	 * @return <code>true</code> if the set contains the element's URI or any of the
+	 *         equivalents classes/properties URI <code>false</code> otherwise
+	 */
 	public boolean containsElement(T element) {
-		if(((RDFNode) element).isResource() && equivalents.contains(((Resource) element).getURI()))
+		if (((RDFNode) element).isResource() && equivalents.contains(((Resource) element).getURI()))
 			return true;
-		
+
 		List<T> list = null;
-		
+
 		try {
-			if(element instanceof OntClass) {
+			if (element instanceof OntClass) {
 				list = (List<T>) ((OntClass) element).listEquivalentClasses().toList();
 			}
-			
-			if(element instanceof OntProperty) {
+
+			if (element instanceof OntProperty) {
 				list = (List<T>) ((OntProperty) element).listEquivalentProperties().toList();
 			}
-			
+
 		} catch (ConversionException e) {
-			LOGGER.warn("The equivalents of "+ element.toString()+" are not specified as " +element.getClass().getCanonicalName());
+			LOGGER.warn("The equivalents of " + element.toString() + " are not specified as "
+					+ element.getClass().getCanonicalName());
 		}
 		if (list != null && !list.isEmpty()) {
 			for (T current : list) {
@@ -100,31 +121,15 @@ public class Equivalent<T> {
 				}
 			}
 		}
-		return false;		
-	}
-	
-	public boolean isSameProperty(OntProperty ontProperty) {
-		if (equivalents.contains(ontProperty.getURI())) {
-			return true;
-		}
-		List<? extends OntProperty> list = null;
-		try {
-			list = ontProperty.listEquivalentProperties().toList();
-		} catch (ConversionException e) {
-
-		}
-		if (list != null && !list.isEmpty()) {
-			for (OntProperty property : list) {
-				if (equivalents.contains(property.toString())) {
-					return true;
-				}
-			}
-		}
 		return false;
 	}
-	
-	
-	public String getStandardName(String newName, String oldName) {
+
+	/**
+	 * @param newName
+	 * @param oldName
+	 * @return the lexicographically first String
+	 */
+	public String compareNames(String newName, String oldName) {
 		if (newName.compareTo(oldName) < 0) {
 			return oldName;
 		}
@@ -172,6 +177,5 @@ public class Equivalent<T> {
 	public void setEquivalents(Set<String> equivalents) {
 		this.equivalents = equivalents;
 	}
-	
-	
+
 }
