@@ -37,10 +37,10 @@ public class Equivalent<T extends OntResource> {
 	 */
 	private Set<String> equivalents = new HashSet<>();
 
-	public Equivalent(T attribute) {
+	public Equivalent(T current) {
 		super();
-		this.name = ((Resource) attribute).getURI();
-		this.attribute = attribute;
+		this.name = ((Resource) current).getURI();
+		this.attribute = current;
 		this.equivalents.add(name);
 	}
 
@@ -49,23 +49,23 @@ public class Equivalent<T extends OntResource> {
 	 * own name. If the object is an OntProperty, the domain and range information
 	 * is also added to the class' object
 	 * 
-	 * @param attribute OntProperty / OntClass object
+	 * @param current OntProperty / OntClass object
 	 */
-	public void addEquivalent(T attribute) {
-		String uri = ((Resource) attribute).getURI();
+	public void addEquivalent(T current) {
+		String uri = ((Resource) current).getURI();
 		if (uri != null) {
 			this.equivalents.add(uri);
 			setName(compareNames(uri, name));
 
-			if (attribute instanceof OntProperty) {
-				List<? extends OntResource> domainList = ((OntProperty) attribute).listDomain().toList();
+			if (current instanceof OntProperty) {
+				List<? extends OntResource> domainList = ((OntProperty) current).listDomain().toList();
 				for (OntResource domain : domainList) {
 					if (!((OntProperty) this.attribute).hasDomain(domain)) {
 						((OntProperty) this.attribute).addDomain(domain);
 					}
 				}
 
-				List<? extends OntResource> rangeList = ((OntProperty) attribute).listRange().toList();
+				List<? extends OntResource> rangeList = ((OntProperty) current).listRange().toList();
 				for (OntResource range : rangeList) {
 					if (!((OntProperty) this.attribute).hasRange(range)) {
 						((OntProperty) this.attribute).addRange(range);
@@ -95,6 +95,7 @@ public class Equivalent<T extends OntResource> {
 	 * @return <code>true</code> if the set contains the element's URI or any of the
 	 *         equivalents classes/properties URI <code>false</code> otherwise
 	 */
+	@SuppressWarnings("unchecked")
 	public boolean containsElement(T element) {
 		if (((RDFNode) element).isResource() && equivalents.contains(((Resource) element).getURI()))
 			return true;
@@ -111,8 +112,7 @@ public class Equivalent<T extends OntResource> {
 			}
 
 		} catch (ConversionException e) {
-			LOGGER.warn("The equivalents of " + element.toString() + " are not specified as "
-					+ element.getClass().getCanonicalName());
+			return false;
 		}
 		if (list != null && !list.isEmpty()) {
 			for (T current : list) {
@@ -177,5 +177,4 @@ public class Equivalent<T extends OntResource> {
 	public void setEquivalents(Set<String> equivalents) {
 		this.equivalents = equivalents;
 	}
-
 }
