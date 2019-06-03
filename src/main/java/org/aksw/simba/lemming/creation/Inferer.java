@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Stack;
@@ -26,13 +27,9 @@ import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
-import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,10 +63,10 @@ public class Inferer {
 		if (ontModel != null) {
 			// collect the equivalent properties and classes information from the ontology
 			Set<OntClass> ontClasses = ontModel.listClasses().toSet();
-			Map<String, Equivalent> classes = searchEquivalents(ontClasses); //searchClassesInOntology(ontModel);
-			
+			Map<String, Equivalent> classes = searchEquivalents(ontClasses); // searchClassesInOntology(ontModel);
+
 			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
-			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);//searchEqPropertiesInOnt(ontModel);
+			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
 
 			// infer type statements, a single property name is also enforced here
 			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
@@ -210,15 +207,16 @@ public class Inferer {
 			property = (OntProperty) node.getAttribute();
 			Property newPredicate = ResourceFactory.createProperty(node.getName());
 
-			ModelUtil.replaceStatement(newModel, statement,
-					ResourceFactory.createStatement(subject, newPredicate, object));
+			if (!newPredicate.getURI().equals(predicate.getURI()))
+				ModelUtil.replaceStatement(newModel, statement,
+						ResourceFactory.createStatement(subject, newPredicate, object));
 		}
 
 		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!newModel.contains(subjType)) {
+				if (!newModel.contains(subjType) && !curResource.isAnon()) {
 					newStmts.add(subjType);
 				}
 			}
@@ -255,7 +253,17 @@ public class Inferer {
 
 		return ontModel;
 	}
-	
+
+	/**
+	 * Searches for the equivalents in an ontology and maps them to our Equivalent<T
+	 * extends OntResource> class, producing a map of the Equivalent objects with
+	 * the URIs as keys.
+	 * 
+	 * @see Equivalent<T extends OntResource>
+	 * @param <T>
+	 * @param ontElements the ontology classes or properties
+	 * @return
+	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set ontElements) {
 
@@ -276,12 +284,13 @@ public class Inferer {
 			if (!isVisited) {
 				List eqsList = null;
 				try {
-					if(current instanceof OntProperty)
+					if (current instanceof OntProperty)
 						eqsList = ((OntProperty) current).listEquivalentProperties().toList();
-					if(current instanceof OntClass)
+					if (current instanceof OntClass)
 						eqsList = ((OntClass) current).listEquivalentClasses().toList();
 				} catch (ConversionException e) {
-					LOGGER.warn("Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
+					LOGGER.warn(
+							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
 							current.toString());
 				}
 
@@ -320,21 +329,19 @@ public class Inferer {
 	}
 
 	/**
-	 * Renames all the resources, which are implicitly of type rdfs:Class in a model,
-	 * to one uniform URI
+	 * Renames all the equivalent resources to one uniform URI
 	 * 
 	 * @param model   the RDF Model
 	 * @param classes the map between the different URIs and the class object
 	 */
 	public void renameClasses(Model model, Map<String, Equivalent> classes) {
-		ResIterator iterator = model.listResourcesWithProperty(RDF.type, RDFS.Class);
-		while (iterator.hasNext()) {
-			Resource curResource = iterator.next();
-			String curResourceURI = curResource.getURI();
-			Equivalent<OntClass> equiv = classes.get(curResourceURI);
-
-			if (equiv != null && curResourceURI != null && !curResourceURI.equals(equiv.getName())) {
-				ResourceUtils.renameResource(curResource, equiv.getName());
+		Iterator<Entry<String, Equivalent>> it = classes.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, Equivalent> pair = it.next();
+			String newName = pair.getValue().getName();
+			Resource mResource = model.getResource(pair.getKey());
+			if (mResource != null && !mResource.getURI().equals(newName)) {
+				ResourceUtils.renameResource(mResource, newName);
 			}
 		}
 	}

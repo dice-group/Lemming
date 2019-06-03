@@ -7,6 +7,10 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.junit.Test;
 
 import junit.framework.Assert;
@@ -38,28 +42,33 @@ public class InfererTest {
 
 	@Test
 	public void testSwdf() {
-		String ttlFileName = "snippet_swdf_2001.ttl";
-//		String ttlFileName = "iswc-2001-complete.rdf";
+		String fileName = "snippet_swdf_2001.rdf";
 
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		ontModel.read("src/test/resources/test_ontology", "TTL");
-//		ontModel.read("22-rdf-syntax-ns", "TTL");
-//    	ontModel.read("rdf-schema", "TTL");
-//    	ontModel.read("swdf-owls/foaf", "TTL");
-//    	ontModel.read("swdf-owls/elements-1.1", "TTL");
-//    	ontModel.read("swdf-owls/ical", "TTL");
-//    	ontModel.read("swdf-owls/owl", "TTL");
-//    	ontModel.read("swdf-owls/conference-ontology", "TTL" );
-//    	ontModel.read("swdf-owls/swrc", "TTL");
-//    	ontModel.read("swdf-owls/conference-ontology-alignments", "TTL");
 
 		Model confModel = ModelFactory.createDefaultModel();
-		confModel.read(ttlFileName);
+		confModel.read(fileName);
 
 		Inferer inferer = new Inferer();
 		Model actualModel = inferer.process(confModel, ontModel);
 
 		printModel(actualModel, "after");
+
+		// check if the model contains properties or resources that should have been
+		// replaced
+		Property foafName = ResourceFactory.createProperty("http://xmlns.com/foaf/0.1/name");
+		Property subEventof = ResourceFactory
+				.createProperty("http://data.semanticweb.org/ns/swc/ontology#isSubEventOf");
+		Assert.assertFalse(actualModel.contains(null, foafName));
+		Assert.assertFalse(actualModel.contains(null, subEventof));
+
+		Resource breakEvent = ResourceFactory.createResource("http://data.semanticweb.org/ns/swc/ontology#BreakEvent");
+		Assert.assertFalse(actualModel.containsResource(breakEvent));
+
+		Resource replaced = ResourceFactory
+				.createResource("https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Break");
+		Assert.assertTrue(actualModel.containsResource(replaced));
 
 	}
 

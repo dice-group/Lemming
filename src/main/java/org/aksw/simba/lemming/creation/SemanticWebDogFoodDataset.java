@@ -211,8 +211,8 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
 
     }
 
-    public static void main(String[] args) {
-        String DATA_FOLDER_PATH = "SemanticWebDogFood/";
-        new SemanticWebDogFoodDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-    }
+//    public static void main(String[] args) {
+//        String DATA_FOLDER_PATH = "SemanticWebDogFood/";
+//        new SemanticWebDogFoodDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//    }
 }
