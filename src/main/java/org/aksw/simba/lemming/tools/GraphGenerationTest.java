@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -76,6 +77,9 @@ public class GraphGenerationTest {
 		 * 
 		 * -r: random optimization 
 		 * -op: (optional) number of optimization steps 
+		 * 
+		 * -l: (optional) path to the mimic graph to be loaded,
+		 * this skips the mimic graph generation process and loads it directly from file
 		 * 
         ----------------------------------------------------*/
         Map<String, String> mapArgs = parseArguments(args);
@@ -150,37 +154,68 @@ public class GraphGenerationTest {
         	}catch(Exception e){}
         }
         
+        String seedString = mapArgs.get("-s");
+        long seed = System.currentTimeMillis();
+//        		new Random().nextLong();
+        if(seedString!= null){
+        	try{
+        		seed = Long.parseLong(seedString);        		
+        	}catch(Exception e){}
+        }
+        LOGGER.info("Current Seed is "+seed);
+       
         //define generator
         String typeGenerator = mapArgs.get("-t");
         if(typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("R")){
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);       	
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }else if(typeGenerator.equalsIgnoreCase("RD")){
-        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("D")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("DD")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("C")){
-        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads);        	
+        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
-        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads);
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }
 
-        LOGGER.info("Generating a first version of mimic graph ...");
-        //create a draft graph
         double startTime = System.currentTimeMillis();
-        
-        mGrphGenerator.generateGraph();
-        // estimate the costed time for generation
-        double duration = System.currentTimeMillis() - startTime;
-        LOGGER.info("Finished graph generation process in " + duration +" ms");
+		String loadMimicGraph = mapArgs.get("-l");
+		boolean isLoaded = false;
+		//if the file path exists, it will read from it otherwise, it will write on it
+		if (loadMimicGraph != null) {
+			LOGGER.info("Loading previously determined Mimic Graph from file.");
+			ColouredGraph colouredGraph = mDatasetManager.readIntResults(loadMimicGraph);
+			if (colouredGraph != null) {
+				mGrphGenerator.setMimicGraph(colouredGraph);
+				isLoaded = true;
+			} 
+		} 
+		
+		// in case the mimic graph is not loaded, regenerate it anyways
+		if (isLoaded == false) {
+			LOGGER.info("Generating a first version of mimic graph ...");
+			// create a draft graph
+			mGrphGenerator.generateGraph();
+			// estimate the costed time for generation
+			double duration = System.currentTimeMillis() - startTime;
+			LOGGER.info("Finished graph generation process in " + duration + " ms");
+			if(loadMimicGraph == null) {
+				loadMimicGraph = "Initialized_MimicGraph.ser";
+			}
+			mDatasetManager.persistIntResults(mGrphGenerator.getMimicGraph(), loadMimicGraph);
+			LOGGER.info("Intermediate results saved under: "+loadMimicGraph);
+
+		}
         
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
-        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier);
+		long secSeed = mGrphGenerator.getSeed()+1;
+        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier, secSeed);
         LOGGER.info("Optimizing the mimic graph ...");
         // TODO check if it is necessary to randomly refine graph 
         grphOptimizer.setRefineGraphRandomly(false);
@@ -204,7 +239,7 @@ public class GraphGenerationTest {
         String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
         
         //output results to file "LemmingEx.result"       
-        grphOptimizer.printResult(mapArgs, startTime, saveFiled);
+        grphOptimizer.printResult(mapArgs, startTime, saveFiled, seed);
         LOGGER.info("Application exits!!!");
 	}
 	
@@ -258,6 +293,12 @@ public class GraphGenerationTest {
 					}
 					else if(param.equalsIgnoreCase("-op")){
 						mapArgs.put("-op", value);
+					}
+					else if (param.equalsIgnoreCase("-l")) {
+						mapArgs.put("-l", value);
+					}
+					else if (param.equalsIgnoreCase("-s")) {
+						mapArgs.put("-s", value);
 					}
 				}
 			}
@@ -329,4 +370,3 @@ public class GraphGenerationTest {
 		}
 	}
 }
-

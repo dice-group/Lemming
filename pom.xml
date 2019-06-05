@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>grph</groupId>
 			<artifactId>grph</artifactId>
-			<version>1.8.0</version>
+			<version>1.10.5</version>
 		</dependency>
 		<!-- Jena 3.0 -->
 		<dependency>

@@ -39,6 +39,8 @@ public class GraphOptimization {
 	private List<Double> mLstErrorScore; 
 	private double mOptimizedTime =0;
 	
+	private long seed;
+	
 	
 	/*-----------------------------------------------
 	 * Variable for storing calculation information *
@@ -46,8 +48,8 @@ public class GraphOptimization {
 	
 	
 	public GraphOptimization(ColouredGraph[] origGrphs,
-			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers) {
-		
+			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers, long seed) {
+		this.seed = seed;
 		mLstErrorScore = new ArrayList<Double>();
 		/*
 		 *  mErrScoreCalculator is used to compute the error score compared to original
@@ -88,13 +90,24 @@ public class GraphOptimization {
 			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
 			//System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
-			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
+			
+			//if the removal cannot happen, the error is set to max as not to be chosen
+			if(metricValuesOfLeft == null) {
+				lErrScore = Double.MAX_VALUE;
+				LOGGER.warn("Edge Removal Prevented. Setting lErrScore: "+lErrScore);
+			} else {
+				lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
+			}
 
 			 // go right by adding a new edge
 			TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
 			//System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
-			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
+			if (metricValuesOfRight == null) {
+				rErrScore = Double.MAX_VALUE;
+			} else {
+				rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
+			}
 			
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
@@ -169,7 +182,8 @@ public class GraphOptimization {
 	private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraph clonedGrph){
 		int edgeId = -1;
 		BitSet edgeColour = null;
-		Random rand = new Random();
+		Random rand = new Random(seed);
+		seed++;
 		while(true){
 			//LOGGER.info("Try to get an edge for removing!");
 			IntSet setOfEdges =	clonedGrph.getEdges();
@@ -209,7 +223,7 @@ public class GraphOptimization {
 	 * @param startingTime the starting time of generation process
 	 * @param savedFile the saved file's name of the mimic dataset
 	 */
-	public void printResult(Map<String, String> args, double startingTime, String savedFile){
+	public void printResult(Map<String, String> args, double startingTime, String savedFile, long seed){
 		BufferedWriter fWriter ;
 		try{
 			LOGGER.warn("Output results to file!");
@@ -232,6 +246,7 @@ public class GraphOptimization {
 			fWriter.write("# Saved error score file: "+ errorScoreFile +".\n");
 			fWriter.write("# Duration: "+ ((int)(mOptimizedTime - startingTime)/1000)+" (s).\n");
 			fWriter.write("# Optimization: "+ mTrueNoOfIteration + "/" + mMaxIteration + " iterations\n");
+			fWriter.write("# Seed: "+ seed +"\n");
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){

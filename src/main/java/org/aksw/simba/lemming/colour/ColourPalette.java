@@ -1,9 +1,9 @@
 package org.aksw.simba.lemming.colour;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
  * A colour palette is a mapping of class or property URIs to colours.
@@ -118,8 +118,14 @@ public interface ColourPalette {
      * Get the map of URIs and colours. This function supports for the evaluation process only.
      * @return the map of URIs and colours
      */
-    public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour();
+    public Map<String, BitSet> getMapOfURIAndColour();
     
     public boolean isColourOfRDFType(BitSet colour);
+
+    public int getHighestColourId();
+
+    public void setHighestColourId(int highestColourId);
+
+    public void setUriColourMap(Map<String, BitSet> uriColourMap);
     
 }

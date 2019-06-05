@@ -1,17 +1,18 @@
 package org.aksw.simba.lemming.colour;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.jena.vocabulary.RDF;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public class InMemoryPalette implements ColourPalette {
 
-    protected ObjectObjectOpenHashMap<String, BitSet> uriColourMap = new ObjectObjectOpenHashMap<String, BitSet>();
-    protected int highestColourId = 0;
+	protected Map<String, BitSet> uriColourMap = new HashMap<String, BitSet>();
+	protected int highestColourId = 0;
 
     @Override
     public void addColour(String uri) {
@@ -21,7 +22,7 @@ public class InMemoryPalette implements ColourPalette {
             uriColourMap.put(uri, colour);
             ++highestColourId;
         }
-    }
+}
 
     @Override
     public BitSet getColour(String uri) {
@@ -30,7 +31,7 @@ public class InMemoryPalette implements ColourPalette {
         } else {
             return new BitSet();
         }
-    }
+}
 
     @Override
     public BitSet getColourMixture(String... uris) {
@@ -41,7 +42,7 @@ public class InMemoryPalette implements ColourPalette {
             }
         }
         return mixture;
-    }
+}
 
     @Override
     public BitSet getColourMixture(Set<String> uris) {
@@ -73,7 +74,7 @@ public class InMemoryPalette implements ColourPalette {
             targetColour = uriColourMap.get(target);
             targetColour.or(uriColourMap.get(source));
         }
-    }
+}
 
     @Override
     public boolean containsUri(String uri) {
@@ -84,36 +85,37 @@ public class InMemoryPalette implements ColourPalette {
     public void setColour(String uri, BitSet colour) {
         uriColourMap.put(uri, colour);
     }
-    
+
     @Override
     public Set<String> getURIs(BitSet inColour, boolean isProperty){
     	Set<String> setOfURIs = new HashSet<String>();
-    	if(inColour != null){
-	    	Object[] arrOfURIs = uriColourMap.keys;
-	    	for(int i = 0 ; i < arrOfURIs.length ; i++){
-	    		if(uriColourMap.allocated[i]){
-	    			String uri = (String) arrOfURIs[i];
-	    			BitSet colo =(BitSet) uriColourMap.get(uri).clone();
-	    			if(isProperty){
-	    				// just compare if 2 bitsets are really equal
-	    				if(colo.equals(inColour)){
-	    					setOfURIs.add(uri);
-	    					break;
-	    				}
-	    			}else{
-	    				//and 2 bitsets
-	    				colo.and(inColour);
-	    				
-	    				//check if they have matching bits 1
-	    				if(colo.cardinality() <= inColour.cardinality() && !colo.isEmpty()){
-	    					setOfURIs.add(uri);
-	    				}
-	    			}
-	    		}
-	    	}
-    	}
-    	return setOfURIs;
-    }
+    	 if(inColour != null){
+//	    	Object[] arrOfURIs = uriColourMap.keys;
+			Object[] arrOfURIs = uriColourMap.keySet().toArray();
+			for (int i = 0; i < arrOfURIs.length; i++) {
+//	    		if(uriColourMap.allocated[i]){
+				String uri = (String) arrOfURIs[i];
+				BitSet colo = (BitSet) uriColourMap.get(uri).clone();
+				if (isProperty) {
+					// just compare if 2 bitsets are really equal
+					if (colo.equals(inColour)) {
+						setOfURIs.add(uri);
+						break;
+					}
+				} else {
+					// and 2 bitsets
+					colo.and(inColour);
+
+					// check if they have matching bits 1
+					if (colo.cardinality() <= inColour.cardinality() && !colo.isEmpty()) {
+						setOfURIs.add(uri);
+					}
+				}
+//	    		}
+			}
+		}
+		return setOfURIs;
+	}
 
     @Override
     public boolean isColourOfRDFType(BitSet colour){
@@ -133,10 +135,45 @@ public class InMemoryPalette implements ColourPalette {
 			}
 			uriColourMap.put(uri, colour);
 		}
+}
+	
+	@Override
+	public void setUriColourMap(Map<String, BitSet> uriColourMap) {
+		this.uriColourMap = uriColourMap;
 	}
 
 	@Override
-	public ObjectObjectOpenHashMap<String, BitSet> getMapOfURIAndColour() {
-		return uriColourMap; 
+	public Map<String, BitSet> getMapOfURIAndColour() {
+		return uriColourMap;
 	}
+
+	@Override
+	public int getHighestColourId() {
+		return highestColourId;
+	}
+
+	@Override
+	public void setHighestColourId(int highestColourId) {
+		this.highestColourId = highestColourId;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InMemoryPalette other = (InMemoryPalette) obj;
+		if (highestColourId != other.highestColourId)
+			return false;
+		if (uriColourMap == null) {
+			if (other.uriColourMap != null)
+				return false;
+		} else if (!uriColourMap.equals(other.uriColourMap))
+			return false;
+		return true;
+	}
+
 }

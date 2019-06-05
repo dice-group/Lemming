@@ -47,10 +47,10 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	
 	
 	public GraphGenerationRandomly2(int iNumberOfVertices,
-			ColouredGraph[] origGrphs, int iNumberOfThreads) {
-		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
-		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;;
-		mRandom = new Random();
+			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
+		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+		mRandom = new Random(this.seed);
 		// initilize variable
 		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
@@ -89,7 +89,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
-					Random random = new Random();
+					Random random = new Random(seed);
+					seed++;
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
@@ -474,8 +475,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					double[] possOutDegreePerTailIDs = new double[arrTailIDs.length];
 					Integer[] objTailIDs = new Integer[arrTailIDs.length];
 					// for each tail id, we compute the potential out degree for it
-					Random random = new Random();
-					
+					Random random = new Random(seed);
+					seed++;
 					for(int i = 0 ; i < arrTailIDs.length ; i++){
 						objTailIDs[i] = arrTailIDs[i];
 						// generate a random out degree for each vertex in its set based on the computed average out-degree
@@ -488,7 +489,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					
 					ObjectDistribution<Integer> potentialOutDegree = new ObjectDistribution<Integer>(objTailIDs, possOutDegreePerTailIDs);
 					OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialOutDegree, random);
-					
+					seed += potentialDegreeProposer.getSeed() - seed +1;
 					// put to map potential degree proposer
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossODegree = mapPossibleODegreePerOEColo.get(edgeColo);
 					if(mapPossODegree == null){
@@ -514,7 +515,8 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					
 					double[] possOutDegreePerHeadDs = new double[arrHeadIDs.length];
 					Integer[] objHeadIDs = new Integer[arrHeadIDs.length];
-					Random random = new Random();
+					Random random = new Random(seed);
+					seed++;
 					
 					// for each head id, we compute the potential in degree for it
 					for(int i = 0; i < arrHeadIDs.length ; i++){

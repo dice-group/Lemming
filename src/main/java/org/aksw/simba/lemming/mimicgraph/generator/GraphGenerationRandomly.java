@@ -26,11 +26,10 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 	private int maxIterationFor1EdgeColo ;
 	private Random mRandom; 
 	
-	
 	public GraphGenerationRandomly(int iNumberOfVertices,
-			ColouredGraph[] origGrphs, int iNumberOfThreads) {
-		super(iNumberOfVertices, origGrphs, iNumberOfThreads);
-		mRandom = new Random();
+			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
+		mRandom = new Random(this.seed);
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 	}
 
@@ -65,7 +64,8 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 				@Override
 				public void run() {
 					//random
-					Random random = new Random(); 
+					Random random = new Random(seed); 
+					seed++;
 					//max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 					//track the index of previous iteration
@@ -124,6 +124,7 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 						
 						//get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
+						
 						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
 						Set<BitSet> setHeadColours = new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
 						
@@ -186,7 +187,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 							}
 							
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
-							
 							int headId = arrHeadIDs[random.nextInt(arrHeadIDs.length)];
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
@@ -250,7 +250,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			while(i < setFakeEdgeIDs.size()){
 					
 				boolean isFoundVerticesConnected = false;
-				
 				BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
 				Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
 				
@@ -264,7 +263,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					continue;
 				
 				BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
-				
 				BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
 				IntSet setTailIDs = new DefaultIntSet();
 				IntSet setHeadIDs = new DefaultIntSet();
@@ -297,7 +295,6 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 					}
 					
 					int[] arrHeadIDs = setHeadIDs.toIntArray();
-					
 					int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
 					isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 					if(isFoundVerticesConnected){

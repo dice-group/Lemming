@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+import toools.set.IntSet;
+
 public class EdgeModifier {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
@@ -75,14 +77,15 @@ public class EdgeModifier {
 	}
 	
 	public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple){
-		
 		if(triple != null && triple.edgeId != -1 &&
 				triple.edgeColour != null &&
 				triple.tailId != -1 && triple.headId !=-1){
 			
 			//add to list of removed edges
 			mLstRemovedEdges.add(triple);
+			
 			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
+			
 			mEdgeModification.removeEdgeFromGraph(triple.edgeId);
 			if(isCountingNodeTriangles){
 				int newNodeTri = mEdgeModification.getNewNodeTriangles();
@@ -109,10 +112,15 @@ public class EdgeModifier {
 	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, 
 	        		(int)mMapMetricValues.get("#nodetriangles"),(int) mMapMetricValues.get("#edgetriangles"));
 	        
+	        IntSet curEdges = mEdgeModification.getGraph().getEdges();
+			if(!curEdges.contains(triple.edgeId)) {
+				return null;
+			}
+	        
 	        return mapChangedMetricValues;
 		}else{
 			LOGGER.warn("Invalid triple for removing an edge!");
-			return mMapMetricValues;
+			return null;
 		}
 	}
 	
@@ -150,7 +158,7 @@ public class EdgeModifier {
 			return mapMetricValues;
 		}else{
 			LOGGER.warn("Invalid triple for adding an edge!");
-			return mMapMetricValues;
+			return null;
 		}
 	}
 	
@@ -162,13 +170,15 @@ public class EdgeModifier {
 	public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues){
 		if(mLstRemovedEdges.size() > 0 ){
 			//store metric values got from trial
-			updateMapMetricValues(newMetricValues);
+			updateMapMetricValues(newMetricValues);	
 			//get the last removed edge
 			TripleBaseSingleID lastTriple = mLstRemovedEdges.get(mLstRemovedEdges.size() -1);
 			//remove the edge from graph again
 			//mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId);
+			
 			mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
-									(int) newMetricValues.get("#edgetriangles"));
+					(int) newMetricValues.get("#edgetriangles"));
+			
 		}
 	}
 	

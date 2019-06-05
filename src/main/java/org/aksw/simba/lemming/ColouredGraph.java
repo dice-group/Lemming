@@ -27,7 +27,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 public class ColouredGraph {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class);
 
     protected Grph graph;
     protected ObjectArrayList<BitSet> vertexColours = new ObjectArrayList<BitSet>();
@@ -636,4 +636,68 @@ public class ColouredGraph {
     public Set<String> getOrginalResourceURIs(BitSet vColo) {
         return vertexPalette.getURIs(vColo, false);
     }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		ColouredGraph other = (ColouredGraph) obj;
+		if (dtEdgePalette == null) {
+			if (other.dtEdgePalette != null) {
+				return false;
+			}
+		} else if (!dtEdgePalette.equals(other.dtEdgePalette)) {
+			return false;
+		}
+		if (edgeColours == null) {
+			if (other.edgeColours != null) {
+				return false;
+			}
+		} else if (!edgeColours.equals(other.edgeColours)) {
+			return false;
+		}
+		if (edgePalette == null) {
+			if (other.edgePalette != null) {
+				return false;
+			}
+		} else if (!edgePalette.equals(other.edgePalette)) {
+			return false;
+		}
+		if (graph == null) {
+			if (other.graph != null) {
+				return false;
+			}
+		} else if (!graph.equals(other.graph)) {
+			return false;
+		}
+		if (vertexColours == null) {
+			if (other.vertexColours != null) {
+				return false;
+			}
+		} else if (!vertexColours.equals(other.vertexColours)) {
+			return false;
+		}
+		if (vertexPalette == null) {
+			if (other.vertexPalette != null) {
+				return false;
+			}
+		} else if (!vertexPalette.equals(other.vertexPalette)) {
+			return false;
+		}
+		return true;
+	}
+
+	
+    
+    
 }
