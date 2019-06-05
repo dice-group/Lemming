@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:bibo="http://purl.org/ontology/bibo/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:dcterms="http://purl.org/dc/terms/"
+	xmlns:dctype="http://purl.org/dc/dcmitype/"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:ical="http://www.w3.org/2002/12/cal/ical#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+	xmlns:swc="http://data.semanticweb.org/ns/swc/ontology#"
+	xmlns:swrc="http://swrc.ontoware.org/ontology#"
+	xmlns:xml="http://www.w3.org/XML/1998/namespace"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+
+	<rdf:Description rdf:about="http://data.semanticweb.org/conference/iswc">
+		<swc:isSuperEventOf rdf:resource="http://data.semanticweb.org/conference/iswc/2001"/>
+	</rdf:Description>
+	
+	<rdf:Description rdf:about="http://data.semanticweb.org/conference/iswc/2001/event-01">
+		<rdf:type rdf:resource="http://data.semanticweb.org/ns/swc/ontology#SpecialEvent"/>
+		<rdfs:label>SWWS Registration and Breakfast</rdfs:label>
+		<swc:hasLocation>TCSEQ Center</swc:hasLocation>
+		<swc:isSubEventOf rdf:resource="http://data.semanticweb.org/conference/iswc/2001"/>
+		<swc:room>TCSEQ Center</swc:room>
+		<ical:dtend rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2001-07-30T09:00:00</ical:dtend>
+		<ical:dtstart rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2001-07-30T08:00:00</ical:dtstart>
+		<ical:tzid>America/Los_Angeles</ical:tzid>
+	</rdf:Description>
+	
+	<rdf:Description rdf:about="http://data.semanticweb.org/person/robert-e-horn">
+		<rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+		<rdfs:label>Robert E. Horn</rdfs:label>
+		<swc:holdsRole rdf:resource="http://data.semanticweb.org/conference/iswc/2001/participant"/>
+		<foaf:name>Robert E. Horn</foaf:name>
+	</rdf:Description>
+	
+	<rdf:Description rdf:about="http://data.semanticweb.org/person/robert-krause">
+		<rdf:type rdf:resource="http://xmlns.com/foaf/0.1/Person"/>
+		<rdfs:label>Robert Krause</rdfs:label>
+		<swc:holdsRole rdf:resource="http://data.semanticweb.org/conference/iswc/2001/participant"/>
+		<foaf:name>Robert Krause</foaf:name>
+	</rdf:Description>
+	
+	<rdf:Description rdf:about="http://data.semanticweb.org/conference/iswc/2001/event-03">
+		<rdf:type rdf:resource="http://data.semanticweb.org/ns/swc/ontology#BreakEvent"/>
+		<rdfs:label>Coffee Break</rdfs:label>
+		<swc:hasLocation>The TCSEQ Center</swc:hasLocation>
+		<swc:isSubEventOf rdf:resource="http://data.semanticweb.org/conference/iswc/2001"/>
+		<swc:room>The TCSEQ Center</swc:room>
+		<ical:dtend rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2001-07-30T11:00:00</ical:dtend>
+		<ical:dtstart rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2001-07-30T10:30:00</ical:dtstart>
+		<ical:tzid>America/Los_Angeles</ical:tzid>
+	</rdf:Description>
+	
+</rdf:RDF>

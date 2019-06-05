@@ -52,7 +52,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
 					 Inferer inferer = new Inferer();
-					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName));
+					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName), null);
 					 ontModel.read("22-rdf-syntax-ns", "TTL");
 					 ontModel.read("rdf-schema", "TTL");
 					 

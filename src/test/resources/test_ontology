@@ -1,0 +1,93 @@
+@prefix bibo:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix conf:  <https://w3id.org/scholarlydata/ontology/conference-ontology.owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix spec:  <http://www.w3.org/2002/12/cal/icalSpec#> .
+@prefix cal:   <http://www.w3.org/2002/12/cal/ical#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix swrc:  <http://swrc.ontoware.org/ontology#> .
+@prefix ical:  <http://www.w3.org/2002/12/cal/icaltzd#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix swc:   <http://data.semanticweb.org/ns/swc/ontology#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+conf:name   a                   owl:DatatypeProperty ;
+        rdfs:comment        "name"@en ;
+        rdfs:domain         conf:Agent ;
+        rdfs:label          "name"@en ;
+        rdfs:range          xsd:string ;
+        rdfs:subPropertyOf  owl:topDataProperty .
+
+conf:Agent  a                owl:Class ;
+        rdfs:comment     "Any agentive Object , either physical (e.g. a whale, a robot, an oak), or social (e.g. a corporation, an institution, a community)."@en ;
+        rdfs:label       "Agent"@en ;
+        rdfs:subClassOf  [ a                   owl:Restriction ;
+                           owl:onProperty      conf:name ;
+                           owl:someValuesFrom  rdfs:Literal
+                         ] .
+						 
+conf:isSubEventOf  a            owl:ObjectProperty ;
+        rdfs:comment        "is sub event of"@en ;
+        rdfs:label          "is sub event of"@en ;
+        rdfs:subPropertyOf  conf:isPartOf ;
+        owl:inverseOf       conf:hasSubEvent .
+
+foaf:name  a                    owl:DatatypeProperty ;
+        owl:equivalentProperty  conf:name .
+
+conf:Break  a                owl:Class ;
+        rdfs:comment     "A break event."@en ;
+        rdfs:label       "Break"@en ;
+        rdfs:subClassOf  conf:NonAcademicEvent .
+		
+swc:BreakEvent  a            owl:Class ;
+        rdfs:subClassOf      swc:NonAcademicEvent ;
+        owl:equivalentClass  conf:Break .
+
+
+swc:isSuperEventOf  a           owl:ObjectProperty ;
+        owl:equivalentProperty  conf:hasSubEvent .
+		
+swc:isSubEventOf  a             owl:ObjectProperty ;
+        owl:equivalentProperty  conf:isSubEventOf .
+		
+conf:hasSubEvent  a         owl:ObjectProperty ;
+        rdfs:comment        "has sub event"@en ;
+        rdfs:domain         conf:OrganisedEvent ;
+        rdfs:label          "has sub event"@en ;
+        rdfs:range          conf:OrganisedEvent ;
+        rdfs:subPropertyOf  conf:hasPart .
+		
+conf:hasLocation  a   owl:ObjectProperty ;
+        rdfs:comment  "has location"@en ;
+        rdfs:domain   conf:OrganisedEvent ;
+        rdfs:label    "has location"@en ;
+        rdfs:range    conf:Site .
+		
+swc:hasLocation  a              owl:ObjectProperty ;
+        owl:equivalentProperty  conf:hasLocation .
+		
+cal:dtend  a            owl:ObjectProperty ;
+        rdfs:comment    "This property specifies the date and time that a calendar component ends." , "\n\t    default value type: DATE-TIME" ;
+        rdfs:domain     [ a            owl:Class ;
+                          owl:unionOf  ( cal:Vevent cal:Vfreebusy cal:Vevent cal:Vfreebusy )
+                        ] ;
+        rdfs:label      "DTEND" ;
+        rdfs:range      [ a            owl:Class ;
+                          owl:unionOf  ( cal:Value_DATE-TIME cal:Value_DATE )
+                        ] ;
+        spec:valueType  "DATE-TIME" .
+		
+ical:dtstart  a                 owl:DatatypeProperty ;
+        owl:equivalentProperty  conf:startDate .
+		
+conf:startDate  a     owl:DatatypeProperty ;
+        rdfs:comment  "start date"@en ;
+        rdfs:domain   conf:OrganisedEvent ;
+        rdfs:label    "start date"@en .
+
+cal:tzid  a             owl:DatatypeProperty ;
+        rdfs:comment    "This property specifies the text value that uniquely identifies the \"VTIMEZONE\" calendar component." , "\n\t    value type: TEXT" ;
+        rdfs:domain     cal:Vtimezone ;
+        rdfs:label      "TZID" ;
+        spec:valueType  "TEXT" .
