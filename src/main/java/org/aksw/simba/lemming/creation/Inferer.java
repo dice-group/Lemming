@@ -23,7 +23,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -265,64 +264,64 @@ public class Inferer {
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set ontElements) {
+	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
 
 		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
 
 		Stack<T> stack = new Stack<T>();
 		stack.addAll(ontElements);
 
-		Map<String, Boolean> visitedMap = (Map<String, Boolean>) ontElements.stream()
-				.collect(Collectors.toMap(Object::toString, visited -> false));
-
 		Set<Equivalent> elements = new HashSet<Equivalent>();
 
 		while (stack.size() > 0) {
-			T current = stack.pop();
+			T currentResource = stack.pop();
+			String curURI = currentResource.getURI();
 			boolean isSame = false;
-			boolean isVisited = visitedMap.get(current.toString());
-			if (!isVisited) {
+			
+			if (curURI!=null && !uriNodeMap.containsKey(curURI)) {
 				List eqsList = null;
 				try {
-					if (current instanceof OntProperty)
-						eqsList = ((OntProperty) current).listEquivalentProperties().toList();
-					if (current instanceof OntClass)
-						eqsList = ((OntClass) current).listEquivalentClasses().toList();
+					if (currentResource.isProperty())
+						eqsList = currentResource.asProperty().listEquivalentProperties().toList();
+					if (currentResource.isClass())
+						eqsList = currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
 					LOGGER.warn(
 							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
-							current.toString());
+							currentResource.toString());
 				}
 
 				if (eqsList != null && !eqsList.isEmpty()) {
-					eqsList.forEach(property -> {
-						visitedMap.putIfAbsent(property.toString(), false);
-					});
 					stack.addAll(eqsList);
 				}
+				
+				//node to where we want to add the info to
+				Equivalent curNode = null;
 
 				// check to which node do we need to add this info to
 				Iterator<Equivalent> propIterator = elements.iterator();
 				while (propIterator.hasNext()) {
-					Equivalent curNode = propIterator.next();
-					isSame = curNode.containsElement(current);
+					curNode = propIterator.next();
+					isSame = curNode.containsElement(currentResource);
 					if (isSame) {
-						curNode.addEquivalent(current);
-						uriNodeMap.put(current.toString(), curNode);
+						curNode.addEquivalent(currentResource);
 						break;
 					}
 				}
 
 				// if not, create new one
 				if (!isSame) {
-					Equivalent node = new Equivalent(current);
-					if (eqsList != null) {
-						node.addEquivalentGroup((Set) eqsList.stream().collect(Collectors.toSet()));
-					}
-					elements.add(node);
-					uriNodeMap.put(current.toString(), node);
+					curNode = new Equivalent(currentResource);
+					elements.add(curNode);
 				}
-				visitedMap.put(current.toString(), true);
+				
+				// add the node to the map with the URI and add the equivalents (if existing) to the node object
+				if (curNode != null) {
+					uriNodeMap.put(curURI, curNode);
+					if(eqsList != null) {
+						curNode.addEquivalentGroup((Set) eqsList.stream().collect(Collectors.toSet()));
+					}
+				}
 			}
 		}
 		return uriNodeMap;

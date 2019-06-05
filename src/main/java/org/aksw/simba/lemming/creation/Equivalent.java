@@ -5,13 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.jena.ontology.ConversionException;
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents an OntClass or an OntProperty and its equivalent classes or
@@ -20,7 +15,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> OntProperty, OntClass
  */
 public class Equivalent<T extends OntResource> {
-	private static final Logger LOGGER = LoggerFactory.getLogger(Equivalent.class);
 
 	/**
 	 * single name to characterize all its equivalents
@@ -39,7 +33,7 @@ public class Equivalent<T extends OntResource> {
 
 	public Equivalent(T current) {
 		super();
-		this.name = ((Resource) current).getURI();
+		this.name = current.getURI();
 		this.attribute = current;
 		this.equivalents.add(name);
 	}
@@ -52,23 +46,26 @@ public class Equivalent<T extends OntResource> {
 	 * @param current OntProperty / OntClass object
 	 */
 	public void addEquivalent(T current) {
-		String uri = ((Resource) current).getURI();
+		String uri = current.getURI();
+		
 		if (uri != null) {
 			this.equivalents.add(uri);
 			setName(compareNames(uri, name));
 
-			if (current instanceof OntProperty) {
-				List<? extends OntResource> domainList = ((OntProperty) current).listDomain().toList();
+			if (current.isProperty()) {
+				OntProperty currentProperty = current.asProperty();
+				
+				List<? extends OntResource> domainList = currentProperty.listDomain().toList();
 				for (OntResource domain : domainList) {
-					if (!((OntProperty) this.attribute).hasDomain(domain)) {
-						((OntProperty) this.attribute).addDomain(domain);
+					if (!attribute.asProperty().hasDomain(domain)) {
+						attribute.asProperty().addDomain(domain);
 					}
 				}
 
-				List<? extends OntResource> rangeList = ((OntProperty) current).listRange().toList();
+				List<? extends OntResource> rangeList = currentProperty.listRange().toList();
 				for (OntResource range : rangeList) {
-					if (!((OntProperty) this.attribute).hasRange(range)) {
-						((OntProperty) this.attribute).addRange(range);
+					if (!attribute.asProperty().hasRange(range)) {
+						attribute.asProperty().addRange(range);
 					}
 				}
 			}
@@ -97,18 +94,18 @@ public class Equivalent<T extends OntResource> {
 	 */
 	@SuppressWarnings("unchecked")
 	public boolean containsElement(T element) {
-		if (((RDFNode) element).isResource() && equivalents.contains(((Resource) element).getURI()))
+		if (element.isURIResource() && equivalents.contains(element.getURI()))
 			return true;
 
 		List<T> list = null;
 
 		try {
-			if (element instanceof OntClass) {
-				list = (List<T>) ((OntClass) element).listEquivalentClasses().toList();
+			if (element.isClass()) {
+				list = (List<T>) element.asClass().listEquivalentClasses().toList();
 			}
 
-			if (element instanceof OntProperty) {
-				list = (List<T>) ((OntProperty) element).listEquivalentProperties().toList();
+			if (element.isProperty()) {
+				list = (List<T>) element.asProperty().listEquivalentProperties().toList();
 			}
 
 		} catch (ConversionException e) {
@@ -116,7 +113,7 @@ public class Equivalent<T extends OntResource> {
 		}
 		if (list != null && !list.isEmpty()) {
 			for (T current : list) {
-				if (equivalents.contains(current.toString())) {
+				if (equivalents.contains(current.getURI())) {
 					return true;
 				}
 			}
