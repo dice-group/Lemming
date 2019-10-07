@@ -10,7 +10,10 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.junit.Test;
+
+import com.google.common.collect.Iterators;
 
 import junit.framework.Assert;
 
@@ -52,7 +55,7 @@ public class InfererTest {
 		Inferer inferer = new Inferer();
 		Model actualModel = inferer.process(confModel, ontModel);
 
-		printModel(actualModel, "after");
+		//printModel(actualModel, "after");
 
 		// check if the model contains properties or resources that should have been
 		// replaced
@@ -82,7 +85,13 @@ public class InfererTest {
 		Inferer inferer = new Inferer();
 		Model actualModel = inferer.process(geoModel, ontModel);
 		
-		//Assert.assertTrue();
+		//prior to inference, 0 resources have a type stmt
+		int count = Iterators.size(geoModel.listResourcesWithProperty(RDF.type));
+		Assert.assertTrue(count==0);
+		
+		int afterCount = Iterators.size(actualModel.listResourcesWithProperty(RDF.type));
+		Assert.assertTrue(afterCount==4);
+		
 	}
 	
 
