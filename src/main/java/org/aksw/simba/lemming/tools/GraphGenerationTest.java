@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -121,10 +120,13 @@ public class GraphGenerationTest {
         	LOGGER.info("Loading SemanticWebDogFood...");
         	mDatasetManager = new SemanticWebDogFoodDataset();
         	datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
-        } else {
+        } else if(dataset.equalsIgnoreCase("lgeo")) {
         	LOGGER.info("Loading LinkedGeo...");
         	mDatasetManager = new LinkedGeoDataset();
         	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
+        } else {
+        	LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
+        	return;
         }
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);

@@ -60,19 +60,22 @@ public class PrecomputingValues {
 
         // For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
-
-        if (args[0].equals("pg")) {
+        String dataset = args[0];
+        if (dataset.equalsIgnoreCase("pg")) {
             USE_SEMANTIC_DOG_FOOD = false;
             USE_PERSON_GRAPH = true;
             USE_LINKED_GEO = false;
-        } else  if (args[0].equals("swdf")){
+        } else if (dataset.equalsIgnoreCase("swdf")){
             USE_SEMANTIC_DOG_FOOD = true;
             USE_PERSON_GRAPH = false;
             USE_LINKED_GEO = false;
-        } else {
+        } else if (dataset.equalsIgnoreCase("lgeo")){
         	USE_SEMANTIC_DOG_FOOD = false;
             USE_PERSON_GRAPH = false;
             USE_LINKED_GEO = true;
+        } else {
+        	LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
+        	return;
         }
 
         List<SingleValueMetric> metrics = new ArrayList<>();
