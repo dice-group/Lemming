@@ -70,6 +70,21 @@ public class InfererTest {
 		Assert.assertTrue(actualModel.containsResource(replaced));
 
 	}
+	
+	@Test
+	public void testLinkedGeo() {
+		OntModel ontModel = ModelFactory.createOntologyModel();
+		ontModel.read("geo_ont_test.ttl");
+		
+		Model geoModel = ModelFactory.createDefaultModel();
+		geoModel.read("snippet_linkedgeo.nt");
+		
+		Inferer inferer = new Inferer();
+		Model actualModel = inferer.process(geoModel, ontModel);
+		
+		//Assert.assertTrue();
+	}
+	
 
 	// for testing
 	private void printModel(Model model, String name) {

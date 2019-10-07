@@ -14,6 +14,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
@@ -44,6 +45,7 @@ public class GraphGenerationTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationTest.class);
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
+	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
 	
 	//default number of vertices is 10000
 	private static int mNumberOfDesiredVertices = 10000;
@@ -59,7 +61,8 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Collect input arguments
 		 * -ds: dataset
-		 * 		value: swdf (semanticwebdogfood), or pg (persongraph)  
+		 * 		value: swdf (semanticwebdogfood), pg (persongraph) 
+		 * 				or lgeo (linkedgeo)
 		 * 
 		 * -nv: number of vertices
 		 * 		value: integer number - denoting number of given vertices
@@ -114,10 +117,14 @@ public class GraphGenerationTest {
         	LOGGER.info("Loading PersonGraph...");
         	mDatasetManager = new PersonGraphDataset();
         	datasetPath = PERSON_GRAPH;
-        }else{
+        }else if(dataset.equalsIgnoreCase("swdf")){
         	LOGGER.info("Loading SemanticWebDogFood...");
         	mDatasetManager = new SemanticWebDogFoodDataset();
         	datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
+        } else {
+        	LOGGER.info("Loading LinkedGeo...");
+        	mDatasetManager = new LinkedGeoDataset();
+        	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
         }
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
@@ -210,7 +217,7 @@ public class GraphGenerationTest {
 			LOGGER.info("Intermediate results saved under: "+loadMimicGraph);
 
 		}
-        
+		
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
