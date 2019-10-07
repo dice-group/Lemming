@@ -91,7 +91,8 @@ public class Inferer {
 		Set<Resource> set = new HashSet<>();
 		List<Statement> statements = model.listStatements().toList();
 		for (Statement curStat : statements) {
-			set.add(curStat.getSubject());
+			if(curStat.getSubject().isURIResource())
+				set.add(curStat.getSubject());
 			if (curStat.getObject().isURIResource()) {
 				set.add(curStat.getObject().asResource());
 			}
