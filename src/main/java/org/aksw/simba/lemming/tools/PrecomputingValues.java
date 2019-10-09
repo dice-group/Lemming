@@ -102,10 +102,6 @@ public class PrecomputingValues {
         	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
             mDatasetManager = new LinkedGeoDataset();
         }
-
-        if (mDatasetManager == null) {
-            return;
-        }
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
 
         // compute metrics for each graph here

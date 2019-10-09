@@ -35,6 +35,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			OntModel ontModel = ModelFactory.createOntologyModel();
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
+			ontModel.read("lgeo/foaf");
 			ontModel.read("lgeo/skos.ttl");
 			ontModel.read("lgeo/purl_dcterms.ttl");
 			ontModel.read("lgeo/owl.ttl");
@@ -73,4 +74,6 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
+	
+	
 }
