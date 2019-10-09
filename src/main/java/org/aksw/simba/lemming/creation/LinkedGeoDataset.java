@@ -35,7 +35,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			OntModel ontModel = ModelFactory.createOntologyModel();
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
-			ontModel.read("lgeo/foaf");
+			ontModel.read("lgeo/foaf.ttl");
 			ontModel.read("lgeo/skos.ttl");
 			ontModel.read("lgeo/purl_dcterms.ttl");
 			ontModel.read("lgeo/owl.ttl");
@@ -46,6 +46,8 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			ontModel.read("lgeo/geovocab_geometry.ttl");
 			ontModel.read("lgeo/geovocab_spatial.ttl");
 			ontModel.read("lgeo/LGD-Dump-110406-Ontology.nt");
+			ontModel.read("lgeo/rdfs-ns-void.rdf");
+			ontModel.read("lgeo/custom_ontology.nt");
 
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
@@ -74,6 +76,4 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
-	
-	
 }
