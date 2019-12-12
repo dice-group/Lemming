@@ -29,6 +29,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,6 +135,15 @@ public class Inferer {
 			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
 			// searchType(curStatement, ontModel, newModel);
 			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
+			
+			String pattern =  "^(http:\\/\\/www\\.w3\\.org\\/1999\\/02\\/22-rdf-syntax-ns#_)\\d+$";
+					//"^(http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#_).*";
+		
+			if(curStatement.getPredicate().getURI().matches(pattern)) {
+				ModelUtil.replaceStatement(newModel, 
+						curStatement, 
+						ResourceFactory.createStatement(curStatement.getSubject(), RDFS.member, curStatement.getObject()));
+			}
 		}
 	}
 
@@ -158,7 +168,6 @@ public class Inferer {
 
 		// search for the predicate of the model in the ontology
 		OntProperty property = ontModel.getOntProperty(predicate.toString());
-
 		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {

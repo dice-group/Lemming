@@ -8,9 +8,13 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.junit.Test;
 
 import com.google.common.collect.Iterators;
@@ -92,26 +96,17 @@ public class InfererTest {
 		int afterCount = Iterators.size(actualModel.listResourcesWithProperty(RDF.type));
 		Assert.assertTrue(afterCount==4);
 		
-	}
-	
-
-	// for testing
-	private void printModel(Model model, String name) {
-		FileWriter out = null;
-		try {
-			out = new FileWriter(name);
-			model.write(out, "TTL");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException ignore) {
-				}
-			}
-		}
+		Model containerModel = ModelFactory.createDefaultModel();
+		containerModel.read("container_graph.ttl");
+		int size = Iterators.size(containerModel.listResourcesWithProperty(RDFS.member));
+		Assert.assertEquals(size, 0);
+		
+		containerModel = inferer.process(containerModel, ontModel);
+		int afterSize = Iterators.size(containerModel.listStatements(null, RDFS.member, (RDFNode)null));
+		Assert.assertEquals(afterSize, 9);
+		
+		
+		
 	}
 
 }

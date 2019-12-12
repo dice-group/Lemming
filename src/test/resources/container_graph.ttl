@@ -1,0 +1,15 @@
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1883> <http://linkedgeodata.org/geometry/node1437608380> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1884> <http://linkedgeodata.org/geometry/node1437608382> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1885> <http://linkedgeodata.org/geometry/node1437608384> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_1886> <http://linkedgeodata.org/geometry/node1437608386> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_189> <http://linkedgeodata.org/geometry/node1865913426> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_18> <http://linkedgeodata.org/geometry/node1865913909> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_190> <http://linkedgeodata.org/geometry/node1865913425> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_191> <http://linkedgeodata.org/geometry/node1865913430> .
+<http://linkedgeodata.org/geometry/posSeq176030702> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_192> <http://linkedgeodata.org/geometry/node1865913434> .
+<http://linkedgeodata.org/geometry/node1729918312> <http://www.opengis.net/ont/geosparql#asWKT> "POINT(-122.7631843 48.2173102)"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .
+<http://linkedgeodata.org/geometry/node1729918312> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://geovocab.org/geometry#Geometry> .
+<http://linkedgeodata.org/geometry/node1729918315> <http://www.opengis.net/ont/geosparql#asWKT> "POINT(-122.7630449 48.2173732)"^^<http://www.opengis.net/ont/geosparql#wktLiteral> .
+<http://linkedgeodata.org/geometry/node1729918315> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://geovocab.org/geometry#Geometry> .
+<http://linkedgeodata.org/geometry/posSeq1760307022> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_asd> <http://linkedgeodata.org/geometry/node14376083802> .
+<http://linkedgeodata.org/geometry/posSeq1760307023> <http://www.w3.org/1999/02/22-rdf-syntax-ns#_12sd> <http://linkedgeodata.org/geometry/node14376083803> .
