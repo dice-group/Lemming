@@ -55,6 +55,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		mRandom = new Random(this.seed);
+		this.seed++;
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
@@ -493,6 +494,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							int iAttemptToGetTailIds = 1000;
 							while(iAttemptToGetTailIds > 0){
 								tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
+								mRandom.setSeed(seed);
+								seed++;
 								if(!mReversedMapClassVertices.containsKey(tailColo))
 									break;
 								tailId = -1;
@@ -523,6 +526,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							
 							int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+							mRandom.setSeed(seed);
+							seed++;
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
 								j++;
@@ -667,6 +672,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			
 			while(iNoOfVertices > 0 ){
 				int vertId = arrVertices[mRandom.nextInt(arrVertices.length)];
+				mRandom.setSeed(seed);
+				seed++;
 				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
 					res.add(vertId);
 					iNoOfVertices --;
