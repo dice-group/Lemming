@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.SymmetricProperty;
 import org.apache.jena.ontology.TransitiveProperty;
 import org.apache.jena.query.Query;
@@ -40,9 +42,9 @@ public class GraphMaterializer {
 	 * @param graph
 	 * @return 
 	 */
-	public List<Statement> deriveSymmetrics(ArrayList<ObjectProperty> symmetricProps, Model graph) {
+	public List<Statement> deriveSymmetrics(ArrayList<OntProperty> symmetricProps, Model graph) {
 		List<Statement> stmts = new ArrayList<Statement>();
-		for(ObjectProperty curProperty: symmetricProps) {
+		for(OntProperty curProperty: symmetricProps) {
 			StmtIterator iterator = graph.listStatements(null, curProperty, (RDFNode)null);
 			while(iterator.hasNext()) {
 				Statement curStmt = iterator.next();
@@ -61,9 +63,9 @@ public class GraphMaterializer {
 	 * @param graph
 	 * @return 
 	 */
-	public List<Statement> deriveTransitives(ArrayList<ObjectProperty> transitiveProps, Model graph) {
+	public List<Statement> deriveTransitives(ArrayList<OntProperty> transitiveProps, Model graph) {
 		List<Statement> stmts = new ArrayList<Statement>();
-		for(ObjectProperty curProperty: transitiveProps) {
+		for(OntProperty curProperty: transitiveProps) {
 			StringBuilder builder = new StringBuilder("select * where { ?a <");
 			builder.append(curProperty.getURI()).append("> ?b . ?b <").append(curProperty.getURI()).append("> ?c . }");
 			List<QuerySolution> results = queryModel(builder.toString(), graph);
@@ -99,16 +101,15 @@ public class GraphMaterializer {
 	/**
 	 * This method identifies the symmetric and transitive properties in the ontology
 	 * @param ontology
+	 * @param ontProperties 
 	 * @return
 	 */
-	public Map<Resource, ArrayList<ObjectProperty>> identifyProperties(OntModel ontology) {
-		Map<Resource, ArrayList<ObjectProperty>> map = new HashMap<Resource, ArrayList<ObjectProperty>>();
-		map.put(OWL.SymmetricProperty, new ArrayList<ObjectProperty>());
-		map.put(OWL.TransitiveProperty, new ArrayList<ObjectProperty>());
+	public Map<Resource, ArrayList<OntProperty>> identifyProperties(OntModel ontology, Set<OntProperty> ontProperties) {
+		Map<Resource, ArrayList<OntProperty>> map = new HashMap<Resource, ArrayList<OntProperty>>();
+		map.put(OWL.SymmetricProperty, new ArrayList<OntProperty>());
+		map.put(OWL.TransitiveProperty, new ArrayList<OntProperty>());
 		
-		ExtendedIterator<ObjectProperty> objProps = ontology.listObjectProperties();
-		while(objProps.hasNext()) {
-			ObjectProperty curProp = objProps.next();
+		for(OntProperty curProp: ontProperties) {
 			
 			//returns null if not
 			SymmetricProperty symmetric = ontology.getSymmetricProperty(curProp.getURI());

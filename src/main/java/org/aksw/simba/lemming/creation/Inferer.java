@@ -79,7 +79,7 @@ public class Inferer {
 			renameClasses(newModel, classes);
 
 			GraphMaterializer materializer = new GraphMaterializer();
-			Map<Resource, ArrayList<ObjectProperty>> propertyMap = materializer.identifyProperties(ontModel);
+			Map<Resource, ArrayList<OntProperty>> propertyMap = materializer.identifyProperties(ontModel, ontProperties);
 			while(true){
 				long size = newModel.size();
 				List<Statement> symmetricStmts = materializer.deriveSymmetrics(propertyMap.get(OWL.SymmetricProperty), newModel);

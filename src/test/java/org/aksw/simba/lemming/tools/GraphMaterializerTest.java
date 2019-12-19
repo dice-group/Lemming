@@ -3,9 +3,11 @@ package org.aksw.simba.lemming.tools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -26,8 +28,7 @@ public class GraphMaterializerTest {
 		ontology.read("skos_snippet.ttl");
 		
 		GraphMaterializer materializer = new GraphMaterializer();
-		
-		Map<Resource, ArrayList<ObjectProperty>> propertyMap = materializer.identifyProperties(ontology);
+		Map<Resource, ArrayList<OntProperty>> propertyMap = materializer.identifyProperties(ontology, ontology.listAllOntProperties().toSet());
 		while(true){
 			long size = graph.size();
 			List<Statement> symmetricStmts = materializer.deriveSymmetrics(propertyMap.get(OWL.SymmetricProperty), graph);
