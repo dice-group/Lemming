@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,8 +13,10 @@ import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Stack;
 
+import org.aksw.simba.lemming.tools.GraphMaterializer;
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
+import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -28,6 +31,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +78,21 @@ public class Inferer {
 			// uniform the names of the classes
 			renameClasses(newModel, classes);
 
+			GraphMaterializer materializer = new GraphMaterializer();
+			Map<Resource, ArrayList<ObjectProperty>> propertyMap = materializer.identifyProperties(ontModel);
+			while(true){
+				long size = newModel.size();
+				List<Statement> symmetricStmts = materializer.deriveSymmetrics(propertyMap.get(OWL.SymmetricProperty), newModel);
+				List<Statement> transitiveStmts = materializer.deriveTransitives(propertyMap.get(OWL.TransitiveProperty), newModel);
+				
+				newModel.add(symmetricStmts);
+				newModel.add(transitiveStmts);
+				
+				//if the model didn't grow, break the loop
+				if(size==newModel.size())
+					break;
+			}
+			
 		}
 		return newModel;
 	}
