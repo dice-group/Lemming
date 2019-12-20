@@ -11,7 +11,7 @@ public class RandomUtil {
             throw new IllegalArgumentException(
                     "Can't choose a random number since all possible numbers seem to be excluded.");
         }
-        OptionalInt result = rnd.ints(bound).filter(i -> !exclude.contains(i)).findFirst();
+        OptionalInt result = rnd.ints(0, bound).filter(i -> !exclude.contains(i)).findFirst();
         if (result.isPresent()) {
             return result.getAsInt();
         } else {
