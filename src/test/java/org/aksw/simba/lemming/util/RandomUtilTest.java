@@ -23,7 +23,7 @@ public class RandomUtilTest {
 
 		testConfigs.add(new Object[] { Sets.newHashSet(1, 2), 5 });
 		testConfigs.add(new Object[] { Sets.newHashSet(13423, 212), 250 });
-		testConfigs.add(new Object[] { Sets.newHashSet(11, 2, 67, 998), 22 });
+		testConfigs.add(new Object[] { Sets.newHashSet(11, 2, 67, 998), 2 });
 
 		return testConfigs;
 	}

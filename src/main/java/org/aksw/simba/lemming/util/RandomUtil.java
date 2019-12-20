@@ -7,10 +7,10 @@ import java.util.Set;
 public class RandomUtil {
 
     public static int getRandomWithExclusion(Random rnd, int bound, Set<Integer> exclude) {
-        if (exclude.size() >= bound) {
-            throw new IllegalArgumentException(
-                    "Can't choose a random number since all possible numbers seem to be excluded.");
-        }
+//        if (exclude.size() >= bound) {
+//            throw new IllegalArgumentException(
+//                    "Can't choose a random number since all possible numbers seem to be excluded.");
+//        }
         OptionalInt result = rnd.ints(0, bound).filter(i -> !exclude.contains(i)).findFirst();
         if (result.isPresent()) {
             return result.getAsInt();
