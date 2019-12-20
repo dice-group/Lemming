@@ -25,6 +25,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandom
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.RandomUtil;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -671,7 +672,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			}
 			
 			while(iNoOfVertices > 0 ){
-				int vertId = arrVertices[mRandom.nextInt(arrVertices.length)];
+				//int vertId = arrVertices[mRandom.nextInt(arrVertices.length)];
+				int vertId = RandomUtil.getRandomWithExclusion(mRandom, arrVertices.length, mReversedMapClassVertices.keySet());
 				mRandom.setSeed(seed);
 				seed++;
 				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
