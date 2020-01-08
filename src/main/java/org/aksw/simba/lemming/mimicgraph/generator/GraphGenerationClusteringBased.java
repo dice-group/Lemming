@@ -366,7 +366,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					
 					if(triple.edgeIDs.size() > 0 ){
 						double noOfEdges = triple.edgeIDs.size();
-						
 						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails);
 						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads);
 						
@@ -374,9 +373,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							LOGGER.warn("There exists no vertices in " + triple.headColour +" or " 
 											+ triple.tailColour +" colour. Skip: " + noOfEdges +" edges!");
 							continue;
-						}
-						
-						
+						} 
 						
 						triple.tailIDs.addAll(setOfRandomTailIds);
 						triple.headIDs.addAll(setOfRandomHeadIds);
@@ -671,15 +668,28 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				return setVertices;
 			}
 			
+			// store the array indices for which the vertID should not match in order to exclude these 
+			// array indexes from the random number generation
+			Set<Integer> unwantedVertices = mReversedMapClassVertices.keySet();
+			unwantedVertices.addAll(res.toIntegerArrayList());
+			Set<Integer> exclusionSet = new HashSet<Integer>();
+			for(int i=0; i<arrVertices.length; i++) {
+				if(unwantedVertices.contains(arrVertices[i])) {
+					exclusionSet.add(i);
+				}
+			}
+			if(exclusionSet.size()>=arrVertices.length) {
+				LOGGER.warn("No possible vertices to connect of "+vertColo);
+				return null;
+			}
+			
 			while(iNoOfVertices > 0 ){
-				//int vertId = arrVertices[mRandom.nextInt(arrVertices.length)];
-				int vertId = RandomUtil.getRandomWithExclusion(mRandom, arrVertices.length, mReversedMapClassVertices.keySet());
+				int vertId = arrVertices[RandomUtil.getRandomWithExclusion(mRandom, arrVertices.length, exclusionSet)];
+				
 				mRandom.setSeed(seed);
 				seed++;
-				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
-					res.add(vertId);
-					iNoOfVertices --;
-				}
+				res.add(vertId);
+				iNoOfVertices --;
 				
 				if(res.size() == (arrVertices.length -1)){
 					if(iNoOfVertices!=0)

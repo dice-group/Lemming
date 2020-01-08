@@ -24,9 +24,9 @@ public class RandomUtilTest {
         List<Object[]> testConfigs = new ArrayList<Object[]>();
 
         testConfigs.add(new Object[] { Sets.newHashSet(1, 2), 5 });
-        testConfigs.add(new Object[] { Sets.newHashSet(13423, 212), 250 });
-        testConfigs.add(new Object[] { Sets.newHashSet(11, 2, 67, 998), 2 });
-
+        testConfigs.add(new Object[] { Sets.newHashSet(123, 212), 250 });
+        testConfigs.add(new Object[] { Sets.newHashSet(45, 152, 212), 4 });
+        
         return testConfigs;
     }
 

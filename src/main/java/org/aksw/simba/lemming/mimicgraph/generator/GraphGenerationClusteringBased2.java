@@ -504,12 +504,26 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				return setVertices;
 			}
 			
+			// store the array indexes for which the vertID should not match and exclude these array indexes from the 
+			// random number generation
+			Set<Integer> keys = mReversedMapClassVertices.keySet();
+			Set<Integer> exclusionSet = new HashSet<Integer>();
+			for(int i=0; i<arrVertices.length; i++) {
+				if(keys.contains(arrVertices[i])) {
+					exclusionSet.add(i);
+				}
+			}
+			if(exclusionSet.size()>=arrVertices.length) {
+				LOGGER.warn("No possible vertices to connect of "+vertColo);
+				return null;
+			}
+			
 			while(iNoOfVertices > 0 ){
-				//int vertId = arrVertices[rand.nextInt(arrVertices.length)];
-				int vertId = RandomUtil.getRandomWithExclusion(rand, arrVertices.length, mReversedMapClassVertices.keySet());
+				int vertId = arrVertices[RandomUtil.getRandomWithExclusion(rand, arrVertices.length, exclusionSet)];
+			
 				rand.setSeed(seed);
 				seed++;
-				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
+				if(!res.contains(vertId)){
 					res.add(vertId);
 					iNoOfVertices --;
 				}
