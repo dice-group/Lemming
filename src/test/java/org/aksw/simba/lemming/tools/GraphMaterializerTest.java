@@ -27,15 +27,16 @@ public class GraphMaterializerTest {
 		OntModel ontology = ModelFactory.createOntologyModel();
 		ontology.read("skos_snippet.ttl");
 		
-		GraphMaterializer materializer = new GraphMaterializer();
-		Map<Resource, ArrayList<OntProperty>> propertyMap = materializer.identifyProperties(ontology, ontology.listAllOntProperties().toSet());
+		GraphMaterializer materializer = new GraphMaterializer(ontology, ontology.listAllOntProperties().toSet());
 		while(true){
 			long size = graph.size();
-			List<Statement> symmetricStmts = materializer.deriveSymmetrics(propertyMap.get(OWL.SymmetricProperty), graph);
-			List<Statement> transitiveStmts = materializer.deriveTransitives(propertyMap.get(OWL.TransitiveProperty), graph);
+			List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(graph);
+			List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(graph);
+			List<Statement> inverseStmts = materializer.deriveInverseStatements(graph);
 			
 			graph.add(symmetricStmts);
 			graph.add(transitiveStmts);
+			graph.add(inverseStmts);
 			
 			//if the model didn't grow, break the loop
 			if(size==graph.size())
@@ -56,6 +57,12 @@ public class GraphMaterializerTest {
 		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/g"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#related"), ResourceFactory.createResource("http://example.org/f")));
 		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/a"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#exactMatch"), ResourceFactory.createResource("http://example.org/c")));
 		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/c"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#exactMatch"), ResourceFactory.createResource("http://example.org/a")));
+		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/t"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#narrower"), ResourceFactory.createResource("http://example.org/a")));
+		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/o"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#topConceptOf"), ResourceFactory.createResource("http://example.org/p")));
+		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/y"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#narrower"), ResourceFactory.createResource("http://example.org/w")));
+		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/w"), ResourceFactory.createProperty("http://www.w3.org/2004/02/skos/core#broader"), ResourceFactory.createResource("http://example.org/y")));
+		graph.add(ResourceFactory.createStatement(ResourceFactory.createResource("http://example.org/a"), ResourceFactory.createProperty("http://example.org/test#broaderTest"), ResourceFactory.createResource("http://example.org/t")));
+		
 		return graph;
 	}
 }

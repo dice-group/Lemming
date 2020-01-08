@@ -78,15 +78,16 @@ public class Inferer {
 			// uniform the names of the classes
 			renameClasses(newModel, classes);
 
-			GraphMaterializer materializer = new GraphMaterializer();
-			Map<Resource, ArrayList<OntProperty>> propertyMap = materializer.identifyProperties(ontModel, ontProperties);
+			GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
 			while(true){
 				long size = newModel.size();
-				List<Statement> symmetricStmts = materializer.deriveSymmetrics(propertyMap.get(OWL.SymmetricProperty), newModel);
-				List<Statement> transitiveStmts = materializer.deriveTransitives(propertyMap.get(OWL.TransitiveProperty), newModel);
+				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
 				
 				newModel.add(symmetricStmts);
 				newModel.add(transitiveStmts);
+				newModel.add(inverseStmts);
 				
 				//if the model didn't grow, break the loop
 				if(size==newModel.size())
