@@ -508,11 +508,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			// random number generation
 			Set<Integer> keys = mReversedMapClassVertices.keySet();
 			Set<Integer> exclusionSet = new HashSet<Integer>();
-			for(int i=0; i<arrVertices.length; i++) {
-				if(keys.contains(arrVertices[i])) {
-					exclusionSet.add(i);
-				}
-			}
+			if(!keys.isEmpty())
+				for(int i=0; i<arrVertices.length; i++) {
+					if(keys.contains(arrVertices[i])) {
+						exclusionSet.add(i);
+					}
+				}			
+			
 			if(exclusionSet.size()>=arrVertices.length) {
 				LOGGER.warn("No possible vertices to connect of "+vertColo);
 				return null;
