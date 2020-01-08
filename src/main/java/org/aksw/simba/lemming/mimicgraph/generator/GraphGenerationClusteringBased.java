@@ -671,7 +671,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			// store the array indices for which the vertID should not match in order to exclude these 
 			// array indexes from the random number generation
 			Set<Integer> unwantedVertices = mReversedMapClassVertices.keySet();
-			unwantedVertices.addAll(res.toIntegerArrayList());
 			Set<Integer> exclusionSet = new HashSet<Integer>();
 			for(int i=0; i<arrVertices.length; i++) {
 				if(unwantedVertices.contains(arrVertices[i])) {
@@ -688,8 +687,10 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				
 				mRandom.setSeed(seed);
 				seed++;
-				res.add(vertId);
-				iNoOfVertices --;
+				if(!res.contains(vertId)){
+					res.add(vertId);
+					iNoOfVertices --;
+				}
 				
 				if(res.size() == (arrVertices.length -1)){
 					if(iNoOfVertices!=0)
