@@ -516,7 +516,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			}
 			
 			while(iNoOfVertices > 0 ){
-				int vertId = RandomUtil.pickRandomElement(setVertices, rand, exclusionSet, false);
+				int vertId = setVertices.pickRandomElement(rand, exclusionSet, false);
 				rand.setSeed(seed);
 				seed++;
 				if(!res.contains(vertId)){

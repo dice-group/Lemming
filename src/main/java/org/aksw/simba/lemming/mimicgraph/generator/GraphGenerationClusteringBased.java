@@ -680,7 +680,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			}
 			
 			while(iNoOfVertices > 0 ){
-				int vertId = RandomUtil.pickRandomElement(setVertices, mRandom, exclusionSet, false);
+				int vertId = setVertices.pickRandomElement(mRandom, exclusionSet, false);
 				mRandom.setSeed(seed);
 				seed++;
 				if(!res.contains(vertId)){
