@@ -495,34 +495,28 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			
 			Random rand = new Random(seed);
 			
-			int[] arrVertices= setVertices.toIntArray();
-			
 			IntSet res = new DefaultIntSet();
 			
-			if(iNoOfVertices >= arrVertices.length){
-				iNoOfVertices = arrVertices.length;
+			if(iNoOfVertices >= setVertices.size()){
+				iNoOfVertices =  setVertices.size();
 				return setVertices;
 			}
 			
 			// store the array indexes for which the vertID should not match and exclude these array indexes from the 
 			// random number generation
-			Set<Integer> keys = mReversedMapClassVertices.keySet();
-			Set<Integer> exclusionSet = new HashSet<Integer>();
-			if(!keys.isEmpty())
-				for(int i=0; i<arrVertices.length; i++) {
-					if(keys.contains(arrVertices[i])) {
-						exclusionSet.add(i);
-					}
-				}			
-			
-			if(exclusionSet.size()>=arrVertices.length) {
+			IntSet exclusionSet = new DefaultIntSet();
+			for(Integer e : mReversedMapClassVertices.keySet()) {
+				if(setVertices.contains(e)) {
+					exclusionSet.add(e);
+				}
+			}
+			if(exclusionSet.size()>= setVertices.size()) {
 				LOGGER.warn("No possible vertices to connect of "+vertColo);
 				return null;
 			}
 			
 			while(iNoOfVertices > 0 ){
-				int vertId = arrVertices[RandomUtil.getRandomWithExclusion(rand, arrVertices.length, exclusionSet)];
-			
+				int vertId = RandomUtil.pickRandomElement(setVertices, rand, exclusionSet, false);
 				rand.setSeed(seed);
 				seed++;
 				if(!res.contains(vertId)){
@@ -530,7 +524,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					iNoOfVertices --;
 				}
 				
-				if(res.size() == (arrVertices.length -1)){
+				if(res.size() == (setVertices.size() -1)){
 					if(iNoOfVertices!=0)
 						LOGGER.warn("Could not get " + iNoOfVertices + " vertices of "+ vertColo);
 					break;
