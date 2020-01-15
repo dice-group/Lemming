@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.tools;
+package org.aksw.simba.lemming.creation;
 
 import java.util.ArrayList;
 import java.util.HashSet;

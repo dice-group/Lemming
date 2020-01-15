@@ -1,19 +1,13 @@
-package org.aksw.simba.lemming.tools;
+package org.aksw.simba.lemming.creation;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.jena.ontology.ObjectProperty;
+import org.aksw.simba.lemming.creation.GraphMaterializer;
 import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.vocabulary.OWL;
 import org.junit.Assert;
 import org.junit.Test;
 

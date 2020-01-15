@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Stack;
 
-import org.aksw.simba.lemming.tools.GraphMaterializer;
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
 import org.apache.jena.ontology.ObjectProperty;
@@ -70,14 +69,7 @@ public class Inferer {
 
 			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
 			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
-
-			// infer type statements, a single property name is also enforced here
-			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
-			checkEmptyTypes(set, newModel);
-
-			// uniform the names of the classes
-			renameClasses(newModel, classes);
-
+			
 			GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
 			while(true){
 				long size = newModel.size();
@@ -93,6 +85,13 @@ public class Inferer {
 				if(size==newModel.size())
 					break;
 			}
+
+			// infer type statements, a single property name is also enforced here
+			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
+			checkEmptyTypes(set, newModel);
+
+			// uniform the names of the classes
+			renameClasses(newModel, classes);
 			
 		}
 		return newModel;
