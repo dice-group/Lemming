@@ -19,7 +19,8 @@ public class BaselineGenerator {
 	
 	public static void main(String[] args) {
 		Map<String, String> mapArgs = parseArguments(args);
-		
+		int noNodes = Integer.parseInt(mapArgs.get("-nv"));
+		double avgDegree = Double.parseDouble(mapArgs.get("-avgd"));
 		long seed = System.currentTimeMillis();
 		if(mapArgs.get("-s")!=null) {
 			seed = Long.parseLong(mapArgs.get("-s"));
@@ -40,8 +41,6 @@ public class BaselineGenerator {
 		ObjectDistribution<BitSet> edgeDistribution = edgeColourDistributionMetric.apply(colouredGraph);
 		
 		// Generate a random, scale-free Barabasi graph
-		int noNodes = colouredGraph.getVertices().size();
-		double avgDegree = colouredGraph.getAverageDegree();
 		BaselineGraph baselineGraph = new BaselineGraph(noNodes, avgDegree, seed);
 				
 		//assign colours
@@ -50,9 +49,12 @@ public class BaselineGenerator {
 		baselineCreator.applyVertexDistribution(vertexDistribution);
 		
 	}
+	
 	/**
 	 * -f file path
 	 * -s seed
+	 * -nv number of nodes
+	 * -avgd average degree
 	 * @param args
 	 */
 	private static Map<String, String> parseArguments(String[] args){
@@ -70,6 +72,14 @@ public class BaselineGenerator {
 					//seed
 					else if(param.equalsIgnoreCase("-s")){
 						mapArgs.put("-s", value);
+					}
+					// number of nodes
+					else if(param.equalsIgnoreCase("-nv")){
+						mapArgs.put("-nv", value);
+					}
+					// average degree
+					else if(param.equalsIgnoreCase("-avgd")){
+						mapArgs.put("-avgd", value);
 					}
 				}
 			}
