@@ -196,6 +196,10 @@ public class ColouredGraph {
     public IntSet getEdges() {
         return graph.getEdges();
     }
+    
+    public double getAverageDegree() {
+    	return graph.getAverageDegree();
+    }
 
     public IntSet getOutEdges(int vertexId) {
         return graph.getOutEdges(vertexId);

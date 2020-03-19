@@ -41,4 +41,6 @@ public class Constants {
 	
 	public static final char[] PUNTUATION_MARKS = {'.', '?', '!', ';', ':', ',', '"', '\''};
 	
+	public static final String BASELINE_STRING = "barabasi_baseline_graph";
+	
 }
