@@ -48,12 +48,11 @@ public class BaselineCreator {
 		
 		//foreach node/edge
 		for (int i = 0; i < sum; i++) {
-			//min+(max-min)*randomDouble
-			double random = sum*randomGen.nextDouble();
+			int random = randomGen.nextInt((int) Math.round(sum));
 			int id = -1;
 			while(random>0) {
 				id++;
-				double count = map.get(sortedColours.get(id));
+				int count = (int) Math.round(map.get(sortedColours.get(id)));
 				random=-count;
 			}
 			// assign colour to current node if not already assigned (shouldn't be)
