@@ -6,11 +6,14 @@ import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
@@ -254,6 +257,32 @@ public class ColouredGraph {
      * @param inEdgeColours
      */
     public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours) {
+        edgeColours = new ObjectArrayList<BitSet>();
+        for (int i = 0; i < inEdgeColours.size(); ++i) {
+            edgeColours.add(inEdgeColours.get(i));
+        }
+    }
+    
+    /**
+     * Set new data to the mapping of vertex's ids and vertex's colours
+     * 
+     * @param inVertexColours
+     */
+    public void setVertexColours(Map<Integer, BitSet> inVertexColours) {
+    	int maxElement = Collections.max(inVertexColours.keySet());
+        vertexColours = new ObjectArrayList<BitSet>();
+        for (int i = 0; i < maxElement; ++i) {
+            vertexColours.add(inVertexColours.get(i));
+        }
+    }
+
+    /**
+     * Set new data to the mapping of edge's ids and edge's colours
+     * 
+     * @param inEdgeColours
+     */
+    public void setEdgeColours(Map<Integer, BitSet> inEdgeColours) {
+    	int maxElement = Collections.max(inEdgeColours.keySet());
         edgeColours = new ObjectArrayList<BitSet>();
         for (int i = 0; i < inEdgeColours.size(); ++i) {
             edgeColours.add(inEdgeColours.get(i));

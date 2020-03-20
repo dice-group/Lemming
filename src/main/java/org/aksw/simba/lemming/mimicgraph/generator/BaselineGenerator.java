@@ -42,6 +42,8 @@ public class BaselineGenerator {
 
 		mimicGraph = new ColouredGraph(baselineGraph.getGraph().getGraph(), null, null, null);
 		copyColourPalette(colouredGraphs, mimicGraph);
+		mimicGraph.setEdgeColours(baselineGraph.getEdgeColourMap());
+		mimicGraph.setVertexColours(baselineGraph.getVertexColourMap());
 
 	}
 

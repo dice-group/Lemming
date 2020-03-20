@@ -188,7 +188,7 @@ public class GraphGenerationTest {
         }else if(typeGenerator.equalsIgnoreCase("CD")){
         	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 
         double startTime = System.currentTimeMillis();
@@ -244,8 +244,9 @@ public class GraphGenerationTest {
         Lexicalization with word2vec
         ----------------------------------------------------*/
         LOGGER.info("Lexicalize the mimic graph ...");
-        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
-        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
+        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(), 
+        		mGrphGenerator.getMappingColoursAndVertices()));
         
         //output results to file "LemmingEx.result"       
         grphOptimizer.printResult(mapArgs, startTime, saveFiled, seed);
