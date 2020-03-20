@@ -47,7 +47,7 @@ public class BaselineCreator {
 	 */
 	private Map<Integer, BitSet> assignColours(ObjectDistribution<BitSet> colourDistribution, int max) {
 		Random randomGen = new Random(graph.getSeed());
-		Map<Integer, BitSet> colourIDMap = new HashMap<Integer, BitSet>();
+		Map<Integer, BitSet> nodeIdToColourMap = new HashMap<Integer, BitSet>();
 		double sum = DoubleStream.of(colourDistribution.getValues()).sum();
 
 		Map<BitSet, Double> map = IntStream.range(0, colourDistribution.getSampleSpace().length).boxed().collect(
@@ -58,20 +58,20 @@ public class BaselineCreator {
 		// foreach node/edge
 		for (int j = 0; j < max; j++) {
 			// for each colour
-			for (int i = 0; i < sum; i++) {
+			//for (int i = 0; i < sum; i++) {
 				double random = sum * randomGen.nextDouble();
 				int id = -1;
 				while (random > 0) {
 					id++;
 					double count = map.get(sortedColours.get(id));
-					random = -count;
+					random -= count;
 				}
-				// assign colour to current node if not already assigned (shouldn't be)
-				colourIDMap.putIfAbsent(j, sortedColours.get(id));
-			}
+				// assign colour to current node/edge if not already assigned (shouldn't be)
+				nodeIdToColourMap.putIfAbsent(j, sortedColours.get(id));
+			//}
 		}
 
-		return colourIDMap;
+		return nodeIdToColourMap;
 	}
 
 	/**
