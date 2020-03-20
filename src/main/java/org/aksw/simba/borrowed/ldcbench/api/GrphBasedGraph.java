@@ -11,6 +11,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntIterator;
 import toools.set.IntSet;
 
 /**
@@ -158,6 +159,10 @@ public class GrphBasedGraph implements GraphBuilder {
         }
         return true;
     }
+    
+    public IntSet getEdgesConnecting(int sourceId, int targetId) {
+    	return graph.getEdgesConnecting(sourceId, targetId);
+    }
 
     public int addNode() {
         return graph.addVertex();
@@ -259,5 +264,9 @@ public class GrphBasedGraph implements GraphBuilder {
 
 	public IntSet getVerticesIncidentToEdge(int edgeId) {
 		return graph.getVerticesIncidentToEdge(edgeId);
+	}
+
+	public Grph getGraph() {
+		return graph;
 	}
 }

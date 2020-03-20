@@ -16,6 +16,9 @@ import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 
 import com.carrotsearch.hppc.BitSet;
 
+import toools.set.DefaultIntSet;
+import toools.set.IntSet;
+
 public class BaselineCreator {
 	private BaselineGraph graph;
 
@@ -24,19 +27,22 @@ public class BaselineCreator {
 	}
 
 	public void applyVertexDistribution(ObjectDistribution<BitSet> vertexColourDistribution) {
-		Map<Integer, BitSet> vertexColourMap = assignColours(vertexColourDistribution, graph.getGraph().getNumberOfNodes());
+		Map<Integer, BitSet> vertexColourMap = assignColours(vertexColourDistribution,
+				graph.getGraph().getNumberOfNodes());
+		graph.setColourVertexIds(groupMapByValue(vertexColourMap));
 		graph.setVertexColourMap(vertexColourMap);
 	}
 
 	public void applyEdgeDistribution(ObjectDistribution<BitSet> edgeColourDistribution) {
 		Map<Integer, BitSet> edgeColourMap = assignColours(edgeColourDistribution, graph.getGraph().getNumberOfEdges());
-		graph.setVertexColourMap(edgeColourMap);
+		graph.setColourEdgeIds(groupMapByValue(edgeColourMap));
+		graph.setEdgeColourMap(edgeColourMap);
 	}
 
 	/**
 	 * 
 	 * @param colourDistribution
-	 * @param max number of nodes / edges in the graph
+	 * @param max                number of nodes / edges in the graph
 	 * @return
 	 */
 	private Map<Integer, BitSet> assignColours(ObjectDistribution<BitSet> colourDistribution, int max) {
@@ -96,5 +102,17 @@ public class BaselineCreator {
 		};
 		return map.entrySet().stream().sorted(valueThenKeyComparator).map(Map.Entry::getKey)
 				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	public Map<BitSet, IntSet> groupMapByValue(Map <Integer, BitSet> vertexColourMap) {
+		Map<BitSet, IntSet> colourVertexIds = new HashMap<BitSet, IntSet>();
+		for (Entry<Integer, BitSet> entry : vertexColourMap.entrySet()) {
+			IntSet set = new DefaultIntSet();
+			if (colourVertexIds.containsKey(entry.getValue()))
+				set = colourVertexIds.get(entry.getValue());
+			set.add(entry.getKey());
+			colourVertexIds.put(entry.getValue(), set);
+		}
+		return colourVertexIds;
 	}
 }

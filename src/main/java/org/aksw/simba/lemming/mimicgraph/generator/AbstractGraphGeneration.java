@@ -26,7 +26,6 @@ import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
-import org.aksw.simba.lemming.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +33,6 @@ import toools.set.DefaultIntSet;
 import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 public abstract class AbstractGraphGeneration {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGraphGeneration.class);
