@@ -92,7 +92,7 @@ public class BuildBaselineGraph {
 		// calculates the metrics values
 		EdgeModifier edgeModifier = new EdgeModifier(mGrphGenerator.getMimicGraph(), metrics);
 
-		LOGGER.info("Application finished!");
+		LOGGER.info("Application finished with seed "+seed);
 	}
 
 	private static Map<String, String> parseArguments(String[] args) {
