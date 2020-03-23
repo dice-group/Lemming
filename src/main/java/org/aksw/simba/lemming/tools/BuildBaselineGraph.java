@@ -89,7 +89,7 @@ public class BuildBaselineGraph {
 		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(),
 				mGrphGenerator.getColourVertexIds()));
 
-		// calculates the 
+		// calculates the metrics values
 		EdgeModifier edgeModifier = new EdgeModifier(mGrphGenerator.getMimicGraph(), metrics);
 
 		LOGGER.info("Application finished!");

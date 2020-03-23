@@ -1,16 +1,22 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import org.aksw.simba.lemming.BaselineGraph;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
-import org.aksw.simba.lemming.creation.BaselineCreator;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgEdgeColoDistMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgVertColoDistMetric;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +32,7 @@ public class BaselineGenerator {
 	public BaselineGenerator(int noNodes, ColouredGraph[] colouredGraphs, long seed) {
 		// estimate an average degree
 		double avgDegree = estimateNoEdges(colouredGraphs, noNodes) / noNodes;
-		LOGGER.info("Estimated average degree: "+avgDegree);
+		LOGGER.info("Estimated average degree: " + avgDegree);
 
 		// colour distribution
 		ObjectDistribution<BitSet> vertexDistribution = AvrgVertColoDistMetric.apply(colouredGraphs);
@@ -36,10 +42,10 @@ public class BaselineGenerator {
 		baselineGraph = new BaselineGraph(noNodes, avgDegree, seed);
 
 		// assign colours
-		BaselineCreator baselineCreator = new BaselineCreator(baselineGraph);
-		baselineCreator.applyEdgeDistribution(edgeDistribution);
-		baselineCreator.applyVertexDistribution(vertexDistribution);
+		applyEdgeDistribution(edgeDistribution);
+		applyVertexDistribution(vertexDistribution);
 
+		// convert it to a ColouredGraph object
 		mimicGraph = new ColouredGraph(baselineGraph.getGraph().getGraph(), null, null, null);
 		copyColourPalette(colouredGraphs, mimicGraph);
 		mimicGraph.setEdgeColours(baselineGraph.getEdgeColourMap());
@@ -55,8 +61,56 @@ public class BaselineGenerator {
 		return mimicGraph;
 	}
 
+	public void applyVertexDistribution(ObjectDistribution<BitSet> vertexColourDistribution) {
+		Map<Integer, BitSet> vertexColourMap = assignColours(vertexColourDistribution,
+				baselineGraph.getGraph().getNumberOfNodes());
+		baselineGraph.setColourVertexIds(MapUtil.groupMapByValue(vertexColourMap));
+		baselineGraph.setVertexColourMap(vertexColourMap);
+	}
+
+	public void applyEdgeDistribution(ObjectDistribution<BitSet> edgeColourDistribution) {
+		Map<Integer, BitSet> edgeColourMap = assignColours(edgeColourDistribution,
+				baselineGraph.getGraph().getNumberOfEdges());
+		baselineGraph.setColourEdgeIds(MapUtil.groupMapByValue(edgeColourMap));
+		baselineGraph.setEdgeColourMap(edgeColourMap);
+	}
+
 	/**
+	 * Assigns colours based on a given distribution
+	 * 
+	 * @param colourDistribution
+	 * @param max                number of nodes / edges in the graph
+	 * @return
+	 */
+	public Map<Integer, BitSet> assignColours(ObjectDistribution<BitSet> colourDistribution, int max) {
+		Random randomGen = new Random(baselineGraph.getSeed());
+		Map<Integer, BitSet> nodeIdToColourMap = new HashMap<Integer, BitSet>();
+		double sum = DoubleStream.of(colourDistribution.getValues()).sum();
+
+		Map<BitSet, Double> map = IntStream.range(0, colourDistribution.getSampleSpace().length).boxed().collect(
+				Collectors.toMap(i -> colourDistribution.getSampleSpace()[i], i -> colourDistribution.getValues()[i]));
+
+		List<BitSet> sortedColours = MapUtil.sortByValueThenKey(map);
+
+		// foreach node/edge
+		for (int j = 0; j < max; j++) {
+			double random = sum * randomGen.nextDouble();
+			int id = -1;
+			while (random > 0) {
+				id++;
+				double count = map.get(sortedColours.get(id));
+				random -= count;
+			}
+			// assign colour to current node/edge if not already assigned (shouldn't be)
+			nodeIdToColourMap.putIfAbsent(j, sortedColours.get(id));
+		}
+
+		return nodeIdToColourMap;
+	}
+
+	/**********************************************************************
 	 * org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration
+	 * ********************************************************************
 	 */
 
 	/**
@@ -64,7 +118,7 @@ public class BaselineGenerator {
 	 * 
 	 * @param origGrphs
 	 */
-	protected double estimateNoEdges(ColouredGraph[] origGrphs, int noVertices) {
+	private double estimateNoEdges(ColouredGraph[] origGrphs, int noVertices) {
 		LOGGER.info("Estimate the number of edges in the new graph.");
 		double estimatedEdges = 0;
 		if (origGrphs != null && origGrphs.length > 0) {
@@ -85,7 +139,7 @@ public class BaselineGenerator {
 		return estimatedEdges;
 	}
 
-	protected void copyColourPalette(ColouredGraph[] origGraphs, ColouredGraph mimicGraph) {
+	private void copyColourPalette(ColouredGraph[] origGraphs, ColouredGraph mimicGraph) {
 		if (Constants.IS_EVALUATION_MODE) {
 			ColourPalette newVertexPalette = new InMemoryPalette();
 			ColourPalette newEdgePalette = new InMemoryPalette();
@@ -121,8 +175,6 @@ public class BaselineGenerator {
 			String uri = (String) arrObjURIs[i];
 			BitSet colour = mapOfURIsAndColours.get(uri);
 			palette.updateColour(colour, uri);
-//			}
 		}
 	}
-
 }
