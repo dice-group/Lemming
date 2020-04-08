@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import java.util.Stack;
 
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
+import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -28,6 +30,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
@@ -67,6 +70,22 @@ public class Inferer {
 
 			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
 			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
+			
+			GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
+			while(true){
+				long size = newModel.size();
+				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
+				
+				newModel.add(symmetricStmts);
+				newModel.add(transitiveStmts);
+				newModel.add(inverseStmts);
+				
+				//if the model didn't grow, break the loop
+				if(size==newModel.size())
+					break;
+			}
 
 			// infer type statements, a single property name is also enforced here
 			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
@@ -74,7 +93,7 @@ public class Inferer {
 
 			// uniform the names of the classes
 			renameClasses(newModel, classes);
-
+			
 		}
 		return newModel;
 	}
