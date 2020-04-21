@@ -236,6 +236,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						}
 						
 						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
@@ -248,6 +249,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						}
 						
 						if(setHeadIDs.size() == 0){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
@@ -410,6 +412,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						+ " edge's coloursince it could not find any approriate vertices to connect");
 			}
 		}
+		System.out.println();
 	}
 	
 	/**
