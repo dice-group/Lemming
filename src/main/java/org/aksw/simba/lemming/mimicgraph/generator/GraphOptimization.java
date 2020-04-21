@@ -250,7 +250,8 @@ public class GraphOptimization {
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){
-					fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")? "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
+					//fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")? "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
+					fWriter.write("# Input dataset: " + args.get("-ds")+ ".\n");
 				}else{
 					fWriter.write("# Default input dataset: Sematic Web Dog Food.\n");
 				}

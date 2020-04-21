@@ -12,6 +12,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.creation.GeologyDataset;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
@@ -45,6 +46,7 @@ public class GraphGenerationTest {
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
 	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
+	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
 	
 	//default number of vertices is 10000
 	private static int mNumberOfDesiredVertices = 10000;
@@ -124,6 +126,10 @@ public class GraphGenerationTest {
         	LOGGER.info("Loading LinkedGeo...");
         	mDatasetManager = new LinkedGeoDataset();
         	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
+        } else if(dataset.equalsIgnoreCase("geology")) {
+        	LOGGER.info("Loading Geology Dataset...");
+        	mDatasetManager = new GeologyDataset();
+        	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
         } else {
         	LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
         	return;

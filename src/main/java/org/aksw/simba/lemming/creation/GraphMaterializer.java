@@ -146,22 +146,25 @@ public class GraphMaterializer {
 		for (OntProperty curProp : ontProperties) {
 
 			// returns null if not
-			SymmetricProperty symmetric = ontology.getSymmetricProperty(curProp.getURI());
-			if (symmetric != null) {
-				this.symmetricProperties.add(symmetric);
+			if (curProp.getURI() != null) {
+				SymmetricProperty symmetric = ontology.getSymmetricProperty(curProp.getURI());
+				if (symmetric != null) {
+					this.symmetricProperties.add(symmetric);
+				}
+
+				TransitiveProperty transitive = ontology.getTransitiveProperty(curProp.getURI());
+				if (transitive != null) {
+					this.transitiveProperties.add(transitive);
+				}
+
+				ExtendedIterator<? extends OntProperty> iterator = curProp.listInverseOf();
+				while (iterator.hasNext()) {
+					OntProperty inverse = iterator.next();
+					inverseProperties.put(curProp, inverse);
+					inverseProperties.put(inverse, curProp);
+				}
 			}
 
-			TransitiveProperty transitive = ontology.getTransitiveProperty(curProp.getURI());
-			if (transitive != null) {
-				this.transitiveProperties.add(transitive);
-			}
-
-			ExtendedIterator<? extends OntProperty> iterator = curProp.listInverseOf();
-			while (iterator.hasNext()) {
-				OntProperty inverse = iterator.next();
-				inverseProperties.put(curProp, inverse);
-				inverseProperties.put(inverse, curProp);
-			}
 		}
 	}
 

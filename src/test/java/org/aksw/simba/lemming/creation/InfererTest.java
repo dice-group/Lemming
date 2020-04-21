@@ -31,7 +31,7 @@ public class InfererTest {
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
 
-		Inferer inferer = new Inferer();
+		Inferer inferer = new Inferer(false);
 		OntModel ontModel = inferer.readOntology(ontFilePath, null);
 		ontModel.read("22-rdf-syntax-ns", "TURTLE");
 		ontModel.read("rdf-schema", "TURTLE");
@@ -56,7 +56,7 @@ public class InfererTest {
 		Model confModel = ModelFactory.createDefaultModel();
 		confModel.read(fileName);
 
-		Inferer inferer = new Inferer();
+		Inferer inferer = new Inferer(false);
 		Model actualModel = inferer.process(confModel, ontModel);
 
 		//printModel(actualModel, "after");
@@ -86,7 +86,7 @@ public class InfererTest {
 		Model geoModel = ModelFactory.createDefaultModel();
 		geoModel.read("snippet_linkedgeo.nt");
 		
-		Inferer inferer = new Inferer();
+		Inferer inferer = new Inferer(false);
 		Model actualModel = inferer.process(geoModel, ontModel);
 		
 		//prior to inference, 0 resources have a type stmt

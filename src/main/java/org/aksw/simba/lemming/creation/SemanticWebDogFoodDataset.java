@@ -60,7 +60,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                 if (oldModelSize < dogFoodModel.size()) {
                     LOGGER.info("Read data. Model has {} triples. Creating graph...", dogFoodModel.size());
                     
-                    Inferer inferer = new Inferer();
+                    Inferer inferer = new Inferer(false);
                     List <String> all = modelOntMap.get(y);
                     
                     for(String cur: all) {
@@ -72,7 +72,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                     
     				graph = creator.processModel(dogFoodModel);
                     if (graph != null) {
-                        LOGGER.info("Generated graph.", dogFoodModel.size());
+                        LOGGER.info("Generated graph." + dogFoodModel.size());
                         graphs.add(graph);
                     } else {
                         LOGGER.error("Couldn't generate coloured graph.");
@@ -83,8 +83,9 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
             } else {
                 LOGGER.error("The folder {} does not exist.", folder.toString());
             }
+            
+           
         }
-        
         // try-and-error analysis of data typed literals in the current dataset.
         //LiteralDatatypeAnalyser literalAnalyser = new LiteralDatatypeAnalyser(SemanticWebDogFoodReader.class.getName());
         //literalAnalyser.analyzeDatatype(dogFoodModel);

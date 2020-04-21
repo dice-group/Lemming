@@ -21,6 +21,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
+import org.aksw.simba.lemming.creation.GeologyDataset;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
@@ -49,10 +50,12 @@ public class PrecomputingValues {
     private static boolean USE_SEMANTIC_DOG_FOOD = false;
     private static boolean USE_PERSON_GRAPH = true;
     private static boolean USE_LINKED_GEO = false;
+    private static boolean USE_GEOLOGY = false;
     private static boolean RECALCULATE_METRICS = true;
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String PERSON_GRAPH = "PersonGraph/";
     private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
+    private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
 
     public static void main(String[] args) {
         LOGGER.info("Start precomputing metric and constant expressions!");
@@ -65,14 +68,22 @@ public class PrecomputingValues {
             USE_SEMANTIC_DOG_FOOD = false;
             USE_PERSON_GRAPH = true;
             USE_LINKED_GEO = false;
+            USE_GEOLOGY = false;
         } else if (dataset.equalsIgnoreCase("swdf")){
             USE_SEMANTIC_DOG_FOOD = true;
             USE_PERSON_GRAPH = false;
             USE_LINKED_GEO = false;
+            USE_GEOLOGY = false;
         } else if (dataset.equalsIgnoreCase("lgeo")){
         	USE_SEMANTIC_DOG_FOOD = false;
             USE_PERSON_GRAPH = false;
             USE_LINKED_GEO = true;
+            USE_GEOLOGY = false;
+        } else if(dataset.equalsIgnoreCase("geology")) {
+        	USE_SEMANTIC_DOG_FOOD = false;
+            USE_PERSON_GRAPH = false;
+            USE_LINKED_GEO = false;
+            USE_GEOLOGY = true;
         } else {
         	LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
         	return;
@@ -101,6 +112,9 @@ public class PrecomputingValues {
         } else if (USE_LINKED_GEO) {
         	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
             mDatasetManager = new LinkedGeoDataset();
+        } else if(USE_GEOLOGY) {
+        	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
+        	mDatasetManager = new GeologyDataset();
         }
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
 

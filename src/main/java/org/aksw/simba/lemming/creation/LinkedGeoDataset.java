@@ -59,7 +59,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 						geoModel.read(subFile.getAbsolutePath(), "TTL");
 					}
 					LOGGER.info("Read data to model - " + geoModel.size() + " triples");
-					Inferer inferer = new Inferer();
+					Inferer inferer = new Inferer(false);
 					// returns a new model with the added triples
 					geoModel = inferer.process(geoModel, ontModel);
 					ColouredGraph graph = creator.processModel(geoModel);
@@ -69,6 +69,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 					}
 				}
 			}
+			
 		} else {
 			LOGGER.error("Find no files in \"" + folder.getAbsolutePath() + "\". Aborting.");
 			System.exit(1);
@@ -76,4 +77,9 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
+	
+//	public static void main(String[] args) {
+//		String DATA_FOLDER_PATH = "LinkedGeoGraphs/";
+//		new LinkedGeoDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
+//	}	
 }

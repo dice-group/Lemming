@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.GeologyDataset;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
@@ -16,11 +17,11 @@ import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.BaselineGenerator;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class BuildBaselineGraph {
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
 	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
+	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraps/";
 
 	public static void main(String[] args) {
 		IDatasetManager mDatasetManager;
@@ -50,7 +52,11 @@ public class BuildBaselineGraph {
 			LOGGER.info("Loading LinkedGeo...");
 			mDatasetManager = new LinkedGeoDataset();
 			datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
-		} else {
+		} else if(dataset.equalsIgnoreCase("geology")) {
+        	LOGGER.info("Loading Geology Dataset...");
+        	mDatasetManager = new GeologyDataset();
+        	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
+        } else {
 			LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
 			return;
 		}
@@ -64,6 +70,12 @@ public class BuildBaselineGraph {
 		metrics.add(new StdDevVertexDegree(DIRECTION.out));
 		metrics.add(new NumberOfEdgesMetric());
 		metrics.add(new NumberOfVerticesMetric());
+		ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+        if(!valuesCarrier.isComputableMetrics(metrics)){
+        	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
+        	LOGGER.warn("Please generate the file [value_store.val] again!");
+        	return ;
+        }
 
 		int noVertices = 0;
 		String strNoOfVertices = mapArgs.get("-nv");
@@ -79,19 +91,17 @@ public class BuildBaselineGraph {
 
 		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
 		double startTime = System.currentTimeMillis();
-		BaselineGenerator mGrphGenerator = new BaselineGenerator(noVertices, graphs, seed);
+		BaselineGenerator mGrphGenerator = new BaselineGenerator(noVertices, graphs, seed, valuesCarrier, metrics);
 		double duration = System.currentTimeMillis() - startTime;
-		LOGGER.info("Finished graph generation process in " + duration + " ms");
-
+		
 		LOGGER.info("Lexicalize the mimic graph ...");
 		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
 
-		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(),
+		String savedFile = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(),
 				mGrphGenerator.getColourVertexIds()));
-
-		// calculates the metrics values
-		EdgeModifier edgeModifier = new EdgeModifier(mGrphGenerator.getMimicGraph(), metrics);
-
+		
+		mGrphGenerator.printResult(mapArgs, startTime, savedFile, seed);
+		LOGGER.info("Finished graph generation process in " + duration + " ms");
 		LOGGER.info("Application finished with seed "+seed);
 	}
 

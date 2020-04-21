@@ -4,13 +4,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.aksw.simba.borrowed.ldcbench.api.GraphGenerator;
-import org.aksw.simba.borrowed.ldcbench.api.GrphBasedGraph;
-import org.aksw.simba.borrowed.ldcbench.api.ParallelBarabasiRDF;
 import org.aksw.simba.lemming.util.Constants;
+import org.dice_research.ldcbench.generate.GraphGenerator;
+import org.dice_research.ldcbench.generate.ParallelBarabasiRDF;
+import org.dice_research.ldcbench.graph.GrphBasedGraph;
 
 import com.carrotsearch.hppc.BitSet;
 
+import grph.Grph;
 import toools.set.IntSet;
 
 public class BaselineGraph {
@@ -38,9 +39,14 @@ public class BaselineGraph {
 		this.vertexColourMap = vertexColourMap;
 		this.edgeColourMap = edgeColourMap;
 	}
-
+	
 	public GrphBasedGraph getGraph() {
 		return graph;
+	}
+
+	public Grph getGrph() {
+		CompatibleGraph cGraph = new CompatibleGraph(graph);
+		return cGraph.getGrph();
 	}
 
 	public Map<Integer, BitSet> getVertexColourMap() {

@@ -18,6 +18,7 @@ import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 public class AvrgVertColoDistMetric {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AvrgVertColoDistMetric.class);
 	
+	
 	public static ObjectDistribution<BitSet> apply(ColouredGraph[] origGrphs){
 		
 		int numberOfGraph = 0;
@@ -29,7 +30,6 @@ public class AvrgVertColoDistMetric {
 			for(ColouredGraph graph: origGrphs){
 				// number of vertices
 				int iNoVertices = graph.getVertices().size();
-				
 				//process vertex colour distribution
 				ObjectDistribution<BitSet> vertColoDist = vertexColourMetric.apply(graph);
 				
@@ -40,6 +40,7 @@ public class AvrgVertColoDistMetric {
 				
 				for(int i = 0 ; i < iSizeVertSpaces ; ++i ){
 					BitSet vertColo = vertSampleSpaces[i];
+					
 					double rate = vertSampleValues[i]/(iNoVertices);
 					
 					mapVertColoRate.putOrAdd(vertColo, rate, rate);
