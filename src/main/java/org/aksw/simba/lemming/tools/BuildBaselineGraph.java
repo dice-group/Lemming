@@ -32,7 +32,7 @@ public class BuildBaselineGraph {
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
 	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
-	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraps/";
+	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
 
 	public static void main(String[] args) {
 		IDatasetManager mDatasetManager;
@@ -62,14 +62,15 @@ public class BuildBaselineGraph {
 		}
 		List<SingleValueMetric> metrics = new ArrayList<>();
 		metrics.add(new NodeTriangleMetric());
-		metrics.add(new EdgeTriangleMetric());
-		metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
-		metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
-		metrics.add(new AvgVertexDegreeMetric());
-		metrics.add(new StdDevVertexDegree(DIRECTION.in));
-		metrics.add(new StdDevVertexDegree(DIRECTION.out));
-		metrics.add(new NumberOfEdgesMetric());
-		metrics.add(new NumberOfVerticesMetric());
+        metrics.add(new EdgeTriangleMetric());
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+        metrics.add(new NumberOfEdgesMetric());
+        metrics.add(new NumberOfVerticesMetric());
+		
 		ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");

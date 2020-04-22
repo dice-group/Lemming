@@ -52,7 +52,7 @@ public class AbstractDatasetManager implements IDatasetManager{
 		try {
 			new File("results").mkdirs();
 			
-			fileName = "results/Mimic_" + mDatasetName + ".rdf";
+			fileName = "results/Mimic_" + mDatasetName + ".ttl";
 			String[] parts = new String[2];
 			int index = fileName.lastIndexOf('.');
 			parts[0] = fileName.substring(0, index);
