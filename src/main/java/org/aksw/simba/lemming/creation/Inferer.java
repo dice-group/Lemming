@@ -245,8 +245,6 @@ public class Inferer {
 		}
 
 		if (property != null) {
-			if(property.getURI().equals("http://xmlns.com/foaf/0.1/primaryTopicOf"))
-				System.out.println();
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);

@@ -63,7 +63,7 @@ public class GraphGenerationTest {
         Collect input arguments
 		 * -ds: dataset
 		 * 		value: swdf (semanticwebdogfood), pg (persongraph) 
-		 * 				or lgeo (linkedgeo)
+		 * 				, lgeo (linkedgeo) or geology
 		 * 
 		 * -nv: number of vertices
 		 * 		value: integer number - denoting number of given vertices
@@ -75,14 +75,14 @@ public class GraphGenerationTest {
 		 * 		value: 	R: random approach, 
 		 * 				RD: random with degree approach
 		 * 		value: 	D: distribution approach, 
-		 * 				DD: disitrbution and degree approach
+		 * 				DD: distribution and degree approach
 		 * 		value: 	C: clustering approach, 
 		 * 				CD: clustering and degree approach
 		 * 
 		 * -r: random optimization 
 		 * -op: (optional) number of optimization steps 
-		 * 
-		 * -l: (optional) path to the mimic graph to be loaded,
+		 * -s:  (optional) seed
+		 * -l:  (optional) path to the mimic graph to be loaded,
 		 * this skips the mimic graph generation process and loads it directly from file
 		 * 
         ----------------------------------------------------*/
