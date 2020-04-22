@@ -45,9 +45,10 @@ import org.slf4j.LoggerFactory;
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
+	private boolean isMat = false;
 	
 	public Inferer(boolean isMat) {
-
+		this.isMat = isMat;
 	}
 
 	/**
@@ -71,20 +72,22 @@ public class Inferer {
 			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
 			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
 			
-			GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
-			while(true){
-				long size = newModel.size();
-				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
-				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
-				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
-				
-				newModel.add(symmetricStmts);
-				newModel.add(transitiveStmts);
-				newModel.add(inverseStmts);
-				
-				//if the model didn't grow, break the loop
-				if(size==newModel.size())
-					break;
+			if(isMat) {
+				GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
+				while(true){
+					long size = newModel.size();
+					List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+					List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+					List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
+					
+					newModel.add(symmetricStmts);
+					newModel.add(transitiveStmts);
+					newModel.add(inverseStmts);
+					
+					//if the model didn't grow, break the loop
+					if(size==newModel.size())
+						break;
+				}
 			}
 
 			// infer type statements, a single property name is also enforced here
