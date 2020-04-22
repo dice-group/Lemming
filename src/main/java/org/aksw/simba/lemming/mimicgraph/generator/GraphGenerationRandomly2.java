@@ -216,6 +216,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						}
 						
 						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
@@ -228,6 +229,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						}
 						
 						if(setHeadIDs.size() == 0){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
