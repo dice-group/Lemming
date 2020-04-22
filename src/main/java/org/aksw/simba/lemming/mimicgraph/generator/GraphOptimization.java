@@ -232,7 +232,7 @@ public class GraphOptimization {
 			
 			BufferedWriter fErrorScoreWriter ;
 			String errorScoreFile = new String(savedFile);
-			errorScoreFile = "results/"+ errorScoreFile.replace(".rdf", ".scores");
+			errorScoreFile = "results/"+ errorScoreFile.replace(".ttl", ".scores");
 			
 			
 			fErrorScoreWriter = new BufferedWriter( new FileWriter(errorScoreFile, true));
