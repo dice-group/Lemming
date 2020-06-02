@@ -1,12 +1,11 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles.forward;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Sets;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,20 +61,18 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
     private int processNeighborsOf(int nodeId, ColouredGraph coloredGraph,
             List<HashSet<Integer>> adjacencyDatastructure, DegreeBasedDecreasingNodeOrdering nodeOrdering) {
         int triangles = 0;
-        IntSet neighborSet = IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));
-        for (IntCursor adjacentNodeIdCursor : neighborSet) {
-            int adjacentNodeId = adjacentNodeIdCursor.value;
+        for(int adjacentNodeId:IntSetUtil.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId))) {
             if (nodeOrdering.isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
                 Sets.SetView<Integer> intersection = Sets.intersection(adjacencyDatastructure.get(nodeId),
                         adjacencyDatastructure.get(adjacentNodeId));
                 if (intersection.size() > 0) {
                     for (int intersect : intersection) {
-                        triangles = triangles + IntSets
+                        triangles = triangles + IntSetUtil
                                 .intersection(nodeOrdering.getEdges(nodeId), nodeOrdering.getEdges(adjacentNodeId))
                                 .size()
-                                * IntSets.intersection(nodeOrdering.getEdges(adjacentNodeId),
+                                * IntSetUtil.intersection(nodeOrdering.getEdges(adjacentNodeId),
                                         nodeOrdering.getEdges(intersect)).size()
-                                * IntSets.intersection(nodeOrdering.getEdges(intersect), nodeOrdering.getEdges(nodeId))
+                                * IntSetUtil.intersection(nodeOrdering.getEdges(intersect), nodeOrdering.getEdges(nodeId))
                                         .size();
                     }
                 }

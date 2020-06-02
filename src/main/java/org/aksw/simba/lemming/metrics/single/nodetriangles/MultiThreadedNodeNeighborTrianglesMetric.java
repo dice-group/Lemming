@@ -2,14 +2,14 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import grph.Grph;
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntHashSet;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
  * This metric is the number of triangles of the graph.
@@ -59,7 +59,7 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
 				protected void run(int threadID, int sourceId) {
 					int count = 0;
 					int sourceEdges[] = edgesOfVertex[sourceId].toIntArray();
-					IntSet connectedNodesSet = new IntHashSet();
+					IntSet connectedNodesSet = new IntOpenHashSet();
                     int n;
 
 					for (int sourceEdge : sourceEdges) {
@@ -78,7 +78,7 @@ public class MultiThreadedNodeNeighborTrianglesMetric extends AbstractMetric imp
                     int connectedNodes[] = connectedNodesSet.toIntArray();
                     for (int i = 0; i < connectedNodes.length; i++) {
                         for (int j = i + 1; j < connectedNodes.length; j++) {
-                            if(IntSets.intersection(edgesOfVertex[connectedNodes[i]], edgesOfVertex[connectedNodes[j]]).size() > 0) {
+                            if(IntSetUtil.intersection(edgesOfVertex[connectedNodes[i]], edgesOfVertex[connectedNodes[j]]).size() > 0) {
                                 ++count;
                             }
                         }

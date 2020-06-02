@@ -2,6 +2,8 @@ package org.aksw.simba.lemming.util;
 
 import java.util.regex.Pattern;
 
+import it.unimi.dsi.fastutil.Hash;
+
 
 public class Constants {
 	public static final int IN_EDGE_DIRECTION = 1;
@@ -42,5 +44,7 @@ public class Constants {
 	public static final char[] PUNTUATION_MARKS = {'.', '?', '!', ';', ':', ',', '"', '\''};
 	
 	public static final String BASELINE_STRING = "barabasi_baseline_graph";
+	
+	public static final int DEFAULT_SIZE = Hash.DEFAULT_INITIAL_SIZE;
 	
 }

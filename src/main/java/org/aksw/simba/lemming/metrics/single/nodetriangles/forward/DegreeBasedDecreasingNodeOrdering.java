@@ -49,7 +49,7 @@ public class DegreeBasedDecreasingNodeOrdering {
      * Initializes the actual ordering of the nodes.
      */
     private void initializeOrderedNodes() {
-        orderedNodes = coloredGraph.getVertices().toIntegerArrayList().stream()
+        orderedNodes = coloredGraph.getVertices().stream()
                 .sorted((node1, node2) -> Integer.compare(getTotalAmountOfNeighborsOfNode(node2), getTotalAmountOfNeighborsOfNode(node1)))
                 .collect(Collectors.toList());
     }

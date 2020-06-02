@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import toools.set.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class BaselineGenerator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BaselineGenerator.class);

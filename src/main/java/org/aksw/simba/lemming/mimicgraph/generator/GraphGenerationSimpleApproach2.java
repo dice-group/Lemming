@@ -26,11 +26,11 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphGenerationSimpleApproach2 extends AbstractGraphGeneration implements IGraphGeneration{
 private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimpleApproach2.class);
@@ -229,10 +229,10 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						}
 						
 						//get set of tail ids and head ids
-						IntSet setHeadIDs = new DefaultIntSet();
+						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						
 						if(mMapColourToVertexIDs.containsKey(headColo)){
-							setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 						}
 						
 						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
@@ -242,7 +242,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						
 						IntSet tmpConnectedHeadIds = getConnectedHeads(tailId, edgeColo);
 						if(tmpConnectedHeadIds!= null && tmpConnectedHeadIds.size() >0 ){
-							for(int connectedHead: tmpConnectedHeadIds.toIntegerArrayList()){
+							for(int connectedHead: tmpConnectedHeadIds){
 								if(setHeadIDs.contains(connectedHead))
 									setHeadIDs.remove(connectedHead);
 							}
@@ -253,7 +253,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 							continue;
 						}
 						
-						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 						
 						int headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
 						
@@ -336,9 +336,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						if(tailIDsProposer !=null && headIDsProposer != null ){
 							Integer tailId = tailIDsProposer.getPotentialItem();
 							
-							IntSet setHeadIDs = new DefaultIntSet();
+							IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							if(mMapColourToVertexIDs.containsKey(headColo)){
-								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+								setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 							}
 							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
 								continue;
@@ -354,7 +354,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 								continue;
 							}
 							
-							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 							
 							Integer headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
 							if(tailId != null && headId != null && 

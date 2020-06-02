@@ -16,13 +16,13 @@ import org.aksw.simba.lemming.metrics.dist.IntDistribution;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 
 /**
@@ -64,10 +64,10 @@ public class MapUtil {
 	public static Map<BitSet, IntSet> groupMapByValue(Map<Integer, BitSet> vertexColourMap) {
 		Map<BitSet, IntSet> colourVertexIds = new HashMap<BitSet, IntSet>();
 		for (Entry<Integer, BitSet> entry : vertexColourMap.entrySet()) {
-			IntSet set = new DefaultIntSet();
+			IntSet set = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			if (colourVertexIds.containsKey(entry.getValue()))
 				set = colourVertexIds.get(entry.getValue());
-			set.add(entry.getKey());
+			set.add(entry.getKey().intValue());
 			colourVertexIds.put(entry.getValue(), set);
 		}
 		return colourVertexIds;

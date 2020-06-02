@@ -29,10 +29,10 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public abstract class AbstractGraphGeneration {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGraphGeneration.class);
@@ -303,7 +303,7 @@ public abstract class AbstractGraphGeneration {
 			int vertId = mMimicGraph.addVertex(offeredColor);
 			IntSet setVertIDs = mMapColourToVertexIDs.get(offeredColor);
 			if(setVertIDs == null){
-				setVertIDs = new DefaultIntSet();
+				setVertIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 				mMapColourToVertexIDs.put(offeredColor, setVertIDs);
 			}
 			setVertIDs.add(vertId);
@@ -448,7 +448,7 @@ public abstract class AbstractGraphGeneration {
 					mMapEdgeIdsToColour.put(fakeEdgeID, eColo);
 					IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
 					if(setEdges == null ){
-						setEdges = new DefaultIntSet();
+						setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						mMapColourToEdgeIDs.put(eColo, setEdges);
 					}
 					setEdges.add(fakeEdgeID	);
@@ -488,7 +488,7 @@ public abstract class AbstractGraphGeneration {
 		//concurrent hash map shared between multi-threads
 		
 		for(BitSet eColo: setOfRestrictedEdgeColours){
-			IntSet setEdges = new DefaultIntSet();
+			IntSet setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			mMapColourToEdgeIDs.put(eColo, setEdges);
 		}
 		
@@ -548,8 +548,7 @@ public abstract class AbstractGraphGeneration {
 			for(BitSet eColo: setEdgeColours){
 				IntSet setEdgeIds = mMapColourToEdgeIDs.get(eColo);
 				if(setEdgeIds!=null && setEdgeIds.size() > 0){
-					
-					for(int eId: mMapColourToEdgeIDs.get(eColo).toIntegerArrayList()){
+					for(int eId: mMapColourToEdgeIDs.get(eColo)) {
 						mMapEdgeIdsToColour.put(eId,eColo);
 					}
 				}else{
@@ -610,7 +609,7 @@ public abstract class AbstractGraphGeneration {
 			
 			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
 			if(setEdgeIDs == null){
-				setEdgeIDs = new DefaultIntSet();
+				setEdgeIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
 				
@@ -632,9 +631,9 @@ public abstract class AbstractGraphGeneration {
 		/*
 		 * filter colour and empty colour vertices
 		 */
-		IntSet colourVertices = new DefaultIntSet();
-		IntSet emptyColourVertices = new DefaultIntSet();
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		IntSet emptyColourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		for(BitSet vColo: setVertexColours){
 			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
 			
@@ -801,7 +800,7 @@ public abstract class AbstractGraphGeneration {
 		
 		IntSet setOfHeads = mapTailToHeads.get(tailId);
 		if(setOfHeads == null){
-			setOfHeads = new DefaultIntSet();
+			setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			mapTailToHeads.put(tailId, setOfHeads);
 		}
 		
@@ -815,7 +814,7 @@ public abstract class AbstractGraphGeneration {
 	
 	public IntSet getConnectedHeads(int tailId, BitSet eColo){
 		
-		IntSet setOfHeads = new DefaultIntSet();
+		IntSet setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
 		if(mapTailToHeads != null && mapTailToHeads.containsKey(tailId)){
 			setOfHeads = mapTailToHeads.get(tailId);
@@ -856,7 +855,7 @@ public abstract class AbstractGraphGeneration {
 		
 		if(iNoOfSpareEdges == 0 ){
 			for(int i = 0 ; i< numberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
@@ -865,16 +864,17 @@ public abstract class AbstractGraphGeneration {
 			}
 		}else{
 			for(int i = 0 ; i< numberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
 				}
 				lstAssingedEdges.add(tmpSetEdges);
 			}
-			IntSet spareSetEdges = new DefaultIntSet();
+			
 			//add remaining edges
 			int iEdgeId = (numberOfThreads -1) *  iNoOfEdgesPerThread;
+			IntSet spareSetEdges = new DefaultIntSet(iNoOfEdges-iEdgeId);
 			spareSetEdges.add(iEdgeId);
 			while(iEdgeId < iNoOfEdges){
 				iEdgeId ++;
@@ -943,7 +943,7 @@ public abstract class AbstractGraphGeneration {
 		
 		if(iNoOfSpareEdges == 0 ){
 			for(int i = 0 ; i< mNumberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
@@ -952,16 +952,17 @@ public abstract class AbstractGraphGeneration {
 			}
 		}else{
 			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
 				}
 				lstAssignedEdges.add(tmpSetEdges);
 			}
-			IntSet spareSetEdges = new DefaultIntSet();
+			
 			//add remaining edges
 			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
+			IntSet spareSetEdges = new DefaultIntSet(iNumberOfOtherEdges-iEdgeId);
 			spareSetEdges.add(iEdgeId);
 			while(iEdgeId < iNumberOfOtherEdges){
 				iEdgeId ++;

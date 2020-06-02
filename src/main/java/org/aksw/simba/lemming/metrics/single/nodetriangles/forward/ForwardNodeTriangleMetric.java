@@ -7,12 +7,12 @@ import java.util.List;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
 import com.google.common.collect.Sets;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
  * This class models an algorithm for computing the amount of node triangles in
@@ -64,9 +64,8 @@ public class ForwardNodeTriangleMetric extends AbstractMetric implements Triangl
     private int processNeighborsOf(int nodeId, ColouredGraph coloredGraph,
             List<HashSet<Integer>> adjacencyDatastructure, DegreeBasedDecreasingNodeOrdering nodeOrdering) {
         int triangles = 0;
-        IntSet neighborSet = IntSets.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));
-        for (IntCursor adjacentNodeIdCursor : neighborSet) {
-            int adjacentNodeId = adjacentNodeIdCursor.value;
+        IntSet neighborSet = IntSetUtil.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));
+        for (int adjacentNodeId:neighborSet) {
             if (nodeOrdering.isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
                 triangles += Sets
                         .intersection(adjacencyDatastructure.get(nodeId), adjacencyDatastructure.get(adjacentNodeId))

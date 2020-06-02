@@ -1,7 +1,6 @@
 package org.aksw.simba.lemming.metrics.dist.multi;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntOpenHashSet;
 import com.carrotsearch.hppc.IntSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
@@ -20,9 +19,9 @@ public class ColouredVerticesMetric {
         ObjectObjectOpenHashMap<BitSet, IntSet> coloursMap = new ObjectObjectOpenHashMap<BitSet, IntSet>();
         IntSet vertices;
         Grph g = graph.getGraph();
-        IntArrayList allVertices = g.getVertices().toIntArrayList();
+        int[] allVertices = g.getVertices().toIntArray();
         BitSet colour;
-        for (int i = 0; i < allVertices.elementsCount; ++i) {
+        for (int i = 0; i < allVertices.length; ++i) {
             colour = graph.getVertexColour(i);
             if (coloursMap.containsKey(colour)) {
                 vertices = coloursMap.lget();
@@ -30,7 +29,7 @@ public class ColouredVerticesMetric {
                 vertices = new IntOpenHashSet();
                 coloursMap.put(colour, vertices);
             }
-            vertices.add(allVertices.buffer[i]);
+            vertices.add(allVertices[i]);
         }
         return coloursMap;
     }

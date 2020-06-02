@@ -1,14 +1,16 @@
 package org.aksw.simba.lemming.grph;
 
+import java.util.Collections;
+
 import grph.Grph;
 import grph.GrphAlgorithm;
 import grph.algo.MultiThreadProcessing;
 import grph.algo.search.GraphSearchListener;
 import grph.algo.search.GraphSearchListener.DECISION;
 import grph.algo.search.SearchResult;
-import toools.collections.IntQueue;
-import toools.collections.IntQueue.ACCESS_MODE;
-import toools.set.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import toools.collections.primitive.IntQueue;
+import toools.collections.primitive.IntQueue.ACCESS_MODE;
 
 /**
  * This diameter algorithm is not based on a diameter matrix and, thus, needs
@@ -56,7 +58,7 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
 	}
 
 	protected int performSearch(final Grph g, final Grph.DIRECTION d, IntSet sources) {
-		final int[] lengths = new int[sources.getGreatest() + 1];
+		final int[] lengths = new int[Collections.max(sources)+1];
 
 		new MultiThreadProcessing(g.getVertices()) {
 

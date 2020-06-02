@@ -4,8 +4,6 @@ import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 
-import toools.set.IntSet;
-
 public class RandomUtil {
 
     public static int getRandomWithExclusion(Random rnd, int bound, Set<Integer> exclude) {

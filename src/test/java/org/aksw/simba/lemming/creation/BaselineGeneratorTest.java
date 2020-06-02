@@ -1,9 +1,9 @@
 package org.aksw.simba.lemming.creation;
 
 import org.aksw.simba.lemming.util.Constants;
-import org.borrowed.ldcbenc.api.GraphGenerator;
-import org.borrowed.ldcbenc.api.GrphBasedGraph;
-import org.borrowed.ldcbenc.api.ParallelBarabasiRDF;
+import org.dice_research.ldcbench.generate.GraphGenerator;
+import org.dice_research.ldcbench.generate.ParallelBarabasiRDF;
+import org.dice_research.ldcbench.graph.GrphBasedGraph;
 import org.junit.Test;
 
 public class BaselineGeneratorTest {

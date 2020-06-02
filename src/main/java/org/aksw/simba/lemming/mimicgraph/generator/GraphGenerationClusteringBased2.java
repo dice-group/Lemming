@@ -29,11 +29,11 @@ import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration implements IGraphGeneration{
 
@@ -230,7 +230,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					//track the index of previous iteration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
-					ArrayList<Integer> arrOfEdges = setOfEdges.toIntegerArrayList();
+					int[] arrOfEdges = setOfEdges.toIntArray();
 					
 					/*
 					 *  set of failed edge colours. A failed edge colour is 
@@ -241,9 +241,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 					
 					//iterate through all edge
 					int j = 0 ;
-					while(j < arrOfEdges.size()){
+					while(j < arrOfEdges.length){
 						//get an edge id
-						int fakeEdgeId = arrOfEdges.get(j);
+						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
 						
 						if(edgeColo == null){
@@ -263,7 +263,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							iIndexOfProcessingEdge = j;
 						}else{
 							if(maxIterationFor1Edge == 0){
-								LOGGER.error("Could not connect edge "+arrOfEdges.get(j)+" of"
+								LOGGER.error("Could not connect edge "+arrOfEdges[j]+" of"
 										+ edgeColo
 										+ " colour since there is no approriate vertices to connect.");						
 								
@@ -320,7 +320,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							}
 							
 							Set<Integer> setTailIds = new HashSet<Integer>();
-							setTailIds.addAll(triples.tailIDs.toIntegerArrayList());
+							setTailIds.addAll(triples.tailIDs);
 							
 							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(tailColo);
 							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(headColo);
@@ -342,10 +342,11 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							}
 							
 							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
-							IntSet setHeadIDs = triples.headIDs.clone();
+							IntSet setHeadIDs = new DefaultIntSet(triples.headIDs.size());
+							setHeadIDs.addAll(triples.headIDs);
 							if(tmpSetOfConnectedHeads!= null && tmpSetOfConnectedHeads.size() >0  ){
 								//int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray(); 
-								for(int connectedHead: tmpSetOfConnectedHeads.toIntegerArrayList()){
+						        for (int connectedHead: tmpSetOfConnectedHeads) {
 									if(setHeadIDs.contains(connectedHead))
 										setHeadIDs.remove(connectedHead);
 								}
@@ -356,7 +357,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 								continue;
 							}
 							
-							Set<Integer> setHeadIds = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							Set<Integer> setHeadIds = new HashSet<Integer>(setHeadIDs);
 							int headId = headIdsProposer.getPotentialItem(setHeadIds);
 							
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
@@ -372,7 +373,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						maxIterationFor1Edge--;
 						
 						if(maxIterationFor1Edge == 0){
-							LOGGER.error("Could not connect edge "+arrOfEdges.get(j)+" of"
+							LOGGER.error("Could not connect edge "+arrOfEdges[j]+" of"
 									+ edgeColo
 									+ " colour since there is no approriate vertices to connect.");						
 							
@@ -436,13 +437,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(triple.tailColour);
 							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(triple.headColour);
 							
-							triple.headIDs.addAll(setOfRandomHeadIds.toIntArray());
-							triple.tailIDs.addAll(setOfRandomTailIds.toIntArray());
+							triple.headIDs.addAll(setOfRandomHeadIds);
+							triple.tailIDs.addAll(setOfRandomTailIds);
 							
 							Set<Integer> setTailIds = new HashSet<Integer>();
-							setTailIds.addAll(setOfRandomTailIds.toIntegerArrayList());
+							setTailIds.addAll(setOfRandomTailIds);
 							Set<Integer> setHeadIds = new HashSet<Integer>();
-							setHeadIds.addAll(setOfRandomHeadIds.toIntegerArrayList());
+							setHeadIds.addAll(setOfRandomHeadIds);
 							
 							/*
 							 *  standardize the amount of edges and vertices
@@ -458,7 +459,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							int i = 0 ; 
 							while(i < noOfEdges){
 								
-								setOfRandomHeadIds = triple.headIDs.clone();
+								setOfRandomHeadIds = new DefaultIntSet(triple.headIDs.size());
+								setOfRandomHeadIds.addAll(triple.headIDs);
 
 								// select a random tail
 								int tailId = tailIdsProposer.getPotentialItem(setTailIds);
@@ -473,7 +475,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 									LOGGER.warn("No heads any more! Consider another tail");
 									continue;
 								}
-								Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setOfRandomHeadIds.toIntegerArrayList());
+								Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setOfRandomHeadIds);
 								
 								headId = headIdsProposer.getPotentialItem(setFilteredHeadIDs);
 								
@@ -495,7 +497,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			
 			Random rand = new Random(seed);
 			
-			IntSet res = new DefaultIntSet();
+			IntSet res = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			
 			if(iNoOfVertices >= setVertices.size()){
 				iNoOfVertices =  setVertices.size();
@@ -504,8 +506,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			
 			// store the array indexes for which the vertID should not match and exclude these array indexes from the 
 			// random number generation
-			IntSet exclusionSet = new DefaultIntSet();
-			for(Integer e : mReversedMapClassVertices.keySet()) {
+			IntSet exclusionSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
+			for(int e : mReversedMapClassVertices.keySet()) {
 				if(setVertices.contains(e)) {
 					exclusionSet.add(e);
 				}
@@ -516,7 +518,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			}
 			
 			while(iNoOfVertices > 0 ){
-				int vertId = setVertices.pickRandomElement(rand, exclusionSet, false);
+				int vertId = RandomUtil.getRandomWithExclusion(rand, setVertices.size(), exclusionSet);
 				rand.setSeed(seed);
 				seed++;
 				if(!res.contains(vertId)){
@@ -537,19 +539,20 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	}
 	
 	private IntSet getRandomVerticesWithDegree(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
-		IntSet setVertices = mMapColourToVertexIDs.get(vertColo).clone();
+		IntSet setVertices = new DefaultIntSet(mMapColourToVertexIDs.get(vertColo).size());
+		setVertices.addAll(mMapColourToVertexIDs.get(vertColo));
 		
 		//invalid setVertices
 		if(setVertices == null || setVertices.size() ==0)
 			return null;
 		
-		Set<Integer> tmpSetOfVertices = new HashSet<Integer>(setVertices.toIntegerArrayList());
+		Set<Integer> tmpSetOfVertices = new HashSet<Integer>(setVertices);
 		IOfferedItem<Integer> vertexIdsProposer= mapVertexIdsProposers.get(vertColo);
 		
 		
 		if(vertexIdsProposer!= null){
 			int[] arrVertices= setVertices.toIntArray();
-			IntSet res = new DefaultIntSet();
+			IntSet res = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			
 			if(iNoOfVertices >= arrVertices.length){
 				iNoOfVertices = arrVertices.length;
@@ -733,7 +736,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				if(setEdges!=null && setEdges.size() >0){
 					
-					for(int eId: setEdges.toIntegerArrayList()){
+					for(int eId: setEdges){
 						TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 						offeredGrpTriple.edgeIDs.add(eId);
 						
@@ -983,12 +986,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							continue;
 						}
 						
-						Set<Integer> setTmpTails = new HashSet<Integer>(offeredGrpTriple.tailIDs.clone().toIntegerArrayList());
+						Set<Integer> setTmpTails = new HashSet<Integer>(offeredGrpTriple.tailIDs);
 						int tId = tailIdsProposer.getPotentialItem(setTmpTails);
 						
 						int[] arrConnectedHeads = getConnectedHeads(tId, offeredGrpTriple.edgeColour).toIntArray();
 						
-						IntSet setAvailableHeads = offeredGrpTriple.headIDs.clone();
+						IntSet setAvailableHeads = new DefaultIntSet(offeredGrpTriple.headIDs.size());
+						setAvailableHeads.addAll(offeredGrpTriple.headIDs);
 						
 						for(int connectedHead : arrConnectedHeads){
 							if(setAvailableHeads.contains(connectedHead)){
@@ -1000,7 +1004,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							continue;
 						}
 						
-						Set<Integer> setTmpHeads = new HashSet<Integer>(setAvailableHeads.toIntegerArrayList());
+						Set<Integer> setTmpHeads = new HashSet<Integer>(setAvailableHeads);
 						int hId = headIdsProposer.getPotentialItem(setTmpHeads);
 						
 						

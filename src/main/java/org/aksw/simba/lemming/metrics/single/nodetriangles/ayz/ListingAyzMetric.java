@@ -4,12 +4,12 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.Constants;
 
 
 /**
@@ -36,10 +36,11 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
     public double apply(ColouredGraph graph) {
         double delta = 3.0;
         double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), (delta - 1) / (delta + 1));
-        IntSet highDegreeVertices = IntSets.from();
-        for (IntCursor vertex : graph.getVertices()) {
-            if (graph.getGraph().getVertexDegree(vertex.value) > threshold) {
-                highDegreeVertices.add(vertex.value);
+        IntSet highDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE); 
+        		//IntSets.from();
+        for (int vertex:graph.getVertices()) {
+            if (graph.getGraph().getVertexDegree(vertex) > threshold) {
+                highDegreeVertices.add(vertex);
             }
         }
 

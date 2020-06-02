@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 /**
  * Compute average distribution of vertices per color over all versions
  * @author nptsy

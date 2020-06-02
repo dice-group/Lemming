@@ -1,13 +1,15 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
+import grph.DefaultIntSet;
 import grph.Grph;
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntHashSet;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
  * @author DANISH AHMED on 6/13/2018
@@ -60,7 +62,8 @@ public class EdgeNumberOfSimpleTrianglesMetric extends AbstractMetric implements
                 protected void run(int threadID, int sourceId) {
                     int count = 0;
                     int sourceEdges[] = edges[sourceId].toIntArray();
-                    IntSet connectedNodesSet = new IntHashSet();
+                    IntSet connectedNodesSet = new IntOpenHashSet(); 
+                    		//new IntHashSet();
                     int n;
                     for (int i = 0; i < sourceEdges.length; ++i) {
                         n = grph.getDirectedSimpleEdgeHead(sourceEdges[i]);
@@ -77,11 +80,11 @@ public class EdgeNumberOfSimpleTrianglesMetric extends AbstractMetric implements
                     int connectedNodes[] = connectedNodesSet.toIntArray();
                     for (int i = 0; i < connectedNodes.length; i++) {
                         for (int j = i + 1; j < connectedNodes.length; j++) {
-                            int connectedNodesIntersectionSize = IntSets.intersection(edges[connectedNodes[i]], edges[connectedNodes[j]]).size();
+                            int connectedNodesIntersectionSize = IntSetUtil.intersection(edges[connectedNodes[i]], edges[connectedNodes[j]]).size();
                             if(connectedNodesIntersectionSize > 0) {
                                 count = count + (connectedNodesIntersectionSize *
-                                        IntSets.intersection(edges[sourceId], edges[connectedNodes[i]]).size() *
-                                        IntSets.intersection(edges[connectedNodes[j]], edges[sourceId]).size());
+                                		IntSetUtil.intersection(edges[sourceId], edges[connectedNodes[i]]).size() *
+                                		IntSetUtil.intersection(edges[connectedNodes[j]], edges[sourceId]).size());
                             }
                         }
                     }

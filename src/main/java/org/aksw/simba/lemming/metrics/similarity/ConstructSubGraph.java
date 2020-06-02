@@ -2,13 +2,14 @@ package org.aksw.simba.lemming.metrics.similarity;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
-import com.carrotsearch.hppc.cursors.IntCursor;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import java.util.HashMap;
 import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.util.MapUtil;
 import static org.aksw.simba.lemming.util.MapUtil.getKeyByValue;
-import toools.set.IntSet;
 
 /**
  * This class constructs a sample/sub coloured graph only with the selected vertices returned from the ranking
@@ -45,17 +46,16 @@ public class ConstructSubGraph {
                     sample.addVertex((BitSet)vertices.values[i]);
                     sample.setVertexColour(getKeyByValue(vIdOldSample, vID), (BitSet)vertices.values[i]);
 
-                    //add out edges                 
-                    for(IntCursor e: outEdges){
-                        BitSet edgeColour = colouredGraph.getEdgeColour(e.value); 
-                        IntSet tail = colouredGraph.getVerticesAccessibleThrough(vID, e.value);
-                        for(IntCursor v: tail){
-                            if(!vIdOldSample.containsValue(v.value)){
+                    //add out edges          
+                    for(int e: outEdges){
+                        BitSet edgeColour = colouredGraph.getEdgeColour(e); 
+                        for(int v:colouredGraph.getVerticesAccessibleThrough(vID, e)){
+                            if(!vIdOldSample.containsValue(v)){
                                 newVID++;
-                                vIdOldSample.put(newVID, v.value);
+                                vIdOldSample.put(newVID, v);
                             }
-                            sample.setVertexColour(MapUtil.getKeyByValue(vIdOldSample,v.value), colouredGraph.getVertexColour(v.value));
-                            sample.addEdge(MapUtil.getKeyByValue(vIdOldSample, vID), MapUtil.getKeyByValue(vIdOldSample,v.value), edgeColour);
+                            sample.setVertexColour(MapUtil.getKeyByValue(vIdOldSample,v), colouredGraph.getVertexColour(v));
+                            sample.addEdge(MapUtil.getKeyByValue(vIdOldSample, vID), MapUtil.getKeyByValue(vIdOldSample,v), edgeColour);
                         }
                     } 
                 newVID++;

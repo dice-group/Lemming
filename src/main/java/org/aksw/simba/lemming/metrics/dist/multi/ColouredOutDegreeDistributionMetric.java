@@ -8,11 +8,11 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.dist.IntDistribution;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 import grph.Grph;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * The distribution of out degrees for every colour. The sample spaces of the
@@ -35,7 +35,7 @@ public class ColouredOutDegreeDistributionMetric extends AbstractMetric
         Grph g = graph.getGraph();
         IntArrayList outDegrees = g.getAllOutEdgeDegrees();
         BitSet colour;
-        for (int i = 0; i < outDegrees.elementsCount; ++i) {
+        for (int i = 0; i < outDegrees.size(); ++i) {
             colour = graph.getVertexColour(i);
             if (colourCountsMap.containsKey(colour)) {
                 counts = colourCountsMap.lget();
@@ -43,7 +43,7 @@ public class ColouredOutDegreeDistributionMetric extends AbstractMetric
                 counts = new IntIntOpenHashMap();
                 colourCountsMap.put(colour, counts);
             }
-            counts.putOrAdd(outDegrees.buffer[i], 1, 1);
+            counts.putOrAdd(outDegrees.getInt(i), 1, 1);
         }
 
         Map<BitSet, IntDistribution> result = new HashMap<BitSet, IntDistribution>(2 * colourCountsMap.assigned);

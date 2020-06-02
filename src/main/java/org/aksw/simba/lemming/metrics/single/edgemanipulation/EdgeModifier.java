@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import toools.set.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class EdgeModifier {
 

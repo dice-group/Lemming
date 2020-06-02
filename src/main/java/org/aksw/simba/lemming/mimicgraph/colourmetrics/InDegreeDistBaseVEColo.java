@@ -4,15 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
-
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
+import org.aksw.simba.lemming.util.Constants;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
-import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * for each vertex's colours, compute in-degree distribution associated with each edge's colour
@@ -149,7 +149,7 @@ public class InDegreeDistBaseVEColo {
 					
 					IntSet setHeadIDs = mapIEColoToVertexIDs.get(edgeColo);
 					if(setHeadIDs == null){
-						setHeadIDs = new DefaultIntSet();
+						setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						mapIEColoToVertexIDs.put(edgeColo, setHeadIDs);
 					}
 					setHeadIDs.add(vertId);

@@ -1,8 +1,9 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles.forward;
 
 import grph.Grph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import org.aksw.simba.lemming.ColouredGraph;
-import toools.set.IntSet;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +62,7 @@ public class DegreeBasedDecreasingNodeOrdering {
      * Initializes the actual ordering of the nodes.
      */
     private void initializeOrderedNodes() {
-        orderedNodes = coloredGraph.getVertices().toIntegerArrayList().stream()
+        orderedNodes = coloredGraph.getVertices().stream()
                 .sorted((node1, node2) -> Integer.compare(getTotalAmountOfNeighborsOfNode(node2), getTotalAmountOfNeighborsOfNode(node1)))
                 .collect(Collectors.toList());
     }

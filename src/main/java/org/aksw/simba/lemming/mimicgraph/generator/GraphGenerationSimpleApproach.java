@@ -23,10 +23,10 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * The simplest approach, we randomly select a vertex in its set (the set with a
@@ -176,15 +176,15 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 						}
 
 						//get set of tail ids and head ids
-						IntSet setTailIDs = new DefaultIntSet();
-						IntSet setHeadIDs = new DefaultIntSet();
+						IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
+						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						
 						if(mMapColourToVertexIDs.containsKey(tailColo)){
-							setTailIDs = mMapColourToVertexIDs.get(tailColo).clone();
+							setTailIDs = mMapColourToVertexIDs.get(tailColo);
 						}
 						
 						if(mMapColourToVertexIDs.containsKey(headColo)){
-							setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							setHeadIDs = mMapColourToVertexIDs.get(headColo);
 						}
 						
 						if(setTailIDs!= null && setTailIDs.size()> 0 && 
@@ -208,7 +208,7 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
 							if(tmpSetOfConnectedHeads!= null && tmpSetOfConnectedHeads.size() >0  ){
 								//int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray(); 
-								for(int connectedHead: tmpSetOfConnectedHeads.toIntegerArrayList()){
+								for(int connectedHead:tmpSetOfConnectedHeads) {
 									if(setHeadIDs.contains(connectedHead))
 										setHeadIDs.remove(connectedHead);
 								}
@@ -295,9 +295,9 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			    			int[] arrTailVertices = tailIDs.toIntArray();
 				    		int tailId = arrTailVertices[mRandom.nextInt(arrTailVertices.length)];
 				    		
-				    		IntSet setHeadIDs = new DefaultIntSet();
+				    		IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							if(mMapColourToVertexIDs.containsKey(headColo)){
-								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+								setHeadIDs = mMapColourToVertexIDs.get(headColo);
 							}
 				    		
 							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
