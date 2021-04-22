@@ -6,15 +6,15 @@ if [ dataset = 'pg' ]
 then 
 	nv=792923
 	opt_iterations=30000
-if [ dataset = 'swdf' ]
+elif [ dataset = 'swdf' ]
 then 
 	nv=45423
 	opt_iterations=50000
-if [ dataset = 'lgeo' ]
+elif [ dataset = 'lgeo' ]
 then 
 	nv=591649
 	opt_iterations=50000
-if [ dataset = 'geology' ]
+elif [ dataset = 'geology' ]
 then 
 	nv=1423
 	opt_iterations=50000
