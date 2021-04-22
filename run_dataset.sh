@@ -26,24 +26,24 @@ fi
 mkdir -p intermediate
 mvn clean install
 
-./run_lemming.sh $dataset $nv RD RD1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv RD RD2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv RD RD3_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv R R1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv R R2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv R R3_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv C C1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv C C2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv C C3_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv CD CD1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv CD CD2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv CD CD3_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv D D1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv D D2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv D D3_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv DD DD1_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv DD DD2_${dataset}_IntResults.ser $opt_iterations
-./run_lemming.sh $dataset $nv DD DD3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv RD intermediate/RD1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv RD intermediate/RD2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv RD intermediate/RD3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv R intermediate/R1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv R intermediate/R2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv R intermediate/R3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv C intermediate/C1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv C intermediate/C2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv C intermediate/C3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv CD intermediate/CD1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv CD intermediate/CD2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv CD intermediate/CD3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv D intermediate/D1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv D intermediate/D2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv D intermediate/D3_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv DD intermediate/DD1_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv DD intermediate/DD2_${dataset}_IntResults.ser $opt_iterations
+./run_lemming.sh $dataset $nv DD intermediate/DD3_${dataset}_IntResults.ser $opt_iterations
 ./run_baseline.sh $dataset $nv
 ./run_baseline.sh $dataset $nv
 ./run_baseline.sh $dataset $nv
