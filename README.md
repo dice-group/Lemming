@@ -77,7 +77,7 @@ Below is a table with the currently accepted datasets and the number of vertices
 ### Reproducing experiments
 You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
 
-The metrics and constant expressions values can be found in ``LemmingEx.result``. All of the reported values are the average from the 3 distinct runs of each generator type. 
+The metrics and constant expressions values can be found in ``LemmingEx.result``. 
 
 The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. You can find the queries used for each dataset under ``Experiments_data/IGUANA experiments/queries``. The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after type inference and materialization).
 
@@ -100,7 +100,6 @@ To use them, you need to specify the folder where the graphs are located:
 ```
 ./exec_all.sh /home/lemming/generated_graphs/
 ```
-
 
 ### Used data and software
 
