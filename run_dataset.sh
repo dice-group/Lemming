@@ -23,6 +23,8 @@ else
 	exit
 fi
 
+mvn clean install
+
 ./run_lemming.sh $dataset $nv RD RD1_${dataset}_IntResults.ser $opt_iterations
 ./run_lemming.sh $dataset $nv RD RD2_${dataset}_IntResults.ser $opt_iterations
 ./run_lemming.sh $dataset $nv RD RD3_${dataset}_IntResults.ser $opt_iterations
