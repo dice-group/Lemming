@@ -94,7 +94,8 @@ These can be collected through the results file:
 -->
 
 
-We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. You need to specify the folder where the graphs are located: 
+We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
+To use them, you need to specify the folder where the graphs are located: 
 
 ```
 ./exec_all.sh /home/lemming/generated_graphs/
