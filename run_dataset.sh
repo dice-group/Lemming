@@ -23,6 +23,7 @@ else
 	exit
 fi
 
+mkdir -p intermediate
 mvn clean install
 
 ./run_lemming.sh $dataset $nv RD RD1_${dataset}_IntResults.ser $opt_iterations
