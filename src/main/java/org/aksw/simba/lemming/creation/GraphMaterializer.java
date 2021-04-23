@@ -5,10 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
-import org.apache.jena.ontology.SymmetricProperty;
-import org.apache.jena.ontology.TransitiveProperty;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -36,11 +33,11 @@ public class GraphMaterializer {
 	private Set<OntProperty> transitiveProperties;
 	private SetMultimap<OntProperty, OntProperty> inverseProperties;
 
-	public GraphMaterializer(OntModel ontology, Set<OntProperty> ontProperties) {
+	public GraphMaterializer(Set<OntProperty> ontProperties) {
 		this.symmetricProperties = new HashSet<OntProperty>();
 		this.transitiveProperties = new HashSet<OntProperty>();
 		this.inverseProperties = HashMultimap.create();
-		identifyProperties(ontology, ontProperties);
+		identifyProperties(ontProperties);
 	}
 
 	/**
@@ -138,33 +135,25 @@ public class GraphMaterializer {
 	 * This method identifies the symmetric, transitive and inverse properties
 	 * present in the ontology
 	 * 
-	 * @param ontology
 	 * @param ontProperties
 	 * @return
 	 */
-	public void identifyProperties(OntModel ontology, Set<OntProperty> ontProperties) {
+	public void identifyProperties(Set<OntProperty> ontProperties) {
 		for (OntProperty curProp : ontProperties) {
-
-			// returns null if not
-			if (curProp.getURI() != null) {
-				SymmetricProperty symmetric = ontology.getSymmetricProperty(curProp.getURI());
-				if (symmetric != null) {
-					this.symmetricProperties.add(symmetric);
-				}
-
-				TransitiveProperty transitive = ontology.getTransitiveProperty(curProp.getURI());
-				if (transitive != null) {
-					this.transitiveProperties.add(transitive);
-				}
-
-				ExtendedIterator<? extends OntProperty> iterator = curProp.listInverseOf();
-				while (iterator.hasNext()) {
-					OntProperty inverse = iterator.next();
-					inverseProperties.put(curProp, inverse);
-					inverseProperties.put(inverse, curProp);
-				}
+			if (curProp.isSymmetricProperty()) {
+				this.symmetricProperties.add(curProp.asSymmetricProperty());
 			}
 
+			if (curProp.isTransitiveProperty()) {
+				this.transitiveProperties.add(curProp.asTransitiveProperty());
+			}
+
+			ExtendedIterator<? extends OntProperty> iterator = curProp.listInverseOf();
+			while (iterator.hasNext()) {
+				OntProperty inverse = iterator.next();
+				inverseProperties.put(curProp, inverse);
+				inverseProperties.put(inverse, curProp);
+			}
 		}
 	}
 

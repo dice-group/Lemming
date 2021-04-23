@@ -2,20 +2,18 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
-import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -30,7 +28,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
-import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
@@ -73,7 +70,7 @@ public class Inferer {
 			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
 			
 			if(isMat) {
-				GraphMaterializer materializer = new GraphMaterializer(ontModel, ontProperties);
+				GraphMaterializer materializer = new GraphMaterializer(ontProperties);
 				while(true){
 					long size = newModel.size();
 					List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);

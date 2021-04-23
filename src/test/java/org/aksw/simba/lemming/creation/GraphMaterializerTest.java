@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.creation;
 
 import java.util.List;
 
-import org.aksw.simba.lemming.creation.GraphMaterializer;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -21,7 +20,7 @@ public class GraphMaterializerTest {
 		OntModel ontology = ModelFactory.createOntologyModel();
 		ontology.read("skos_snippet.ttl");
 		
-		GraphMaterializer materializer = new GraphMaterializer(ontology, ontology.listAllOntProperties().toSet());
+		GraphMaterializer materializer = new GraphMaterializer(ontology.listAllOntProperties().toSet());
 		while(true){
 			long size = graph.size();
 			List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(graph);
