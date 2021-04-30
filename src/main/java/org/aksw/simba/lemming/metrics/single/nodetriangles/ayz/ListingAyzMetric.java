@@ -20,8 +20,9 @@ import org.aksw.simba.lemming.util.Constants;
  * @see <a href=
  *      "https://www.researchgate.net/publication/225621879_Finding_and_Counting_Given_Length_Cycles">https://www.researchgate.net/publication/225621879_Finding_and_Counting_Given_Length_Cycles</a>).
  *
+ * @see <a>https://i11www.iti.kit.edu/extra/publications/sw-fclt-05_t.pdf</a>
+ *
  * @author Tanja Tornede
- * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/AyzNumberOfTrianglesMetric.java
  *
  */
 public class ListingAyzMetric extends AbstractMetric implements SingleValueMetric {
@@ -34,32 +35,38 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
 
     @Override
     public double apply(ColouredGraph graph) {
-        double delta = 3.0;
-        double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), (delta - 1) / (delta + 1));
-        IntSet highDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE); 
-        		//IntSets.from();
+
+        double r = 2.376;
+        double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), (r - 1) / (r + 1));
+        IntSet highDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+        IntSet lowDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+
+        //divide vertices into lowDegreeVertices and highDegreeVertices
         for (int vertex:graph.getVertices()) {
             if (graph.getGraph().getVertexDegree(vertex) > threshold) {
                 highDegreeVertices.add(vertex);
+            }else{
+                lowDegreeVertices.add(vertex);
             }
         }
 
+        //NodeIterator performed on lowDegreeVertices, matrix multiplication induced subgraph of highDegreeVertices
         double numberOfTriangles = 0;
-        numberOfTriangles += countTrianglesViaNodeIterator(graph, highDegreeVertices);
+        numberOfTriangles += countTrianglesViaNodeIterator(graph, lowDegreeVertices);
         numberOfTriangles += countTrianglesViaMatrixMultiplication(graph, highDegreeVertices);
 
         return numberOfTriangles;
     }
 
 
-    private double countTrianglesViaNodeIterator(ColouredGraph graph, IntSet highDegreeVertices) {
+    private double countTrianglesViaNodeIterator(ColouredGraph graph, IntSet vertices) {
         NodeIteratorMetric nodeIterator = new NodeIteratorMetric();
-        return nodeIterator.calculateTriangles(graph, highDegreeVertices);
+        return nodeIterator.calculateTriangles(graph, vertices);
     }
 
 
-    private double countTrianglesViaMatrixMultiplication(ColouredGraph graph, IntSet highDegreeVertices) {
-        ColouredGraph subgraph = new ColouredGraph(graph.getGraph().getSubgraphInducedByVertices(highDegreeVertices),
+    private double countTrianglesViaMatrixMultiplication(ColouredGraph graph, IntSet vertices) {
+        ColouredGraph subgraph = new ColouredGraph(graph.getGraph().getSubgraphInducedByVertices(vertices),
                 graph.getVertexPalette(), graph.getEdgePalette());
         MatrixMultiplicationNumberOfTrianglesMetric matrixMultiplication = new MatrixMultiplicationNumberOfTrianglesMetric();
         return matrixMultiplication.apply(subgraph);
