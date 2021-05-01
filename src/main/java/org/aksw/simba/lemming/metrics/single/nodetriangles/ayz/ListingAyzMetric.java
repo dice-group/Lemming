@@ -39,20 +39,17 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
         double r = 2.376;
         double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), (r - 1) / (r + 1));
         IntSet highDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
-        IntSet lowDegreeVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
 
-        //divide vertices into lowDegreeVertices and highDegreeVertices
         for (int vertex:graph.getVertices()) {
             if (graph.getGraph().getVertexDegree(vertex) > threshold) {
                 highDegreeVertices.add(vertex);
-            }else{
-                lowDegreeVertices.add(vertex);
             }
         }
 
-        //NodeIterator performed on lowDegreeVertices, matrix multiplication induced subgraph of highDegreeVertices
+        //NodeIterator performed on lowDegreeVertices (deference set of highDegreeVertices),
+        // matrix multiplication induced subgraph of highDegreeVertices
         double numberOfTriangles = 0;
-        numberOfTriangles += countTrianglesViaNodeIterator(graph, lowDegreeVertices);
+        numberOfTriangles += countTrianglesViaNodeIterator(graph, highDegreeVertices);
         numberOfTriangles += countTrianglesViaMatrixMultiplication(graph, highDegreeVertices);
 
         return numberOfTriangles;

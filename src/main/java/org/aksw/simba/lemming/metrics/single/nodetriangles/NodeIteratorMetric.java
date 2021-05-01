@@ -30,36 +30,44 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
         super("#nodetriangles");
     }
 
-    public int calculateTriangles(ColouredGraph graph, IntSet highDegreeVertices) {
+    /**
+     * Count triangles on in a given graph, and the triangles which are formed by the given vertices are not taken into account.
+     * @param graph
+     * @param vertices
+     * @return amount of triangles
+     */
+    public int calculateTriangles(ColouredGraph graph, IntSet vertices) {
+        //TODO[zw]: why undirected
         Grph grph = getUndirectedGraph(graph.getGraph());
+        //TODO[zw]: IntSet dynamic???
         IntSet visitedVertices = new DefaultIntSet(grph.getNumberOfVertices());
-		//IntSets.from();
+        visitedVertices.addAll(vertices);
         int numberOfTriangles = 0;
         for (int vertex:grph.getVertices()) {
+            if(visitedVertices.contains(vertex)){
+                break;
+            }
+            visitedVertices.add(vertex);
             IntSet neighbors = IntSetUtil.difference(IntSetUtil.union(grph.getInNeighbors(vertex), grph.getOutNeighbors(vertex)),
                     visitedVertices);
             for (int neighbor1:neighbors) {
                 IntSet neighbors1 = IntSetUtil
                         .difference(IntSetUtil.union(grph.getInNeighbors(neighbor1), grph.getOutNeighbors(neighbor1)), visitedVertices);
                 for (int neighbor2:neighbors) {
-                    if (vertex != neighbor1 && vertex != neighbor2 && neighbor1 < neighbor2
-                            && neighbors1.contains(neighbor2)) {
-                        if (!highDegreeVertices.contains(vertex) || !highDegreeVertices.contains(neighbor1)
-                                || !highDegreeVertices.contains(neighbor2)) {
-                            numberOfTriangles++;
-                        }
+                    //TODO[zw]: why here compare neighbour??
+                    if (neighbors1.contains(neighbor2) && neighbor1 < neighbor2) {
+                        numberOfTriangles++;
                     }
                 }
             }
-            visitedVertices.add(vertex);
         }
         return numberOfTriangles;
     }
 
     @Override
     public double apply(ColouredGraph graph) {
-        IntSet highDegreeVertices = IntSets.EMPTY_SET;
-        return calculateTriangles(graph, highDegreeVertices);
+        IntSet vertices = IntSets.EMPTY_SET;
+        return calculateTriangles(graph, vertices);
     }
 
     private Grph getUndirectedGraph(Grph graph) {
