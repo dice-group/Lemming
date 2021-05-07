@@ -37,9 +37,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
      * @return amount of triangles
      */
     public int calculateTriangles(ColouredGraph graph, IntSet vertices) {
-        //TODO[zw]: why undirected
         Grph grph = getUndirectedGraph(graph.getGraph());
-        //TODO[zw]: IntSet dynamic???
         IntSet visitedVertices = new DefaultIntSet(grph.getNumberOfVertices());
         visitedVertices.addAll(vertices);
         int numberOfTriangles = 0;
@@ -54,7 +52,6 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
                 IntSet neighbors1 = IntSetUtil
                         .difference(IntSetUtil.union(grph.getInNeighbors(neighbor1), grph.getOutNeighbors(neighbor1)), visitedVertices);
                 for (int neighbor2:neighbors) {
-                    //TODO[zw]: why here compare neighbour??
                     if (neighbors1.contains(neighbor2) && neighbor1 < neighbor2) {
                         numberOfTriangles++;
                     }
