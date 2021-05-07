@@ -14,7 +14,6 @@ import toools.math.IntMatrix;
 *
 * */
 
-
 public class MultiEdgeIgnoringAdjacencyMatrix {
 
     private IntMatrix internalMatrix;
@@ -24,7 +23,6 @@ public class MultiEdgeIgnoringAdjacencyMatrix {
     public MultiEdgeIgnoringAdjacencyMatrix(Grph graph) {
 
         int[] vertices = graph.getVertices().toIntArray();
-        Arrays.sort(vertices);
 
         verticesToIndicesMap = new IntIntOpenHashMap();
 
@@ -44,7 +42,6 @@ public class MultiEdgeIgnoringAdjacencyMatrix {
             }
         }
     }
-
 
     public static IntMatrix power(MultiEdgeIgnoringAdjacencyMatrix adjacencyMatrix, int k) {
         IntMatrix intMatrix = adjacencyMatrix.internalMatrix;
