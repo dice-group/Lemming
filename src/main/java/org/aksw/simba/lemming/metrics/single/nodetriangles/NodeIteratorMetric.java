@@ -19,7 +19,7 @@ import org.aksw.simba.lemming.util.IntSetUtil;
  * "Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study".
  *
  * @see <a href=
- *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>).
+ *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>
  *
  * @author Tanja Tornede
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorNumberOfTrianglesMetric.java
@@ -31,10 +31,11 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     /**
-     * Count triangles on in a given graph, and the triangles which are formed by the given vertices are not taken into account.
-     * @param graph
-     * @param vertices
-     * @return amount of triangles
+     * Count triangles on in a given graph, and the triangles which are formed by the given node set vertices are not
+     * taken into account.
+     * @param graph an instance of {@link ColouredGraph}.
+     * @param vertices a set of nodes, and it is a subset of nodes from the given graph.
+     * @return Amount of triangles
      */
     public int calculateTriangles(ColouredGraph graph, IntSet vertices) {
         Grph grph = getUndirectedGraph(graph.getGraph());
