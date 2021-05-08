@@ -16,10 +16,14 @@ public class ColouredGraphConverter {
      * @param fileName: the fileName of RDF-file.
      * @return a ColouredGraph for the given RDF-file.
      */
-    public ColouredGraph convertFileToGraph(String fileName){
+    public static ColouredGraph convertFileToGraph(String fileName){
        Model model = ModelFactory.createDefaultModel();
-       String filePath = this.getClass().getClassLoader().getResource(fileName).getPath();
-       model.read(filePath);
+       try{
+           String filePath = ColouredGraphConverter.class.getClassLoader().getResource(fileName).getPath();
+           model.read(filePath);
+       }catch (Exception e){
+           throw new RuntimeException("Couldn't find file from resource \"" + fileName + "\".", e);
+       }
        GraphCreator creator = new GraphCreator();
        ColouredGraph graph = creator.processModel(model);
        return graph;

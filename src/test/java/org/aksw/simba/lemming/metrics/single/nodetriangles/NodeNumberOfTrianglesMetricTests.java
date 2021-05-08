@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.numberoftriangles;
+package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeig
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.ListingAyzMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardNodeTriangleMetric;
 import org.junit.Assert;
 import org.junit.Test;
@@ -61,6 +62,12 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
+    public void matrixMultiplicationNumberOfTrianglesMetric(){
+        this.metric = new MatrixMultiplicationNumberOfTrianglesMetric();
+        test();
+    }
+
+    @Test
     public void multiThreadedNodeNeighborTrianglesMetric() {
         this.metric = new MultiThreadedNodeNeighborTrianglesMetric();
         test();
@@ -82,8 +89,8 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
         double countedTriangles = metric.apply(graph);
 
         double range = 0.25;
-        double minRange = expectedTriangles - (expectedTriangles * range);
-        double maxRange = expectedTriangles + (expectedTriangles * range);
+        double minRange = expectedNumOfTriangles - (expectedNumOfTriangles * range);
+        double maxRange = expectedNumOfTriangles + (expectedNumOfTriangles * range);
         Assert.assertTrue(countedTriangles >= minRange && countedTriangles <= maxRange);
     }
 }
