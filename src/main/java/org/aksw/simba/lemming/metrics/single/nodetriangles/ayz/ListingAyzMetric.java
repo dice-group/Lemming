@@ -9,8 +9,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
-import org.aksw.simba.lemming.util.Constants;
-
 
 /**
  * This class models an algorithm for counting the amount of node triangles in a given graph. This

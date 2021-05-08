@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.matrix;
+package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
