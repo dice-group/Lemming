@@ -3,18 +3,11 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
 import org.aksw.simba.lemming.metrics.single.NumberOfTrianglesMetricTest;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.DuolionMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.EdgeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.MultiThreadedNodeNeighborTrianglesMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorCoreMetric;
-import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.ListingAyzMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardNodeTriangleMetric;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -77,20 +70,5 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     public void edgeIteratorMetric() {
         this.metric = new EdgeIteratorMetric();
         test();
-    }
-
-    @Test
-    public void duolionMetric() {
-        Assert.assertNotNull(graph);
-
-        final double edgeSurvivalProbability = 0.9;
-        DuolionMetric metric = new DuolionMetric(new ForwardNodeTriangleMetric(), edgeSurvivalProbability,
-                new Random().nextLong());
-        double countedTriangles = metric.apply(graph);
-
-        double range = 0.25;
-        double minRange = expectedNumOfTriangles - (expectedNumOfTriangles * range);
-        double maxRange = expectedNumOfTriangles + (expectedNumOfTriangles * range);
-        Assert.assertTrue(countedTriangles >= minRange && countedTriangles <= maxRange);
     }
 }
