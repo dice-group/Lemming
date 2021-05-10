@@ -60,7 +60,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                 if (oldModelSize < dogFoodModel.size()) {
                     LOGGER.info("Read data. Model has {} triples. Creating graph...", dogFoodModel.size());
                     
-                    Inferer inferer = new Inferer(false);
+                    Inferer inferer = new Inferer(true);
                     List <String> all = modelOntMap.get(y);
                     
                     for(String cur: all) {
