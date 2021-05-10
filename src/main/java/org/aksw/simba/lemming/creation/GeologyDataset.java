@@ -1,9 +1,6 @@
 package org.aksw.simba.lemming.creation;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,6 +46,7 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 			ontModel.read("geology/sf.ttl");
 			ontModel.read("geology/sosa.ttl");
 			ontModel.read("geology/thors.ttl");
+			
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			// sort ascendently
 			Collections.sort(lstSortedFilesByName);

@@ -27,8 +27,15 @@ import org.slf4j.LoggerFactory;
 
 import grph.Grph.DIRECTION;
 
+/**
+ * Application's entry-point for the baseline graph generator
+ * 
+ * @author Alexandra Silva
+ *
+ */
 public class BuildBaselineGraph {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BuildBaselineGraph.class);
+
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
 	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
@@ -52,31 +59,32 @@ public class BuildBaselineGraph {
 			LOGGER.info("Loading LinkedGeo...");
 			mDatasetManager = new LinkedGeoDataset();
 			datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
-		} else if(dataset.equalsIgnoreCase("geology")) {
-        	LOGGER.info("Loading Geology Dataset...");
-        	mDatasetManager = new GeologyDataset();
-        	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
-        } else {
+		} else if (dataset.equalsIgnoreCase("geology")) {
+			LOGGER.info("Loading Geology Dataset...");
+			mDatasetManager = new GeologyDataset();
+			datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
+		} else {
 			LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
 			return;
 		}
 		List<SingleValueMetric> metrics = new ArrayList<>();
 		metrics.add(new NodeTriangleMetric());
-        metrics.add(new EdgeTriangleMetric());
-        metrics.add(new AvgVertexDegreeMetric());
-        metrics.add(new StdDevVertexDegree(DIRECTION.in));
-        metrics.add(new StdDevVertexDegree(DIRECTION.out));
-        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
-        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
-        metrics.add(new NumberOfEdgesMetric());
-        metrics.add(new NumberOfVerticesMetric());
-		
+		metrics.add(new EdgeTriangleMetric());
+		metrics.add(new AvgVertexDegreeMetric());
+		metrics.add(new StdDevVertexDegree(DIRECTION.in));
+		metrics.add(new StdDevVertexDegree(DIRECTION.out));
+		metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+		metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+		metrics.add(new NumberOfEdgesMetric());
+		metrics.add(new NumberOfVerticesMetric());
+
 		ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
-        if(!valuesCarrier.isComputableMetrics(metrics)){
-        	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
-        	LOGGER.warn("Please generate the file [value_store.val] again!");
-        	return ;
-        }
+		if (!valuesCarrier.isComputableMetrics(metrics)) {
+			LOGGER.error(
+					"The list of metrics has some metrics that are not existing in the precomputed metric values.");
+			LOGGER.warn("Please generate the file [value_store.val] again!");
+			return;
+		}
 
 		int noVertices = 0;
 		String strNoOfVertices = mapArgs.get("-nv");
@@ -94,16 +102,16 @@ public class BuildBaselineGraph {
 		double startTime = System.currentTimeMillis();
 		BaselineGenerator mGrphGenerator = new BaselineGenerator(noVertices, graphs, seed, valuesCarrier, metrics);
 		double duration = System.currentTimeMillis() - startTime;
-		
+
 		LOGGER.info("Lexicalize the mimic graph ...");
 		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
 
-		String savedFile = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(),
-				mGrphGenerator.getColourVertexIds()));
-		
+		String savedFile = mDatasetManager.writeGraphsToFile(graphLexicalization
+				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getColourVertexIds()));
+
 		mGrphGenerator.printResult(mapArgs, startTime, savedFile, seed);
 		LOGGER.info("Finished graph generation process in " + duration + " ms");
-		LOGGER.info("Application finished with seed "+seed);
+		LOGGER.info("Application finished with seed " + seed);
 	}
 
 	private static Map<String, String> parseArguments(String[] args) {

@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.colour.ColourPalette;
-import org.aksw.simba.lemming.colour.InMemoryPalette;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgEdgeColoDistMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgVertColoDistMetric;
@@ -34,7 +32,7 @@ import com.carrotsearch.hppc.BitSet;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public abstract class AbstractGraphGeneration {
+public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGraphGeneration.class);
 	
 	protected int mIDesiredNoOfVertices = 0;
@@ -95,7 +93,7 @@ public abstract class AbstractGraphGeneration {
 		// mimic grpah
 		mMimicGraph = new ColouredGraph();
 		//copy all colour palette to the mimic graph
-		copyColourPalette(origGrphs);
+		copyColourPalette(origGrphs, mMimicGraph);
 		
 		// random
 		mRandom = new Random(this.seed);
@@ -122,7 +120,7 @@ public abstract class AbstractGraphGeneration {
 		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
 		
 		//estimate potential number of edges
-		estimateNoEdges(origGrphs);
+		estimateNoEdges(origGrphs, mIDesiredNoOfVertices);
 		
 		//assign colors to vertices
 		paintVertices();
@@ -682,29 +680,6 @@ public abstract class AbstractGraphGeneration {
 	
 	
 	/**
-	 * draft estimation of number edges
-	 * @param origGrphs
-	 */
-	private void estimateNoEdges(ColouredGraph[] origGrphs){
-		LOGGER.info("Estimate the number of edges in the new graph.");
-		if(origGrphs != null && origGrphs.length >0){
-			int iNoOfVersions = origGrphs.length;
-			double noEdges = 0;
-			for(ColouredGraph graph: origGrphs){
-				int iNoEdges = graph.getEdges().size();
-				int iNoVertices = graph.getVertices().size();
-				noEdges += iNoEdges/(iNoVertices *1.0); 
-			}
-			noEdges *= mIDesiredNoOfVertices;
-			noEdges /= iNoOfVersions;
-			mIDesiredNoOfEdges = (int)Math.round(noEdges);
-			LOGGER.warn("Estimated the number of edges in the new graph is " + mIDesiredNoOfEdges);
-		}else{
-			LOGGER.warn("The array of original graphs is empty!");
-		}
-	}
-	
-	/**
 	 * compute average distribution of vertex's and edge's colors
 	 * 
 	 * @param origGrphs the array of all versions of a graph
@@ -733,48 +708,6 @@ public abstract class AbstractGraphGeneration {
 //		System.out.println("Number of painted edges: " + totalEdges + " in total " + keyEdgeColo.size() +" colors");
 //	}
 	
-	private void copyColourPalette(ColouredGraph[] origGraphs){
-		if(Constants.IS_EVALUATION_MODE){
-			ColourPalette newVertexPalette = new InMemoryPalette();
-			ColourPalette newEdgePalette = new InMemoryPalette();
-			ColourPalette newDTEdgePalette = new InMemoryPalette();
-			
-			//copy colour palette of all the original graphs to the new one
-			
-			for(ColouredGraph grph: origGraphs){
-				// merge vertex colours
-				ColourPalette vPalette = grph.getVertexPalette();
-				Map<String, BitSet>mapVertexURIsToColours =  vPalette.getMapOfURIAndColour();
-				fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
-				
-				// merge edge colours
-				ColourPalette ePalette = grph.getEdgePalette();
-				Map<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
-				fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
-				
-				// merge data typed edge colours
-				ColourPalette dtePalette = grph.getDataTypedEdgePalette();
-				Map<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
-				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
-			}
-			
-			mMimicGraph.setVertexPalette(newVertexPalette);
-			mMimicGraph.setEdgePalette(newEdgePalette);
-			mMimicGraph.setDataTypeEdgePalette(newDTEdgePalette);
-		}
-	}
-	
-	private void fillColourToPalette(ColourPalette palette, Map<String, BitSet> mapOfURIsAndColours){
-//		Object[]arrObjURIs = mapOfURIsAndColours.keys;
-		Object[]arrObjURIs = mapOfURIsAndColours.keySet().toArray();
-		for(int i = 0 ; i < arrObjURIs.length ; i++){
-//			if(mapOfURIsAndColours.allocated[i]){
-				String uri = (String) arrObjURIs[i];
-				BitSet colour = mapOfURIsAndColours.get(uri);
-				palette.updateColour(colour, uri);
-//			}
-		}
-	}
 	
 	public synchronized boolean connectIfPossible(int tailId, int headId, BitSet eColo) {
 		if(connectableVertices(tailId, headId, eColo)) {
