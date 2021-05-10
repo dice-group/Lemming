@@ -140,6 +140,10 @@ public class GraphMaterializer {
 	public void identifyProperties(Set<OntProperty> ontProperties) {
 		for (OntProperty curProp : ontProperties) {
 
+			// Some ontologies might try to infer some "anonymous" properties. 
+			// Since we are trying to infer new statements from our inverse properties, 
+			// it would be illegal in RDF to consider these "anonymous" properties.
+			// Hence it's best we just filter these properties.
 			if (curProp.isAnon()) {
 				continue;
 			}
