@@ -37,19 +37,18 @@ public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric 
         // NOTE: This implementation only works under the assumption that no two nodes are connected
         // by more than one edge
 
-        IntMatrix cubicAdjacencyMatrix = getCubicAdjacencyMatrix(graph);
-
-        double diagonalSumOfCubicAdjacencyMatrix = getSumOfDiagonal(cubicAdjacencyMatrix);
-        return diagonalSumOfCubicAdjacencyMatrix / 6;
-    }
-
-
-    public IntMatrix getCubicAdjacencyMatrix(ColouredGraph graph) {
         MultiEdgeIgnoringAdjacencyMatrix adjacencyMatrix = new MultiEdgeIgnoringAdjacencyMatrix(graph.getGraph());
-        return MultiEdgeIgnoringAdjacencyMatrix.power(adjacencyMatrix, 3);
+        IntMatrix cubicAdjacencyMatrix = MultiEdgeIgnoringAdjacencyMatrix.power(adjacencyMatrix, 3);
+
+        double trace = getSumOfDiagonal(cubicAdjacencyMatrix);
+        return trace / 6;
     }
 
-
+    /**
+     * Calculate the trace of a given {@link IntMatrix}. The trace of a matrix is the sum of m<sub>ii<sub/>.
+     * @param matrix an instance of {@link IntMatrix}
+     * @return Trace of the given matrix.
+     */
     private double getSumOfDiagonal(IntMatrix matrix) {
         double sum = 0;
         for (int i = 0; i < matrix.width; i++) {
