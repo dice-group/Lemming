@@ -144,7 +144,6 @@ public class Inferer {
 			}
 		}
 		LOGGER.info("Number of resources without type : " + emptyTypeCount);
-		System.out.println();
 	}
 
 	/**

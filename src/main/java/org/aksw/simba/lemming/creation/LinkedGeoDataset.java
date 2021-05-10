@@ -33,6 +33,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			Collections.sort(lstSortedFilesByName);
 
 			OntModel ontModel = ModelFactory.createOntologyModel();
+			ontModel.getDocumentManager().setProcessImports(false);
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
 			ontModel.read("lgeo/foaf.ttl");

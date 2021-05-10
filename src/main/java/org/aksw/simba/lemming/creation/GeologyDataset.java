@@ -28,6 +28,7 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 		File folder = new File(dataFolderPath);
 		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
 			OntModel ontModel = ModelFactory.createOntologyModel();
+			ontModel.getDocumentManager().setProcessImports(false);
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
 			ontModel.read("geology/void.ttl");

@@ -38,6 +38,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
 
     	//start by loading the common ontologies to all models
         OntModel ontModel = ModelFactory.createOntologyModel();
+        ontModel.getDocumentManager().setProcessImports(false);
     	ontModel.read("22-rdf-syntax-ns", "TTL");
     	ontModel.read("rdf-schema", "TTL");
     	ontModel.read("swdf-owls/foaf", "TTL");
@@ -50,6 +51,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
     	
         for (int y = START_YEAR; y <= END_YEAR; ++y) {
         	OntModel curOntModel = ModelFactory.createOntologyModel();
+        	curOntModel.getDocumentManager().setProcessImports(false);
         	curOntModel.add(ontModel);
         	
             LOGGER.info("Adding year {}...", y);
