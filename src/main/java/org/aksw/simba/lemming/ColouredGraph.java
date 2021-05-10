@@ -173,12 +173,10 @@ public class ColouredGraph {
         return dtEdgePalette;
     }
 
-    //Getter of NeighborhoodsArray are used only in NMSimilarity, but that similarity is deprecated!!!
-    @Deprecated
     public int[][] getInNeighborhoodsArray() {
         return graph.getInNeighborhoods();
     }
-    @Deprecated
+
     public int[][] getOutNeighborhoodsArray() {
         return graph.getOutNeighborhoods();
     }
