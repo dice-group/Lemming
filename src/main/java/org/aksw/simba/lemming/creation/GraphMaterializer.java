@@ -18,7 +18,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
@@ -140,6 +139,11 @@ public class GraphMaterializer {
 	 */
 	public void identifyProperties(Set<OntProperty> ontProperties) {
 		for (OntProperty curProp : ontProperties) {
+		  
+  		    if(curProp.isAnon()) {
+              continue;
+            }
+  		    
 			if (curProp.isSymmetricProperty()) {
 				this.symmetricProperties.add(curProp.asSymmetricProperty());
 			}
