@@ -139,11 +139,11 @@ public class GraphMaterializer {
 	 */
 	public void identifyProperties(Set<OntProperty> ontProperties) {
 		for (OntProperty curProp : ontProperties) {
-		  
-  		    if(curProp.isAnon()) {
-              continue;
-            }
-  		    
+
+			if (curProp.isAnon()) {
+				continue;
+			}
+
 			if (curProp.isSymmetricProperty()) {
 				this.symmetricProperties.add(curProp.asSymmetricProperty());
 			}
