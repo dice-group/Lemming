@@ -66,12 +66,11 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                     List <String> all = modelOntMap.get(y);
                     
                     for(String cur: all) {
-                		ontModel.read("src/main/resources/swdf-owls/"+cur, "TTL");
+                		ontModel.read("swdf-owls/"+cur, "TTL");
                 	}
                                        
     				 //returns a new model with the added triples
     				dogFoodModel = inferer.process(dogFoodModel, curOntModel);
-                    
     				graph = creator.processModel(dogFoodModel);
                     if (graph != null) {
                         LOGGER.info("Generated graph." + dogFoodModel.size());

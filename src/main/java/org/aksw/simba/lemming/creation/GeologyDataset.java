@@ -47,6 +47,9 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 			ontModel.read("geology/sf.ttl");
 			ontModel.read("geology/sosa.ttl");
 			ontModel.read("geology/thors.ttl");
+			ontModel.read("geology/time.ttl");
+			ontModel.read("geology/basic.ttl");
+			ontModel.read("geology/temporal.ttl");
 			
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			// sort ascendently
