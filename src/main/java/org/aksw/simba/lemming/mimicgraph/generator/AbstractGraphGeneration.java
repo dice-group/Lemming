@@ -120,7 +120,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
 		
 		//estimate potential number of edges
-		estimateNoEdges(origGrphs, mIDesiredNoOfVertices);
+		mIDesiredNoOfEdges = estimateNoEdges(origGrphs, mIDesiredNoOfVertices);
 		
 		//assign colors to vertices
 		paintVertices();

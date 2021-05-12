@@ -26,9 +26,9 @@ public class BasicGraphGenerator {
 	 * 
 	 * @param origGrphs
 	 */
-	protected double estimateNoEdges(ColouredGraph[] origGrphs, int noVertices) {
+	protected int estimateNoEdges(ColouredGraph[] origGrphs, int noVertices) {
 		LOGGER.info("Estimate the number of edges in the new graph.");
-		double estimatedEdges = 0;
+		int estimatedEdges = 0;
 		if (origGrphs != null && origGrphs.length > 0) {
 			int iNoOfVersions = origGrphs.length;
 			double noEdges = 0;
