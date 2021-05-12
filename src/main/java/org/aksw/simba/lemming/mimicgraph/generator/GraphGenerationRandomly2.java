@@ -491,7 +491,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					
 					ObjectDistribution<Integer> potentialOutDegree = new ObjectDistribution<Integer>(objTailIDs, possOutDegreePerTailIDs);
 					OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialOutDegree, random);
-					seed += potentialDegreeProposer.getSeed() - seed +1;
+					seed = potentialDegreeProposer.getSeed() + 1;
 					// put to map potential degree proposer
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossODegree = mapPossibleODegreePerOEColo.get(edgeColo);
 					if(mapPossODegree == null){

@@ -731,7 +731,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed +1;
+				seed = grpTripleProposer.getSeed() + 1;
 				IntSet setEdges = mMapColourToEdgeIDs.get(edgeColo);
 				
 				if(setEdges!=null && setEdges.size() >0){
@@ -856,7 +856,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				ObjectDistribution<Integer> potentialOutDegree = new ObjectDistribution<Integer>(objTailIDs, possOutDegreePerTailIDs);
 				OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialOutDegree, random);
-				seed += potentialDegreeProposer.getSeed() - seed +1;
+				seed = potentialDegreeProposer.getSeed() + 1;
 				// put to map potential degree proposer
 				ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossODegree = mapPossibleODegreePerOEColo.get(edgeColo);
 				if(mapPossODegree == null){
@@ -960,7 +960,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed +1;
+				seed = grpTripleProposer.getSeed() + 1;
 				while(maxIterationFor1EdgeColo > 0 ){
 					TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 					
