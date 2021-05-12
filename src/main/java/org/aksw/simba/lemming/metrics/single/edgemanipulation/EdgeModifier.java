@@ -82,7 +82,7 @@ public class EdgeModifier {
 				triple.tailId != -1 && triple.headId !=-1){
 			
 			//add to list of removed edges
-			mLstRemovedEdges.add(triple);
+			//mLstRemovedEdges.add(triple);
 			
 			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
 			
@@ -109,13 +109,12 @@ public class EdgeModifier {
 	        
 	        //reverse the graph
 	       // mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
-	        mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, 
+	        int removedEdgeID = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour, 
 	        		(int)mMapMetricValues.get("#nodetriangles"),(int) mMapMetricValues.get("#edgetriangles"));
 	        
-	        IntSet curEdges = mEdgeModification.getGraph().getEdges();
-			if(!curEdges.contains(triple.edgeId)) {
-				return null;
-			}
+	        TripleBaseSingleID removedTriple = new TripleBaseSingleID(triple.tailId, triple.headColour, triple.headId, 
+	        		triple.tailColour, removedEdgeID, triple.edgeColour);
+	        mLstRemovedEdges.add(removedTriple);
 	        
 	        return mapChangedMetricValues;
 		}else{
