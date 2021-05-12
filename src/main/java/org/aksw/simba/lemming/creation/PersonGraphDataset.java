@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -52,7 +53,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
 					 Inferer inferer = new Inferer(true);
-					 OntModel ontModel = ModelFactory.createOntologyModel();
+					 OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					 ontModel.getDocumentManager().setProcessImports(false);
 					 ontModel.read(modelOntMap.get(fileName));					 
 					 ontModel.read("22-rdf-syntax-ns", "TTL");
