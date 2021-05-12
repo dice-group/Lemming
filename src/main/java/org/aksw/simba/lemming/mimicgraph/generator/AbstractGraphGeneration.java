@@ -127,7 +127,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		
 		//initialize edge colour proposer
 		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours, seed);
-		seed += mEdgeColoProposer.getSeed() - seed +1;
+		seed = mEdgeColoProposer.getSeed() + 1;
 		
 		//assign colors to edges
 		paintEdges();
@@ -293,7 +293,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist, seed);
-		seed += colorProposer.getSeed() - seed +1;
+		seed = colorProposer.getSeed() + 1;
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
@@ -393,7 +393,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 			
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
-			seed += eColoProposer.getSeed() - seed +1;
+			seed = eColoProposer.getSeed() + 1;
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -496,7 +496,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 			
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
-			seed += eColoProposer.getSeed() - seed +1;
+			seed = eColoProposer.getSeed() + 1;
 			//final ObjectDoubleOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
 			
 			
