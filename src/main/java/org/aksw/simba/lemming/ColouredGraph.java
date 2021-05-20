@@ -62,8 +62,8 @@ public class ColouredGraph {
         this.vertexPalette = vertexPalette;
         this.edgePalette = edgePalette;
 
-        mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
-        mapLiteralTypes = new HashMap<BitSet, String>();
+        mapVertexIdAndLiterals = new HashMap<>();
+        mapLiteralTypes = new HashMap<>();
     }
 
     public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
@@ -242,10 +242,7 @@ public class ColouredGraph {
      * @param inVertexColours
      */
     public void setVertexColours(ObjectArrayList<BitSet> inVertexColours) {
-        vertexColours = new ObjectArrayList<BitSet>();
-        for (int i = 0; i < inVertexColours.size(); ++i) {
-            vertexColours.add(inVertexColours.get(i));
-        }
+        vertexColours = new ObjectArrayList<>(inVertexColours);
     }
 
     /**
@@ -254,33 +251,28 @@ public class ColouredGraph {
      * @param inEdgeColours
      */
     public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours) {
-        edgeColours = new ObjectArrayList<BitSet>();
-        for (int i = 0; i < inEdgeColours.size(); ++i) {
-            edgeColours.add(inEdgeColours.get(i));
-        }
+        edgeColours = new ObjectArrayList<>(inEdgeColours);
     }
     
     /**
      * Set new data to the mapping of vertex's ids and vertex's colours
-     * 
+     * Note: vertex ids should be from 0 to map's size-1 continuously
      * @param inVertexColours
      */
     public void setVertexColours(Map<Integer, BitSet> inVertexColours) {
-    	int maxElement = Collections.max(inVertexColours.keySet());
-        vertexColours = new ObjectArrayList<BitSet>();
-        for (int i = 0; i < maxElement; ++i) {
+        vertexColours = new ObjectArrayList<>();
+        for (int i = 0; i < inVertexColours.size(); ++i) {
             vertexColours.add(inVertexColours.get(i));
         }
     }
 
     /**
      * Set new data to the mapping of edge's ids and edge's colours
-     * 
+     * Note: edge ids should be from 0 to map'size-1 continuously
      * @param inEdgeColours
      */
     public void setEdgeColours(Map<Integer, BitSet> inEdgeColours) {
-    	//int maxElement = Collections.max(inEdgeColours.keySet());
-        edgeColours = new ObjectArrayList<BitSet>();
+        edgeColours = new ObjectArrayList<>();
         for (int i = 0; i < inEdgeColours.size(); ++i) {
             edgeColours.add(inEdgeColours.get(i));
         }
