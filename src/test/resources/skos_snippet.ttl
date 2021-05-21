@@ -1,0 +1,23 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+
+skos:closeMatch  a          rdf:Property , owl:SymmetricProperty , owl:ObjectProperty .
+
+skos:related  a             rdf:Property , owl:SymmetricProperty , owl:ObjectProperty .
+
+skos:exactMatch  a          rdf:Property , owl:TransitiveProperty , owl:SymmetricProperty , owl:ObjectProperty .
+
+skos:broader  a             rdf:Property , owl:ObjectProperty ;
+        owl:inverseOf       skos:narrower .
+		
+skos:narrower  a   rdf:Property , owl:ObjectProperty .
+		
+skos:topConceptOf  a        rdf:Property , owl:ObjectProperty ;
+        owl:inverseOf       skos:hasTopConcept  .
+		
+skos:hasTopConcept  a     rdf:Property , owl:ObjectProperty ;
+        owl:inverseOf     skos:topConceptOf  .
+		
+<http://example.org/test#broaderTest> a rdf:Property , owl:ObjectProperty ;
+		owl:inverseOf       skos:narrower .

@@ -7,10 +7,10 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * Compute, for each edge's color, the distribution of edges over vertex's

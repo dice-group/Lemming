@@ -1,0 +1,22 @@
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix lgeo:	<http://linkedgeodata.org/ontology/> .
+
+lgeo:wheelchair a		rdf:Property , owl:DatatypeProperty , owl:ObjectProperty ;
+		rdfs:range	xsd:boolean ; 
+		rdfs:range	owl:Thing ;
+		rdfs:domain	<http://geovocab.org/spatial#Feature> .
+
+dcterms:contributor  a       rdf:Property ;
+        rdfs:comment         "An entity responsible for making contributions to the resource."@en ;
+        rdfs:isDefinedBy     dcterms: ;
+        rdfs:label           "Contributor"@en ;
+        rdfs:range           dcterms:Agent ;
+        rdfs:subPropertyOf   <http://purl.org/dc/elements/1.1/contributor> ;
+        dcterms:description  "Examples of a Contributor include a person, an organization, or a service."@en ;
+        dcterms:hasVersion   <http://dublincore.org/usage/terms/history/#contributorT-001> ;
+        dcterms:issued       "2008-01-14"^^xsd:date ;
+        dcterms:modified     "2010-10-11"^^xsd:date .

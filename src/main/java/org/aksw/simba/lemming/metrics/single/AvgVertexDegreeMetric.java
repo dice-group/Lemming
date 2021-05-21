@@ -3,7 +3,7 @@ package org.aksw.simba.lemming.metrics.single;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
-import com.carrotsearch.hppc.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * This metric determines the average degree of outgoing edges in the graph.
@@ -28,10 +28,10 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     protected double calculateAvg(IntArrayList degrees) {
         double sum = 0;
-        for (int i = 0; i < degrees.elementsCount; ++i) {
-            sum += degrees.buffer[i];
+        for (int i = 0; i < degrees.size(); ++i) {
+            sum += degrees.getInt(i);
         }
-        return sum / degrees.elementsCount;
+        return sum / degrees.size();
     }
 
 }

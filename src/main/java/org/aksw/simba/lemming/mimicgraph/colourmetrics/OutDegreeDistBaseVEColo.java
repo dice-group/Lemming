@@ -1,18 +1,17 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics;
 
+import grph.DefaultIntSet;
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
-
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
+import org.aksw.simba.lemming.util.Constants;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
-import com.carrotsearch.hppc.ObjectArrayList;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -155,7 +154,7 @@ public class OutDegreeDistBaseVEColo {
 					
 					IntSet setTailIDs = mapOEColoToVertIDs.get(edgeColo);
 					if(setTailIDs == null){
-						setTailIDs = new DefaultIntSet();
+						setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						mapOEColoToVertIDs.put(edgeColo, setTailIDs);
 					}
 					setTailIDs.add(vertId);

@@ -7,7 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import grph.Grph;
-import toools.set.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * @author DANISH AHMED on 8/10/2018

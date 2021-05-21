@@ -1,9 +1,11 @@
 package org.aksw.simba.lemming.mimicgraph.constraints;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
+import org.aksw.simba.lemming.util.Constants;
 
 import com.carrotsearch.hppc.BitSet;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class TripleBaseSetOfIDs {
 	
@@ -25,15 +27,15 @@ public class TripleBaseSetOfIDs {
 		
 		tailColour = tailColo;
 		noOfTails = rateOfTails;
-		tailIDs = new DefaultIntSet();
+		tailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 
 		edgeColour = edgeColo;
 		noOfEdges = rateOfEdges;
-		edgeIDs = new DefaultIntSet();
+		edgeIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		
 		headColour = headColo;
 		noOfHeads = rateOfHeads;
-		headIDs = new DefaultIntSet();
+		headIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 	}
 	
 	public boolean equals(Object obj){

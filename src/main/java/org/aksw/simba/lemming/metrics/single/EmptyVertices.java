@@ -5,7 +5,8 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import com.carrotsearch.hppc.BitSet;
 
-import toools.set.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 
 public class EmptyVertices  extends AbstractMetric implements SingleValueMetric {
 	

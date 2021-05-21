@@ -1,13 +1,14 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
+import grph.DefaultIntSet;
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
  * @author DANISH AHMED on 6/13/2018
@@ -20,7 +21,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
     @Override
     public double apply(ColouredGraph graph) {
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfVertices()];
-        IntSet visitedVertices = IntSets.from();
+      
         Grph grph = getUndirectedGraph(graph.getGraph());
 
         for (int i = 0; i < edges.length; ++i) {
@@ -29,23 +30,25 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
         }
 
         int numberOfTriangles = 0;
-        for (IntCursor vertex : graph.getVertices()) {
-            IntSet neighbors = IntSets.difference(IntSets.union(grph.getInNeighbors(vertex.value), grph.getOutNeighbors(vertex.value)),
+        IntSet vertGrph = graph.getVertices();
+        IntSet visitedVertices = new DefaultIntSet(vertGrph.size());
+        for (int vertex:vertGrph) {
+            IntSet neighbors = IntSetUtil.difference(IntSetUtil.union(grph.getInNeighbors(vertex), grph.getOutNeighbors(vertex)),
                     visitedVertices);
-            for (IntCursor neighbor1 : neighbors) {
-                IntSet neighbors1 = IntSets
-                        .difference(IntSets.union(grph.getInNeighbors(neighbor1.value), grph.getOutNeighbors(neighbor1.value)), visitedVertices);
-                for (IntCursor neighbor2 : neighbors) {
-                    if (vertex.value != neighbor1.value && vertex.value != neighbor2.value && neighbor1.value < neighbor2.value
-                            && neighbors1.contains(neighbor2.value)) {
+            for (int neighbor1:neighbors) {
+                IntSet neighbors1 = IntSetUtil
+                        .difference(IntSetUtil.union(grph.getInNeighbors(neighbor1), grph.getOutNeighbors(neighbor1)), visitedVertices);
+                for (int neighbor2:neighbors) {
+                    if (vertex != neighbor1 && vertex != neighbor2 && neighbor1 < neighbor2
+                            && neighbors1.contains(neighbor2)) {
                         numberOfTriangles = numberOfTriangles +
-                                (IntSets.intersection(edges[vertex.value], edges[neighbor1.value]).size() *
-                                        IntSets.intersection(edges[neighbor1.value], edges[neighbor2.value]).size() *
-                                        IntSets.intersection(edges[neighbor2.value], edges[vertex.value]).size());
+                                (IntSetUtil.intersection(edges[vertex], edges[neighbor1]).size() *
+                                		IntSetUtil.intersection(edges[neighbor1], edges[neighbor2]).size() *
+                                		IntSetUtil.intersection(edges[neighbor2], edges[vertex]).size());
                     }
                 }
             }
-            visitedVertices.add(vertex.value);
+            visitedVertices.add(vertex);
         }
         return numberOfTriangles;
     }
@@ -53,9 +56,9 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 
     private Grph getUndirectedGraph(Grph graph) {
         Grph undirectedGraph = new InMemoryGrph();
-        for (IntCursor e : graph.getEdges()) {
-            int sourceNode = graph.getOneVertex(e.value);
-            int targetNode = graph.getTheOtherVertex(e.value, sourceNode);
+        for (int e: graph.getEdges()) {
+            int sourceNode = graph.getOneVertex(e);
+            int targetNode = graph.getTheOtherVertex(e, sourceNode);
             undirectedGraph.addUndirectedSimpleEdge(sourceNode, targetNode);
         }
         return undirectedGraph;

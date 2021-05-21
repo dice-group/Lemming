@@ -4,7 +4,6 @@ import java.util.Arrays;
 
 import com.carrotsearch.hppc.IntIntMap;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
-import com.carrotsearch.hppc.cursors.IntCursor;
 
 import grph.Grph;
 import toools.math.IntMatrix;
@@ -36,9 +35,9 @@ public class MultiEdgeIgnoringAdjacencyMatrix {
         }
 
         internalMatrix = new IntMatrix(graph.getNumberOfVertices(), graph.getNumberOfVertices());
-        for (IntCursor e : graph.getEdges()) {
-            int sourceNode = graph.getOneVertex(e.value);
-            int targetNode = graph.getTheOtherVertex(e.value, sourceNode);
+        for (int e: graph.getEdges()) {
+            int sourceNode = graph.getOneVertex(e);
+            int targetNode = graph.getTheOtherVertex(e, sourceNode);
             if (sourceNode != targetNode) {
                 internalMatrix.set(verticesToIndicesMap.get(sourceNode), verticesToIndicesMap.get(targetNode), 1);
                 internalMatrix.set(verticesToIndicesMap.get(targetNode), verticesToIndicesMap.get(sourceNode), 1);

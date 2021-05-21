@@ -1,0 +1,3 @@
+<http://linkedgeodata.org/ontology/posSeq> <http://www.w3.org/2000/01/rdf-schema#range> <http://www.w3.org/1999/02/22-rdf-syntax-ns#Seq> .
+
+<http://linkedgeodata.org/ontology/gadmSameAs> <http://www.w3.org/2000/01/rdf-schema#range> <http://geovocab.org/spatial#Feature> .

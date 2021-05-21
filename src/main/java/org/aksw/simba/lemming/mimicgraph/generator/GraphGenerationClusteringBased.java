@@ -8,7 +8,6 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -25,14 +24,15 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandom
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.RandomUtil;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * Graph generation based on the group of triple's colours.
@@ -55,6 +55,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		mRandom = new Random(this.seed);
+		this.seed++;
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
@@ -228,12 +229,11 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed + 1;
+				seed = grpTripleProposer.getSeed() + 1;
 				IntSet setEdges = mMapColourToEdgeIDs.get(edgeColo);
 				
 				if(setEdges!=null && setEdges.size() >0){
-					
-					for(int eId: setEdges.toIntegerArrayList()){
+			        for (int eId : setEdges) {
 						TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 						offeredGrpTriple.edgeIDs.add(eId);
 						
@@ -364,7 +364,6 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					
 					if(triple.edgeIDs.size() > 0 ){
 						double noOfEdges = triple.edgeIDs.size();
-						
 						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails);
 						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads);
 						
@@ -372,9 +371,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							LOGGER.warn("There exists no vertices in " + triple.headColour +" or " 
 											+ triple.tailColour +" colour. Skip: " + noOfEdges +" edges!");
 							continue;
-						}
-						
-						
+						} 
 						
 						triple.tailIDs.addAll(setOfRandomTailIds);
 						triple.headIDs.addAll(setOfRandomHeadIds);
@@ -423,13 +420,13 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 					//track the index of previous iteration
 					int iIndexOfProcessingEdge = -1;
 					//set of process edges
-					ArrayList<Integer> lstEdgeIds = setOfEdges.toIntegerArrayList();
+					int[] lstEdgeIds = setOfEdges.toIntArray();
 
 					//iterate through all edge
 					int j = 0 ;
-					while(j < lstEdgeIds.size()){
+					while(j < lstEdgeIds.length){
 						//get an edge id
-						int fakeEdgeId = lstEdgeIds.get(j);
+						int fakeEdgeId = lstEdgeIds[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
 						
 						if(edgeColo == null){
@@ -493,6 +490,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							int iAttemptToGetTailIds = 1000;
 							while(iAttemptToGetTailIds > 0){
 								tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
+								mRandom.setSeed(seed);
+								seed++;
 								if(!mReversedMapClassVertices.containsKey(tailColo))
 									break;
 								tailId = -1;
@@ -504,12 +503,13 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 								continue;
 							}
 							
-							IntSet setHeadIDs = triples.headIDs.clone();
+							IntSet setHeadIDs = new DefaultIntSet(triples.headIDs.size());
+							setHeadIDs.addAll(triples.headIDs);
 							
 							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
 							if(tmpSetOfConnectedHeads!= null && tmpSetOfConnectedHeads.size() >0  ){
 								//int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray(); 
-								for(int connectedHead: tmpSetOfConnectedHeads.toIntegerArrayList()){
+						        for (int connectedHead: tmpSetOfConnectedHeads) {
 									if(setHeadIDs.contains(connectedHead))
 										setHeadIDs.remove(connectedHead);
 								}
@@ -523,6 +523,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							
 							int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+							mRandom.setSeed(seed);
+							seed++;
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 							if(isFoundVerticesConnected){
 								j++;
@@ -537,7 +539,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 						
 						if (maxIterationFor1Edge == 0) {
 							LOGGER.error("Could not create "
-									+ (lstEdgeIds.size() - j)
+									+ (lstEdgeIds.length - j)
 									+ " edges in the "
 									+ edgeColo
 									+ " colour since it could not find any approriate vertices to connect.");						
@@ -602,9 +604,9 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							
 							
 							int[] arrTailIDs = setOfRandomTailIds.toIntArray();
-							triple.tailIDs.addAll(arrTailIDs);
+							triple.tailIDs.addAll(setOfRandomTailIds);
 							int[] arrHeadIDs = setOfRandomHeadIds.toIntArray();
-							triple.headIDs.addAll(arrHeadIDs);
+							triple.headIDs.addAll(setOfRandomHeadIds);
 							/*
 							 *  standardize the amount of edges and vertices
 							 *  this makes sure there is no pair of vertices are connected by 
@@ -619,7 +621,8 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 							int i = 0 ; 
 							while(i < noOfEdges){
 								
-								setOfRandomHeadIds = triple.headIDs.clone();
+								setOfRandomHeadIds = new DefaultIntSet(triple.headIDs.size());
+								setOfRandomHeadIds.addAll(triple.headIDs);
 								
 								// select a random tail
 								int tailId = arrTailIDs[rand.nextInt(arrTailIDs.length)];
@@ -656,23 +659,37 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo);
 		if(setVertices != null){
 			
-			int[] arrVertices= setVertices.toIntArray();
+			IntSet res = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			
-			IntSet res = new DefaultIntSet();
-			
-			if(iNoOfVertices >= arrVertices.length){
-				iNoOfVertices = arrVertices.length;
+			if(iNoOfVertices >= setVertices.size()){
+				iNoOfVertices = setVertices.size();
 				return setVertices;
 			}
 			
+			// store the array indices for which the vertID should not match in order to exclude these 
+			// array indexes from the random number generation
+			Set<Integer> keys = mReversedMapClassVertices.keySet();
+			IntSet exclusionSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
+			for(int e : mReversedMapClassVertices.keySet()) {
+				if(setVertices.contains(e)) {
+					exclusionSet.add(e);
+				}
+			}
+			if(exclusionSet.size()>=setVertices.size()) {
+				LOGGER.warn("No possible vertices to connect of "+vertColo);
+				return null;
+			}
+			
 			while(iNoOfVertices > 0 ){
-				int vertId = arrVertices[mRandom.nextInt(arrVertices.length)];
-				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
+				int vertId = RandomUtil.getRandomWithExclusion(mRandom, setVertices.size(), exclusionSet);
+				mRandom.setSeed(seed);
+				seed++;
+				if(!res.contains(vertId)){
 					res.add(vertId);
 					iNoOfVertices --;
 				}
 				
-				if(res.size() == (arrVertices.length -1)){
+				if(res.size() == (setVertices.size() -1)){
 					if(iNoOfVertices!=0)
 						LOGGER.warn("Could not get " + iNoOfVertices + " vertices of "+ vertColo);
 					break;
@@ -727,7 +744,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed +1;
+				seed = grpTripleProposer.getSeed() + 1;
 				TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 				
 				//get random a head and a tail to connect
