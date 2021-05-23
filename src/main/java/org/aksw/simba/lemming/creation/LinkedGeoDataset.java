@@ -50,6 +50,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			ontModel.read("lgeo/rdfs-ns-void.rdf");
 			ontModel.read("lgeo/custom_ontology.nt");
 
+			Inferer inferer = new Inferer(true, ontModel);
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
 
@@ -60,9 +61,9 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 						geoModel.read(subFile.getAbsolutePath(), "TTL");
 					}
 					LOGGER.info("Read data to model - " + geoModel.size() + " triples");
-					Inferer inferer = new Inferer(true);
+
 					// returns a new model with the added triples
-					geoModel = inferer.process(geoModel, ontModel);
+					geoModel = inferer.process(geoModel);
 					ColouredGraph graph = creator.processModel(geoModel);
 					if (graph != null) {
 						LOGGER.info("Generated graph of " + geoModel.size() + " triples");

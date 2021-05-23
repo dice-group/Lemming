@@ -54,14 +54,14 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			// sort ascendently
 			Collections.sort(lstSortedFilesByName);
+			Inferer inferer = new Inferer(true, ontModel);
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
 				Model geologyModel = ModelFactory.createDefaultModel();
 				geologyModel.read(file.getAbsolutePath(), "TTL");
 				LOGGER.info("Read data to model - " + geologyModel.size() + " triples " + file.getName());
-				Inferer inferer = new Inferer(true);
 				// returns a new model with the added triples
-				geologyModel = inferer.process(geologyModel, ontModel);
+				geologyModel = inferer.process(geologyModel);
 				ColouredGraph graph = creator.processModel(geologyModel);
 				if (graph != null) {
 					LOGGER.info("Generated graph of " + geologyModel.size() + " triples");

@@ -41,7 +41,8 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
     	for (File file : ontFolder.listFiles()) {
     		ontModel.read(file.getAbsolutePath(), "TTL");
     	}
-    	
+        Inferer inferer = new Inferer(true, ontModel);
+
         for (int y = START_YEAR; y <= END_YEAR; ++y) {
         	
             LOGGER.info("Adding year {}...", y);
@@ -51,11 +52,9 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                 addToModel(folder, dogFoodModel);
                 if (oldModelSize < dogFoodModel.size()) {
                     LOGGER.info("Read data. Model has {} triples. Creating graph...", dogFoodModel.size());
-                    
-                    Inferer inferer = new Inferer(true);
-                    
+
     				 //returns a new model with the added triples
-    				dogFoodModel = inferer.process(dogFoodModel, ontModel);
+    				dogFoodModel = inferer.process(dogFoodModel);
     				graph = creator.processModel(dogFoodModel);
                     if (graph != null) {
                         LOGGER.info("Generated graph." + dogFoodModel.size());
