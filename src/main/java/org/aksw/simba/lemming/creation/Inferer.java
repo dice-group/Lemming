@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
 import org.apache.jena.ontology.OntClass;
@@ -19,19 +20,16 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * The Inferer class implements an inference of the type of subjects and objects
@@ -50,9 +48,42 @@ public class Inferer {
 	 * Do we also want materialization to be applied to the graph
 	 */
 	private boolean isMat = false;
-	
-	public Inferer(boolean isMat) {
+
+	/**
+	 * An ontology model for a dataset.
+	 */
+	private OntModel ontModel;
+
+	private Map<String, Equivalent> classesEquiMap;
+
+	private Map<String, Equivalent> propertiesEquiMap;
+
+	private Set<OntProperty> ontProperties;
+
+
+	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
 		this.isMat = isMat;
+		this.ontModel = ontModel;
+
+		// collect the equivalent properties and classes information from the ontology
+		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		classesEquiMap = searchEquivalents(ontClasses);
+		this.ontProperties = ontModel.listAllOntProperties().toSet();
+		propertiesEquiMap = searchEquivalents(this.ontProperties);
+	}
+
+	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
+		this.isMat = isMat;
+		OntModel ontModel = this.readOntology(filePath, base);
+		for(String fileName : rdfsFilesMap.keySet()){
+			ontModel.read(fileName, rdfsFilesMap.get(fileName));
+		}
+		this.ontModel = ontModel;
+		// collect the equivalent properties and classes information from the ontology
+		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		classesEquiMap = searchEquivalents(ontClasses);
+		this.ontProperties = ontModel.listAllOntProperties().toSet();
+		propertiesEquiMap = searchEquivalents(this.ontProperties);
 	}
 
 	/**
@@ -60,48 +91,39 @@ public class Inferer {
 	 * goes on to populate it further with inferred triples
 	 * 
 	 * @param sourceModel RDF Model where we want the inference to take place
-	 * @param ontModel    Ontology Model
 	 * @return The new model with the same triples as the sourceModel plus the
 	 *         inferred triples.
 	 */
-	public Model process(Model sourceModel, OntModel ontModel) {
+	public Model process(Model sourceModel) {
 		Model newModel = ModelFactory.createDefaultModel();
 		newModel.add(sourceModel);
 		Set<Resource> set = extractUniqueResources(newModel);
-		if (ontModel != null) {
-			// collect the equivalent properties and classes information from the ontology
-			Set<OntClass> ontClasses = ontModel.listClasses().toSet();
-			Map<String, Equivalent> classes = searchEquivalents(ontClasses); // searchClassesInOntology(ontModel);
 
-			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
-			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
-			
-			if(isMat) {
-				GraphMaterializer materializer = new GraphMaterializer(ontProperties);
-				while(true){
-					long size = newModel.size();
-					List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
-					List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
-					List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
+		if(isMat) {
+			GraphMaterializer materializer = new GraphMaterializer(this.ontProperties);
+			while(true){
+				long size = newModel.size();
+				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
 					
-					newModel.add(symmetricStmts);
-					newModel.add(transitiveStmts);
-					newModel.add(inverseStmts);
+				newModel.add(symmetricStmts);
+				newModel.add(transitiveStmts);
+				newModel.add(inverseStmts);
 					
-					//if the model didn't grow, break the loop
-					if(size==newModel.size())
+				//if the model didn't grow, break the loop
+				if(size==newModel.size())
 						break;
-				}
 			}
-
-			// infer type statements, a single property name is also enforced here
-			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
-			checkEmptyTypes(set, newModel);
-
-			// uniform the names of the classes
-			renameClasses(newModel, classes);
-			
 		}
+
+		// infer type statements, a single property name is also enforced here
+		iterateStmts(newModel, sourceModel, ontModel, this.propertiesEquiMap);
+		checkEmptyTypes(set, newModel);
+
+		// uniform the names of the classes
+		renameClasses(newModel, this.classesEquiMap);
+
 		return newModel;
 	}
 
@@ -116,8 +138,9 @@ public class Inferer {
 	 */
 	private Set<Resource> extractUniqueResources(Model model) {
 		Set<Resource> set = new HashSet<>();
-		List<Statement> statements = model.listStatements().toList();
-		for (Statement curStat : statements) {
+		StmtIterator iterator = model.listStatements();
+		while(iterator.hasNext()){
+			Statement curStat = iterator.next();
 			if(curStat.getSubject().isURIResource())
 				set.add(curStat.getSubject());
 			if (curStat.getObject().isURIResource()) {
@@ -307,7 +330,7 @@ public class Inferer {
 		stack.addAll(ontElements);
 
 		Set<Equivalent> elements = new HashSet<Equivalent>();
-
+		//TODO: BOTTLENECK
 		while (stack.size() > 0) {
 			T currentResource = stack.pop();
 			String curURI = currentResource.getURI();
