@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 
@@ -330,58 +329,35 @@ public class Inferer {
 
 		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
 
-		Stack<T> stack = new Stack<T>();
-		stack.addAll(ontElements);
+		for(T currentResource : ontElements){
 
-		Set<Equivalent> elements = new HashSet<Equivalent>();
-		//TODO: BOTTLENECK
-		while (stack.size() > 0) {
-			T currentResource = stack.pop();
 			String curURI = currentResource.getURI();
-			boolean isSame = false;
-			
-			if (curURI!=null && !uriNodeMap.containsKey(curURI)) {
-				List eqsList = null;
+
+			if (curURI!=null) {
+
+				Equivalent curNode = new Equivalent(currentResource);
+				uriNodeMap.put(curURI,curNode);
+
+				//compute the equivalent classes/properties and store them into a list
+				List<T> eqsList = null;
 				try {
 					if (currentResource.isProperty())
-						eqsList = currentResource.asProperty().listEquivalentProperties().toList();
+						eqsList = (List<T>) currentResource.asProperty().listEquivalentProperties().toList();
 					if (currentResource.isClass())
-						eqsList = currentResource.asClass().listEquivalentClasses().toList();
+						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
 					LOGGER.warn(
 							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
 							currentResource.toString());
 				}
 
+				// If there're equivalent classes or properties, put them into map
 				if (eqsList != null && !eqsList.isEmpty()) {
-					stack.addAll(eqsList);
-				}
-				
-				//node to where we want to add the info to
-				Equivalent curNode = null;
-
-				// check to which node do we need to add this info to
-				Iterator<Equivalent> propIterator = elements.iterator();
-				while (propIterator.hasNext()) {
-					curNode = propIterator.next();
-					isSame = curNode.containsElement(currentResource);
-					if (isSame) {
-						curNode.addEquivalent(currentResource);
-						break;
-					}
-				}
-
-				// if not, create new one
-				if (!isSame) {
-					curNode = new Equivalent(currentResource);
-					elements.add(curNode);
-				}
-				
-				// add the node to the map with the URI and add the equivalents (if existing) to the node object
-				if (curNode != null) {
-					uriNodeMap.put(curURI, curNode);
-					if(eqsList != null) {
-						curNode.addEquivalentGroup((Set) eqsList.stream().collect(Collectors.toSet()));
+					for(T eq : eqsList){
+						if(eq.getURI() != null){
+							uriNodeMap.put(eq.toString(), curNode);
+							curNode.addEquivalent(eq);
+						}
 					}
 				}
 			}
