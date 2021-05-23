@@ -413,6 +413,4 @@ public class PrecomputingValuesTest{
             }
         }
     }
-
-
 }

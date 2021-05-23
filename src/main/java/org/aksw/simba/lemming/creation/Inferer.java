@@ -95,7 +95,6 @@ public class Inferer {
 	 * @return The new model with the same triples as the sourceModel plus the
 	 *         inferred triples.
 	 */
-	//todo: this is a bottleneck
 	public Model process(Model sourceModel) {
 		Model newModel = ModelFactory.createDefaultModel();
 		newModel.add(sourceModel);
@@ -103,8 +102,11 @@ public class Inferer {
 
 		if(isMat) {
 			GraphMaterializer materializer = new GraphMaterializer(this.ontProperties);
-			while(true){
-				long size = newModel.size();
+			long curSize;
+			long newSize;
+			do{
+				curSize = newModel.size();
+
 				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
 				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
 				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
@@ -112,11 +114,11 @@ public class Inferer {
 				newModel.add(symmetricStmts);
 				newModel.add(transitiveStmts);
 				newModel.add(inverseStmts);
-					
-				//if the model didn't grow, break the loop
-				if(size==newModel.size())
-						break;
-			}
+
+				newSize = newModel.size();
+
+			//if the model doesn't grow, terminate the loop
+			}while(curSize != newSize);
 		}
 
 		// infer type statements, a single property name is also enforced here
