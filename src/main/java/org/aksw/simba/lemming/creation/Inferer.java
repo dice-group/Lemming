@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 
 import org.aksw.simba.lemming.util.ModelUtil;
@@ -58,7 +57,6 @@ public class Inferer {
 	private Map<String, Equivalent> propertiesEquiMap;
 
 	private Set<OntProperty> ontProperties;
-
 
 
 	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
@@ -121,7 +119,7 @@ public class Inferer {
 		}
 
 		// infer type statements, a single property name is also enforced here
-		iterateStmts(newModel, sourceModel, ontModel, this.propertiesEquiMap);
+		iterateStmts(newModel, sourceModel, this.propertiesEquiMap);
 		checkEmptyTypes(set, newModel);
 
 		// uniform the names of the classes
@@ -179,9 +177,9 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param ontModel    the ontology model
+	 * @param uriNodeMap  the ontology model
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, OntModel ontModel, Map<String, Equivalent> uriNodeMap) {
+	public void iterateStmts(Model newModel, Model sourceModel, Map<String, Equivalent> uriNodeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
 			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
@@ -207,12 +205,12 @@ public class Inferer {
 	 * 
 	 * @param statement statement in which we want to check the predicate in the
 	 *                  ontology
-	 * @param ontModel  the ontology model
-	 * @param newModel  where we add the new triples and therefore, where we check
+	 * @param model  where we add the new triples and therefore, where we check
 	 *                  if the statement is already existing in the model or not
+	 * @param ontModel  the ontology model
 	 * @return a set of statements inferred from one property
 	 */
-	private Set<Statement> searchType(Statement statement, OntModel ontModel, Model newModel) {
+	private Set<Statement> searchType(Statement statement, Model model, OntModel ontModel) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
@@ -224,7 +222,7 @@ public class Inferer {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!newModel.contains(subjType)) {
+				if (!model.contains(subjType)) {
 					newStmts.add(subjType);
 				}
 			}
@@ -232,7 +230,7 @@ public class Inferer {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
 					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!newModel.contains(objType)) {
+					if (!model.contains(objType)) {
 						newStmts.add(objType);
 					}
 				}
@@ -242,7 +240,7 @@ public class Inferer {
 	}
 
 	/**
-	 * Same as searchType(Statement statement, OntModel ontModel, Model newModel),
+	 * Same as searchType(Statement statement, Model model, OntModel ontModel),
 	 * but in our custom objects: For a given statement, this method searches for
 	 * the predicate of a model inside the Ontology. If found in the Ontology, it
 	 * then extracts the domain and range. Creating and adding a new triple with the
@@ -250,12 +248,12 @@ public class Inferer {
 	 * 
 	 * @param statement  statement in which we want to check the predicate in the
 	 *                   ontology
-	 * @param newModel   where we add the new triples and therefore, where we check
+	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
 	 * @param uriNodeMap
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model newModel, Map<String, Equivalent> uriNodeMap) {
+	private Set<Statement> searchType(Statement statement, Model model, Map<String, Equivalent> uriNodeMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
@@ -265,11 +263,11 @@ public class Inferer {
 		OntProperty property = null;
 
 		if (node != null) {
-			property = (OntProperty) node.getAttribute();
+			property = node.getAttribute();
 			Property newPredicate = ResourceFactory.createProperty(node.getName());
 
 			if (!newPredicate.getURI().equals(predicate.getURI()))
-				ModelUtil.replaceStatement(newModel, statement,
+				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
 		}
 
@@ -277,7 +275,7 @@ public class Inferer {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!newModel.contains(subjType) && !curResource.isAnon()) {
+				if (!model.contains(subjType) && !curResource.isAnon()) {
 					newStmts.add(subjType);
 				}
 			}
@@ -285,7 +283,7 @@ public class Inferer {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
 					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!newModel.contains(objType)) {
+					if (!model.contains(objType)) {
 						newStmts.add(objType);
 					}
 				}
@@ -306,7 +304,7 @@ public class Inferer {
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		try (InputStream inputStream = FileManager.get().open(filePath)) {
 			if (inputStream != null) {
-				ontModel.read(inputStream, "RDF/XML");
+				ontModel.read(inputStream, base);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Couldn't read ontology file. Returning empty ontology model.", e);
