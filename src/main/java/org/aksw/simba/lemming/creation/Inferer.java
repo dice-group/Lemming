@@ -61,6 +61,7 @@ public class Inferer {
 	private Set<OntProperty> ontProperties;
 
 
+
 	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
 		this.isMat = isMat;
 		this.ontModel = ontModel;
@@ -94,6 +95,7 @@ public class Inferer {
 	 * @return The new model with the same triples as the sourceModel plus the
 	 *         inferred triples.
 	 */
+	//todo: this is a bottleneck
 	public Model process(Model sourceModel) {
 		Model newModel = ModelFactory.createDefaultModel();
 		newModel.add(sourceModel);
