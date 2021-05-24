@@ -22,17 +22,20 @@ import static org.junit.Assert.assertTrue;
 
 public class PrecomputingValuesTest{
     private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
-    IDatasetManager datasetManager = new GeologyDataset();
+    private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
+    private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
+    private static final String PERSON_GRAPH = "PersonGraph/";
 
     @Test
     public void testGeologyGraphs(){
         //create ontology model
-        OntModel ontModel = createOntologyModel();
+        OntModel ontModel = createOntModelForGeology();
 
         File folder = new File(GEOLOGY_DATASET_FOLDER_PATH);
         List<String> lstSortedFilesByName = Arrays.asList(folder.list());
         Collections.sort(lstSortedFilesByName);
 
+        System.out.println("Test GeologyGraphs:");
         System.out.println("Compute with old Inferer......");
         long startTime = System.currentTimeMillis();
         List<Long> sizesForOldInferer = new ArrayList<>();
@@ -74,30 +77,82 @@ public class PrecomputingValuesTest{
         assertTrue(timeForNewInferer<(timeForOldInferer));
     }
 
-    private OntModel createOntologyModel(){
+    //@Test
+    public void testSWDF(){
+        //create ontology model
+        OntModel ontModel = createOntModelForSWDF();
+
+        System.out.println("Test SemanticWebDogFood::");
+        System.out.println("Compute with old Inferer......");
+        long startTime = System.currentTimeMillis();
+        List<Long> sizesForOldInferer = new ArrayList<>();
+
+        Model dogFoodModel = ModelFactory.createDefaultModel();
+        for (int y = 2001; y <= 2015; ++y) {
+            File folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
+            if (folder.exists()) {
+                for(File file: folder.listFiles()){
+                    dogFoodModel.read(file.getAbsolutePath());
+                }
+            }
+            sizesForOldInferer.add(dogFoodModel.size());
+            OldInferer oldInferer = new OldInferer(true);
+            dogFoodModel = oldInferer.process(dogFoodModel, ontModel);
+            sizesForOldInferer.add(dogFoodModel.size());
+        }
+
+        long endTime = System.currentTimeMillis();
+        long timeForOldInferer = endTime-startTime;
+        System.out.println("OldTime: " + timeForOldInferer);
+
+
+        System.out.println("Compute with new Inferer......");
+        startTime = System.currentTimeMillis();
+        List<Long> sizesForNewInferer = new ArrayList<>();
+
+        dogFoodModel = ModelFactory.createDefaultModel();
+        Inferer inferer = new Inferer(true, ontModel);
+        for (int y = 2001; y <= 2015; ++y) {
+            File folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
+            if (folder.exists()) {
+                for(File file: folder.listFiles()){
+                    dogFoodModel.read(file.getAbsolutePath());
+                }
+            }
+            sizesForNewInferer.add(dogFoodModel.size());
+            dogFoodModel = inferer.process(dogFoodModel);
+            sizesForNewInferer.add(dogFoodModel.size());
+        }
+
+        endTime = System.currentTimeMillis();
+        long timeForNewInferer = endTime-startTime;
+        System.out.println("NewTime: " + timeForNewInferer);
+
+        assertArrayEquals(sizesForOldInferer.toArray(), sizesForNewInferer.toArray());
+        assertTrue(timeForNewInferer<(timeForOldInferer));
+    }
+
+    private OntModel createOntModelForGeology(){
         OntModel ontModel = ModelFactory.createOntologyModel();
         ontModel.getDocumentManager().setProcessImports(false);
         ontModel.read("22-rdf-syntax-ns", "TTL");
         ontModel.read("rdf-schema", "TTL");
-        ontModel.read("geology/void.ttl");
-        ontModel.read("geology/foaf.ttl");
-        ontModel.read("geology/skos.ttl");
-        ontModel.read("geology/dcterms.ttl");
-        ontModel.read("geology/owl.ttl");
-        ontModel.read("geology/dc.ttl");
-        ontModel.read("geology/geometry.ttl");
-        ontModel.read("geology/geosparql.ttl");
-        ontModel.read("geology/gts.ttl");
-        ontModel.read("geology/gts-w3c.ttl");
-        ontModel.read("geology/rank.ttl");
-        ontModel.read("geology/sampling.ttl");
-        ontModel.read("geology/sam-lite.ttl");
-        ontModel.read("geology/sf.ttl");
-        ontModel.read("geology/sosa.ttl");
-        ontModel.read("geology/thors.ttl");
-        ontModel.read("geology/time.ttl");
-        ontModel.read("geology/basic.ttl");
-        ontModel.read("geology/temporal.ttl");
+        File ontFolder = new File("geology");
+        for(File file : ontFolder.listFiles()){
+            ontModel.read(file.getAbsolutePath(), "ttl");
+        }
+        return ontModel;
+    }
+
+    private OntModel createOntModelForSWDF(){
+        OntModel ontModel = ModelFactory.createOntologyModel();
+        ontModel.getDocumentManager().setProcessImports(false);
+        ontModel.read("22-rdf-syntax-ns", "TTL");
+        ontModel.read("rdf-schema", "TTL");
+        File ontFolder = new File("swdf-owls");
+        for (File file : ontFolder.listFiles()) {
+            ontModel.read(file.getAbsolutePath(), "TTL");
+        }
         return ontModel;
     }
 
