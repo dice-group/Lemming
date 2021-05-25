@@ -229,7 +229,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed + 1;
+				seed = grpTripleProposer.getSeed() + 1;
 				IntSet setEdges = mMapColourToEdgeIDs.get(edgeColo);
 				
 				if(setEdges!=null && setEdges.size() >0){
@@ -744,7 +744,7 @@ public class GraphGenerationClusteringBased extends AbstractGraphGeneration
 				
 				ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples, arrEdgeRatePerTriple);
 				OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(objDist, seed);
-				seed += grpTripleProposer.getSeed() - seed +1;
+				seed = grpTripleProposer.getSeed() + 1;
 				TripleBaseSetOfIDs offeredGrpTriple = grpTripleProposer.getPotentialItem();
 				
 				//get random a head and a tail to connect

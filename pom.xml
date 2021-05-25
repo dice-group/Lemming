@@ -40,6 +40,12 @@
 			<groupId>org.aksw</groupId>
 			<artifactId>word2vec-restful-webservice</artifactId>
 			<version>0.0.1</version>
+			<exclusions>
+				<exclusion>
+					<groupId>ch.qos.logback</groupId>
+					<artifactId>logback-classic</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>grph</groupId>

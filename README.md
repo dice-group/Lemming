@@ -44,7 +44,7 @@ This will produce a file named ``value_store.val`` to be used during graph gener
   <tr><th align="left">-l</th><td>False</td><td>Initialized_MimicGraph.ser</td><td> File path where to save the initialized mimic graph. If a graph already exists there, the mimic graph generation will be skipped and loaded from file instead.</td></tr>
   <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
   <tr><th align="left">-thrs</th><td>False</td><td>availableProcessors*4</td><td>Number of threads</td></tr>
-  <tr><th align="left">-op</th><td>False</td><td>50,000</td><td>Number of optimization iterations</td></tr>
+  <tr><th align="left">-op</th><td>False</td><td>50 000</td><td>Number of optimization iterations</td></tr>
 </table>
 
 To run the graph generation, you can use maven's plugin:
@@ -65,14 +65,12 @@ From the metrics pre-computation step, you can get the number of vertices of the
 Below is a table with the currently accepted datasets and the number of vertices of its target graph.
 
 <table>
-  <tr><th align="left">Dataset</th><th align="center">No. vertices</th><th>Folder</th><th>Description</th></tr>
-  <tr><th align="left">pg</th><td align="center">792 923</td><td>PersonGraph/</td><td>Person Graph (subset of DBpedia)</td></tr>
-  <tr><th align="left">swdf</th><td align="center">45 423</td><td>SemanticWebDogFood/</td><td>Semantic Web Dog Food</td></tr>
-  <tr><th align="left">lgeo</th><td align="center">591 649</td><td>LinkedGeoGraphs/</td><td>Linked Geo Data</td></tr>
-  <tr><th align="left">geology</th><td align="center">1 423</td><td>GeologyGraphs/</td><td> International Chronostratigraphic Chart </td></tr>
+  <tr><th align="left">Dataset</th><th align="center">No. vertices</th><th>Folder</th><th>Description</th><th>Target graph</th></tr>
+  <tr><th align="left">pg</th><td align="center">792 923</td><td>PersonGraph/</td><td>Person Graph (subset of DBpedia)</td><td align="center">2016-10</td></tr>
+  <tr><th align="left">swdf</th><td align="center">45 420</td><td>SemanticWebDogFood/</td><td>Semantic Web Dog Food</td><td align="center">2015</td></tr>
+  <tr><th align="left">lgeo</th><td align="center">591 649</td><td>LinkedGeoGraphs/</td><td>Linked Geo Data</td><td align="center">2015</td></tr>
+  <tr><th align="left">geology</th><td align="center">1 281</td><td>GeologyGraphs/</td><td> International Chronostratigraphic Chart</td><td align="center">2018-1</td></tr>
 </table>
-
-
 
 ### Reproducing experiments
 You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.

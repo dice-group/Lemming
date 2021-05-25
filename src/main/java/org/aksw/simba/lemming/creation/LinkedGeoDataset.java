@@ -33,6 +33,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			Collections.sort(lstSortedFilesByName);
 
 			OntModel ontModel = ModelFactory.createOntologyModel();
+			ontModel.getDocumentManager().setProcessImports(false);
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
 			ontModel.read("lgeo/foaf.ttl");
@@ -59,7 +60,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 						geoModel.read(subFile.getAbsolutePath(), "TTL");
 					}
 					LOGGER.info("Read data to model - " + geoModel.size() + " triples");
-					Inferer inferer = new Inferer(false);
+					Inferer inferer = new Inferer(true);
 					// returns a new model with the added triples
 					geoModel = inferer.process(geoModel, ontModel);
 					ColouredGraph graph = creator.processModel(geoModel);

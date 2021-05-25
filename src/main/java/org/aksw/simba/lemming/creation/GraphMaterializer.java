@@ -18,19 +18,28 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.iterator.ExtendedIterator;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 
 /**
- * The class identifies transient, symmetric and inverseOf property relations in
- * the graph
+ * The class identifies transient, symmetric and inverse properties in the graph
+ * and derives new statements with these properties' rules based on a given
+ * graph
  *
+ *@author Alexandra Silva
  */
 public class GraphMaterializer {
-
+	/**
+	 * Set of symmetric properties
+	 */
 	private Set<OntProperty> symmetricProperties;
+	/**
+	 * Set of transitive properties
+	 */
 	private Set<OntProperty> transitiveProperties;
+	/**
+	 * Map containing the inverse properties in both directions
+	 */
 	private SetMultimap<OntProperty, OntProperty> inverseProperties;
 
 	public GraphMaterializer(Set<OntProperty> ontProperties) {
@@ -140,6 +149,15 @@ public class GraphMaterializer {
 	 */
 	public void identifyProperties(Set<OntProperty> ontProperties) {
 		for (OntProperty curProp : ontProperties) {
+
+			// Some ontologies might try to infer some "anonymous" properties.
+			// Since we are trying to infer new statements from our inverse properties,
+			// it would be illegal in RDF to consider these "anonymous" properties.
+			// Hence it's best we just filter these properties.
+			if (curProp.isAnon()) {
+				continue;
+			}
+
 			if (curProp.isSymmetricProperty()) {
 				this.symmetricProperties.add(curProp.asSymmetricProperty());
 			}
@@ -156,7 +174,7 @@ public class GraphMaterializer {
 			}
 		}
 	}
-
+	
 	public Set<OntProperty> getSymmetricProperties() {
 		return symmetricProperties;
 	}

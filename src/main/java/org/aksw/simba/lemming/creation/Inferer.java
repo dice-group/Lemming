@@ -37,11 +37,18 @@ import org.slf4j.LoggerFactory;
  * The Inferer class implements an inference of the type of subjects and objects
  * of a given RDF Model from a given Ontology. To use this class, one could
  * first use the readOntology() method and then use the process() method.
+ * 
+ * @author Alexandra Silva
  *
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
+	
+	/**
+	 * Do we also want materialization to be applied to the graph
+	 */
 	private boolean isMat = false;
 	
 	public Inferer(boolean isMat) {
@@ -137,7 +144,6 @@ public class Inferer {
 			}
 		}
 		LOGGER.info("Number of resources without type : " + emptyTypeCount);
-		System.out.println();
 	}
 
 	/**
@@ -293,7 +299,6 @@ public class Inferer {
 	 * @param ontElements the ontology classes or properties
 	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
 
 		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
