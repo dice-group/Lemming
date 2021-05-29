@@ -20,6 +20,7 @@ public class BooleanLiteralGenerator extends AbstractLiteralGenerator implements
 	public BooleanLiteralGenerator(
 			Map<BitSet, Map<BitSet, Set<String>>> sampleData) {
 		super(sampleData);
+		mapOfProbabilities = new HashMap<BitSet, Map<BitSet,Double>>();
 		computeDistribution();
 	}
 

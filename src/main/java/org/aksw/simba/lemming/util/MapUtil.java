@@ -2,24 +2,27 @@ package org.aksw.simba.lemming.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.metrics.dist.IntDistribution;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 
 /**
@@ -27,7 +30,49 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
  * @author jsaveta
  */
 public class MapUtil {
+	
+	/**
+	 * Sort by value, if value is the same, sort by key
+	 * 
+	 * @param map
+	 * @return
+	 */
+	public static List<BitSet> sortByValueThenKey(Map<BitSet, Double> map) {
+		Comparator<Entry<BitSet, Double>> valueThenKeyComparator = new Comparator<Entry<BitSet, Double>>() {
+			@Override
+			public int compare(Entry<BitSet, Double> arg0, Entry<BitSet, Double> arg1) {
+				int comparison = Double.compare(arg0.getValue(), arg1.getValue());
+				if (comparison != 0) {
+					return comparison;
+				} else {
+					if (arg0.getKey().equals(arg1.getKey()))
+						return 0;
+					BitSet xor = (BitSet) arg0.getKey().clone();
+					xor.xor(arg1.getKey());
+					int firstDifferent = (int) (xor.length() - 1);
+					if (firstDifferent == -1)
+						return 0;
+
+					return arg1.getKey().get(firstDifferent) ? 1 : -1;
+				}
+			}
+		};
+		return map.entrySet().stream().sorted(valueThenKeyComparator).map(Map.Entry::getKey)
+				.collect(Collectors.toCollection(ArrayList::new));
+	}
     
+	public static Map<BitSet, IntSet> groupMapByValue(Map<Integer, BitSet> vertexColourMap) {
+		Map<BitSet, IntSet> colourVertexIds = new HashMap<BitSet, IntSet>();
+		for (Entry<Integer, BitSet> entry : vertexColourMap.entrySet()) {
+			IntSet set = new DefaultIntSet(Constants.DEFAULT_SIZE);
+			if (colourVertexIds.containsKey(entry.getValue()))
+				set = colourVertexIds.get(entry.getValue());
+			set.add(entry.getKey().intValue());
+			colourVertexIds.put(entry.getValue(), set);
+		}
+		return colourVertexIds;
+	}
+	
     public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
         for (Map.Entry<T, E> entry : map.entrySet()) {
             if (Objects.equals(value, entry.getValue())) {

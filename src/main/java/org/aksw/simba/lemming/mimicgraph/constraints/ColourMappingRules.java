@@ -1,13 +1,12 @@
 package org.aksw.simba.lemming.mimicgraph.constraints;
 
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-
-import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;

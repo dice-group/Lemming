@@ -9,10 +9,10 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.util.MapUtil;
 
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * This class will calculate the distribution of vertices in a particular color over 

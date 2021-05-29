@@ -18,9 +18,9 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphReverter {
 	

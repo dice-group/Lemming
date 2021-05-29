@@ -8,9 +8,16 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.junit.Test;
+
+import com.google.common.collect.Iterators;
 
 import junit.framework.Assert;
 
@@ -24,7 +31,7 @@ public class InfererTest {
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
 
-		Inferer inferer = new Inferer();
+		Inferer inferer = new Inferer(false);
 		OntModel ontModel = inferer.readOntology(ontFilePath, null);
 		ontModel.read("22-rdf-syntax-ns", "TURTLE");
 		ontModel.read("rdf-schema", "TURTLE");
@@ -49,10 +56,10 @@ public class InfererTest {
 		Model confModel = ModelFactory.createDefaultModel();
 		confModel.read(fileName);
 
-		Inferer inferer = new Inferer();
+		Inferer inferer = new Inferer(false);
 		Model actualModel = inferer.process(confModel, ontModel);
 
-		printModel(actualModel, "after");
+		//printModel(actualModel, "after");
 
 		// check if the model contains properties or resources that should have been
 		// replaced
@@ -70,24 +77,36 @@ public class InfererTest {
 		Assert.assertTrue(actualModel.containsResource(replaced));
 
 	}
-
-	// for testing
-	private void printModel(Model model, String name) {
-		FileWriter out = null;
-		try {
-			out = new FileWriter(name);
-			model.write(out, "TTL");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException ignore) {
-				}
-			}
-		}
+	
+	@Test
+	public void testLinkedGeo() {
+		OntModel ontModel = ModelFactory.createOntologyModel();
+		ontModel.read("geo_ont_test.ttl");
+		
+		Model geoModel = ModelFactory.createDefaultModel();
+		geoModel.read("snippet_linkedgeo.nt");
+		
+		Inferer inferer = new Inferer(false);
+		Model actualModel = inferer.process(geoModel, ontModel);
+		
+		//prior to inference, 0 resources have a type stmt
+		int count = Iterators.size(geoModel.listResourcesWithProperty(RDF.type));
+		Assert.assertTrue(count==0);
+		
+		int afterCount = Iterators.size(actualModel.listResourcesWithProperty(RDF.type));
+		Assert.assertTrue(afterCount==4);
+		
+		Model containerModel = ModelFactory.createDefaultModel();
+		containerModel.read("container_graph.ttl");
+		int size = Iterators.size(containerModel.listResourcesWithProperty(RDFS.member));
+		Assert.assertEquals(size, 0);
+		
+		containerModel = inferer.process(containerModel, ontModel);
+		int afterSize = Iterators.size(containerModel.listStatements(null, RDFS.member, (RDFNode)null));
+		Assert.assertEquals(afterSize, 9);
+		
+		
+		
 	}
 
 }

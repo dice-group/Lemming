@@ -12,6 +12,20 @@ public class TripleBaseSingleID {
 	public int edgeId = -1;
 	public BitSet edgeColour = null;
 	
+	public TripleBaseSingleID() {
+	}
+
+	public TripleBaseSingleID(int tailId, BitSet headColour, int headId, BitSet tailColour, int edgeId,
+			BitSet edgeColour) {
+		super();
+		this.tailId = tailId;
+		this.headColour = headColour;
+		this.headId = headId;
+		this.tailColour = tailColour;
+		this.edgeId = edgeId;
+		this.edgeColour = edgeColour;
+	}
+
 	public boolean equals(Object obj){
 		if(obj instanceof TripleBaseSingleID){
 			TripleBaseSingleID comObj = (TripleBaseSingleID) obj;

@@ -26,11 +26,11 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphGenerationSimpleApproach2 extends AbstractGraphGeneration implements IGraphGeneration{
 private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimpleApproach2.class);
@@ -229,29 +229,31 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						}
 						
 						//get set of tail ids and head ids
-						IntSet setHeadIDs = new DefaultIntSet();
+						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						
 						if(mMapColourToVertexIDs.containsKey(headColo)){
-							setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 						}
 						
 						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
 						IntSet tmpConnectedHeadIds = getConnectedHeads(tailId, edgeColo);
 						if(tmpConnectedHeadIds!= null && tmpConnectedHeadIds.size() >0 ){
-							for(int connectedHead: tmpConnectedHeadIds.toIntegerArrayList()){
+							for(int connectedHead: tmpConnectedHeadIds){
 								if(setHeadIDs.contains(connectedHead))
 									setHeadIDs.remove(connectedHead);
 							}
 						}
 						
 						if(setHeadIDs.size() == 0){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
-						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 						
 						int headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
 						
@@ -334,9 +336,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						if(tailIDsProposer !=null && headIDsProposer != null ){
 							Integer tailId = tailIDsProposer.getPotentialItem();
 							
-							IntSet setHeadIDs = new DefaultIntSet();
+							IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							if(mMapColourToVertexIDs.containsKey(headColo)){
-								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+								setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 							}
 							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
 								continue;
@@ -352,7 +354,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 								continue;
 							}
 							
-							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 							
 							Integer headId = headIDsProposer.getPotentialItem(setFilteredHeadIDs);
 							if(tailId != null && headId != null && 
@@ -410,6 +412,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 						+ " edge's coloursince it could not find any approriate vertices to connect");
 			}
 		}
+		System.out.println();
 	}
 	
 	/**
@@ -427,7 +430,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if(outEdgeDistPerVertColo != null){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
-				seed += vertColoProposer.getSeed() - seed+1;
+				seed = vertColoProposer.getSeed() + 1;
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -441,7 +444,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if(inEdgeDistPerVertColo != null){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
-				seed += vertColoProposer.getSeed() - seed+1;
+				seed = vertColoProposer.getSeed() + 1;
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -482,7 +485,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 					
 					ObjectDistribution<Integer> potentialOutDegree = new ObjectDistribution<Integer>(objTailIDs, possOutDegreePerTailIDs);
 					OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialOutDegree, random);
-					seed += potentialDegreeProposer.getSeed() - seed +1;
+					seed = potentialDegreeProposer.getSeed() + 1;
 					
 					// put to map potential degree proposer
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossODegree = mapPossibleODegreePerOEColo.get(edgeColo);

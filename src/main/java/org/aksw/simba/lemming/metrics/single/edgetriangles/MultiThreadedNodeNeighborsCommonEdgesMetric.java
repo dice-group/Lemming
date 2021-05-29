@@ -2,14 +2,13 @@ package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
 import grph.Grph;
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
-
+import org.aksw.simba.lemming.util.IntSetUtil;
 /**
  * This metric is the number of triangles of the graph.
  * 
@@ -75,7 +74,7 @@ public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric 
                                 // make sure that n_2 is larger than the sourceId (so no other thread is
                                 // handling this triangle). Note that n_2 is allowed to be smaller than n_1
                                 if ((n_2 > sourceId) && (n_2 != n_1)) {
-                                    count += IntSets.intersection(edgesOfVertex[n_1], edgesOfVertex[n_2]).size();
+                                    count += IntSetUtil.intersection(edgesOfVertex[n_1], edgesOfVertex[n_2]).size();
                                 }
                             }
                         }

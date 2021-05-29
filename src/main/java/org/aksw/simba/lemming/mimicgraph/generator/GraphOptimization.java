@@ -20,10 +20,10 @@ import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphOptimization {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphOptimization.class);
@@ -232,7 +232,7 @@ public class GraphOptimization {
 			
 			BufferedWriter fErrorScoreWriter ;
 			String errorScoreFile = new String(savedFile);
-			errorScoreFile = "results/"+ errorScoreFile.replace(".rdf", ".scores");
+			errorScoreFile = "results/"+ errorScoreFile.replace(".ttl", ".scores");
 			
 			
 			fErrorScoreWriter = new BufferedWriter( new FileWriter(errorScoreFile, true));
@@ -250,7 +250,8 @@ public class GraphOptimization {
 			if(args!=null && args.size()>0){
 				//dataset 
 				if(args.containsKey("-ds")){
-					fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")? "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
+					//fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")? "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
+					fWriter.write("# Input dataset: " + args.get("-ds")+ ".\n");
 				}else{
 					fWriter.write("# Default input dataset: Sematic Web Dog Food.\n");
 				}

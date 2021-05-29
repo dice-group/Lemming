@@ -2,9 +2,9 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 
-import com.carrotsearch.hppc.IntArrayList;
 
 import grph.Grph.DIRECTION;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
@@ -28,11 +28,11 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     protected double calculateStdDev(IntArrayList degrees, double avg) {
         double temp, sum = 0;
-        for (int i = 0; i < degrees.elementsCount; ++i) {
-            temp = avg - degrees.buffer[i];
+        for (int i = 0; i < degrees.size(); ++i) {
+            temp = avg - degrees.getInt(i);
             temp *= temp;
             sum += temp;
         }
-        return Math.sqrt(sum / degrees.elementsCount);
+        return Math.sqrt(sum / degrees.size());
     }
 }

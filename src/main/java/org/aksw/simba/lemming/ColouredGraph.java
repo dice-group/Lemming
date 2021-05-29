@@ -1,11 +1,14 @@
 package org.aksw.simba.lemming;
 
+import grph.DefaultIntSet;
 import grph.Grph;
 import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -18,9 +21,6 @@ import org.aksw.simba.lemming.util.Constants;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
@@ -62,8 +62,8 @@ public class ColouredGraph {
         this.vertexPalette = vertexPalette;
         this.edgePalette = edgePalette;
 
-        mapVertexIdAndLiterals = new HashMap<Integer, Map<BitSet, List<String>>>();
-        mapLiteralTypes = new HashMap<BitSet, String>();
+        mapVertexIdAndLiterals = new HashMap<>();
+        mapLiteralTypes = new HashMap<>();
     }
 
     public ColouredGraph(ColourPalette vertexPalette, ColourPalette edgePalette, ColourPalette datatypedEdgePalette) {
@@ -196,6 +196,10 @@ public class ColouredGraph {
     public IntSet getEdges() {
         return graph.getEdges();
     }
+    
+    public double getAverageDegree() {
+    	return graph.getAverageDegree();
+    }
 
     public IntSet getOutEdges(int vertexId) {
         return graph.getOutEdges(vertexId);
@@ -206,7 +210,7 @@ public class ColouredGraph {
     }
 
     public IntSet getVerticesAccessibleThrough(int vertexId, int edgeId) {
-        return graph.getVerticesAccessibleThrough(vertexId, edgeId);
+    	return graph.getVerticesAccessibleThrough(vertexId, edgeId);
     }
 
     public int getDiameter() {
@@ -238,10 +242,7 @@ public class ColouredGraph {
      * @param inVertexColours
      */
     public void setVertexColours(ObjectArrayList<BitSet> inVertexColours) {
-        vertexColours = new ObjectArrayList<BitSet>();
-        for (int i = 0; i < inVertexColours.size(); ++i) {
-            vertexColours.add(inVertexColours.get(i));
-        }
+        vertexColours = new ObjectArrayList<>(inVertexColours);
     }
 
     /**
@@ -250,7 +251,28 @@ public class ColouredGraph {
      * @param inEdgeColours
      */
     public void setEdgeColours(ObjectArrayList<BitSet> inEdgeColours) {
-        edgeColours = new ObjectArrayList<BitSet>();
+        edgeColours = new ObjectArrayList<>(inEdgeColours);
+    }
+    
+    /**
+     * Set new data to the mapping of vertex's ids and vertex's colours
+     * Note: vertex ids should be from 0 to map's size-1 continuously
+     * @param inVertexColours
+     */
+    public void setVertexColours(Map<Integer, BitSet> inVertexColours) {
+        vertexColours = new ObjectArrayList<>();
+        for (int i = 0; i < inVertexColours.size(); ++i) {
+            vertexColours.add(inVertexColours.get(i));
+        }
+    }
+
+    /**
+     * Set new data to the mapping of edge's ids and edge's colours
+     * Note: edge ids should be from 0 to map'size-1 continuously
+     * @param inEdgeColours
+     */
+    public void setEdgeColours(Map<Integer, BitSet> inEdgeColours) {
+        edgeColours = new ObjectArrayList<>();
         for (int i = 0; i < inEdgeColours.size(); ++i) {
             edgeColours.add(inEdgeColours.get(i));
         }
@@ -331,8 +353,8 @@ public class ColouredGraph {
      * @return
      */
     public IntSet getVertices(BitSet vertexColour) {
-        IntSet setVertices = new DefaultIntSet();
-
+        IntSet setVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+     
         new MultiThreadProcessing(this.getVertices()) {
 
             @Override
@@ -513,7 +535,7 @@ public class ColouredGraph {
 
                         IntSet setOfLinkedVIDs = res.get(dteColo);
                         if (setOfLinkedVIDs == null) {
-                            setOfLinkedVIDs = new DefaultIntSet();
+                            setOfLinkedVIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
                             res.put(dteColo, setOfLinkedVIDs);
                         }
                         setOfLinkedVIDs.add(vId);

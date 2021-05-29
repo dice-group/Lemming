@@ -3,10 +3,10 @@ package org.aksw.simba.lemming.metrics.dist;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
-import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 
 import grph.Grph;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * The distribution of out degrees. The sample space is sorted ascending.
@@ -25,8 +25,8 @@ public class OutDegreeDistributionMetric extends AbstractMetric implements IntDi
         IntIntOpenHashMap counts = new IntIntOpenHashMap();
         Grph g = graph.getGraph();
         IntArrayList outDegrees = g.getAllOutEdgeDegrees();
-        for (int i = 0; i < outDegrees.elementsCount; ++i) {
-            counts.putOrAdd(outDegrees.buffer[i], 1, 1);
+        for (int i = 0; i < outDegrees.size(); ++i) {
+            counts.putOrAdd(outDegrees.getInt(i), 1, 1);
         }
         return IntDistribution.fromMap(counts);
     }

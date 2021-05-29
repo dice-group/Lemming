@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.creation.GeologyDataset;
 import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
@@ -44,6 +45,8 @@ public class GraphGenerationTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationTest.class);
 	private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 	private static final String PERSON_GRAPH = "PersonGraph/";
+	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
+	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
 	
 	//default number of vertices is 10000
 	private static int mNumberOfDesiredVertices = 10000;
@@ -59,7 +62,8 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Collect input arguments
 		 * -ds: dataset
-		 * 		value: swdf (semanticwebdogfood), or pg (persongraph)  
+		 * 		value: swdf (semanticwebdogfood), pg (persongraph) 
+		 * 				, lgeo (linkedgeo) or geology
 		 * 
 		 * -nv: number of vertices
 		 * 		value: integer number - denoting number of given vertices
@@ -71,14 +75,14 @@ public class GraphGenerationTest {
 		 * 		value: 	R: random approach, 
 		 * 				RD: random with degree approach
 		 * 		value: 	D: distribution approach, 
-		 * 				DD: disitrbution and degree approach
+		 * 				DD: distribution and degree approach
 		 * 		value: 	C: clustering approach, 
 		 * 				CD: clustering and degree approach
 		 * 
 		 * -r: random optimization 
 		 * -op: (optional) number of optimization steps 
-		 * 
-		 * -l: (optional) path to the mimic graph to be loaded,
+		 * -s:  (optional) seed
+		 * -l:  (optional) path to the mimic graph to be loaded,
 		 * this skips the mimic graph generation process and loads it directly from file
 		 * 
         ----------------------------------------------------*/
@@ -114,10 +118,21 @@ public class GraphGenerationTest {
         	LOGGER.info("Loading PersonGraph...");
         	mDatasetManager = new PersonGraphDataset();
         	datasetPath = PERSON_GRAPH;
-        }else{
+        }else if(dataset.equalsIgnoreCase("swdf")){
         	LOGGER.info("Loading SemanticWebDogFood...");
         	mDatasetManager = new SemanticWebDogFoodDataset();
         	datasetPath = SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH;
+        } else if(dataset.equalsIgnoreCase("lgeo")) {
+        	LOGGER.info("Loading LinkedGeo...");
+        	mDatasetManager = new LinkedGeoDataset();
+        	datasetPath = LINKED_GEO_DATASET_FOLDER_PATH;
+        } else if(dataset.equalsIgnoreCase("geology")) {
+        	LOGGER.info("Loading Geology Dataset...");
+        	mDatasetManager = new GeologyDataset();
+        	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
+        } else {
+        	LOGGER.error("Got an unknown dataset name: \"{}\". Aborting", dataset);
+        	return;
         }
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
@@ -179,7 +194,7 @@ public class GraphGenerationTest {
         }else if(typeGenerator.equalsIgnoreCase("CD")){
         	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 
         double startTime = System.currentTimeMillis();
@@ -210,7 +225,7 @@ public class GraphGenerationTest {
 			LOGGER.info("Intermediate results saved under: "+loadMimicGraph);
 
 		}
-        
+		
         /*---------------------------------------------------
         Optimization with constant expressions
         ----------------------------------------------------*/
@@ -235,8 +250,9 @@ public class GraphGenerationTest {
         Lexicalization with word2vec
         ----------------------------------------------------*/
         LOGGER.info("Lexicalize the mimic graph ...");
-        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs, mGrphGenerator);
-        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph());
+        GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
+        String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(), 
+        		mGrphGenerator.getMappingColoursAndVertices()));
         
         //output results to file "LemmingEx.result"       
         grphOptimizer.printResult(mapArgs, startTime, saveFiled, seed);

@@ -1,12 +1,12 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
 import grph.Grph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import toools.set.IntSet;
-import toools.set.IntSets;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 import java.util.*;
 
@@ -52,15 +52,14 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
             // An edge will always have only two vertices
             // In case of loop edge, it will have only 1 vertex
             if (verticesConnectedToEdge.length == 2) {
-                IntSet verticesInCommon = IntSets.intersection(
+                IntSet verticesInCommon = IntSetUtil.intersection(
                         vertexNeighbors[verticesConnectedToEdge[0]],
                         vertexNeighbors[verticesConnectedToEdge[1]]);
-
-                for (IntCursor vertex : verticesInCommon) {
-                    if (vertex.value == verticesConnectedToEdge[0]
-                            || vertex.value == verticesConnectedToEdge[1])
+                for (int vertex:verticesInCommon) {
+                    if (vertex == verticesConnectedToEdge[0]
+                            || vertex == verticesConnectedToEdge[1])
                         continue;
-                    temp.set(vertex.value, verticesConnectedToEdge[0], verticesConnectedToEdge[1]);
+                    temp.set(vertex, verticesConnectedToEdge[0], verticesConnectedToEdge[1]);
 
                     if (visitedV.contains(temp))
                         continue;
@@ -70,9 +69,9 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
                     } catch (CloneNotSupportedException e) {
                         e.printStackTrace();
                     }
-                    triangleCount += IntSets.intersection(vertexEdges[verticesConnectedToEdge[0]], vertexEdges[verticesConnectedToEdge[1]]).size() *
-                            IntSets.intersection(vertexEdges[verticesConnectedToEdge[1]], vertexEdges[vertex.value]).size() *
-                            IntSets.intersection(vertexEdges[vertex.value], vertexEdges[verticesConnectedToEdge[0]]).size();
+                    triangleCount += IntSetUtil.intersection(vertexEdges[verticesConnectedToEdge[0]], vertexEdges[verticesConnectedToEdge[1]]).size() *
+                    		IntSetUtil.intersection(vertexEdges[verticesConnectedToEdge[1]], vertexEdges[vertex]).size() *
+                    		IntSetUtil.intersection(vertexEdges[vertex], vertexEdges[verticesConnectedToEdge[0]]).size();
                     }
             }
         }

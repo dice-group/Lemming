@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics;
 
+import grph.DefaultIntSet;
 import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,10 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.MapUtil;
-
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -174,7 +174,7 @@ public class TripleColourDistributionMetric  {
 		// third key
 		IntSet setItemIDs = mapItems.get(thirdKey);
 		if (setItemIDs == null) {
-			setItemIDs = new DefaultIntSet();
+			setItemIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			mapItems.put(thirdKey, setItemIDs);
 		}
 
@@ -234,7 +234,7 @@ public class TripleColourDistributionMetric  {
 						// tail color
 						IntSet setTailIDs = mapTails.get(tColo);
 						if(setTailIDs == null){
-							setTailIDs = new DefaultIntSet();
+							setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							mapTails.put(tColo, setTailIDs);
 						}
 						setTailIDs.add(tId);
@@ -259,7 +259,7 @@ public class TripleColourDistributionMetric  {
 						// head color
 						IntSet setHeadIDs = mapHeads.get(hColo);
 						if(setHeadIDs == null){
-							setHeadIDs = new DefaultIntSet();
+							setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							mapHeads.put(hColo, setHeadIDs);
 						}
 						
@@ -285,7 +285,7 @@ public class TripleColourDistributionMetric  {
 						// edge color
 						IntSet setEdgeIDs = mapEdges.get(edgeColo);
 						if(setEdgeIDs == null){
-							setEdgeIDs = new DefaultIntSet();
+							setEdgeIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							mapEdges.put(edgeColo, setEdgeIDs);
 						}
 						setEdgeIDs.add(edgeId);

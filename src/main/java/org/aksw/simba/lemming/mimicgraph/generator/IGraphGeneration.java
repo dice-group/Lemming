@@ -6,9 +6,10 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
-import toools.set.IntSet;
 
 import com.carrotsearch.hppc.BitSet;
+
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public interface IGraphGeneration {
 	public ColouredGraph generateGraph();

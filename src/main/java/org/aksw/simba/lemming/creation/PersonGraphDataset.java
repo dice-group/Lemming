@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 			 modelOntMap.put("outputfile_2015-2010.ttl", "dbpedia_2015-10.owl");
 			 modelOntMap.put("outputfile_2016-2004.ttl", "dbpedia_2016-04.owl");
 			 modelOntMap.put("outputfile_2016-2010.ttl", "dbpedia_2016-10.owl");
-			 
+
 			 for (String fileName : lstSortedFilesByName) {
 				 File file = new File(dataFolderPath+"/"+fileName);
 				 
@@ -51,8 +52,10 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 					 
-					 Inferer inferer = new Inferer();
-					 OntModel ontModel = inferer.readOntology(modelOntMap.get(fileName), null);
+					 Inferer inferer = new Inferer(true);
+					 OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+					 ontModel.getDocumentManager().setProcessImports(false);
+					 ontModel.read(modelOntMap.get(fileName));					 
 					 ontModel.read("22-rdf-syntax-ns", "TTL");
 					 ontModel.read("rdf-schema", "TTL");
 					 
@@ -60,10 +63,10 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 personModel = inferer.process(personModel, ontModel);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
-					if (graph != null) {
-						LOGGER.info("Generated graph of "+ personModel.size() +" triples");
+					 if (graph != null) {
+						LOGGER.info("Generated graph of " + personModel.size() + " triples");
 						graphs.add(graph);
-					}
+					 }
 				 }
 			 }
 		 }else{

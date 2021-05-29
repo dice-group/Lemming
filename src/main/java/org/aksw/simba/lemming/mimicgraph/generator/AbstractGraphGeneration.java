@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.colour.ColourPalette;
-import org.aksw.simba.lemming.colour.InMemoryPalette;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgEdgeColoDistMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgVertColoDistMetric;
@@ -26,19 +24,15 @@ import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
-import org.aksw.simba.lemming.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
-public abstract class AbstractGraphGeneration {
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
+public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGraphGeneration.class);
 	
 	protected int mIDesiredNoOfVertices = 0;
@@ -99,7 +93,7 @@ public abstract class AbstractGraphGeneration {
 		// mimic grpah
 		mMimicGraph = new ColouredGraph();
 		//copy all colour palette to the mimic graph
-		copyColourPalette(origGrphs);
+		copyColourPalette(origGrphs, mMimicGraph);
 		
 		// random
 		mRandom = new Random(this.seed);
@@ -126,14 +120,14 @@ public abstract class AbstractGraphGeneration {
 		mRdfTypePropertyColour = mMimicGraph.getRDFTypePropertyColour();
 		
 		//estimate potential number of edges
-		estimateNoEdges(origGrphs);
+		mIDesiredNoOfEdges = estimateNoEdges(origGrphs, mIDesiredNoOfVertices);
 		
 		//assign colors to vertices
 		paintVertices();
 		
 		//initialize edge colour proposer
 		mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist, mSetOfRestrictedEdgeColours, seed);
-		seed += mEdgeColoProposer.getSeed() - seed +1;
+		seed = mEdgeColoProposer.getSeed() + 1;
 		
 		//assign colors to edges
 		paintEdges();
@@ -299,7 +293,7 @@ public abstract class AbstractGraphGeneration {
 	private void paintVertices(){
 		LOGGER.info("Assign colors to vertices.");
 		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(mVertColoDist, seed);
-		seed += colorProposer.getSeed() - seed +1;
+		seed = colorProposer.getSeed() + 1;
 		//IOfferedItem<BitSet> colorProposer = new OfferedItemByErrorScore<BitSet>(mVertColoDist);
 		for(int i = 0 ; i< mIDesiredNoOfVertices ; i++){
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
@@ -307,7 +301,7 @@ public abstract class AbstractGraphGeneration {
 			int vertId = mMimicGraph.addVertex(offeredColor);
 			IntSet setVertIDs = mMapColourToVertexIDs.get(offeredColor);
 			if(setVertIDs == null){
-				setVertIDs = new DefaultIntSet();
+				setVertIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 				mMapColourToVertexIDs.put(offeredColor, setVertIDs);
 			}
 			setVertIDs.add(vertId);
@@ -399,7 +393,7 @@ public abstract class AbstractGraphGeneration {
 			
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
-			seed += eColoProposer.getSeed() - seed +1;
+			seed = eColoProposer.getSeed() + 1;
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -452,7 +446,7 @@ public abstract class AbstractGraphGeneration {
 					mMapEdgeIdsToColour.put(fakeEdgeID, eColo);
 					IntSet setEdges = mMapColourToEdgeIDs.get(eColo);
 					if(setEdges == null ){
-						setEdges = new DefaultIntSet();
+						setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						mMapColourToEdgeIDs.put(eColo, setEdges);
 					}
 					setEdges.add(fakeEdgeID	);
@@ -492,7 +486,7 @@ public abstract class AbstractGraphGeneration {
 		//concurrent hash map shared between multi-threads
 		
 		for(BitSet eColo: setOfRestrictedEdgeColours){
-			IntSet setEdges = new DefaultIntSet();
+			IntSet setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			mMapColourToEdgeIDs.put(eColo, setEdges);
 		}
 		
@@ -502,7 +496,7 @@ public abstract class AbstractGraphGeneration {
 			
 			final IOfferedItem<BitSet> eColoProposer = 
 					new OfferedItemByRandomProb<>( new ObjectDistribution<BitSet>(mEdgeColoDist.sampleSpace, mEdgeColoDist.values), seed);
-			seed += eColoProposer.getSeed() - seed +1;
+			seed = eColoProposer.getSeed() + 1;
 			//final ObjectDoubleOpenHashMap<BitSet> tmpEdgeThreshold = mEdgeColoursThreshold.clone();
 			
 			
@@ -552,8 +546,7 @@ public abstract class AbstractGraphGeneration {
 			for(BitSet eColo: setEdgeColours){
 				IntSet setEdgeIds = mMapColourToEdgeIDs.get(eColo);
 				if(setEdgeIds!=null && setEdgeIds.size() > 0){
-					
-					for(int eId: mMapColourToEdgeIDs.get(eColo).toIntegerArrayList()){
+					for(int eId: mMapColourToEdgeIDs.get(eColo)) {
 						mMapEdgeIdsToColour.put(eId,eColo);
 					}
 				}else{
@@ -614,7 +607,7 @@ public abstract class AbstractGraphGeneration {
 			
 			IntSet setEdgeIDs = mMapColourToEdgeIDs.get(offeredColor);
 			if(setEdgeIDs == null){
-				setEdgeIDs = new DefaultIntSet();
+				setEdgeIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 				mMapColourToEdgeIDs.put(offeredColor, setEdgeIDs);
 			}
 				
@@ -636,9 +629,9 @@ public abstract class AbstractGraphGeneration {
 		/*
 		 * filter colour and empty colour vertices
 		 */
-		IntSet colourVertices = new DefaultIntSet();
-		IntSet emptyColourVertices = new DefaultIntSet();
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		IntSet emptyColourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		for(BitSet vColo: setVertexColours){
 			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
 			
@@ -687,29 +680,6 @@ public abstract class AbstractGraphGeneration {
 	
 	
 	/**
-	 * draft estimation of number edges
-	 * @param origGrphs
-	 */
-	private void estimateNoEdges(ColouredGraph[] origGrphs){
-		LOGGER.info("Estimate the number of edges in the new graph.");
-		if(origGrphs != null && origGrphs.length >0){
-			int iNoOfVersions = origGrphs.length;
-			double noEdges = 0;
-			for(ColouredGraph graph: origGrphs){
-				int iNoEdges = graph.getEdges().size();
-				int iNoVertices = graph.getVertices().size();
-				noEdges += iNoEdges/(iNoVertices *1.0); 
-			}
-			noEdges *= mIDesiredNoOfVertices;
-			noEdges /= iNoOfVersions;
-			mIDesiredNoOfEdges = (int)Math.round(noEdges);
-			LOGGER.warn("Estimated the number of edges in the new graph is " + mIDesiredNoOfEdges);
-		}else{
-			LOGGER.warn("The array of original graphs is empty!");
-		}
-	}
-	
-	/**
 	 * compute average distribution of vertex's and edge's colors
 	 * 
 	 * @param origGrphs the array of all versions of a graph
@@ -738,48 +708,6 @@ public abstract class AbstractGraphGeneration {
 //		System.out.println("Number of painted edges: " + totalEdges + " in total " + keyEdgeColo.size() +" colors");
 //	}
 	
-	private void copyColourPalette(ColouredGraph[] origGraphs){
-		if(Constants.IS_EVALUATION_MODE){
-			ColourPalette newVertexPalette = new InMemoryPalette();
-			ColourPalette newEdgePalette = new InMemoryPalette();
-			ColourPalette newDTEdgePalette = new InMemoryPalette();
-			
-			//copy colour palette of all the original graphs to the new one
-			
-			for(ColouredGraph grph: origGraphs){
-				// merge vertex colours
-				ColourPalette vPalette = grph.getVertexPalette();
-				Map<String, BitSet>mapVertexURIsToColours =  vPalette.getMapOfURIAndColour();
-				fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
-				
-				// merge edge colours
-				ColourPalette ePalette = grph.getEdgePalette();
-				Map<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
-				fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
-				
-				// merge data typed edge colours
-				ColourPalette dtePalette = grph.getDataTypedEdgePalette();
-				Map<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
-				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
-			}
-			
-			mMimicGraph.setVertexPalette(newVertexPalette);
-			mMimicGraph.setEdgePalette(newEdgePalette);
-			mMimicGraph.setDataTypeEdgePalette(newDTEdgePalette);
-		}
-	}
-	
-	private void fillColourToPalette(ColourPalette palette, Map<String, BitSet> mapOfURIsAndColours){
-//		Object[]arrObjURIs = mapOfURIsAndColours.keys;
-		Object[]arrObjURIs = mapOfURIsAndColours.keySet().toArray();
-		for(int i = 0 ; i < arrObjURIs.length ; i++){
-//			if(mapOfURIsAndColours.allocated[i]){
-				String uri = (String) arrObjURIs[i];
-				BitSet colour = mapOfURIsAndColours.get(uri);
-				palette.updateColour(colour, uri);
-//			}
-		}
-	}
 	
 	public synchronized boolean connectIfPossible(int tailId, int headId, BitSet eColo) {
 		if(connectableVertices(tailId, headId, eColo)) {
@@ -805,7 +733,7 @@ public abstract class AbstractGraphGeneration {
 		
 		IntSet setOfHeads = mapTailToHeads.get(tailId);
 		if(setOfHeads == null){
-			setOfHeads = new DefaultIntSet();
+			setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			mapTailToHeads.put(tailId, setOfHeads);
 		}
 		
@@ -819,7 +747,7 @@ public abstract class AbstractGraphGeneration {
 	
 	public IntSet getConnectedHeads(int tailId, BitSet eColo){
 		
-		IntSet setOfHeads = new DefaultIntSet();
+		IntSet setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
 		if(mapTailToHeads != null && mapTailToHeads.containsKey(tailId)){
 			setOfHeads = mapTailToHeads.get(tailId);
@@ -860,7 +788,7 @@ public abstract class AbstractGraphGeneration {
 		
 		if(iNoOfSpareEdges == 0 ){
 			for(int i = 0 ; i< numberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
@@ -869,16 +797,17 @@ public abstract class AbstractGraphGeneration {
 			}
 		}else{
 			for(int i = 0 ; i< numberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
 				}
 				lstAssingedEdges.add(tmpSetEdges);
 			}
-			IntSet spareSetEdges = new DefaultIntSet();
+			
 			//add remaining edges
 			int iEdgeId = (numberOfThreads -1) *  iNoOfEdgesPerThread;
+			IntSet spareSetEdges = new DefaultIntSet(iNoOfEdges-iEdgeId);
 			spareSetEdges.add(iEdgeId);
 			while(iEdgeId < iNoOfEdges){
 				iEdgeId ++;
@@ -947,7 +876,7 @@ public abstract class AbstractGraphGeneration {
 		
 		if(iNoOfSpareEdges == 0 ){
 			for(int i = 0 ; i< mNumberOfThreads ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
@@ -956,16 +885,17 @@ public abstract class AbstractGraphGeneration {
 			}
 		}else{
 			for(int i = 0 ; i< mNumberOfThreads -1 ; i++){
-				IntSet tmpSetEdges = new DefaultIntSet();
+				IntSet tmpSetEdges = new DefaultIntSet(iNoOfEdgesPerThread);
 				for(int j = 0 ; j < iNoOfEdgesPerThread ; j++){
 					int iEdgeId = (i*iNoOfEdgesPerThread) + j;
 					tmpSetEdges.add(iEdgeId);
 				}
 				lstAssignedEdges.add(tmpSetEdges);
 			}
-			IntSet spareSetEdges = new DefaultIntSet();
+			
 			//add remaining edges
 			int iEdgeId = (mNumberOfThreads -1) *  iNoOfEdgesPerThread;
+			IntSet spareSetEdges = new DefaultIntSet(iNumberOfOtherEdges-iEdgeId);
 			spareSetEdges.add(iEdgeId);
 			while(iEdgeId < iNumberOfOtherEdges){
 				iEdgeId ++;

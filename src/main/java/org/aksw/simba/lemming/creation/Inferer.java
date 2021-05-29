@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
@@ -29,6 +29,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,14 +37,22 @@ import org.slf4j.LoggerFactory;
  * The Inferer class implements an inference of the type of subjects and objects
  * of a given RDF Model from a given Ontology. To use this class, one could
  * first use the readOntology() method and then use the process() method.
+ * 
+ * @author Alexandra Silva
  *
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
-
-	public Inferer() {
-
+	
+	/**
+	 * Do we also want materialization to be applied to the graph
+	 */
+	private boolean isMat = false;
+	
+	public Inferer(boolean isMat) {
+		this.isMat = isMat;
 	}
 
 	/**
@@ -66,6 +75,24 @@ public class Inferer {
 
 			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
 			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
+			
+			if(isMat) {
+				GraphMaterializer materializer = new GraphMaterializer(ontProperties);
+				while(true){
+					long size = newModel.size();
+					List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+					List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+					List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
+					
+					newModel.add(symmetricStmts);
+					newModel.add(transitiveStmts);
+					newModel.add(inverseStmts);
+					
+					//if the model didn't grow, break the loop
+					if(size==newModel.size())
+						break;
+				}
+			}
 
 			// infer type statements, a single property name is also enforced here
 			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
@@ -73,7 +100,7 @@ public class Inferer {
 
 			// uniform the names of the classes
 			renameClasses(newModel, classes);
-
+			
 		}
 		return newModel;
 	}
@@ -91,7 +118,8 @@ public class Inferer {
 		Set<Resource> set = new HashSet<>();
 		List<Statement> statements = model.listStatements().toList();
 		for (Statement curStat : statements) {
-			set.add(curStat.getSubject());
+			if(curStat.getSubject().isURIResource())
+				set.add(curStat.getSubject());
 			if (curStat.getObject().isURIResource()) {
 				set.add(curStat.getObject().asResource());
 			}
@@ -133,6 +161,15 @@ public class Inferer {
 			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
 			// searchType(curStatement, ontModel, newModel);
 			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
+			
+			String pattern =  "^(http:\\/\\/www\\.w3\\.org\\/1999\\/02\\/22-rdf-syntax-ns#_)\\d+$";
+					//"^(http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#_).*";
+		
+			if(curStatement.getPredicate().getURI().matches(pattern)) {
+				ModelUtil.replaceStatement(newModel, 
+						curStatement, 
+						ResourceFactory.createStatement(curStatement.getSubject(), RDFS.member, curStatement.getObject()));
+			}
 		}
 	}
 
@@ -157,7 +194,6 @@ public class Inferer {
 
 		// search for the predicate of the model in the ontology
 		OntProperty property = ontModel.getOntProperty(predicate.toString());
-
 		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
@@ -263,7 +299,6 @@ public class Inferer {
 	 * @param ontElements the ontology classes or properties
 	 * @return
 	 */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
 
 		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();

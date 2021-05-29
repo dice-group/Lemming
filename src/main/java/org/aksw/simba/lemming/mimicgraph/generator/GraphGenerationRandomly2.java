@@ -22,11 +22,11 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import toools.set.DefaultIntSet;
-import toools.set.IntSet;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements IGraphGeneration{
 
@@ -209,29 +209,31 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 						}
 						
 						//get set of tail ids and head ids
-						IntSet setHeadIDs = new DefaultIntSet();
+						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						
 						if(mMapColourToVertexIDs.containsKey(headColo)){
-							setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+							setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 						}
 						
 						if(setHeadIDs == null || setHeadIDs.size() == 0 ){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
 						IntSet tmpConnectedHeadIds = getConnectedHeads(tailId, edgeColo);
 						if(tmpConnectedHeadIds!= null && tmpConnectedHeadIds.size() >0 ){
-							for(int connectedHead: tmpConnectedHeadIds.toIntegerArrayList()){
+							for(int connectedHead: tmpConnectedHeadIds){
 								if(setHeadIDs.contains(connectedHead))
 									setHeadIDs.remove(connectedHead);
 							}
 						}
 						
 						if(setHeadIDs.size() == 0){
+							maxIterationFor1Edge--;
 							continue;
 						}
 						
-						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 						
 						int headId = headIDProposer.getPotentialItem(setFilteredHeadIDs);
 						
@@ -316,9 +318,9 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 								continue;
 							}
 							
-							IntSet setHeadIDs = new DefaultIntSet();
+							IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 							if(mMapColourToVertexIDs.containsKey(headColo)){
-								setHeadIDs = mMapColourToVertexIDs.get(headColo).clone();
+								setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 							}
 							
 							if(setHeadIDs == null || setHeadIDs.size() == 0 ){
@@ -335,7 +337,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 								continue;
 							}
 							
-							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs.toIntegerArrayList());
+							Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
 							
 							int headId = headIDProposer.getPotentialItem(setFilteredHeadIDs);
 							
@@ -489,7 +491,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 					
 					ObjectDistribution<Integer> potentialOutDegree = new ObjectDistribution<Integer>(objTailIDs, possOutDegreePerTailIDs);
 					OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialOutDegree, random);
-					seed += potentialDegreeProposer.getSeed() - seed +1;
+					seed = potentialDegreeProposer.getSeed() + 1;
 					// put to map potential degree proposer
 					ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapPossODegree = mapPossibleODegreePerOEColo.get(edgeColo);
 					if(mapPossODegree == null){

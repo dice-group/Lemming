@@ -6,7 +6,6 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
-import com.carrotsearch.hppc.cursors.IntCursor;
 
 
 /**
@@ -46,10 +45,9 @@ public class DuolionMetric extends AbstractMetric implements SingleValueMetric {
     @Override
     public double apply(ColouredGraph graph) {
         graphCopy = graph.copy();
-
-        for (IntCursor edgeCursor : graph.getGraph().getEdges()) {
+        for (int edge:graph.getGraph().getEdges()) {
             if (random.nextDouble() > edgeSurvivalProbability) {
-                graphCopy.getGraph().removeEdge(edgeCursor.value);
+                graphCopy.getGraph().removeEdge(edge);
             }
         }
 
