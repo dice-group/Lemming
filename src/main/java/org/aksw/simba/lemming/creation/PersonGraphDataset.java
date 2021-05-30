@@ -52,10 +52,8 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
 
-
 					 OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					 ontModel.getDocumentManager().setProcessImports(false);
-					 //TODO: ask: datafiles contains RDFS??
 					 ontModel.read(modelOntMap.get(fileName));
 					 ontModel.read("22-rdf-syntax-ns", "TTL");
 					 ontModel.read("rdf-schema", "TTL");

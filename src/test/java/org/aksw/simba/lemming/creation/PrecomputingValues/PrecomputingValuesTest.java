@@ -77,7 +77,7 @@ public class PrecomputingValuesTest{
         assertTrue(timeForNewInferer<(timeForOldInferer));
     }
 
-    @Test
+    //@Test
     public void testSWDF(){
         //create ontology model
         OntModel ontModel = createOntModelForSWDF();
@@ -140,6 +140,63 @@ public class PrecomputingValuesTest{
         assertTrue(timeForNewInferer<(timeForOldInferer));
     }
 
+    @Test
+    public void testLinkedGeo(){
+        //create ontology model
+        OntModel ontModel = createOntModelForLGeo();
+
+        File folder = new File(LINKED_GEO_DATASET_FOLDER_PATH);
+        List<String> lstSortedFilesByName = Arrays.asList(folder.list());
+        Collections.sort(lstSortedFilesByName);
+
+        System.out.println("Test LinkedGeo:");
+        System.out.println("Compute with old Inferer......");
+        long startTime = System.currentTimeMillis();
+        List<Long> sizesForOldInferer = new ArrayList<>();
+
+        for (String fileName : lstSortedFilesByName) {
+            File file = new File(LINKED_GEO_DATASET_FOLDER_PATH + "/" + fileName);
+            Model geoModel = ModelFactory.createDefaultModel();
+            for (File subFile : file.listFiles()) {
+                // read file to model
+                geoModel.read(subFile.getAbsolutePath(), "TTL");
+            }
+            sizesForOldInferer.add(geoModel.size());
+            OldInferer oldInferer = new OldInferer(true);
+            // returns a new model with the added triples
+            geoModel = oldInferer.process(geoModel, ontModel);
+            sizesForOldInferer.add(geoModel.size());
+        }
+
+        long endTime = System.currentTimeMillis();
+        long timeForOldInferer = endTime-startTime;
+        System.out.println("OldTime: " + timeForOldInferer);
+
+        System.out.println("Compute with new Inferer......");
+        startTime = System.currentTimeMillis();
+        List<Long> sizesForNewInferer = new ArrayList<>();
+        Inferer inferer = new Inferer(true, ontModel);
+        for (String fileName : lstSortedFilesByName) {
+            File file = new File(LINKED_GEO_DATASET_FOLDER_PATH + "/" + fileName);
+            Model geoModel = ModelFactory.createDefaultModel();
+            for (File subFile : file.listFiles()) {
+                // read file to model
+                geoModel.read(subFile.getAbsolutePath(), "TTL");
+            }
+            sizesForNewInferer.add(geoModel.size());
+
+            // returns a new model with the added triples
+            geoModel = inferer.process(geoModel);
+            sizesForNewInferer.add(geoModel.size());
+        }
+        endTime = System.currentTimeMillis();
+        long timeForNewInferer = endTime-startTime;
+        System.out.println("NewTime: " + timeForNewInferer);
+
+        assertArrayEquals(sizesForOldInferer.toArray(), sizesForNewInferer.toArray());
+        assertTrue(timeForNewInferer<(timeForOldInferer));
+    }
+
     private OntModel createOntModelForGeology(){
         OntModel ontModel = ModelFactory.createOntologyModel();
         ontModel.getDocumentManager().setProcessImports(false);
@@ -163,6 +220,28 @@ public class PrecomputingValuesTest{
         }
         return ontModel;
     }
+
+    private OntModel createOntModelForLGeo(){
+        OntModel ontModel = ModelFactory.createOntologyModel();
+        ontModel.getDocumentManager().setProcessImports(false);
+        ontModel.read("22-rdf-syntax-ns", "TTL");
+        ontModel.read("rdf-schema", "TTL");
+        ontModel.read("lgeo/foaf.ttl");
+        ontModel.read("lgeo/skos.ttl");
+        ontModel.read("lgeo/purl_dcterms.ttl");
+        ontModel.read("lgeo/owl.ttl");
+        ontModel.read("lgeo/terms.ttl");
+        ontModel.read("lgeo/wgs84_pos.ttl");
+        ontModel.read("lgeo/2014-09-09-ontology.sorted.nt");
+        ontModel.read("lgeo/geosparql.ttl");
+        ontModel.read("lgeo/geovocab_geometry.ttl");
+        ontModel.read("lgeo/geovocab_spatial.ttl");
+        ontModel.read("lgeo/LGD-Dump-110406-Ontology.nt");
+        ontModel.read("lgeo/rdfs-ns-void.rdf");
+        ontModel.read("lgeo/custom_ontology.nt");
+        return ontModel;
+    }
+
 
     private void addToModel(File folder, Model dogFoodModel) {
         for (File file : folder.listFiles()) {
