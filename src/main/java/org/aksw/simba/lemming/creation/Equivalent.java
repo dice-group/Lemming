@@ -74,8 +74,7 @@ public class Equivalent<T extends OntResource> {
 
 	/**
 	 * Adds the elements of a set to object's own set
-	 * 
-	 * @see addEquivalent(T attribute)
+	 *
 	 * @param set set of OntProperty / OntClass objects to be added
 	 */
 	public void addEquivalentGroup(Set<T> set) {
