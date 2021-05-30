@@ -26,7 +26,7 @@ public class PrecomputingValuesTest{
     private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
     private static final String PERSON_GRAPH = "PersonGraph/";
 
-    @Test
+    //@Test
     public void testGeologyGraphs(){
         //create ontology model
         OntModel ontModel = createOntModelForGeology();
@@ -77,7 +77,7 @@ public class PrecomputingValuesTest{
         assertTrue(timeForNewInferer<(timeForOldInferer));
     }
 
-    //@Test
+    @Test
     public void testSWDF(){
         //create ontology model
         OntModel ontModel = createOntModelForSWDF();
@@ -88,16 +88,21 @@ public class PrecomputingValuesTest{
         List<Long> sizesForOldInferer = new ArrayList<>();
 
         Model dogFoodModel = ModelFactory.createDefaultModel();
-        for (int y = 2001; y <= 2015; ++y) {
-            File folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
+        long oldModelSize;
+        File folder;
+        for (int y = 2001; y <= 2019; ++y) {
+            folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
             if (folder.exists()) {
+                oldModelSize = dogFoodModel.size();
+                addToModel(folder, dogFoodModel);
+                if(oldModelSize < dogFoodModel.size()){
+                    OldInferer oldInferer = new OldInferer(true);
+                    dogFoodModel = oldInferer.process(dogFoodModel, ontModel);
+                }
                 for(File file: folder.listFiles()){
                     dogFoodModel.read(file.getAbsolutePath());
                 }
             }
-            sizesForOldInferer.add(dogFoodModel.size());
-            OldInferer oldInferer = new OldInferer(true);
-            dogFoodModel = oldInferer.process(dogFoodModel, ontModel);
             sizesForOldInferer.add(dogFoodModel.size());
         }
 
@@ -112,15 +117,18 @@ public class PrecomputingValuesTest{
 
         dogFoodModel = ModelFactory.createDefaultModel();
         Inferer inferer = new Inferer(true, ontModel);
-        for (int y = 2001; y <= 2015; ++y) {
-            File folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
+        for (int y = 2001; y <= 2019; ++y) {
+            folder = new File(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH + y);
             if (folder.exists()) {
+                oldModelSize = dogFoodModel.size();
+                addToModel(folder, dogFoodModel);
+                if(oldModelSize < dogFoodModel.size()){
+                    dogFoodModel = inferer.process(dogFoodModel);
+                }
                 for(File file: folder.listFiles()){
                     dogFoodModel.read(file.getAbsolutePath());
                 }
             }
-            sizesForNewInferer.add(dogFoodModel.size());
-            dogFoodModel = inferer.process(dogFoodModel);
             sizesForNewInferer.add(dogFoodModel.size());
         }
 
@@ -154,6 +162,17 @@ public class PrecomputingValuesTest{
             ontModel.read(file.getAbsolutePath(), "TTL");
         }
         return ontModel;
+    }
+
+    private void addToModel(File folder, Model dogFoodModel) {
+        for (File file : folder.listFiles()) {
+            try {
+                dogFoodModel.read(file.getAbsolutePath());
+            } catch (Exception e) {
+                System.out.println("Exception while reading file \"" + file.toString() + "\". Aborting." + " " + e.toString() );
+                System.exit(1);
+            }
+        }
     }
 
     class OldInferer {
@@ -447,6 +466,12 @@ public class PrecomputingValuesTest{
                     }
                 }
             }
+            /*System.out.println(uriNodeMap.keySet().size());
+            for(String uri : uriNodeMap.keySet()){
+                System.out.print(uri + "  --> ");
+                System.out.println("\t" + uriNodeMap.get(uri).getEquivalents().toString());
+
+            }*/
             return uriNodeMap;
         }
 
