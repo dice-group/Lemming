@@ -24,9 +24,8 @@ public class PrecomputingValuesTest{
     private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
     private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
     private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
-    private static final String PERSON_GRAPH = "PersonGraph/";
 
-    //@Test
+    @Test
     public void testGeologyGraphs(){
         //create ontology model
         OntModel ontModel = createOntModelForGeology();
@@ -77,7 +76,7 @@ public class PrecomputingValuesTest{
         assertTrue(timeForNewInferer<(timeForOldInferer));
     }
 
-    //@Test
+    @Test
     public void testSWDF(){
         //create ontology model
         OntModel ontModel = createOntModelForSWDF();
