@@ -2,13 +2,9 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 
 import org.aksw.simba.lemming.util.ModelUtil;
@@ -45,7 +41,7 @@ public class Inferer {
 	/**
 	 * Do we also want materialization to be applied to the graph
 	 */
-	private boolean isMat = false;
+	private boolean isMat;
 
 	/**
 	 * An ontology model for a dataset.
@@ -58,12 +54,11 @@ public class Inferer {
 
 	private Set<OntProperty> ontProperties;
 
-
 	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
 		this.isMat = isMat;
 		this.ontModel = ontModel;
 
-		// collect the equivalent properties and classes information from the ontology
+		//collect the equivalent properties and classes information from the ontology
 		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
 		classesEquiMap = searchEquivalents(ontClasses);
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
@@ -325,18 +320,16 @@ public class Inferer {
 	 */
 	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
 
-		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
+		Map<String, Equivalent> uriNodeMap = new HashMap<>();
 
-		for(T currentResource : ontElements){
+		Stack<T> stack = new Stack<>();
+		stack.addAll(ontElements);
 
+		while (!stack.isEmpty()) {
+			T currentResource = stack.pop();
 			String curURI = currentResource.getURI();
 
-			if (curURI!=null) {
-
-				Equivalent curNode = new Equivalent(currentResource);
-				uriNodeMap.put(curURI,curNode);
-
-				//compute the equivalent classes/properties and store them into a list
+			if (curURI!=null && !uriNodeMap.containsKey(curURI)) {
 				List<T> eqsList = null;
 				try {
 					if (currentResource.isProperty())
@@ -344,19 +337,32 @@ public class Inferer {
 					if (currentResource.isClass())
 						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
-					LOGGER.warn(
-							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
-							currentResource.toString());
+
 				}
 
-				// If there're equivalent classes or properties, put them into map
+				//node to where we want to add the info to
+				Equivalent curNode = null;
 				if (eqsList != null && !eqsList.isEmpty()) {
-					for(T eq : eqsList){
-						if(eq.getURI() != null){
-							uriNodeMap.put(eq.toString(), curNode);
-							curNode.addEquivalent(eq);
-						}
+					stack.addAll(eqsList);
+				}
+
+				// check to which node do we need to add this info to
+				for (Equivalent<T> equi : uriNodeMap.values()) {
+					if(equi.containsElement(currentResource)){
+						curNode = equi;
+						curNode.addEquivalent(currentResource);
+						break;
 					}
+				}
+				// if there's no such node, create new one
+				if (curNode == null) {
+					curNode = new Equivalent(currentResource);
+				}
+
+				// add the node to the map with the URI and add the equivalents (if existing) to the node object
+				uriNodeMap.put(curURI, curNode);
+				if(eqsList != null) {
+					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
 				}
 			}
 		}
