@@ -166,4 +166,12 @@ public class VertexDegrees {
 	public void updateVertexOutdegree(int vertexId, int additionValue) {
 		mMapVerticesoutDegree.putOrAdd(vertexId, vertexId, additionValue);
 	}
+
+	public IntIntOpenHashMap getmMapVerticesinDegree() {
+		return mMapVerticesinDegree;
+	}
+
+	public IntIntOpenHashMap getmMapVerticesoutDegree() {
+		return mMapVerticesoutDegree;
+	}
 }
