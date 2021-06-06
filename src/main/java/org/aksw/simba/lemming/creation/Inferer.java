@@ -217,17 +217,14 @@ public class Inferer {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!model.contains(subjType)) {
-					newStmts.add(subjType);
-				}
+				newStmts.add(subjType);
+
 			}
 			if (object.isResource()) {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
 					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!model.contains(objType)) {
-						newStmts.add(objType);
-					}
+					newStmts.add(objType);
 				}
 			}
 		}
@@ -270,7 +267,7 @@ public class Inferer {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!model.contains(subjNewStmt) && !curResource.isAnon()) {
+				if (!curResource.isAnon()) {
 					newStmts.add(subjNewStmt);
 				}
 			}
@@ -278,9 +275,8 @@ public class Inferer {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
 					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!model.contains(objNewStmt)) {
-						newStmts.add(objNewStmt);
-					}
+					newStmts.add(objNewStmt);
+
 				}
 			}
 		}
