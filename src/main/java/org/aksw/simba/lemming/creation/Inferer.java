@@ -172,7 +172,7 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param uriNodeMap  the ontology model
+	 * @param uriNodeMap  map each resource uri to its equivalent resources
 	 */
 	public void iterateStmts(Model newModel, Model sourceModel, Map<String, Equivalent> uriNodeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
@@ -245,7 +245,7 @@ public class Inferer {
 	 *                   ontology
 	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
-	 * @param uriNodeMap
+	 * @param uriNodeMap map each resource uri to its equivalent resources
 	 * @return a set of statements inferred from a property
 	 */
 	private Set<Statement> searchType(Statement statement, Model model, Map<String, Equivalent> uriNodeMap) {
@@ -269,17 +269,17 @@ public class Inferer {
 		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
-				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!model.contains(subjType) && !curResource.isAnon()) {
-					newStmts.add(subjType);
+				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
+				if (!model.contains(subjNewStmt) && !curResource.isAnon()) {
+					newStmts.add(subjNewStmt);
 				}
 			}
 			if (object.isResource()) {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
-					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!model.contains(objType)) {
-						newStmts.add(objType);
+					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
+					if (!model.contains(objNewStmt)) {
+						newStmts.add(objNewStmt);
 					}
 				}
 			}
