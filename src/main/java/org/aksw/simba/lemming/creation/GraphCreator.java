@@ -35,12 +35,13 @@ public class GraphCreator {
 	protected ColourPalette vertexPalette;
 	protected ColourPalette edgePalette;
 
-	protected ColourPalette datatypedEdgePalette;
 	protected Map<Resource, Set<RDFDatatype>> dataTypedProperties;
+	protected ColourPalette datatypedEdgePalette;
+
 
 	public GraphCreator() {
-		// Initialize the classes
-		classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+		// Initialize the classes, OWL.class and RDF.class has the same color
+		classes = new ObjectObjectOpenHashMap<>();
 		classes.put(RDFS.Class, new HierarchyNode());
 		classes.put(OWL.Class, new HierarchyNode());
 		classes.put(RDF.Property, new HierarchyNode());
@@ -49,12 +50,13 @@ public class GraphCreator {
 		vertexPalette.setColour(OWL.Class.getURI(), vertexPalette.getColour(RDFS.Class.getURI()));
 		vertexPalette.addColour(RDF.Property.getURI());
 		// Initialize the properties
-		properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+		properties = new ObjectObjectOpenHashMap<>();
 		properties.put(RDF.type, new HierarchyNode());
 		edgePalette = new InMemoryPalette();
 		edgePalette.addColour(RDF.type.getURI());
 
-		dataTypedProperties = new HashMap<Resource, Set<RDFDatatype>>();
+		//data type edge connected literal
+		dataTypedProperties = new HashMap<>();
 		datatypedEdgePalette = new InMemoryPalette();
 	}
 
@@ -108,8 +110,7 @@ public class GraphCreator {
 			}
 
 			/*
-			 * ------------------------------------------------- if this statement has an
-			 * object as a literal -------------------------------------------------
+			 *if this statement has an object as a literal
 			 */
 			else {
 
@@ -148,6 +149,7 @@ public class GraphCreator {
 	}
 
 	protected ColourPalette createVertexPalette(Model model) {
+		//list all classes, put them into classes hierarchyNode map
 		NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
 		RDFNode node;
 		Resource resource1, resource2;
@@ -158,6 +160,7 @@ public class GraphCreator {
 				classes.put(resource1, null);
 			}
 		}
+		//list all statements with property RDFS.subClassOf
 		StmtIterator sIterator = model.listStatements(null, RDFS.subClassOf, (RDFNode) null);
 		Statement statement;
 		HierarchyNode hNode1, hNode2;
@@ -196,18 +199,18 @@ public class GraphCreator {
 				}
 				// add the hierarchy information
 				// if there is no list of child nodes
-				if (hNode1.childNodes == null) {
-					hNode1.childNodes = new Resource[] { resource2 };
+				if (hNode1.parentNodes == null) {
+					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
-					hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
-					hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
+					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
+					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
 				}
 				// if there is no list of parent nodes
-				if (hNode2.parentNodes == null) {
-					hNode2.parentNodes = new Resource[] { resource1 };
+				if (hNode2.childNodes == null) {
+					hNode2.childNodes = new Resource[] { resource1 };
 				} else {
-					hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
-					hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+					hNode2.childNodes = Arrays.copyOf(hNode2.childNodes, hNode2.childNodes.length + 1);
+					hNode2.childNodes[hNode2.childNodes.length - 1] = resource1;
 				}
 			} else {
 				// this triple seems to be wrong
@@ -274,18 +277,18 @@ public class GraphCreator {
 				}
 				// add the hierarchy information
 				// if there is no list of child nodes
-				if (hNode1.childNodes == null) {
-					hNode1.childNodes = new Resource[] { resource2 };
+				if (hNode1.parentNodes == null) {
+					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
-					hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
-					hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
+					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
+					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
 				}
 				// if there is no list of parent nodes
-				if (hNode2.parentNodes == null) {
-					hNode2.parentNodes = new Resource[] { resource1 };
+				if (hNode2.childNodes == null) {
+					hNode2.childNodes = new Resource[] { resource1 };
 				} else {
-					hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
-					hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+					hNode2.childNodes = Arrays.copyOf(hNode2.childNodes, hNode2.childNodes.length + 1);
+					hNode2.childNodes[hNode2.childNodes.length - 1] = resource1;
 				}
 			}
 		}
