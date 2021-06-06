@@ -333,7 +333,9 @@ public class Inferer {
 					if (currentResource.isClass())
 						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
-
+					LOGGER.warn(
+							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
+							currentResource.toString());
 				}
 
 				//node to where we want to add the info to
