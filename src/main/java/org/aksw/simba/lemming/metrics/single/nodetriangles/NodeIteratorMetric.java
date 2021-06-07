@@ -19,7 +19,7 @@ import org.aksw.simba.lemming.util.IntSetUtil;
  * "Finding, Counting and Listing all Triangles in Large Graphs, An Experimental Study".
  *
  * @see <a href=
- *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>).
+ *      "https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study">https://www.researchgate.net/publication/221131490_Finding_Counting_and_Listing_All_Triangles_in_Large_Graphs_an_Experimental_Study</a>
  *
  * @author Tanja Tornede
  * https://github.com/BlackHawkLex/Lemming/blob/master/src/main/java/org/aksw/simba/lemming/metrics/single/triangle/NodeIteratorNumberOfTrianglesMetric.java
@@ -30,24 +30,30 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
         super("#nodetriangles");
     }
 
-    public int calculateTriangles(ColouredGraph graph, IntSet highDegreeVertices) {
+    /**
+     * Count triangles on in a given graph, and the triangles which are formed by the given node set vertices are not
+     * taken into account.
+     * @param graph an instance of {@link ColouredGraph}.
+     * @param vertices a set of nodes, and it is a subset of nodes from the given graph.
+     * @return Amount of triangles
+     */
+    public int calculateTriangles(ColouredGraph graph, IntSet vertices) {
         Grph grph = getUndirectedGraph(graph.getGraph());
         IntSet visitedVertices = new DefaultIntSet(grph.getNumberOfVertices());
-		//IntSets.from();
         int numberOfTriangles = 0;
+
         for (int vertex:grph.getVertices()) {
+            if(vertices.contains(vertex)){
+                continue;
+            }
             IntSet neighbors = IntSetUtil.difference(IntSetUtil.union(grph.getInNeighbors(vertex), grph.getOutNeighbors(vertex)),
                     visitedVertices);
             for (int neighbor1:neighbors) {
                 IntSet neighbors1 = IntSetUtil
                         .difference(IntSetUtil.union(grph.getInNeighbors(neighbor1), grph.getOutNeighbors(neighbor1)), visitedVertices);
                 for (int neighbor2:neighbors) {
-                    if (vertex != neighbor1 && vertex != neighbor2 && neighbor1 < neighbor2
-                            && neighbors1.contains(neighbor2)) {
-                        if (!highDegreeVertices.contains(vertex) || !highDegreeVertices.contains(neighbor1)
-                                || !highDegreeVertices.contains(neighbor2)) {
-                            numberOfTriangles++;
-                        }
+                    if (vertex != neighbor1 && vertex != neighbor2 && neighbor1 < neighbor2 && neighbors1.contains(neighbor2)) {
+                        numberOfTriangles++;
                     }
                 }
             }
@@ -58,8 +64,8 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 
     @Override
     public double apply(ColouredGraph graph) {
-        IntSet highDegreeVertices = IntSets.EMPTY_SET;
-        return calculateTriangles(graph, highDegreeVertices);
+        IntSet vertices = IntSets.EMPTY_SET;
+        return calculateTriangles(graph, vertices);
     }
 
     private Grph getUndirectedGraph(Grph graph) {
