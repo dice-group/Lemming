@@ -26,13 +26,44 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         return calculateStdDev(degrees, calculateAvg(degrees));
     }
 
-    protected double calculateStdDev(IntArrayList degrees, double avg) {
+    protected double calculateStdDev(int[] degrees, double avg) {
         double temp, sum = 0;
-        for (int i = 0; i < degrees.size(); ++i) {
-            temp = avg - degrees.getInt(i);
+        for (int i = 0; i < degrees.length; ++i) {
+            temp = avg - degrees[i];
             temp *= temp;
             sum += temp;
         }
-        return Math.sqrt(sum / degrees.size());
+        return Math.sqrt(sum / degrees.length);
+    }
+    
+    /**
+     * The method checks if we need to compute in degree or out-degree and then calls the metricComputationMaxDegree with correct parameters.
+     * @param triple - edge on which graph operation is performed.
+     * @param metric - input metric which needs to be computed.
+     * @param graph - input graph.
+     * @param graphOperation - boolean value indicating graph operation. ("true" for adding an edge and "false" for removing an edge)
+     * @param previousResult - UpdatableMetricResult object containing the previous computed results.
+     * @return
+     */
+    @Override
+    public UpdatableMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
+            boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+    	UpdatableMetricResult newMetricResult;
+    	
+		switch (metric.getName()) {
+			case "stdDevInDegree":	
+
+				newMetricResult = calculateStdDev(mVertexDegrees.getmMapVerticesinDegree(), calculateAvg(mVertexDegrees.getmMapVerticesinDegree()));
+				break;
+
+			case "stdDevOutDegree":
+				newMetricResult = calculateStdDev(mVertexDegrees.getmMapVerticesinDegree(), calculateAvg(mVertexDegrees.getmMapVerticesinDegree()));
+				break;
+			
+			default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
+				newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
+		}
+		
+        return newMetricResult;
     }
 }
