@@ -1,12 +1,8 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import java.util.Arrays;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.apache.commons.lang3.ArrayUtils;
-
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
@@ -41,21 +37,20 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     }
     
     /**
-     * The method checks if we need to compute in degree or out-degree and then calls the metricComputationMaxDegree with correct parameters.
+     * The method calculates the StdDev of an array of updated degrees.
      * @param triple - edge on which graph operation is performed.
-     * @param metric - input metric which needs to be computed.
      * @param graph - input graph.
      * @param graphOperation - boolean value indicating graph operation. ("true" for adding an edge and "false" for removing an edge)
      * @param previousResult - UpdatableMetricResult object containing the previous computed results.
-     * @return
+     * @return SimpleMetricResult object.
      */
     @Override
-    public SimpleMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
+    public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph,
             boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
     	SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
     	int[] degreesArray;
     	IntArrayList degreesList;
-		switch (metric.getName()) {
+		switch (getName()) {
 			case "stdDevInDegree":	
 				degreesArray = mVertexDegrees.getmMapVerticesinDegree();
 				degreesList =  new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
@@ -69,9 +64,22 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 				break;
 			
 			default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-				newMetricResult = (SimpleMetricResult) applyUpdatable(graph, graphOperation, triple, previousResult);
+				newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
 		} 
 		
         return newMetricResult;
+    }
+    
+    /** Stores the previously computed values in SimpleMetricResult object.
+     * @param graph - input graph.
+     * @param graphOperation - boolean value indicating graph operation. ("true" for adding an edge and "false" for removing an edge). Not used here.
+     * @param triple - Edge on which graph operation is performed. Not used here.
+     * @param newMetricResult - UpdatableMetricResult object containing the results that should be updated.
+     * @return SimpleMetricResult object.
+     */
+    @Override
+    public SimpleMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation, TripleBaseSingleID triple, UpdatableMetricResult newMetricResult) {
+    	SimpleMetricResult metricResultTempObj = (SimpleMetricResult) newMetricResult;
+    	return metricResultTempObj;
     }
 }
