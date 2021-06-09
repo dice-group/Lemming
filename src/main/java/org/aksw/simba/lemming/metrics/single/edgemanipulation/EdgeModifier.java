@@ -51,11 +51,11 @@ public class EdgeModifier {
 		//Initialize the UpdatableMetricResult for all metrics
 		mMapPrevMetricsResult = new HashMap<>();
 		for(SingleValueMetric singleMetric: lstMetrics) {
-			if(singleMetric.getName().equals("maxInDegree")||singleMetric.getName().equals("maxOutDegree")) {
-				mMapPrevMetricsResult.put(singleMetric.getName(), new MaxVertexDegreeMetricResult(singleMetric.getName(), 0.0));
-			}else {
+			//if(singleMetric.getName().equals("maxInDegree")||singleMetric.getName().equals("maxOutDegree")) {
+				//mMapPrevMetricsResult.put(singleMetric.getName(), new MaxVertexDegreeMetricResult(singleMetric.getName(), 0.0));
+			//}else {
 				mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-			}
+			//}
 		}
 		
 		// Initialize optimized metrics list
@@ -128,7 +128,7 @@ public class EdgeModifier {
 	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
         			//double metVal = metric.apply(graph);
 	        		//Calling update method to get the metric values based on previous results
-	        		mMapPrevMetricsResult.put(metric.getName(), metric.update(triple, metric, graph, false, mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+	        		mMapPrevMetricsResult.put(metric.getName(), metric.update(triple, graph, false, mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
 	        		double metVal = mMapPrevMetricsResult.get(metric.getName()).getResult();//Get the new metric value
 	        		mapChangedMetricValues.put(metric.getName(), metVal);   
 	        	}
@@ -175,7 +175,7 @@ public class EdgeModifier {
 	        		
         			//double metVal = metric.apply(graph);
 	        		//Calling update method to get the metric values based on previous results
-	        		mMapPrevMetricsResult.put(metric.getName(), metric.update(triple, metric, graph, true, mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+	        		mMapPrevMetricsResult.put(metric.getName(), metric.update(triple, graph, true, mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
 	        		double metVal = mMapPrevMetricsResult.get(metric.getName()).getResult();//Get the new metric value
 	        		mapMetricValues.put(metric.getName(), metVal);   
 	        	}
