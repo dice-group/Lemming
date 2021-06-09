@@ -3,13 +3,12 @@ package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetricResult;
 import org.aksw.simba.lemming.metrics.single.SimpleMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.tools.PrecomputingValues;
@@ -62,6 +61,8 @@ public class EdgeModifier {
 		metricsOptimized= new ArrayList<>();
 		metricsOptimized.add(new MaxVertexDegreeMetric(DIRECTION.in));
 		metricsOptimized.add(new MaxVertexDegreeMetric(DIRECTION.out));
+		metricsOptimized.add(new StdDevVertexDegree(DIRECTION.in));
+		metricsOptimized.add(new StdDevVertexDegree(DIRECTION.out));
 	}
 	
 	private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics){
