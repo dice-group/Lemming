@@ -68,17 +68,17 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
+    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph,
             boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
     	UpdatableMetricResult newMetricResult;
     	
-		switch (metric.getName()) {
+		switch (getName()) {
 			case "maxInDegree":	
 				
 				if(graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge 
-					newMetricResult = metricComputationMaxDegree(metric, graph, GRAPHOPERATION.AddAnEdgeIndegree, DIRECTION.in, triple.headId, triple, 1, previousResult, mVertexDegrees);
+					newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeIndegree, DIRECTION.in, triple.headId, triple, 1, previousResult, mVertexDegrees);
 				}else {
-					newMetricResult = metricComputationMaxDegree(metric, graph, GRAPHOPERATION.RemoveAnEdgeIndegree, DIRECTION.in, triple.headId, triple, -1, previousResult, mVertexDegrees);
+					newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeIndegree, DIRECTION.in, triple.headId, triple, -1, previousResult, mVertexDegrees);
 				}
 				
 				break;
@@ -86,9 +86,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 			case "maxOutDegree":
 				if(graphOperation) {
-					newMetricResult = metricComputationMaxDegree(metric, graph, GRAPHOPERATION.AddAnEdgeOutdegree, DIRECTION.out, triple.headId, triple, 1, previousResult, mVertexDegrees);
+					newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeOutdegree, DIRECTION.out, triple.headId, triple, 1, previousResult, mVertexDegrees);
 				}else {
-					newMetricResult = metricComputationMaxDegree(metric, graph, GRAPHOPERATION.RemoveAnEdgeOutdegree, DIRECTION.out, triple.headId, triple, -1, previousResult, mVertexDegrees);
+					newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeOutdegree, DIRECTION.out, triple.headId, triple, -1, previousResult, mVertexDegrees);
 				}
 				break;
 			
@@ -110,12 +110,18 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * @param tripleID - The vertex that is modified.
 	 * @return
 	 */
-	private UpdatableMetricResult metricComputationMaxDegree(SingleValueMetric metric, ColouredGraph graph, GRAPHOPERATION metricName,
+	private UpdatableMetricResult metricComputationMaxDegree( ColouredGraph graph, GRAPHOPERATION metricName,
 			DIRECTION direction, int tripleID, TripleBaseSingleID triple, int updateVertexDegree, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
 		double metVal;
 
+		MaxVertexDegreeMetricResult metricResultTempObj;
+		if (previousResult instanceof MaxVertexDegreeMetricResult) {
+			metricResultTempObj = (MaxVertexDegreeMetricResult) previousResult;
+		}else {
+			metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), 0.0);
+		}
+		
 		// Set Temporary maps
-		MaxVertexDegreeMetricResult metricResultTempObj = (MaxVertexDegreeMetricResult) previousResult;
 		metricResultTempObj.setmMapCandidatesMetricTemp( metricResultTempObj.getmMapCandidatesMetric(), metricName);
 		metricResultTempObj.setmMapCandidatesMetricValuesTemp(metricResultTempObj.getmMapCandidatesMetricValues(), metricName);
 		
@@ -123,7 +129,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 		if (intSetTemp.size() == 0) { // Initially the Candidate set will be empty, hence need to call the apply method and store the candidates
 
-			metVal = metric.apply(graph); // apply the metric and get the value
+			metVal = apply(graph); // apply the metric and get the value
 			
 			metricResultTempObj.getmMapCandidatesMetricValuesTemp().replace(metricName, metVal); // Store the metric value for later use
 			metricResultTempObj.getmMapCandidatesMetricValues().put(metricName, metVal);
@@ -142,7 +148,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 					if(updateVertexDegree > 0) {
 						metVal = metVal + updateVertexDegree;
 					}else {
-						metVal = metric.apply(graph); // apply the metric and get the value
+						metVal = apply(graph); // apply the metric and get the value
 						IntSet maxDegreeVertices;
 						maxDegreeVertices = mVertexDegrees.getVerticesForDegree((int) metVal, direction); // Get the vertex with the metric value
 						

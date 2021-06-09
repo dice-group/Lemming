@@ -42,7 +42,7 @@ public interface SingleValueMetric extends Metric {
      * @param previousResult - UpdatableMetricResult object containing the previous computed results.
      * @return - metric result.
      */
-    public default UpdatableMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
+    public default UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph,
             boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
         return applyUpdatable(graph, graphOperation, triple,previousResult);
     }
