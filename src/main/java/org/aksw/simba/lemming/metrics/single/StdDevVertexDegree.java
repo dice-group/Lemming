@@ -1,7 +1,11 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import java.util.Arrays;
 
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.apache.commons.lang3.ArrayUtils;
 
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -26,14 +30,14 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         return calculateStdDev(degrees, calculateAvg(degrees));
     }
 
-    protected double calculateStdDev(int[] degrees, double avg) {
+    protected double calculateStdDev(IntArrayList degrees, double avg) {
         double temp, sum = 0;
-        for (int i = 0; i < degrees.length; ++i) {
-            temp = avg - degrees[i];
+        for (int i = 0; i < degrees.size(); ++i) {
+            temp = avg - degrees.getInt(i);
             temp *= temp;
             sum += temp;
         }
-        return Math.sqrt(sum / degrees.length);
+        return Math.sqrt(sum / degrees.size());
     }
     
     /**
@@ -46,23 +50,27 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
+    public SimpleMetricResult update(TripleBaseSingleID triple, SingleValueMetric metric, ColouredGraph graph,
             boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-    	UpdatableMetricResult newMetricResult;
-    	
+    	SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
+    	int[] degreesArray;
+    	IntArrayList degreesList;
 		switch (metric.getName()) {
 			case "stdDevInDegree":	
-
-				newMetricResult = calculateStdDev(mVertexDegrees.getmMapVerticesinDegree(), calculateAvg(mVertexDegrees.getmMapVerticesinDegree()));
+				degreesArray = mVertexDegrees.getmMapVerticesinDegree();
+				degreesList =  new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
+				newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
 				break;
 
 			case "stdDevOutDegree":
-				newMetricResult = calculateStdDev(mVertexDegrees.getmMapVerticesinDegree(), calculateAvg(mVertexDegrees.getmMapVerticesinDegree()));
+				degreesArray = mVertexDegrees.getmMapVerticesoutDegree();
+				degreesList = new IntArrayList(degreesArray);
+				newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
 				break;
 			
 			default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-				newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
-		}
+				newMetricResult = (SimpleMetricResult) applyUpdatable(graph, graphOperation, triple, previousResult);
+		} 
 		
         return newMetricResult;
     }
