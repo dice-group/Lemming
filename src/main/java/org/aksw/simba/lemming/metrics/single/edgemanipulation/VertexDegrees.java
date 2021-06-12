@@ -9,7 +9,9 @@ import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-/** Class for storing in and out degree of vertices.
+/**
+ * Class for storing in and out degree of vertices.
+ * 
  * @author Atul
  *
  */
@@ -21,6 +23,7 @@ public class VertexDegrees {
 
 	/**
 	 * Initializing the Maps and calling computeVerticesDegree method.
+	 * 
 	 * @param clonedGraph
 	 */
 	public VertexDegrees(ColouredGraph clonedGraph) {
@@ -30,6 +33,7 @@ public class VertexDegrees {
 
 	/**
 	 * Computing the in degree and out degree for all vertices in graph.
+	 * 
 	 * @param graph
 	 */
 	private void computeVerticesDegree(ColouredGraph graph) {
@@ -51,26 +55,27 @@ public class VertexDegrees {
 
 	/**
 	 * Returns in degree for input vertex id.
+	 * 
 	 * @param vertexId
 	 * @return
 	 */
 	public int getVertexIndegree(int vertexId) {
-		int inDegree = mMapVerticesinDegree[vertexId];
-		return inDegree;
+		return mMapVerticesinDegree[vertexId];
 	}
 
 	/**
 	 * Returns out degree for input vertex id.
+	 * 
 	 * @param vertexId
 	 * @return
 	 */
 	public int getVertexOutdegree(int vertexId) {
-		int outDegree = mMapVerticesoutDegree[vertexId];
-		return outDegree;
+		return mMapVerticesoutDegree[vertexId];
 	}
-	
+
 	/**
 	 * Returns out degree for input vertex id.
+	 * 
 	 * @param vertexId
 	 * @return
 	 */
@@ -85,10 +90,10 @@ public class VertexDegrees {
 
 		return degree;
 	}
-	
 
 	/**
 	 * Returns all vertices with input in degree.
+	 * 
 	 * @param degree
 	 * @return
 	 */
@@ -103,9 +108,10 @@ public class VertexDegrees {
 
 		return setOfVertices;
 	}
-	
+
 	/**
 	 * Returns all vertices with input out degree.
+	 * 
 	 * @param degree
 	 * @return
 	 */
@@ -120,21 +126,21 @@ public class VertexDegrees {
 
 		return setOfVertices;
 	}
-	
+
 	/**
 	 * Returns all vertices with input degree and direction.
+	 * 
 	 * @param degree
 	 * @return
 	 */
 	public IntSet getVerticesForDegree(int degree, DIRECTION direction) {
 		IntSet setOfVertices = new IntOpenHashSet();
-		
+
 		int mMapVerticesDegreeTemp[];
-		
-		if(direction == DIRECTION.in) {
+
+		if (direction == DIRECTION.in) {
 			mMapVerticesDegreeTemp = mMapVerticesinDegree;
-		}
-		else {
+		} else {
 			mMapVerticesDegreeTemp = mMapVerticesoutDegree;
 		}
 
@@ -149,15 +155,17 @@ public class VertexDegrees {
 
 	/**
 	 * Updates the in-degree for input vertex id with specified additionValue.
+	 * 
 	 * @param vertexId
 	 * @param additionValue
 	 */
 	public void updateVertexIndegree(int vertexId, int additionValue) {
 		mMapVerticesinDegree[vertexId] = mMapVerticesinDegree[vertexId] + additionValue;
 	}
-	
+
 	/**
 	 * Updates the out-degree for input vertex id with specified additionValue.
+	 * 
 	 * @param vertexId
 	 * @param additionValue
 	 */
