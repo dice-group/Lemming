@@ -65,7 +65,7 @@ public class EdgeModifier {
 		metricsOptimized = new ArrayList<>();
 		metricsOptimized.add(new MaxVertexDegreeMetric(DIRECTION.in));
 		metricsOptimized.add(new MaxVertexDegreeMetric(DIRECTION.out));
-		metricsOptimized.add(new AvgVertexDegreeMetric();
+		metricsOptimized.add(new AvgVertexDegreeMetric());
 		metricsOptimized.add(new StdDevVertexDegree(DIRECTION.in));
 		metricsOptimized.add(new StdDevVertexDegree(DIRECTION.out));
 	}
@@ -203,8 +203,7 @@ public class EdgeModifier {
 	/**
 	 * execute removing an edge
 	 * 
-	 * @param newMetricValues
-	 *            the already calculated metric from trial
+	 * @param newMetricValues the already calculated metric from trial
 	 */
 	public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
 		if (mLstRemovedEdges.size() > 0) {
@@ -229,8 +228,7 @@ public class EdgeModifier {
 	/**
 	 * execute adding an edge
 	 * 
-	 * @param newMetricValues
-	 *            the already calculated metric from trial
+	 * @param newMetricValues the already calculated metric from trial
 	 */
 	public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
 		if (mLstAddedEdges.size() > 0) {

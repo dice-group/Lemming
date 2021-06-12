@@ -8,78 +8,88 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
-    protected DIRECTION direction;
+	protected DIRECTION direction;
 
-    public StdDevVertexDegree(DIRECTION direction) {
-        super(direction == DIRECTION.in ? "stdDevInDegree" : "stdDevOutDegree");
-        this.direction = direction;
-    }
+	public StdDevVertexDegree(DIRECTION direction) {
+		super(direction == DIRECTION.in ? "stdDevInDegree" : "stdDevOutDegree");
+		this.direction = direction;
+	}
 
-    @Override
-    public double apply(ColouredGraph graph) {
-        IntArrayList degrees = null;
-        if (direction == DIRECTION.in) {
-            degrees = graph.getGraph().getAllInEdgeDegrees();
-        } else {
-            degrees = graph.getGraph().getAllOutEdgeDegrees();
-        }
-        return calculateStdDev(degrees, calculateAvg(degrees));
-    }
+	@Override
+	public double apply(ColouredGraph graph) {
+		IntArrayList degrees = null;
+		if (direction == DIRECTION.in) {
+			degrees = graph.getGraph().getAllInEdgeDegrees();
+		} else {
+			degrees = graph.getGraph().getAllOutEdgeDegrees();
+		}
+		return calculateStdDev(degrees, calculateAvg(degrees));
+	}
 
-    protected double calculateStdDev(IntArrayList degrees, double avg) {
-        double temp, sum = 0;
-        for (int i = 0; i < degrees.size(); ++i) {
-            temp = avg - degrees.getInt(i);
-            temp *= temp;
-            sum += temp;
-        }
-        return Math.sqrt(sum / degrees.size());
-    }
-    
-    /**
-     * The method calculates the StdDev of an array of updated degrees.
-     * @param triple - edge on which graph operation is performed.
-     * @param graph - input graph.
-     * @param graphOperation - boolean value indicating graph operation. ("true" for adding an edge and "false" for removing an edge)
-     * @param previousResult - UpdatableMetricResult object containing the previous computed results.
-     * @return SimpleMetricResult object.
-     */
-    @Override
-    public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph,
-            boolean graphOperation, UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-    	SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
-    	int[] degreesArray;
-    	IntArrayList degreesList;
+	protected double calculateStdDev(IntArrayList degrees, double avg) {
+		double temp, sum = 0;
+		for (int i = 0; i < degrees.size(); ++i) {
+			temp = avg - degrees.getInt(i);
+			temp *= temp;
+			sum += temp;
+		}
+		return Math.sqrt(sum / degrees.size());
+	}
+
+	/**
+	 * The method calculates the StdDev of an array of updated degrees.
+	 * 
+	 * @param triple         - edge on which graph operation is performed.
+	 * @param graph          - input graph.
+	 * @param graphOperation - boolean value indicating graph operation. ("true" for
+	 *                       adding an edge and "false" for removing an edge)
+	 * @param previousResult - UpdatableMetricResult object containing the previous
+	 *                       computed results.
+	 * @return SimpleMetricResult object.
+	 */
+	@Override
+	public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
+			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+		SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
+		int[] degreesArray;
+		IntArrayList degreesList;
 		switch (getName()) {
-			case "stdDevInDegree":	
-				degreesArray = mVertexDegrees.getmMapVerticesinDegree();
-				degreesList =  new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
-				newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-				break;
+		case "stdDevInDegree":
+			degreesArray = mVertexDegrees.getmMapVerticesinDegree();
+			degreesList = new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
+			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
+			break;
 
-			case "stdDevOutDegree":
-				degreesArray = mVertexDegrees.getmMapVerticesoutDegree();
-				degreesList = new IntArrayList(degreesArray);
-				newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-				break;
-			
-			default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-				newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
-		} 
-		
-        return newMetricResult;
-    }
-    
-    /** Stores the previously computed values in SimpleMetricResult object.
-     * @param graph - input graph.
-     * @param graphOperation - boolean value indicating graph operation. ("true" for adding an edge and "false" for removing an edge). Not used here.
-     * @param triple - Edge on which graph operation is performed. Not used here.
-     * @param newMetricResult - UpdatableMetricResult object containing the results that should be updated.
-     * @return SimpleMetricResult object.
-     */
-    @Override
-    public SimpleMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation, TripleBaseSingleID triple, UpdatableMetricResult newMetricResult) {
-    	SimpleMetricResult metricResultTempObj = (SimpleMetricResult) newMetricResult;
-    	return metricResultTempObj;
-    }
+		case "stdDevOutDegree":
+			degreesArray = mVertexDegrees.getmMapVerticesoutDegree();
+			degreesList = new IntArrayList(degreesArray);
+			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
+			break;
+
+		default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
+			newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
+		}
+
+		return newMetricResult;
+	}
+
+	/**
+	 * Stores the previously computed values in SimpleMetricResult object.
+	 * 
+	 * @param graph           - input graph.
+	 * @param graphOperation  - boolean value indicating graph operation. ("true"
+	 *                        for adding an edge and "false" for removing an edge).
+	 *                        Not used here.
+	 * @param triple          - Edge on which graph operation is performed. Not used
+	 *                        here.
+	 * @param newMetricResult - UpdatableMetricResult object containing the results
+	 *                        that should be updated.
+	 * @return SimpleMetricResult object.
+	 */
+	@Override
+	public SimpleMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation, TripleBaseSingleID triple,
+			UpdatableMetricResult newMetricResult) {
+		SimpleMetricResult metricResultTempObj = (SimpleMetricResult) newMetricResult;
+		return metricResultTempObj;
+	}
 }
