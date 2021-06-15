@@ -36,7 +36,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
         return sum / degrees.size();
     }
     
-    /**
+	/**
 	 * Stores the previously computed values in UpdateMetricResult object
 	 * 
 	 * @param graph
@@ -108,8 +108,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 		double numberOfVertices = 1;
 		if (graphOperation) { // If Add an Edge
 
-			if (metricResultTempObj.getSumVertexDegAddEdge() == 0.0) { // Computing the Avg Vertex Degree Metric for the
-																		// first time
+			if (metricResultTempObj.getSumVertexDegAddEdge() == 0.0) {
+				// Computing the Avg Vertex Degree Metric for the first time
 
 				// Get the Array from VertexDegrees class (Note: This can be replaced with
 				// getAllInEdgeDegrees method of Grph package)
@@ -120,8 +120,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 				numberOfVertices = getmMapVerticesinDegree.length;
 
 			} else { // Re-using the previously computed values
-				sum = metricResultTempObj.getSumVertexDegAddEdge() + 1; // Get the previous computed sum and add 1 to
-																		// previous sum since edge is added.
+				sum = metricResultTempObj.getSumVertexDegAddEdge() + 1;
+				// Get the previous computed sum and add 1 to previous sum since edge is added.
 				numberOfVertices = metricResultTempObj.getNumberOfVertices();
 			}
 
@@ -131,8 +131,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 		} else { // If Remove an Edge
 
-			if (metricResultTempObj.getSumVertexDegRemEdge() == 0.0) {// Computing the Avg Vertex Degree Metric for the
-																		// first time
+			if (metricResultTempObj.getSumVertexDegRemEdge() == 0.0) {
+				// Computing the Avg Vertex Degree Metric for the first time
 
 				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesinDegree();
 
@@ -142,8 +142,10 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 				numberOfVertices = getmMapVerticesinDegree.length;
 
 			} else { // Re-using the previously computed values
-				sum = metricResultTempObj.getSumVertexDegRemEdge() - 1; // Get the previous computed sum and subtract 1
-																		// to previous sum since edge is removed.
+				sum = metricResultTempObj.getSumVertexDegRemEdge() - 1;
+				// Get the previous computed sum and subtract 1 to previous sum since edge is
+				// removed.
+
 				numberOfVertices = metricResultTempObj.getNumberOfVertices();
 
 			}

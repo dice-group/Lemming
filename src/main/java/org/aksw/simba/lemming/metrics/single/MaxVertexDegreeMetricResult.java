@@ -18,16 +18,19 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 
-	private HashMap<GRAPHOPERATION, IntSet> mMapCandidatesMetricTemp; // Temp Map for storing candidate vertices for
-																		// metric computation
-	private HashMap<GRAPHOPERATION, Double> mMapCandidatesMetricValuesTemp; // Temp Map for storing metric values
+	private HashMap<GRAPHOPERATION, IntSet> mMapCandidatesMetricTemp;
+	// Temp Map for storing candidate vertices for metric computation
+
+	private HashMap<GRAPHOPERATION, Double> mMapCandidatesMetricValuesTemp;
+	// Temp Map for storing metric values
+
 	VertexDegrees mVertexDegrees;
 
-	private HashMap<GRAPHOPERATION, IntSet> mMapCandidatesMetric = new HashMap<>(); // Map for storing candidate
-																					// vertices for Max Degree metric
-																					// computation
-	private HashMap<GRAPHOPERATION, Double> mMapCandidatesMetricValues = new HashMap<>(); // Map for storing max degree
-																							// of vertices
+	private HashMap<GRAPHOPERATION, IntSet> mMapCandidatesMetric = new HashMap<>();
+	// Map for storing candidate vertices for Max Degree metric computation
+
+	private HashMap<GRAPHOPERATION, Double> mMapCandidatesMetricValues = new HashMap<>();
+	// Map for storing max degree of vertices
 
 	/**
 	 * Initializes the Maps, metric name, and result.
@@ -178,7 +181,5 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 	public HashMap<GRAPHOPERATION, Double> getmMapCandidatesMetricValues() {
 		return mMapCandidatesMetricValues;
 	}
-
-	
 
 }
