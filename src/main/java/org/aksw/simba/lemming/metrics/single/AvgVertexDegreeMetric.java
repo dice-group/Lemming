@@ -41,11 +41,6 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
-	 * @param triple
-	 *            - Edge on which graph operation is performed.
 	 * @param newMetricResult
 	 *            - UpdatableMetricResult object containing the results that should
 	 *            be updated.
@@ -53,16 +48,14 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 *         further iterations.
 	 */
 	@Override
-	public UpdatableMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation, TripleBaseSingleID triple,
-			UpdatableMetricResult newMetricResult) {
+	public UpdatableMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult previousResult) {
 
-		AvgVertexDegreeMetricResult metricResultTempObj = (AvgVertexDegreeMetricResult) newMetricResult;
-
-		// Update previous Results
-		if (graphOperation) { // If Add an Edge
-			metricResultTempObj.setSumVertexDegAddEdge(metricResultTempObj.getSumVertexDegAddEdgeTemp());
-		} else { // Remove an Edge
-			metricResultTempObj.setSumVertexDegRemEdge(metricResultTempObj.getSumVertexDegRemEdgeTemp());
+		AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
+		if (previousResult instanceof AvgVertexDegreeMetricResult) {
+			// Copying previously computed values in temporary variables
+			metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
+			metricResultTempObj
+					.setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
 		}
 
 		return metricResultTempObj;
@@ -97,18 +90,13 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 			return new SimpleMetricResult(getName(), apply(graph));
 		}
 
-		AvgVertexDegreeMetricResult metricResultTempObj;
-		if (previousResult instanceof AvgVertexDegreeMetricResult) {
-			metricResultTempObj = (AvgVertexDegreeMetricResult) previousResult;
-		} else {
-			metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
-		}
+		AvgVertexDegreeMetricResult metricResultTempObj = (AvgVertexDegreeMetricResult) applyUpdatable(graph, previousResult);
 
 		double sum = 0;
 		double numberOfVertices = 1;
 		if (graphOperation) { // If Add an Edge
 
-			if (metricResultTempObj.getSumVertexDegAddEdge() == 0.0) {
+			if (metricResultTempObj.getSumVertexDeg() == 0.0) {
 				// Computing the Avg Vertex Degree Metric for the first time
 
 				// Get the Array from VertexDegrees class (Note: This can be replaced with
@@ -120,18 +108,18 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 				numberOfVertices = getmMapVerticesinDegree.length;
 
 			} else { // Re-using the previously computed values
-				sum = metricResultTempObj.getSumVertexDegAddEdge() + 1;
+				sum = metricResultTempObj.getSumVertexDeg() + 1;
 				// Get the previous computed sum and add 1 to previous sum since edge is added.
 				numberOfVertices = metricResultTempObj.getNumberOfVertices();
 			}
 
 			// Set values in Temporary objects
-			metricResultTempObj.setSumVertexDegAddEdgeTemp(sum);
+			metricResultTempObj.setSumVertexDeg(sum);
 			metricResultTempObj.setNumberOfVertices(numberOfVertices);
 
 		} else { // If Remove an Edge
 
-			if (metricResultTempObj.getSumVertexDegRemEdge() == 0.0) {
+			if (metricResultTempObj.getSumVertexDeg() == 0.0) {
 				// Computing the Avg Vertex Degree Metric for the first time
 
 				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesinDegree();
@@ -142,7 +130,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 				numberOfVertices = getmMapVerticesinDegree.length;
 
 			} else { // Re-using the previously computed values
-				sum = metricResultTempObj.getSumVertexDegRemEdge() - 1;
+				sum = metricResultTempObj.getSumVertexDeg() - 1;
 				// Get the previous computed sum and subtract 1 to previous sum since edge is
 				// removed.
 
@@ -150,12 +138,13 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 			}
 
-			metricResultTempObj.setSumVertexDegRemEdgeTemp(sum);
+			metricResultTempObj.setSumVertexDeg(sum);
 			metricResultTempObj.setNumberOfVertices(numberOfVertices);
 		}
 
 		sum = sum / numberOfVertices; // Compute Metric value
 		metricResultTempObj.setResult(sum);
+
 		return metricResultTempObj;
 	}
 

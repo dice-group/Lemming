@@ -10,11 +10,7 @@ package org.aksw.simba.lemming.metrics.single;
  */
 public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 
-	private double sumVertexDegAddEdge = 0.0; // Variable for storing sum of vertex degrees for Add an Edge
-	private double sumVertexDegRemEdge = 0.0; // Variable for storing sum of Vertex degrees for Remove an Edge
-
-	private double sumVertexDegAddEdgeTemp = 0.0; // Temp variable for storing sum of vertex degrees for Add an Edge
-	private double sumVertexDegRemEdgeTemp = 0.0; // Temp variable for storing sum of Vertex degrees for Remove an Edge
+	private double sumVertexDeg = 0.0; // Variable for storing sum of vertex degrees
 
 	private double numberOfVertices = 0.0; // Variable for storing number of vertices.
 
@@ -35,8 +31,8 @@ public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 	 * 
 	 * @return - double value for sum.
 	 */
-	public double getSumVertexDegAddEdge() {
-		return sumVertexDegAddEdge;
+	public double getSumVertexDeg() {
+		return sumVertexDeg;
 	}
 
 	/**
@@ -45,68 +41,8 @@ public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 	 * @param sumVertexDegAddEdge
 	 *            - double value for sum
 	 */
-	public void setSumVertexDegAddEdge(double sumVertexDegAddEdge) {
-		this.sumVertexDegAddEdge = sumVertexDegAddEdge;
-	}
-
-	/**
-	 * Returns the sum of vertex degrees computed for remove an edge operation.
-	 * 
-	 * @return - double value for sum.
-	 */
-	public double getSumVertexDegRemEdge() {
-		return sumVertexDegRemEdge;
-	}
-
-	/**
-	 * Update the sum of vertex degrees computed for remove an edge operation.
-	 * 
-	 * @param sumVertexDegRemEdge
-	 *            - double value for sum
-	 */
-	public void setSumVertexDegRemEdge(double sumVertexDegRemEdge) {
-		this.sumVertexDegRemEdge = sumVertexDegRemEdge;
-	}
-
-	/**
-	 * Returns the temporarily stored sum of vertex degrees computed for add an edge
-	 * operation.
-	 * 
-	 * @return - double value for sum
-	 */
-	public double getSumVertexDegAddEdgeTemp() {
-		return sumVertexDegAddEdgeTemp;
-	}
-
-	/**
-	 * Update the temporarily stored sum of vertex degrees computed for add an edge
-	 * operation.
-	 * 
-	 * @param sumVertexDegAddEdgeTemp
-	 */
-	public void setSumVertexDegAddEdgeTemp(double sumVertexDegAddEdgeTemp) {
-		this.sumVertexDegAddEdgeTemp = sumVertexDegAddEdgeTemp;
-	}
-
-	/**
-	 * Returns the temporarily stored sum of vertex degrees computed for remove an
-	 * edge operation.
-	 * 
-	 * @return - double value for sum
-	 */
-	public double getSumVertexDegRemEdgeTemp() {
-		return sumVertexDegRemEdgeTemp;
-	}
-
-	/**
-	 * Update the temporarily stored sum of vertex degrees computed for remove an
-	 * edge operation.
-	 * 
-	 * @param sumVertexDegRemEdgeTemp
-	 *            - double value for sum.
-	 */
-	public void setSumVertexDegRemEdgeTemp(double sumVertexDegRemEdgeTemp) {
-		this.sumVertexDegRemEdgeTemp = sumVertexDegRemEdgeTemp;
+	public void setSumVertexDeg(double sumVertexDeg) {
+		this.sumVertexDeg = sumVertexDeg;
 	}
 
 	/**
