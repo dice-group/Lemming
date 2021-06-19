@@ -342,25 +342,49 @@ public class Inferer {
 				Equivalent curNode = null;
 				if (eqsList != null && !eqsList.isEmpty()) {
 					stack.addAll(eqsList);
+
+					Map<T, Equivalent> equiMap = new HashMap<>();
+					for(T equiRe : eqsList){
+						if(equiRe.getURI()!=null && uriNodeMap.containsKey(equiRe.getURI())){
+							Equivalent equi = uriNodeMap.get(equiRe.getURI());
+							equiMap.put(equiRe, equi);
+						}
+					}
+					if(!equiMap.isEmpty()){
+						for(T key : equiMap.keySet()){
+							if(curNode == null || curNode == equiMap.get(key)){
+								curNode = equiMap.get(key);
+							}else {
+								curNode.addEquivalentGroup(equiMap.get(key).getEquiResources());
+							}
+						}
+						curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+						uriNodeMap.put(curURI, curNode);
+						for(Object r : curNode.getEquiResources()){
+							if(uriNodeMap.containsKey(((T) r).getURI())){
+								uriNodeMap.put(((T)r).getURI(), curNode);
+							}
+						}
+					}
 				}
 
 				// check to which node do we need to add this info to
-				for (Equivalent<T> equi : uriNodeMap.values()) {
+
+				/*for (Equivalent<T> equi : uriNodeMap.values()) {
 					if(equi.containsElement(currentResource)){
 						curNode = equi;
 						curNode.addEquivalent(currentResource);
 						break;
 					}
-				}
+				}*/
+
 				// if there's no such node, create new one
 				if (curNode == null) {
 					curNode = new Equivalent(currentResource);
-				}
-
-				// add the node to the map with the URI and add the equivalents (if existing) to the node object
-				uriNodeMap.put(curURI, curNode);
-				if(eqsList != null) {
-					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+					uriNodeMap.put(curURI, curNode);
+					if(eqsList != null) {
+						curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+					}
 				}
 			}
 		}
