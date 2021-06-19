@@ -2,8 +2,6 @@ package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
 import org.aksw.simba.lemming.ColouredGraph;
 
-import com.carrotsearch.hppc.IntIntOpenHashMap;
-
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
