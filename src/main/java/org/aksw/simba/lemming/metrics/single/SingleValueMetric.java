@@ -38,8 +38,7 @@ public interface SingleValueMetric extends Metric {
 	 *            be updated.
 	 * @return - metric result.
 	 */
-	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation,
-			TripleBaseSingleID triple, UpdatableMetricResult newMetricResult) {
+	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult prevMetricResult) {
 		return new SimpleMetricResult(getName(), apply(graph));
 	}
 
@@ -62,6 +61,6 @@ public interface SingleValueMetric extends Metric {
 	 */
 	public default UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-		return applyUpdatable(graph, graphOperation, triple, previousResult);
+		return applyUpdatable(graph, previousResult);
 	}
 }
