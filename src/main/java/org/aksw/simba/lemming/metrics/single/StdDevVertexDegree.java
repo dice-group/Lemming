@@ -67,29 +67,32 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 			break;
 
 		default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-			newMetricResult = applyUpdatable(graph, graphOperation, triple, previousResult);
+			newMetricResult = applyUpdatable(graph, previousResult);
 		}
 
 		return newMetricResult;
 	}
 
 	/**
-	 * Stores the previously computed values in SimpleMetricResult object.
+	 * Stores the previously computed values in UpdateMetricResult object
 	 * 
-	 * @param graph           - input graph.
-	 * @param graphOperation  - boolean value indicating graph operation. ("true"
-	 *                        for adding an edge and "false" for removing an edge).
-	 *                        Not used here.
-	 * @param triple          - Edge on which graph operation is performed. Not used
-	 *                        here.
-	 * @param newMetricResult - UpdatableMetricResult object containing the results
-	 *                        that should be updated.
-	 * @return SimpleMetricResult object.
+	 * @param graph
+	 *            - input graph.
+	 * @param newMetricResult
+	 *            - UpdatableMetricResult object containing the results that should
+	 *            be updated.
+	 * @return UpdatableMetricResult object with updated sum that can be used in
+	 *         further iterations.
 	 */
 	@Override
-	public SimpleMetricResult applyUpdatable(ColouredGraph graph, boolean graphOperation, TripleBaseSingleID triple,
-			UpdatableMetricResult newMetricResult) {
-		SimpleMetricResult metricResultTempObj = (SimpleMetricResult) newMetricResult;
+	public SimpleMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult previousResult) {
+
+		SimpleMetricResult metricResultTempObj = new SimpleMetricResult(getName(), 0.0);
+		if (previousResult instanceof SimpleMetricResult) {
+			// Copying previously computed values in temporary variables
+			metricResultTempObj.setResult(((SimpleMetricResult) previousResult).result);
+		}
+
 		return metricResultTempObj;
 	}
 }
