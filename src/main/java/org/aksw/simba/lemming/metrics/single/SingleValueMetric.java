@@ -28,14 +28,9 @@ public interface SingleValueMetric extends Metric {
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
-	 * @param triple
-	 *            - Edge on which graph operation is performed.
-	 * @param newMetricResult
+	 * @param prevMetricResult
 	 *            - UpdatableMetricResult object containing the results that could
-	 *            be updated.
+	 *            be used.
 	 * @return - metric result.
 	 */
 	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult prevMetricResult) {

@@ -41,9 +41,9 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param newMetricResult
-	 *            - UpdatableMetricResult object containing the results that should
-	 *            be updated.
+	 * @param previousResult
+	 *            - UpdatableMetricResult object containing the previous results
+	 *            that can be used.
 	 * @return UpdatableMetricResult object with updated sum that can be used in
 	 *         further iterations.
 	 */
@@ -113,7 +113,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 				numberOfVertices = metricResultTempObj.getNumberOfVertices();
 			}
 
-			// Set values in Temporary objects
+			// Set values in Temporary object
 			metricResultTempObj.setSumVertexDeg(sum);
 			metricResultTempObj.setNumberOfVertices(numberOfVertices);
 

@@ -41,9 +41,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param newMetricResult
-	 *            - UpdatableMetricResult object containing the results that should
-	 *            be updated.
+	 * @param previousResult
+	 *            - UpdatableMetricResult object containing the previous results
+	 *            that can be used.
 	 * @return UpdatableMetricResult object with updated candidate set and metric
 	 *         values.
 	 */

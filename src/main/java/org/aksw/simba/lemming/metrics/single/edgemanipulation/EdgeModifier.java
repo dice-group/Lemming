@@ -29,9 +29,9 @@ public class EdgeModifier {
 	private List<TripleBaseSingleID> mLstAddedEdges;
 	private boolean isCoutingEdgeTriangles = false;
 	private boolean isCountingNodeTriangles = false;
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult;
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge;
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge;
+	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
+	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge; // Map to store results for remove an edge
+	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge; // Map to store results for add an edge
 
 	public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
 		// list of metric
