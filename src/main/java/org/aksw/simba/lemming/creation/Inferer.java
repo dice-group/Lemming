@@ -318,14 +318,13 @@ public class Inferer {
 
 		Map<String, Equivalent> uriNodeMap = new HashMap<>();
 
-		Stack<T> stack = new Stack<>();
-		stack.addAll(ontElements);
+		for (T currentResource : ontElements) {
 
-		while (!stack.isEmpty()) {
-			T currentResource = stack.pop();
 			String curURI = currentResource.getURI();
 
-			if (curURI!=null && !uriNodeMap.containsKey(curURI)) {
+			if (curURI!=null) {
+
+				//find equivalent classes if possible
 				List<T> eqsList = null;
 				try {
 					if (currentResource.isProperty())
@@ -340,57 +339,44 @@ public class Inferer {
 
 				//node to where we want to add the info to
 				Equivalent curNode = null;
-				if (eqsList != null && !eqsList.isEmpty()) {
-					stack.addAll(eqsList);
-
-					Map<T, Equivalent> equiMap = new HashMap<>();
-					for(T equiRe : eqsList){
-						if(equiRe.getURI()!=null && uriNodeMap.containsKey(equiRe.getURI())){
-							Equivalent equi = uriNodeMap.get(equiRe.getURI());
-							equiMap.put(equiRe, equi);
-						}
-					}
-					if(!equiMap.isEmpty()){
-						for(T key : equiMap.keySet()){
-							if(curNode == null || curNode == equiMap.get(key)){
-								curNode = equiMap.get(key);
-							}else {
-								curNode.addEquivalentGroup(equiMap.get(key).getEquiResources());
-							}
-						}
-						curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+				if(eqsList == null || eqsList.isEmpty()){
+					if(!uriNodeMap.containsKey(curURI)){
+						curNode = new Equivalent(currentResource);
 						uriNodeMap.put(curURI, curNode);
-						for(Object r : curNode.getEquiResources()){
-							if(uriNodeMap.containsKey(((T) r).getURI())){
-								uriNodeMap.put(((T)r).getURI(), curNode);
+					}
+				}else{
+
+					if(uriNodeMap.containsKey(curURI)){
+						curNode = uriNodeMap.get(curURI);
+					}
+					Map<T, Equivalent> localMap = new HashMap<>();
+					for(T re : eqsList){
+						if(re.getURI()!=null && uriNodeMap.containsKey(re.getURI())){
+							localMap.put(re, uriNodeMap.get(re.getURI()));
+						}
+					}
+					if(!localMap.isEmpty()){
+						for(T re : localMap.keySet()){
+							if(curNode == null){
+								curNode = localMap.get(re);
+							}else if (curNode != localMap.get(re)){
+								curNode.addEquivalentGroup(localMap.get(re).getEquiResources());
 							}
 						}
 					}
-				}
-
-				// check to which node do we need to add this info to
-
-				/*for (Equivalent<T> equi : uriNodeMap.values()) {
-					if(equi.containsElement(currentResource)){
-						curNode = equi;
-						curNode.addEquivalent(currentResource);
-						break;
+					if(curNode==null){
+						curNode = new Equivalent(currentResource);
 					}
-				}*/
-
-				// if there's no such node, create new one
-				if (curNode == null) {
-					curNode = new Equivalent(currentResource);
-					uriNodeMap.put(curURI, curNode);
-					if(eqsList != null) {
-						curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+					curNode.addEquivalent(currentResource);
+					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+					for(Object s : curNode.getEquivalents()){
+						uriNodeMap.put((String) s, curNode);
 					}
 				}
 			}
 		}
 		return uriNodeMap;
 	}
-
 	/**
 	 * Renames all the equivalent resources to one uniform URI
 	 * 
