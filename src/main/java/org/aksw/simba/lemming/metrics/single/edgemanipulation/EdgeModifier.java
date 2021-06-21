@@ -51,8 +51,6 @@ public class EdgeModifier {
 		mMapPrevMetricsResultAddEdge = new HashMap<>();
 		for (SingleValueMetric singleMetric : lstMetrics) {
 			mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-			mMapPrevMetricsResultRemoveEdge.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-			mMapPrevMetricsResultAddEdge.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
 		}
 
 	}
@@ -205,9 +203,8 @@ public class EdgeModifier {
 			mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
 					(int) newMetricValues.get("#edgetriangles"));
 			// Update the previously computed values
-			for (String metric : mMapPrevMetricsResultRemoveEdge.keySet()) {
-				mMapPrevMetricsResult.put(metric, mMapPrevMetricsResultRemoveEdge.get(metric));
-			}
+			mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultRemoveEdge);
+			mMapPrevMetricsResultRemoveEdge.clear();
 
 		}
 	}
@@ -230,9 +227,8 @@ public class EdgeModifier {
 			mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId, lastTriple.edgeColour,
 					(int) newMetricValues.get("#nodetriangles"), (int) newMetricValues.get("#edgetriangles"));
 			// Update the previously computed values
-			for (String metric : mMapPrevMetricsResultAddEdge.keySet()) {
-				mMapPrevMetricsResult.put(metric, mMapPrevMetricsResultAddEdge.get(metric));
-			}
+			mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultAddEdge);
+			mMapPrevMetricsResultAddEdge.clear();
 		}
 	}
 
