@@ -2,15 +2,10 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Stack;
 import java.util.stream.Collectors;
+
 
 import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.ontology.ConversionException;
@@ -19,19 +14,16 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.ontology.OntResource;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.util.FileManager;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * The Inferer class implements an inference of the type of subjects and objects
@@ -49,10 +41,42 @@ public class Inferer {
 	/**
 	 * Do we also want materialization to be applied to the graph
 	 */
-	private boolean isMat = false;
-	
-	public Inferer(boolean isMat) {
+	private boolean isMat;
+
+	/**
+	 * An ontology model for a dataset.
+	 */
+	private OntModel ontModel;
+
+	private Map<String, Equivalent> classesEquiMap;
+
+	private Map<String, Equivalent> propertiesEquiMap;
+
+	private Set<OntProperty> ontProperties;
+
+	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
 		this.isMat = isMat;
+		this.ontModel = ontModel;
+
+		//collect the equivalent properties and classes information from the ontology
+		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		classesEquiMap = searchEquivalents(ontClasses);
+		this.ontProperties = ontModel.listAllOntProperties().toSet();
+		propertiesEquiMap = searchEquivalents(this.ontProperties);
+	}
+
+	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
+		this.isMat = isMat;
+		OntModel ontModel = this.readOntology(filePath, base);
+		for(String fileName : rdfsFilesMap.keySet()){
+			ontModel.read(fileName, rdfsFilesMap.get(fileName));
+		}
+		this.ontModel = ontModel;
+		// collect the equivalent properties and classes information from the ontology
+		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		classesEquiMap = searchEquivalents(ontClasses);
+		this.ontProperties = ontModel.listAllOntProperties().toSet();
+		propertiesEquiMap = searchEquivalents(this.ontProperties);
 	}
 
 	/**
@@ -60,48 +84,42 @@ public class Inferer {
 	 * goes on to populate it further with inferred triples
 	 * 
 	 * @param sourceModel RDF Model where we want the inference to take place
-	 * @param ontModel    Ontology Model
 	 * @return The new model with the same triples as the sourceModel plus the
 	 *         inferred triples.
 	 */
-	public Model process(Model sourceModel, OntModel ontModel) {
+	public Model process(Model sourceModel) {
 		Model newModel = ModelFactory.createDefaultModel();
 		newModel.add(sourceModel);
 		Set<Resource> set = extractUniqueResources(newModel);
-		if (ontModel != null) {
-			// collect the equivalent properties and classes information from the ontology
-			Set<OntClass> ontClasses = ontModel.listClasses().toSet();
-			Map<String, Equivalent> classes = searchEquivalents(ontClasses); // searchClassesInOntology(ontModel);
 
-			Set<OntProperty> ontProperties = ontModel.listAllOntProperties().toSet();
-			Map<String, Equivalent> uriNodeMap = searchEquivalents(ontProperties);// searchEqPropertiesInOnt(ontModel);
-			
-			if(isMat) {
-				GraphMaterializer materializer = new GraphMaterializer(ontProperties);
-				while(true){
-					long size = newModel.size();
-					List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
-					List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
-					List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
+		if(isMat) {
+			GraphMaterializer materializer = new GraphMaterializer(this.ontProperties);
+			long curSize;
+			long newSize;
+			do{
+				curSize = newModel.size();
+
+				List<Statement> symmetricStmts = materializer.deriveSymmetricStatements(newModel);
+				List<Statement> transitiveStmts = materializer.deriveTransitiveStatements(newModel);
+				List<Statement> inverseStmts = materializer.deriveInverseStatements(newModel);
 					
-					newModel.add(symmetricStmts);
-					newModel.add(transitiveStmts);
-					newModel.add(inverseStmts);
-					
-					//if the model didn't grow, break the loop
-					if(size==newModel.size())
-						break;
-				}
-			}
+				newModel.add(symmetricStmts);
+				newModel.add(transitiveStmts);
+				newModel.add(inverseStmts);
 
-			// infer type statements, a single property name is also enforced here
-			iterateStmts(newModel, sourceModel, ontModel, uriNodeMap);
-			checkEmptyTypes(set, newModel);
+				newSize = newModel.size();
 
-			// uniform the names of the classes
-			renameClasses(newModel, classes);
-			
+			//if the model doesn't grow, terminate the loop
+			}while(curSize != newSize);
 		}
+
+		// infer type statements, a single property name is also enforced here
+		iterateStmts(newModel, sourceModel, this.propertiesEquiMap);
+		checkEmptyTypes(set, newModel);
+
+		// uniform the names of the classes
+		renameClasses(newModel, this.classesEquiMap);
+
 		return newModel;
 	}
 
@@ -116,8 +134,9 @@ public class Inferer {
 	 */
 	private Set<Resource> extractUniqueResources(Model model) {
 		Set<Resource> set = new HashSet<>();
-		List<Statement> statements = model.listStatements().toList();
-		for (Statement curStat : statements) {
+		StmtIterator iterator = model.listStatements();
+		while(iterator.hasNext()){
+			Statement curStat = iterator.next();
 			if(curStat.getSubject().isURIResource())
 				set.add(curStat.getSubject());
 			if (curStat.getObject().isURIResource()) {
@@ -153,9 +172,9 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param ontModel    the ontology model
+	 * @param uriNodeMap  map each resource uri to its equivalent resources
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, OntModel ontModel, Map<String, Equivalent> uriNodeMap) {
+	public void iterateStmts(Model newModel, Model sourceModel, Map<String, Equivalent> uriNodeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
 			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
@@ -181,12 +200,12 @@ public class Inferer {
 	 * 
 	 * @param statement statement in which we want to check the predicate in the
 	 *                  ontology
-	 * @param ontModel  the ontology model
-	 * @param newModel  where we add the new triples and therefore, where we check
+	 * @param model  where we add the new triples and therefore, where we check
 	 *                  if the statement is already existing in the model or not
+	 * @param ontModel  the ontology model
 	 * @return a set of statements inferred from one property
 	 */
-	private Set<Statement> searchType(Statement statement, OntModel ontModel, Model newModel) {
+	private Set<Statement> searchType(Statement statement, Model model, OntModel ontModel) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
@@ -198,17 +217,14 @@ public class Inferer {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!newModel.contains(subjType)) {
-					newStmts.add(subjType);
-				}
+				newStmts.add(subjType);
+
 			}
 			if (object.isResource()) {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
 					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!newModel.contains(objType)) {
-						newStmts.add(objType);
-					}
+					newStmts.add(objType);
 				}
 			}
 		}
@@ -216,7 +232,7 @@ public class Inferer {
 	}
 
 	/**
-	 * Same as searchType(Statement statement, OntModel ontModel, Model newModel),
+	 * Same as searchType(Statement statement, Model model, OntModel ontModel),
 	 * but in our custom objects: For a given statement, this method searches for
 	 * the predicate of a model inside the Ontology. If found in the Ontology, it
 	 * then extracts the domain and range. Creating and adding a new triple with the
@@ -224,12 +240,12 @@ public class Inferer {
 	 * 
 	 * @param statement  statement in which we want to check the predicate in the
 	 *                   ontology
-	 * @param newModel   where we add the new triples and therefore, where we check
+	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
-	 * @param uriNodeMap
+	 * @param uriNodeMap map each resource uri to its equivalent resources
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model newModel, Map<String, Equivalent> uriNodeMap) {
+	private Set<Statement> searchType(Statement statement, Model model, Map<String, Equivalent> uriNodeMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
@@ -239,29 +255,28 @@ public class Inferer {
 		OntProperty property = null;
 
 		if (node != null) {
-			property = (OntProperty) node.getAttribute();
+			property = node.getAttribute();
 			Property newPredicate = ResourceFactory.createProperty(node.getName());
 
 			if (!newPredicate.getURI().equals(predicate.getURI()))
-				ModelUtil.replaceStatement(newModel, statement,
+				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
 		}
 
 		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
-				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!newModel.contains(subjType) && !curResource.isAnon()) {
-					newStmts.add(subjType);
+				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
+				if (!curResource.isAnon()) {
+					newStmts.add(subjNewStmt);
 				}
 			}
 			if (object.isResource()) {
 				List<? extends OntResource> range = property.listRange().toList();
 				for (OntResource curResource : range) {
-					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					if (!newModel.contains(objType)) {
-						newStmts.add(objType);
-					}
+					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
+					newStmts.add(objNewStmt);
+
 				}
 			}
 		}
@@ -280,7 +295,7 @@ public class Inferer {
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		try (InputStream inputStream = FileManager.get().open(filePath)) {
 			if (inputStream != null) {
-				ontModel.read(inputStream, "RDF/XML");
+				ontModel.read(inputStream, base);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Couldn't read ontology file. Returning empty ontology model.", e);
@@ -301,67 +316,67 @@ public class Inferer {
 	 */
 	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
 
-		Map<String, Equivalent> uriNodeMap = new HashMap<String, Equivalent>();
+		Map<String, Equivalent> uriNodeMap = new HashMap<>();
 
-		Stack<T> stack = new Stack<T>();
-		stack.addAll(ontElements);
+		for (T currentResource : ontElements) {
 
-		Set<Equivalent> elements = new HashSet<Equivalent>();
-
-		while (stack.size() > 0) {
-			T currentResource = stack.pop();
 			String curURI = currentResource.getURI();
-			boolean isSame = false;
-			
-			if (curURI!=null && !uriNodeMap.containsKey(curURI)) {
-				List eqsList = null;
+
+			if (curURI!=null) {
+
+				//find equivalent classes if possible
+				List<T> eqsList = null;
 				try {
 					if (currentResource.isProperty())
-						eqsList = currentResource.asProperty().listEquivalentProperties().toList();
+						eqsList = (List<T>) currentResource.asProperty().listEquivalentProperties().toList();
 					if (currentResource.isClass())
-						eqsList = currentResource.asClass().listEquivalentClasses().toList();
+						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
 					LOGGER.warn(
 							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
 							currentResource.toString());
 				}
 
-				if (eqsList != null && !eqsList.isEmpty()) {
-					stack.addAll(eqsList);
-				}
-				
 				//node to where we want to add the info to
 				Equivalent curNode = null;
-
-				// check to which node do we need to add this info to
-				Iterator<Equivalent> propIterator = elements.iterator();
-				while (propIterator.hasNext()) {
-					curNode = propIterator.next();
-					isSame = curNode.containsElement(currentResource);
-					if (isSame) {
-						curNode.addEquivalent(currentResource);
-						break;
+				if(eqsList == null || eqsList.isEmpty()){
+					if(!uriNodeMap.containsKey(curURI)){
+						curNode = new Equivalent(currentResource);
+						uriNodeMap.put(curURI, curNode);
 					}
-				}
+				}else{
 
-				// if not, create new one
-				if (!isSame) {
-					curNode = new Equivalent(currentResource);
-					elements.add(curNode);
-				}
-				
-				// add the node to the map with the URI and add the equivalents (if existing) to the node object
-				if (curNode != null) {
-					uriNodeMap.put(curURI, curNode);
-					if(eqsList != null) {
-						curNode.addEquivalentGroup((Set) eqsList.stream().collect(Collectors.toSet()));
+					if(uriNodeMap.containsKey(curURI)){
+						curNode = uriNodeMap.get(curURI);
+					}
+					Map<T, Equivalent> localMap = new HashMap<>();
+					for(T re : eqsList){
+						if(re.getURI()!=null && uriNodeMap.containsKey(re.getURI())){
+							localMap.put(re, uriNodeMap.get(re.getURI()));
+						}
+					}
+					if(!localMap.isEmpty()){
+						for(T re : localMap.keySet()){
+							if(curNode == null){
+								curNode = localMap.get(re);
+							}else if (curNode != localMap.get(re)){
+								curNode.addEquivalentGroup(localMap.get(re).getEquiResources());
+							}
+						}
+					}
+					if(curNode==null){
+						curNode = new Equivalent(currentResource);
+					}
+					curNode.addEquivalent(currentResource);
+					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
+					for(Object s : curNode.getEquivalents()){
+						uriNodeMap.put((String) s, curNode);
 					}
 				}
 			}
 		}
 		return uriNodeMap;
 	}
-
 	/**
 	 * Renames all the equivalent resources to one uniform URI
 	 * 
