@@ -86,9 +86,6 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 	public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
 
-		if (getName().equals("stdDevInDegree") || getName().equals("stdDevOutDegree")) {
-			return new SimpleMetricResult(getName(), apply(graph));
-		}
 
 		AvgVertexDegreeMetricResult metricResultTempObj = (AvgVertexDegreeMetricResult) applyUpdatable(graph, previousResult);
 
