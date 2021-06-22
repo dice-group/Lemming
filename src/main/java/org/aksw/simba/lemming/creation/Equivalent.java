@@ -31,11 +31,17 @@ public class Equivalent<T extends OntResource> {
 	 */
 	private Set<String> equivalents = new HashSet<>();
 
+	/**
+	 * all equivalent-resources
+	 */
+	private Set<T> equiResources = new HashSet<>();
+
 	public Equivalent(T current) {
 		super();
 		this.name = current.getURI();
 		this.attribute = current;
 		this.equivalents.add(name);
+		this.equiResources.add(current);
 	}
 
 	/**
@@ -49,7 +55,9 @@ public class Equivalent<T extends OntResource> {
 		String uri = current.getURI();
 		
 		if (uri != null) {
-			this.equivalents.add(uri);
+			if(this.equivalents.add(uri)){
+				this.equiResources.add(current);
+			}
 			setName(compareNames(uri, name));
 
 			if (current.isProperty()) {
@@ -74,8 +82,7 @@ public class Equivalent<T extends OntResource> {
 
 	/**
 	 * Adds the elements of a set to object's own set
-	 * 
-	 * @see addEquivalent(T attribute)
+	 *
 	 * @param set set of OntProperty / OntClass objects to be added
 	 */
 	public void addEquivalentGroup(Set<T> set) {
@@ -119,6 +126,10 @@ public class Equivalent<T extends OntResource> {
 			}
 		}
 		return false;
+	}
+
+	public Set<T> getEquiResources(){
+		return this.equiResources;
 	}
 
 	/**

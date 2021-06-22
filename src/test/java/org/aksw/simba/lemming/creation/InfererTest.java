@@ -2,6 +2,8 @@ package org.aksw.simba.lemming.creation;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -31,12 +33,16 @@ public class InfererTest {
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
 
-		Inferer inferer = new Inferer(false);
+		//TODO: use inferer to build ontModel
+		Map<String, String> rdfsMap = new HashMap<>();
+		rdfsMap.put("22-rdf-syntax-ns", "TURTLE");
+		rdfsMap.put("rdf-schema", "TURTLE");
+		Inferer inferer = new Inferer(false, ontFilePath, null, rdfsMap);
 		OntModel ontModel = inferer.readOntology(ontFilePath, null);
 		ontModel.read("22-rdf-syntax-ns", "TURTLE");
 		ontModel.read("rdf-schema", "TURTLE");
 
-		Model actualModel = inferer.process(personModel, ontModel);
+		Model actualModel = inferer.process(personModel);
 
 		Model expModel = ModelFactory.createDefaultModel();
 		expModel.read("expected_literal.ttl", "TTL");
@@ -56,8 +62,8 @@ public class InfererTest {
 		Model confModel = ModelFactory.createDefaultModel();
 		confModel.read(fileName);
 
-		Inferer inferer = new Inferer(false);
-		Model actualModel = inferer.process(confModel, ontModel);
+		Inferer inferer = new Inferer(false, ontModel);
+		Model actualModel = inferer.process(confModel);
 
 		//printModel(actualModel, "after");
 
@@ -86,8 +92,8 @@ public class InfererTest {
 		Model geoModel = ModelFactory.createDefaultModel();
 		geoModel.read("snippet_linkedgeo.nt");
 		
-		Inferer inferer = new Inferer(false);
-		Model actualModel = inferer.process(geoModel, ontModel);
+		Inferer inferer = new Inferer(false, ontModel);
+		Model actualModel = inferer.process(geoModel);
 		
 		//prior to inference, 0 resources have a type stmt
 		int count = Iterators.size(geoModel.listResourcesWithProperty(RDF.type));
@@ -101,7 +107,7 @@ public class InfererTest {
 		int size = Iterators.size(containerModel.listResourcesWithProperty(RDFS.member));
 		Assert.assertEquals(size, 0);
 		
-		containerModel = inferer.process(containerModel, ontModel);
+		containerModel = inferer.process(containerModel);
 		int afterSize = Iterators.size(containerModel.listStatements(null, RDFS.member, (RDFNode)null));
 		Assert.assertEquals(afterSize, 9);
 		
