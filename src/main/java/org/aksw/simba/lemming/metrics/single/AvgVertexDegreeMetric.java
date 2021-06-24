@@ -15,50 +15,25 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
  */
 public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValueMetric {
 
-    public AvgVertexDegreeMetric() {
-        super("avgDegree");
-    }
+	public AvgVertexDegreeMetric() {
+		super("avgDegree");
+	}
 
-    protected AvgVertexDegreeMetric(String name) {
-        super(name);
-    }
+	protected AvgVertexDegreeMetric(String name) {
+		super(name);
+	}
 
-    @Override
-    public double apply(ColouredGraph graph) {
-        return calculateAvg(graph.getGraph().getAllInEdgeDegrees());
-    }
-
-    protected double calculateAvg(IntArrayList degrees) {
-        double sum = 0;
-        for (int i = 0; i < degrees.size(); ++i) {
-            sum += degrees.getInt(i);
-        }
-        return sum / degrees.size();
-    }
-    
-	/**
-	 * Stores the previously computed values in UpdateMetricResult object
-	 * 
-	 * @param graph
-	 *            - input graph.
-	 * @param previousResult
-	 *            - UpdatableMetricResult object containing the previous results
-	 *            that can be used.
-	 * @return UpdatableMetricResult object with updated sum that can be used in
-	 *         further iterations.
-	 */
 	@Override
-	public UpdatableMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult previousResult) {
+	public double apply(ColouredGraph graph) {
+		return calculateAvg(graph.getGraph().getAllInEdgeDegrees());
+	}
 
-		AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
-		if (previousResult instanceof AvgVertexDegreeMetricResult) {
-			// Copying previously computed values in temporary variables
-			metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
-			metricResultTempObj
-					.setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
+	protected double calculateAvg(IntArrayList degrees) {
+		double sum = 0;
+		for (int i = 0; i < degrees.size(); ++i) {
+			sum += degrees.getInt(i);
 		}
-
-		return metricResultTempObj;
+		return sum / degrees.size();
 	}
 
 	/**
@@ -90,7 +65,13 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 			return new SimpleMetricResult(getName(), apply(graph));
 		}
 
-		AvgVertexDegreeMetricResult metricResultTempObj = (AvgVertexDegreeMetricResult) applyUpdatable(graph, previousResult);
+		AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
+		if (previousResult instanceof AvgVertexDegreeMetricResult) {
+			// Copying previously computed values in temporary variables
+			metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
+			metricResultTempObj
+					.setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
+		}
 
 		double sum = 0;
 		double numberOfVertices = 1;
@@ -101,7 +82,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 				// Get the Array from VertexDegrees class (Note: This can be replaced with
 				// getAllInEdgeDegrees method of Grph package)
-				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesinDegree();
+				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesInDegree();
 				for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
 					sum += getmMapVerticesinDegree[key];
 				}
@@ -122,7 +103,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 			if (metricResultTempObj.getSumVertexDeg() == 0.0) {
 				// Computing the Avg Vertex Degree Metric for the first time
 
-				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesinDegree();
+				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesInDegree();
 
 				for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
 					sum += getmMapVerticesinDegree[key];
