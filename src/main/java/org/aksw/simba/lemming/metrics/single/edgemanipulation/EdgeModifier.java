@@ -119,7 +119,7 @@ public class EdgeModifier {
 					// double metVal = metric.apply(graph);
 					// Calling update method to get the metric values based on previous results
 					mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
-							new HashMap<>(mMapPrevMetricsResult).get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
 					double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new metric value
 					mapChangedMetricValues.put(metric.getName(), metVal);
 				}
@@ -168,7 +168,7 @@ public class EdgeModifier {
 					// double metVal = metric.apply(graph);
 					// Calling update method to get the metric values based on previous results
 					mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
-							new HashMap<>(mMapPrevMetricsResult).get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
 					double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric value
 					mapMetricValues.put(metric.getName(), metVal);
 				}
