@@ -21,24 +21,18 @@ public interface SingleValueMetric extends Metric {
      * @return the value of the metric.
      */
     public double apply(ColouredGraph graph);
-    
-    
+
 	/**
-	 * Returns metric results that for further computations could be reused.
+	 * Returns metric results that can be reused for further computations.
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
-	 * @param triple
-	 *            - Edge on which graph operation is performed.
-	 * @param newMetricResult
+	 * @param prevMetricResult
 	 *            - UpdatableMetricResult object containing the results that could
-	 *            be updated.
+	 *            be used.
 	 * @return - metric result.
 	 */
-	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult prevMetricResult) {
+	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
 		return new SimpleMetricResult(getName(), apply(graph));
 	}
 
@@ -61,6 +55,6 @@ public interface SingleValueMetric extends Metric {
 	 */
 	public default UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-		return applyUpdatable(graph, previousResult);
+		return applyUpdatable(graph);
 	}
 }
