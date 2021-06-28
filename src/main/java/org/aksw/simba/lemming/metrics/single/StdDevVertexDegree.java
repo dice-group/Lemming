@@ -45,6 +45,8 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 	 *                       adding an edge and "false" for removing an edge)
 	 * @param previousResult - UpdatableMetricResult object containing the previous
 	 *                       computed results.
+	 * @param mVertexDegrees - Object of VertexDegrees class which contains degrees
+	 *                       of all the nodes
 	 * @return SimpleMetricResult object.
 	 */
 	@Override
@@ -66,7 +68,8 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
 			break;
 
-		default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
+		default:// If metric is other than stdDevInDegree and stdDevOutDegree then apply the
+				// metric
 			newMetricResult = (SimpleMetricResult) applyUpdatable(graph);
 		}
 
