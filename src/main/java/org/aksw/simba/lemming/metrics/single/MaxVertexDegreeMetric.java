@@ -58,8 +58,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
 		UpdatableMetricResult newMetricResult;
 
-		switch (direction) {
-		case in:
+		if(direction == DIRECTION.in) {
 
 			if (graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeIndegree, DIRECTION.in,
@@ -69,11 +68,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 						triple.headId, triple, -1, previousResult, mVertexDegrees);
 			}
 
-			break;
-		// Logic to check if maxDegreeMetric call is required for maxInDegree, defined
-		// in method : metricComputationMaxDegree
-
-		case out:
+		}
+		else {
 			if (graphOperation) {
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeOutdegree, DIRECTION.out,
 						triple.tailId, triple, 1, previousResult, mVertexDegrees);
@@ -81,10 +77,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeOutdegree, DIRECTION.out,
 						triple.tailId, triple, -1, previousResult, mVertexDegrees);
 			}
-			break;
+			
 
-		default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-			newMetricResult = applyUpdatable(graph);
 		}
 
 		return newMetricResult;

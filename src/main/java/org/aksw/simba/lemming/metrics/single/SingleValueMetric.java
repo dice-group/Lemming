@@ -27,9 +27,6 @@ public interface SingleValueMetric extends Metric {
 	 * 
 	 * @param graph
 	 *            - input graph.
-	 * @param prevMetricResult
-	 *            - UpdatableMetricResult object containing the results that could
-	 *            be used.
 	 * @return - metric result.
 	 */
 	public default UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
