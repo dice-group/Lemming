@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 
 import org.aksw.simba.lemming.util.ModelUtil;
@@ -33,7 +32,7 @@ import javax.annotation.Nullable;
  * @author Alexandra Silva
  *
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
@@ -48,9 +47,9 @@ public class Inferer {
 	 */
 	private OntModel ontModel;
 
-	private Map<String, Equivalent> classesEquiMap;
+	public Map<OntClass, Set<OntClass>> classesEquiMap;
 
-	private Map<String, Equivalent> propertiesEquiMap;
+	public Map<OntProperty, Set<OntProperty>> propertiesEquiMap;
 
 	private Set<OntProperty> ontProperties;
 
@@ -172,12 +171,12 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param uriNodeMap  map each resource uri to its equivalent resources
+	 * @param iriEquiMap  map each resource uri to its equivalent resources
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, Map<String, Equivalent> uriNodeMap) {
+	public void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, Set<OntProperty>> iriEquiMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
-			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
+			Set<Statement> newStmts = searchType(curStatement, newModel, iriEquiMap);
 			// searchType(curStatement, ontModel, newModel);
 			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
 			
@@ -242,22 +241,45 @@ public class Inferer {
 	 *                   ontology
 	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
-	 * @param uriNodeMap map each resource uri to its equivalent resources
+	 * @param iriEquiMap map each resource uri to its equivalent resources
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model model, Map<String, Equivalent> uriNodeMap) {
+	private Set<Statement> searchType(Statement statement, Model model, Map<OntProperty, Set<OntProperty>> iriEquiMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
 		RDFNode object = statement.getObject();
 
-		Equivalent<OntProperty> node = uriNodeMap.get(predicate.toString());
+		Set<OntProperty> eqsSet = iriEquiMap.get(predicate);
 		OntProperty property = null;
+		if(eqsSet != null){
+			List<OntProperty> eqsProperties = new ArrayList<>(iriEquiMap.get(predicate));
+			property = eqsProperties.get(0);
+			//Add all domains and ranges of equivalent properties to property
+			for(int i=1; i<eqsProperties.size(); i++){
+				OntProperty currentProperty = eqsProperties.get(i);
+				List<? extends OntResource> domainList = currentProperty.listDomain().toList();
+				for (OntResource domain : domainList) {
+					if (!property.hasDomain(domain)) {
+						property.addDomain(domain);
+					}
+				}
 
-		if (node != null) {
-			property = node.getAttribute();
-			Property newPredicate = ResourceFactory.createProperty(node.getName());
-
+				List<? extends OntResource> rangeList = currentProperty.listRange().toList();
+				for (OntResource range : rangeList) {
+					if (!property.hasRange(range)) {
+						property.addRange(range);
+					}
+				}
+			}
+			//find a name to represent all equivalent properties
+			String name = null;
+			for(OntProperty ontPro : eqsProperties){
+				if(name == null || name.compareTo(ontPro.getURI())<0){
+					name = ontPro.getURI();
+				}
+			}
+			Property newPredicate = ResourceFactory.createProperty(name);
 			if (!newPredicate.getURI().equals(predicate.getURI()))
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
@@ -305,24 +327,17 @@ public class Inferer {
 	}
 
 	/**
-	 * Searches for the equivalents in an ontology and maps them to our Equivalent<T
-	 * extends OntResource> class, producing a map of the Equivalent objects with
-	 * the URIs as keys.
-	 * 
-	 * @see Equivalent<T extends OntResource>
-	 * @param <T>
+	 * Searches for the equivalents in an ontology and maps each IRI to a set of equivalent IRIs
 	 * @param ontElements the ontology classes or properties
 	 * @return
 	 */
-	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
+	public <T extends OntResource> Map<T, Set<T>> searchEquivalents(Set<T> ontElements) {
 
-		Map<String, Equivalent> uriNodeMap = new HashMap<>();
+		Map<T, Set<T>> iriEquiMap = new HashMap<>();
 
 		for (T currentResource : ontElements) {
 
-			String curURI = currentResource.getURI();
-
-			if (curURI!=null) {
+			if (currentResource.getURI()!=null) {
 
 				//find equivalent classes if possible
 				List<T> eqsList = null;
@@ -337,58 +352,68 @@ public class Inferer {
 							currentResource.toString());
 				}
 
-				//node to where we want to add the info to
-				Equivalent curNode = null;
+				Set<T> equiSet = null;
 				if(eqsList == null || eqsList.isEmpty()){
-					if(!uriNodeMap.containsKey(curURI)){
-						curNode = new Equivalent(currentResource);
-						uriNodeMap.put(curURI, curNode);
+					if(!iriEquiMap.containsKey(currentResource)){
+						equiSet = new HashSet<>();
+						equiSet.add(currentResource);
+						iriEquiMap.put(currentResource, equiSet);
 					}
 				}else{
-
-					if(uriNodeMap.containsKey(curURI)){
-						curNode = uriNodeMap.get(curURI);
+					if(iriEquiMap.containsKey(currentResource)){
+						equiSet = iriEquiMap.get(currentResource);
 					}
-					Map<T, Equivalent> localMap = new HashMap<>();
+					Map<T, Set<T>> localMap = new HashMap<>();
 					for(T re : eqsList){
-						if(re.getURI()!=null && uriNodeMap.containsKey(re.getURI())){
-							localMap.put(re, uriNodeMap.get(re.getURI()));
+						if(re.getURI()!=null && iriEquiMap.containsKey(re)){
+							localMap.put(re, iriEquiMap.get(re));
 						}
 					}
-					if(!localMap.isEmpty()){
-						for(T re : localMap.keySet()){
-							if(curNode == null){
-								curNode = localMap.get(re);
-							}else if (curNode != localMap.get(re)){
-								curNode.addEquivalentGroup(localMap.get(re).getEquiResources());
-							}
+
+					for(T re : localMap.keySet()){
+						if(equiSet == null){
+							equiSet = localMap.get(re);
+						}else if (equiSet != localMap.get(re)){
+							equiSet.addAll(localMap.get(re));
 						}
 					}
-					if(curNode==null){
-						curNode = new Equivalent(currentResource);
+
+					if(equiSet==null){
+						equiSet = new HashSet<>();
+						equiSet.add(currentResource);
+					}else{
+						equiSet.add(currentResource);
 					}
-					curNode.addEquivalent(currentResource);
-					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
-					for(Object s : curNode.getEquivalents()){
-						uriNodeMap.put((String) s, curNode);
+					for(T eq : eqsList){
+						if(eq.getURI() != null){
+							equiSet.add(eq);
+						}
+					}
+					for(T s : equiSet){
+						iriEquiMap.put(s, equiSet);
 					}
 				}
 			}
 		}
-		return uriNodeMap;
+		return iriEquiMap;
 	}
 	/**
 	 * Renames all the equivalent resources to one uniform URI
 	 * 
 	 * @param model   the RDF Model
-	 * @param classes the map between the different URIs and the class object
+	 * @param classes the map between the different IRIs and their equivalent classes
 	 */
-	public void renameClasses(Model model, Map<String, Equivalent> classes) {
-		Iterator<Entry<String, Equivalent>> it = classes.entrySet().iterator();
+	public void renameClasses(Model model, Map<OntClass, Set<OntClass>> classes) {
+		Iterator<Entry<OntClass, Set<OntClass>>> it = classes.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<String, Equivalent> pair = it.next();
-			String newName = pair.getValue().getName();
-			Resource mResource = model.getResource(pair.getKey());
+			Map.Entry<OntClass, Set<OntClass>> pair = it.next();
+			String newName = null;
+			for(OntClass clazz : pair.getValue()){
+				if(newName == null || newName.compareTo(clazz.getURI())<0){
+					newName = clazz.getURI();
+				}
+			}
+			Resource mResource = model.getResource(pair.getKey().getURI());
 			if (mResource != null && !mResource.getURI().equals(newName)) {
 				ResourceUtils.renameResource(mResource, newName);
 			}
