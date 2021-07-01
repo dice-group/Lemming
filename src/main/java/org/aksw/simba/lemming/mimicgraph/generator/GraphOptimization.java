@@ -4,15 +4,21 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,7 +30,6 @@ import org.aksw.simba.lemming.metrics.single.edgemanipulation.ErrorScores;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
-import org.apache.commons.lang3.concurrent.Computable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +54,6 @@ public class GraphOptimization {
 	
 	private long seed;
 	
-	private Executor executor = Executors.newFixedThreadPool(4);
 	
 	/*-----------------------------------------------
 	 * Variable for storing calculation information *
@@ -80,10 +84,10 @@ public class GraphOptimization {
 	
 	public ErrorScores tryToRemoveAnEdgeThread() {
 		double lErrScore;
-		System.out.println("In tryToRemoveAnEdgeThread");
+		//System.out.println("In tryToRemoveAnEdgeThread");
 		// go left by removing an edge
 		TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
-		System.out.println("Removed triple: "+lTriple.edgeId);
+		System.out.println("Removed tripleId: "+lTriple.edgeId +", headId: "+lTriple.headId +", tailId: "+lTriple.tailId);
 		ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
 		//System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 		//if the removal cannot happen, the error is set to max as not to be chosen
@@ -93,17 +97,17 @@ public class GraphOptimization {
 		} else {
 			lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 		}
-		System.out.println("Left = "+ lErrScore + " " + metricValuesOfLeft);
-		return new ErrorScores(lErrScore, metricValuesOfLeft);
+		//System.out.println("Left = "+ lErrScore + " " + metricValuesOfLeft);
+		return new ErrorScores(true, lErrScore, metricValuesOfLeft);
 
 	}
 	
 	public ErrorScores tryToAddAnEdgeThread() {
 		double rErrScore;
-		System.out.println("In tryToAddAnEdgeThread");
+		//System.out.println("In tryToAddAnEdgeThread");
 		 // go right by adding a new edge
 		TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
-		System.out.println("Added triple: "+rTriple.edgeId);
+		System.out.println("Added tripleId: "+rTriple.edgeId +", headId: "+rTriple.headId +", tailId: "+rTriple.tailId);
 		ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
 		//System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 		if (metricValuesOfRight == null) {
@@ -111,8 +115,8 @@ public class GraphOptimization {
 		} else {
 			rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
 		}
-		System.out.println("Right = "+rErrScore + " " + metricValuesOfRight);
-		return new ErrorScores(rErrScore, metricValuesOfRight);
+		//System.out.println("Right = "+rErrScore + " " + metricValuesOfRight);
+		return new ErrorScores(false ,rErrScore, metricValuesOfRight);
 	}
 	
 	public void refineGraph(){
@@ -129,48 +133,50 @@ public class GraphOptimization {
 		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
-			//System.out.println("loop start");
 			// add errorScore to tracking list result
 			mLstErrorScore.add(pErrScore);
-			// thread 1
-			//System.out.println("left thread");
-			/*CompletableFuture<ErrorScores> cfLErrScore = CompletableFuture.supplyAsync(() -> tryToRemoveAnEdgeThread(), executor);
-			//thread 2
-			System.out.println("right thread");
-			CompletableFuture<ErrorScores> cfRErrScore = CompletableFuture.supplyAsync(() -> tryToAddAnEdgeThread(), executor);
-			*/
-			errScoreLeft = tryToRemoveAnEdgeThread();
-			errScoreRight = tryToAddAnEdgeThread();
-			//CompletableFuture<Void> combinedResult = CompletableFuture.allOf(cfLErrScore,cfRErrScore);
-			//System.out.println("wait for threads to complete");
-			/*try {
-				combinedResult.get();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
-
-			/*System.out.println("completed both threads " + cfLErrScore.isDone() + " and "+ cfRErrScore.isDone());
-			List<ErrorScores> listErrScores = Stream.of(cfLErrScore,cfRErrScore)
-					.map(CompletableFuture::join)
-					.collect(Collectors.toList());*/
-			// fill object of ErrorScore class
-			/*try {
-				errScoreLeft = cfLErrScore.get();
-			} catch (InterruptedException | ExecutionException e) {
-				System.out.println("Error Occured... See stack trace");
-				e.printStackTrace();
-			}*/
-			//errScoreLeft = new ErrorScores(listErrScores.get(0));
-			//errScoreRight = new ErrorScores(listErrScores.get(1));
 			
-			// Error Scores
+			///*
+			ExecutorService executor = Executors.newFixedThreadPool(2);
+			List<ErrorScores> scores = null;
+	        List<Callable<ErrorScores>> listOfCallable = Arrays.asList(
+	                () -> tryToRemoveAnEdgeThread(),
+	                () -> tryToAddAnEdgeThread());
+
+	        try {
+
+	            List<Future<ErrorScores>> futures = executor.invokeAll(listOfCallable);
+
+	            scores = futures.stream().map(f -> {
+	                try {
+	                	ErrorScores x = f.get();
+	                    return x;
+	                } catch (Exception e) {
+	                    throw new IllegalStateException(e);
+	                }
+	            }).collect(Collectors.toList());
+
+	        } catch (InterruptedException e) {// thread was interrupted
+	            e.printStackTrace();
+	        } finally {
+	            // shut down the executor manually
+	            executor.shutdown();
+	        }
+			
+	        for (ErrorScores score : scores){
+	        	if(score.getAction()) {
+	        		errScoreLeft = new ErrorScores(score);
+	        	} else {
+	    	        errScoreRight = new ErrorScores(score);	        		
+	        	}
+	        }
+			//*/
+			//errScoreLeft = tryToRemoveAnEdgeThread();
+			//errScoreRight = tryToAddAnEdgeThread();
 			lErrScore = errScoreLeft.getErrorScore();
 			rErrScore = errScoreRight.getErrorScore();
-			//System.out.println(lErrScore + "......" + rErrScore);
+			System.out.println(errScoreLeft.getMetricValues());
+			System.out.println(errScoreRight.getMetricValues());
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 			
