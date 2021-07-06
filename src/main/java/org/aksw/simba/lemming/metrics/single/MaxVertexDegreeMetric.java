@@ -39,18 +39,13 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * The method checks if we need to compute in degree or out-degree and then
 	 * calls the metricComputationMaxDegree with correct parameters.
 	 * 
-	 * @param triple
-	 *            - edge on which graph operation is performed.
-	 * @param metric
-	 *            - input metric which needs to be computed.
-	 * @param graph
-	 *            - input graph.
-	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
-	 * @param previousResult
-	 *            - UpdatableMetricResult object containing the previous computed
-	 *            results.
+	 * @param triple         - edge on which graph operation is performed.
+	 * @param metric         - input metric which needs to be computed.
+	 * @param graph          - input graph.
+	 * @param graphOperation - boolean value indicating graph operation. ("true" for
+	 *                       adding an edge and "false" for removing an edge)
+	 * @param previousResult - UpdatableMetricResult object containing the previous
+	 *                       computed results.
 	 * @return
 	 */
 	@Override
@@ -58,7 +53,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
 		UpdatableMetricResult newMetricResult;
 
-		if(direction == DIRECTION.in) {
+		if (direction == DIRECTION.in) {
 
 			if (graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeIndegree, DIRECTION.in,
@@ -68,8 +63,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 						triple.headId, triple, -1, previousResult, mVertexDegrees);
 			}
 
-		}
-		else {
+		} else {
 			if (graphOperation) {
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeOutdegree, DIRECTION.out,
 						triple.tailId, triple, 1, previousResult, mVertexDegrees);
@@ -77,7 +71,6 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 				newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeOutdegree, DIRECTION.out,
 						triple.tailId, triple, -1, previousResult, mVertexDegrees);
 			}
-			
 
 		}
 
@@ -88,17 +81,12 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * The method contains logic that reduces the number of calls to apply method
 	 * for the max vertex degree metric.
 	 * 
-	 * @param metric
-	 *            - metric which should be calculated.
-	 * @param graph
-	 *            - input graph.
-	 * @param metricName
-	 *            - can be "RemoveAnEdge" or "AddAnEdge" indicating how the edge is
-	 *            modified.
-	 * @param direction
-	 *            - this is in or out based on the operation.
-	 * @param vertexID
-	 *            - The vertex that is modified.
+	 * @param metric     - metric which should be calculated.
+	 * @param graph      - input graph.
+	 * @param metricName - can be "RemoveAnEdge" or "AddAnEdge" indicating how the
+	 *                   edge is modified.
+	 * @param direction  - this is in or out based on the operation.
+	 * @param vertexID   - The vertex that is modified.
 	 * @return
 	 */
 	private UpdatableMetricResult metricComputationMaxDegree(ColouredGraph graph, GRAPHOPERATION metricName,
@@ -234,10 +222,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 	/**
 	 * Checks If previous candidates are not changed.
 	 * 
-	 * @param metricName
-	 *            - name of the metric.
-	 * @param triple
-	 *            - triple containing the vertices which have been updated.
+	 * @param metricName - name of the metric.
+	 * @param triple     - triple containing the vertices which have been updated.
 	 */
 	public void verifyCandidates(GRAPHOPERATION metricName, TripleBaseSingleID triple,
 			MaxVertexDegreeMetricResult metricResultTempObj) {

@@ -42,25 +42,19 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 	 * degrees stored in VertexDegrees else it will update the previously stored sum
 	 * value.
 	 * 
-	 * @param triple
-	 *            - edge on which graph operation is performed.
-	 * @param metric
-	 *            - input metric which needs to be computed.
-	 * @param graph
-	 *            - input graph.
-	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
-	 * @param previousResult
-	 *            - UpdatableMetricResult object containing the previous computed
-	 *            results.
+	 * @param triple         - edge on which graph operation is performed.
+	 * @param metric         - input metric which needs to be computed.
+	 * @param graph          - input graph.
+	 * @param graphOperation - boolean value indicating graph operation. ("true" for
+	 *                       adding an edge and "false" for removing an edge)
+	 * @param previousResult - UpdatableMetricResult object containing the previous
+	 *                       computed results.
 	 * @return UpdatableMetricResult object with updated values that can be used in
 	 *         further computations
 	 */
 	@Override
 	public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-
 
 		AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
 		if (previousResult instanceof AvgVertexDegreeMetricResult) {
@@ -79,7 +73,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
 				// Get the Array from VertexDegrees class (Note: This can be replaced with
 				// getAllInEdgeDegrees method of Grph package)
-				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesInDegree();
+				int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
 				for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
 					sum += getmMapVerticesinDegree[key];
 				}
@@ -100,7 +94,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 			if (metricResultTempObj.getSumVertexDeg() == 0.0) {
 				// Computing the Avg Vertex Degree Metric for the first time
 
-				int[] getmMapVerticesinDegree = mVertexDegrees.getmMapVerticesInDegree();
+				int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
 
 				for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
 					sum += getmMapVerticesinDegree[key];

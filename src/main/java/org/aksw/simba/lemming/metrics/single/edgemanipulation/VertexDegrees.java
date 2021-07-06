@@ -171,11 +171,11 @@ public class VertexDegrees {
 		mMapVerticesOutDegree[vertexId] = mMapVerticesOutDegree[vertexId] + additionValue;
 	}
 
-	public int[] getmMapVerticesInDegree() {
+	public int[] getMapVerticesInDegree() {
 		return mMapVerticesInDegree;
 	}
 
-	public int[] getmMapVerticesOutDegree() {
+	public int[] getMapVerticesOutDegree() {
 		return mMapVerticesOutDegree;
 	}
 }
