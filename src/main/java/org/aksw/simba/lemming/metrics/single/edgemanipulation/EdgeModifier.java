@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-
 public class EdgeModifier {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
@@ -30,7 +29,8 @@ public class EdgeModifier {
 	private boolean isCoutingEdgeTriangles = false;
 	private boolean isCountingNodeTriangles = false;
 	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge; // Map to store results for remove an edge
+	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge; // Map to store results for remove
+																					// an edge
 	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge; // Map to store results for add an edge
 
 	public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
@@ -120,7 +120,8 @@ public class EdgeModifier {
 					// Calling update method to get the metric values based on previous results
 					mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
 							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
-					double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new metric value
+					double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new
+																										// metric value
 					mapChangedMetricValues.put(metric.getName(), metVal);
 				}
 			}
@@ -169,7 +170,8 @@ public class EdgeModifier {
 					// Calling update method to get the metric values based on previous results
 					mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
 							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
-					double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric value
+					double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric
+																									// value
 					mapMetricValues.put(metric.getName(), metVal);
 				}
 			}
@@ -188,8 +190,7 @@ public class EdgeModifier {
 	/**
 	 * execute removing an edge
 	 * 
-	 * @param newMetricValues
-	 *            the already calculated metric from trial
+	 * @param newMetricValues the already calculated metric from trial
 	 */
 	public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
 		if (mLstRemovedEdges.size() > 0) {
@@ -212,8 +213,7 @@ public class EdgeModifier {
 	/**
 	 * execute adding an edge
 	 * 
-	 * @param newMetricValues
-	 *            the already calculated metric from trial
+	 * @param newMetricValues the already calculated metric from trial
 	 */
 	public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
 		if (mLstAddedEdges.size() > 0) {

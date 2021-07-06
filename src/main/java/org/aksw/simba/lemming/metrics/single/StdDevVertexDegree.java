@@ -52,24 +52,20 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 	@Override
 	public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
 			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-		SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
+		SimpleMetricResult newMetricResult = new SimpleMetricResult(this.name, 0);
 		int[] degreesArray;
 		IntArrayList degreesList;
-		switch (direction) {
-		case in:
-			degreesArray = mVertexDegrees.getmMapVerticesInDegree();
-			degreesList = new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
-			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-			break;
-
-		case out:
-			degreesArray = mVertexDegrees.getmMapVerticesOutDegree();
+		if (this.direction == DIRECTION.in) {
+			degreesArray = mVertexDegrees.getMapVerticesInDegree();
 			degreesList = new IntArrayList(degreesArray);
 			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-			break;
-
-		default:// If metric is other than stdDevInDegree and stdDevOutDegree then apply the
-				// metric
+		} else if (this.direction == DIRECTION.out) {
+			degreesArray = mVertexDegrees.getMapVerticesOutDegree();
+			degreesList = new IntArrayList(degreesArray);
+			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
+		} else {
+			// If metric is other than stdDevInDegree and stdDevOutDegree then apply the
+			// metric
 			newMetricResult = (SimpleMetricResult) applyUpdatable(graph);
 		}
 

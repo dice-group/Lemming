@@ -25,10 +25,8 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Initializes the Maps, metric name, and result.
 	 * 
-	 * @param metricName
-	 *            - Name of the metric.
-	 * @param result
-	 *            - Metric value.
+	 * @param metricName - Name of the metric.
+	 * @param result     - Metric value.
 	 */
 	public MaxVertexDegreeMetricResult(String metricName, double result) {
 		super(metricName, result);
@@ -64,10 +62,10 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Update the temporary candidate map.
 	 * 
-	 * @param mMapCandidatesMetricTemp1
-	 *            - Input map containing the candidates that needs to be updated.
-	 * @param key
-	 *            - GRAPHOPERATION ENUM denoting the key that needs to be updated.
+	 * @param mMapCandidatesMetricTemp1 - Input map containing the candidates that
+	 *                                  needs to be updated.
+	 * @param key                       - GRAPHOPERATION ENUM denoting the key that
+	 *                                  needs to be updated.
 	 */
 	public void setmMapCandidatesMetric(HashMap<GRAPHOPERATION, IntSet> mMapCandidatesMetricTemp1) {
 		for (GRAPHOPERATION graphOptKey : GRAPHOPERATION.values()) {
@@ -87,11 +85,10 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Update the metric values in temporary map.
 	 * 
-	 * @param mMapCandidatesMetricValuesTemp1
-	 *            - - Input map containing the metric values that needs to be
-	 *            updated.
-	 * @param key
-	 *            - GRAPHOPERATION ENUM denoting the key that needs to be updated.
+	 * @param mMapCandidatesMetricValuesTemp1 - - Input map containing the metric
+	 *                                        values that needs to be updated.
+	 * @param key                             - GRAPHOPERATION ENUM denoting the key
+	 *                                        that needs to be updated.
 	 */
 	public void setmMapCandidatesMetricValues(HashMap<GRAPHOPERATION, Double> mMapCandidatesMetricValuesTemp1) {
 		for (GRAPHOPERATION graphOptKey : GRAPHOPERATION.values()) {

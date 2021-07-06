@@ -14,10 +14,8 @@ public class SimpleMetricResult implements UpdatableMetricResult {
 	/**
 	 * Initialize metric name and result.
 	 * 
-	 * @param metricName
-	 *            - metric name string.
-	 * @param result
-	 *            - metric value.
+	 * @param metricName - metric name string.
+	 * @param result     - metric value.
 	 */
 	public SimpleMetricResult(String metricName, double result) {
 		this.metricName = metricName;
