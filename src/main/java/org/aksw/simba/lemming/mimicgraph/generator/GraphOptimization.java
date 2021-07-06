@@ -132,45 +132,26 @@ public class GraphOptimization {
 		ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
 		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
+		
+
+		// TODO change number of threads to -thrs argument
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		
 		for(int i = 0 ; i < mMaxIteration ; ++i){
 			// add errorScore to tracking list result
 			mLstErrorScore.add(pErrScore);
+			Future<ErrorScores> leftFutureScore = executor.submit(()-> tryToRemoveAnEdgeThread());
+			Future<ErrorScores> rightFutureScore = executor.submit(()-> tryToAddAnEdgeThread());
+	        
+			try {
+				errScoreLeft = leftFutureScore.get();
+				errScoreRight = rightFutureScore.get();
+			} catch (InterruptedException | ExecutionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				System.exit(1);
+			}
 			
-			///*
-			ExecutorService executor = Executors.newFixedThreadPool(2);
-			List<ErrorScores> scores = null;
-	        List<Callable<ErrorScores>> listOfCallable = Arrays.asList(
-	                () -> tryToRemoveAnEdgeThread(),
-	                () -> tryToAddAnEdgeThread());
-
-	        try {
-
-	            List<Future<ErrorScores>> futures = executor.invokeAll(listOfCallable);
-
-	            scores = futures.stream().map(f -> {
-	                try {
-	                	ErrorScores x = f.get();
-	                    return x;
-	                } catch (Exception e) {
-	                    throw new IllegalStateException(e);
-	                }
-	            }).collect(Collectors.toList());
-
-	        } catch (InterruptedException e) {// thread was interrupted
-	            e.printStackTrace();
-	        } finally {
-	            // shut down the executor manually
-	            executor.shutdown();
-	        }
-			
-	        for (ErrorScores score : scores){
-	        	if(score.getAction()) {
-	        		errScoreLeft = new ErrorScores(score);
-	        	} else {
-	    	        errScoreRight = new ErrorScores(score);	        		
-	        	}
-	        }
-			//*/
 			//errScoreLeft = tryToRemoveAnEdgeThread();
 			//errScoreRight = tryToAddAnEdgeThread();
 			lErrScore = errScoreLeft.getErrorScore();
@@ -212,6 +193,9 @@ public class GraphOptimization {
 				break;
 			}
 		}
+		
+		// shut down the executor manually
+        executor.shutdown();
 		
 		if(mTrueNoOfIteration == 0 ){
 			mTrueNoOfIteration = mMaxIteration;
