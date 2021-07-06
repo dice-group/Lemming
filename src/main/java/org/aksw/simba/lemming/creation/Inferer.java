@@ -47,9 +47,11 @@ public class Inferer {
 	 */
 	private OntModel ontModel;
 
-	public Map<OntClass, Set<OntClass>> classesEquiMap;
+	private Map<OntClass, String> classesEquiNameMap;
 
-	public Map<OntProperty, Set<OntProperty>> propertiesEquiMap;
+	private Map<OntProperty, String> propertiesEquiNameMap;
+
+	private Map<OntProperty, OntProperty> propertyDRPropertyMap;
 
 	private Set<OntProperty> ontProperties;
 
@@ -59,9 +61,14 @@ public class Inferer {
 
 		//collect the equivalent properties and classes information from the ontology
 		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
-		classesEquiMap = searchEquivalents(ontClasses);
+		Map<OntClass, Set<OntClass>> classesEquiMap = searchEquivalents(ontClasses);
+		classesEquiNameMap = findProperName(classesEquiMap);
+
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
-		propertiesEquiMap = searchEquivalents(this.ontProperties);
+		Map<OntProperty, Set<OntProperty>> propertiesEquiMap = searchEquivalents(this.ontProperties);
+		propertiesEquiNameMap = findProperName(propertiesEquiMap);
+		propertyDRPropertyMap = collectRangeDomain(propertiesEquiMap);
+
 	}
 
 	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
@@ -73,9 +80,13 @@ public class Inferer {
 		this.ontModel = ontModel;
 		// collect the equivalent properties and classes information from the ontology
 		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
-		classesEquiMap = searchEquivalents(ontClasses);
+		Map<OntClass, Set<OntClass>> classesEquiMap = searchEquivalents(ontClasses);
+		classesEquiNameMap = findProperName(classesEquiMap);
+
+
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
-		propertiesEquiMap = searchEquivalents(this.ontProperties);
+		Map<OntProperty, Set<OntProperty>> propertiesEquiMap = searchEquivalents(this.ontProperties);
+		propertiesEquiNameMap = findProperName(propertiesEquiMap);
 	}
 
 	/**
@@ -112,12 +123,12 @@ public class Inferer {
 			}while(curSize != newSize);
 		}
 
-		// infer type statements, a single property name is also enforced here
-		iterateStmts(newModel, sourceModel, this.propertiesEquiMap);
-		checkEmptyTypes(set, newModel);
-
 		// uniform the names of the classes
-		renameClasses(newModel, this.classesEquiMap);
+		renameClasses(newModel, this.classesEquiNameMap);
+
+		// infer type statements, a single property name is also enforced here
+		iterateStmts(newModel, sourceModel, this.propertiesEquiNameMap, this.propertyDRPropertyMap);
+		checkEmptyTypes(set, newModel);
 
 		return newModel;
 	}
@@ -171,12 +182,13 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param iriEquiMap  map each resource uri to its equivalent resources
+	 * @param propToName   map each resource uri to a string name which represents equivalent resources
+	 * @param domainRangeMap map each ontproperty to a property which contains all domain and range of equivalent resources
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, Set<OntProperty>> iriEquiMap) {
+	public void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, String> propToName, Map<OntProperty, OntProperty> domainRangeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
-			Set<Statement> newStmts = searchType(curStatement, newModel, iriEquiMap);
+			Set<Statement> newStmts = searchType(curStatement, newModel, propToName, domainRangeMap);
 			// searchType(curStatement, ontModel, newModel);
 			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
 			
@@ -241,51 +253,24 @@ public class Inferer {
 	 *                   ontology
 	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
-	 * @param iriEquiMap map each resource uri to its equivalent resources
+	 * @param properties map each resource uri to a string name which represents equivalent resources
+	 * @param domainRangeMap map each ontproperty to a property which contains all domain and range of equivalent resources
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model model, Map<OntProperty, Set<OntProperty>> iriEquiMap) {
+	private Set<Statement> searchType(Statement statement, Model model, Map<OntProperty, String> properties, Map<OntProperty, OntProperty> domainRangeMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
 		RDFNode object = statement.getObject();
 
-		Set<OntProperty> eqsSet = iriEquiMap.get(predicate);
-		OntProperty property = null;
-		if(eqsSet != null){
-			List<OntProperty> eqsProperties = new ArrayList<>(iriEquiMap.get(predicate));
-			property = eqsProperties.get(0);
-			//Add all domains and ranges of equivalent properties to property
-			for(int i=1; i<eqsProperties.size(); i++){
-				OntProperty currentProperty = eqsProperties.get(i);
-				List<? extends OntResource> domainList = currentProperty.listDomain().toList();
-				for (OntResource domain : domainList) {
-					if (!property.hasDomain(domain)) {
-						property.addDomain(domain);
-					}
-				}
-
-				List<? extends OntResource> rangeList = currentProperty.listRange().toList();
-				for (OntResource range : rangeList) {
-					if (!property.hasRange(range)) {
-						property.addRange(range);
-					}
-				}
-			}
-			//find a name to represent all equivalent properties
-			String name = null;
-			for(OntProperty ontPro : eqsProperties){
-				if(name == null || name.compareTo(ontPro.getURI())<0){
-					name = ontPro.getURI();
-				}
-			}
+		String name = properties.get(predicate);
+		OntProperty property = domainRangeMap.get(predicate);
+		if(name != null && property !=null){
 			Property newPredicate = ResourceFactory.createProperty(name);
 			if (!newPredicate.getURI().equals(predicate.getURI()))
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
-		}
 
-		if (property != null) {
 			List<? extends OntResource> domain = property.listDomain().toList();
 			for (OntResource curResource : domain) {
 				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
@@ -298,7 +283,6 @@ public class Inferer {
 				for (OntResource curResource : range) {
 					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
 					newStmts.add(objNewStmt);
-
 				}
 			}
 		}
@@ -401,22 +385,60 @@ public class Inferer {
 	 * Renames all the equivalent resources to one uniform URI
 	 * 
 	 * @param model   the RDF Model
-	 * @param classes the map between the different IRIs and their equivalent classes
+	 * @param classes the map between the different IRIs and a uri name representing their equivalent classes
 	 */
-	public void renameClasses(Model model, Map<OntClass, Set<OntClass>> classes) {
-		Iterator<Entry<OntClass, Set<OntClass>>> it = classes.entrySet().iterator();
+	public void renameClasses(Model model, Map<OntClass, String> classes) {
+		Iterator<Entry<OntClass, String>> it = classes.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<OntClass, Set<OntClass>> pair = it.next();
-			String newName = null;
-			for(OntClass clazz : pair.getValue()){
-				if(newName == null || newName.compareTo(clazz.getURI())<0){
-					newName = clazz.getURI();
-				}
-			}
+			Map.Entry<OntClass, String> pair = it.next();
 			Resource mResource = model.getResource(pair.getKey().getURI());
-			if (mResource != null && !mResource.getURI().equals(newName)) {
-				ResourceUtils.renameResource(mResource, newName);
+			if (mResource != null && !mResource.getURI().equals(pair.getValue())) {
+				ResourceUtils.renameResource(mResource, pair.getValue());
 			}
 		}
+	}
+
+	private <T extends OntResource> Map<T, String> findProperName(Map<T, Set<T>> iriEquiMap){
+		Map<T, String> iriToName = new HashMap<>();
+		for(T re : iriEquiMap.keySet()){
+			if(!iriToName.containsKey(re)){
+				String properName = re.getURI();
+				Set<T> equis = iriEquiMap.get(re);
+				for(T eq : equis){
+					if(properName.compareTo(eq.getURI())<0){
+						properName = eq.getURI();
+					}
+				}
+				for(T eq : iriEquiMap.get(re)){
+					iriToName.put(eq, properName);
+				}
+			}
+		}
+		return  iriToName;
+	}
+
+	private Map<OntProperty,OntProperty> collectRangeDomain(Map<OntProperty, Set<OntProperty>> propertyEquiMap){
+		Map<OntProperty,OntProperty> ontProToOntProDR = new HashMap<>();
+		for(OntProperty property : propertyEquiMap.keySet()){
+			List<OntProperty> eqsProperties = new ArrayList<>(propertyEquiMap.get(property));
+			OntProperty collectedProperty = eqsProperties.get(0);
+			for(OntProperty currentProperty : eqsProperties){
+				List<? extends OntResource> domainList = currentProperty.listDomain().toList();
+				for (OntResource domain : domainList) {
+					if (!collectedProperty.hasDomain(domain)) {
+						currentProperty.addDomain(domain);
+					}
+				}
+
+				List<? extends OntResource> rangeList = currentProperty.listRange().toList();
+				for (OntResource range : rangeList) {
+					if (!collectedProperty.hasRange(range)) {
+						currentProperty.addRange(range);
+					}
+				}
+			}
+			ontProToOntProDR.put(property, collectedProperty);
+		}
+		return ontProToOntProDR;
 	}
 }
