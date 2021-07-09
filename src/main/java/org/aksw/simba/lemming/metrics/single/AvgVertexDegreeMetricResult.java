@@ -17,10 +17,8 @@ public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Initialization calls super class with the name of metric and metric value.
 	 * 
-	 * @param metricName
-	 *            - Name of the metric.
-	 * @param result
-	 *            - Metric value.
+	 * @param metricName - Name of the metric.
+	 * @param result     - Metric value.
 	 */
 	public AvgVertexDegreeMetricResult(String metricName, double result) {
 		super(metricName, result);
@@ -38,8 +36,7 @@ public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Update the sum of vertex degrees computed for add an edge operation.
 	 * 
-	 * @param sumVertexDegAddEdge
-	 *            - double value for sum
+	 * @param sumVertexDeg - double value for sum
 	 */
 	public void setSumVertexDeg(double sumVertexDeg) {
 		this.sumVertexDeg = sumVertexDeg;
@@ -57,8 +54,7 @@ public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
 	/**
 	 * Updates the number of vertices for the graph.
 	 * 
-	 * @param numberOfVertices
-	 *            - double value for number of vertices.
+	 * @param numberOfVertices - double value for number of vertices.
 	 */
 	public void setNumberOfVertices(double numberOfVertices) {
 		this.numberOfVertices = numberOfVertices;
