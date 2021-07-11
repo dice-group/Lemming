@@ -138,8 +138,8 @@ public class EdgeModification {
 		this.graph.removeEdge(edgeId);
 
 		// For removing an edge from a graph, update the vertex in and out degrees.
-		mVertexDegrees.updateVertexIndegree(headId, -1);
-		mVertexDegrees.updateVertexOutdegree(tailId, -1);
+		mVertexDegrees.updateVertexInDegree(headId, -1);
+		mVertexDegrees.updateVertexOutDegree(tailId, -1);
 	}
 
 	/*
@@ -261,8 +261,8 @@ public class EdgeModification {
 		}
 
 		// For adding an edge in a graph, update the vertex in and out degrees.
-		mVertexDegrees.updateVertexIndegree(head, 1);
-		mVertexDegrees.updateVertexOutdegree(tail, 1);
+		mVertexDegrees.updateVertexInDegree(head, 1);
+		mVertexDegrees.updateVertexOutDegree(tail, 1);
 
 		return edgeId;
 	}
@@ -279,8 +279,8 @@ public class EdgeModification {
 		// For removing an edge from a graph, update the vertex in and out degrees.
 		int headId = graph.getGraph().getDirectedSimpleEdgeHead(edgeId);
 		int tailId = graph.getGraph().getDirectedSimpleEdgeTail(edgeId);
-		mVertexDegrees.updateVertexIndegree(headId, -1);
-		mVertexDegrees.updateVertexOutdegree(tailId, -1);
+		mVertexDegrees.updateVertexInDegree(headId, -1);
+		mVertexDegrees.updateVertexOutDegree(tailId, -1);
 
 	}
 
@@ -293,8 +293,8 @@ public class EdgeModification {
 		this.newEdgeTriangles = newEdgeTriangles;
 
 		// For adding an edge in a graph, update the vertex in and out degrees.
-		mVertexDegrees.updateVertexIndegree(head, 1);
-		mVertexDegrees.updateVertexOutdegree(tail, 1);
+		mVertexDegrees.updateVertexInDegree(head, 1);
+		mVertexDegrees.updateVertexOutDegree(tail, 1);
 
 		return graph.addEdge(tail, head, color);
 	}

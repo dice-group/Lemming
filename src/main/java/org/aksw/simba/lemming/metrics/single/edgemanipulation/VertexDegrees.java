@@ -16,8 +16,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 public class VertexDegrees {
 
 	// Maps for storing in-degree and out-degree for different vertices
-	private int mMapVerticesinDegree[];
-	private int mMapVerticesoutDegree[];
+	private int mMapVerticesInDegree[];
+	private int mMapVerticesOutDegree[];
 
 	/**
 	 * Initializing the Maps and calling computeVerticesDegree method.
@@ -36,8 +36,8 @@ public class VertexDegrees {
 	 */
 	private void computeVerticesDegree(ColouredGraph graph) {
 		IntSet vertices = graph.getVertices();
-		mMapVerticesinDegree = new int[vertices.size()];
-		mMapVerticesoutDegree = new int[vertices.size()];
+		mMapVerticesInDegree = new int[vertices.size()];
+		mMapVerticesOutDegree = new int[vertices.size()];
 		int index = 0;
 		IntIterator iterator = vertices.iterator();
 		while (iterator.hasNext()) {
@@ -45,8 +45,8 @@ public class VertexDegrees {
 			int inVertexDegree = graph.getGraph().getInVertexDegree(nextInt);
 			int outVertexDegree = graph.getGraph().getOutVertexDegree(nextInt);
 
-			mMapVerticesinDegree[index] = inVertexDegree;
-			mMapVerticesoutDegree[index] = outVertexDegree;
+			mMapVerticesInDegree[index] = inVertexDegree;
+			mMapVerticesOutDegree[index] = outVertexDegree;
 			index++;
 		}
 	}
@@ -57,8 +57,8 @@ public class VertexDegrees {
 	 * @param vertexId
 	 * @return
 	 */
-	public int getVertexIndegree(int vertexId) {
-		return mMapVerticesinDegree[vertexId];
+	public int getVertexInDegree(int vertexId) {
+		return mMapVerticesInDegree[vertexId];
 	}
 
 	/**
@@ -67,8 +67,8 @@ public class VertexDegrees {
 	 * @param vertexId
 	 * @return
 	 */
-	public int getVertexOutdegree(int vertexId) {
-		return mMapVerticesoutDegree[vertexId];
+	public int getVertexOutDegree(int vertexId) {
+		return mMapVerticesOutDegree[vertexId];
 	}
 
 	/**
@@ -77,13 +77,13 @@ public class VertexDegrees {
 	 * @param vertexId
 	 * @return
 	 */
-	public int getVertexdegree(int vertexId, DIRECTION direction) {
+	public int getVertexDegree(int vertexId, DIRECTION direction) {
 
 		int degree;
 		if (direction == DIRECTION.in) {
-			degree = mMapVerticesinDegree[vertexId];
+			degree = mMapVerticesInDegree[vertexId];
 		} else {
-			degree = mMapVerticesoutDegree[vertexId];
+			degree = mMapVerticesOutDegree[vertexId];
 		}
 
 		return degree;
@@ -95,11 +95,11 @@ public class VertexDegrees {
 	 * @param degree
 	 * @return
 	 */
-	public IntSet getVerticesForIndegree(int degree) {
+	public IntSet getVerticesForInDegree(int degree) {
 		IntSet setOfVertices = new IntOpenHashSet();
 
-		for (int j = 0; j < mMapVerticesinDegree.length; ++j) {
-			if (mMapVerticesinDegree[j] == degree) {
+		for (int j = 0; j < mMapVerticesInDegree.length; ++j) {
+			if (mMapVerticesInDegree[j] == degree) {
 				setOfVertices.add(j);
 			}
 		}
@@ -113,11 +113,11 @@ public class VertexDegrees {
 	 * @param degree
 	 * @return
 	 */
-	public IntSet getVerticesForOutdegree(int degree) {
+	public IntSet getVerticesForOutDegree(int degree) {
 		IntSet setOfVertices = new IntOpenHashSet();
 
-		for (int j = 0; j < mMapVerticesoutDegree.length; ++j) {
-			if (mMapVerticesoutDegree[j] == degree) {
+		for (int j = 0; j < mMapVerticesOutDegree.length; ++j) {
+			if (mMapVerticesOutDegree[j] == degree) {
 				setOfVertices.add(j);
 			}
 		}
@@ -137,9 +137,9 @@ public class VertexDegrees {
 		int mMapVerticesDegreeTemp[];
 
 		if (direction == DIRECTION.in) {
-			mMapVerticesDegreeTemp = mMapVerticesinDegree;
+			mMapVerticesDegreeTemp = mMapVerticesInDegree;
 		} else {
-			mMapVerticesDegreeTemp = mMapVerticesoutDegree;
+			mMapVerticesDegreeTemp = mMapVerticesOutDegree;
 		}
 
 		for (int j = 0; j < mMapVerticesDegreeTemp.length; ++j) {
@@ -157,8 +157,8 @@ public class VertexDegrees {
 	 * @param vertexId
 	 * @param additionValue
 	 */
-	public void updateVertexIndegree(int vertexId, int additionValue) {
-		mMapVerticesinDegree[vertexId] = mMapVerticesinDegree[vertexId] + additionValue;
+	public void updateVertexInDegree(int vertexId, int additionValue) {
+		mMapVerticesInDegree[vertexId] = mMapVerticesInDegree[vertexId] + additionValue;
 	}
 
 	/**
@@ -167,15 +167,15 @@ public class VertexDegrees {
 	 * @param vertexId
 	 * @param additionValue
 	 */
-	public void updateVertexOutdegree(int vertexId, int additionValue) {
-		mMapVerticesoutDegree[vertexId] = mMapVerticesoutDegree[vertexId] + additionValue;
+	public void updateVertexOutDegree(int vertexId, int additionValue) {
+		mMapVerticesOutDegree[vertexId] = mMapVerticesOutDegree[vertexId] + additionValue;
 	}
 
-	public int[] getmMapVerticesinDegree() {
-		return mMapVerticesinDegree;
+	public int[] getMapVerticesInDegree() {
+		return mMapVerticesInDegree;
 	}
 
-	public int[] getmMapVerticesoutDegree() {
-		return mMapVerticesoutDegree;
+	public int[] getMapVerticesOutDegree() {
+		return mMapVerticesOutDegree;
 	}
 }
