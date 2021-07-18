@@ -198,14 +198,14 @@ public class GraphCreator {
 					classes.put(resource2, hNode2);
 				}
 				// add the hierarchy information
-				// if there is no list of child nodes
+				// if there is no list of parent nodes
 				if (hNode1.parentNodes == null) {
 					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
 					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
 					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
 				}
-				// if there is no list of parent nodes
+				// if there is no list of child nodes
 				if (hNode2.childNodes == null) {
 					hNode2.childNodes = new Resource[] { resource1 };
 				} else {
@@ -276,14 +276,14 @@ public class GraphCreator {
 					properties.put(resource2, hNode2);
 				}
 				// add the hierarchy information
-				// if there is no list of child nodes
+				// if there is no list of parent nodes
 				if (hNode1.parentNodes == null) {
 					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
 					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
 					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
 				}
-				// if there is no list of parent nodes
+				// if there is no list of child nodes
 				if (hNode2.childNodes == null) {
 					hNode2.childNodes = new Resource[] { resource1 };
 				} else {
