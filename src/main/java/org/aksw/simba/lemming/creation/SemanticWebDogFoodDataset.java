@@ -24,7 +24,6 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
     
     @Override
     public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
-        //TODO: DogFoodModel is incrementally, not like geologyDataset, each file is a graph.
         Model dogFoodModel = ModelFactory.createDefaultModel();
         
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();

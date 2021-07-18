@@ -123,13 +123,14 @@ public class Inferer {
 			}while(curSize != newSize);
 		}
 
-		// uniform the names of the classes
-		renameClasses(newModel, this.classesEquiNameMap);
+
 
 		// infer type statements, a single property name is also enforced here
 		iterateStmts(newModel, sourceModel, this.propertiesEquiNameMap, this.propertyDRPropertyMap);
 		checkEmptyTypes(set, newModel);
 
+		// uniform the names of the classes
+		renameClasses(newModel, this.classesEquiNameMap);
 		return newModel;
 	}
 
@@ -271,16 +272,14 @@ public class Inferer {
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
 
-			List<? extends OntResource> domain = property.listDomain().toList();
-			for (OntResource curResource : domain) {
+			for (OntResource curResource : property.listDomain().toList()) {
 				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
 				if (!curResource.isAnon()) {
 					newStmts.add(subjNewStmt);
 				}
 			}
 			if (object.isResource()) {
-				List<? extends OntResource> range = property.listRange().toList();
-				for (OntResource curResource : range) {
+				for (OntResource curResource : property.listRange().toList()) {
 					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
 					newStmts.add(objNewStmt);
 				}
@@ -347,18 +346,15 @@ public class Inferer {
 					if(iriEquiMap.containsKey(currentResource)){
 						equiSet = iriEquiMap.get(currentResource);
 					}
-					Map<T, Set<T>> localMap = new HashMap<>();
-					for(T re : eqsList){
-						if(re.getURI()!=null && iriEquiMap.containsKey(re)){
-							localMap.put(re, iriEquiMap.get(re));
-						}
-					}
 
-					for(T re : localMap.keySet()){
-						if(equiSet == null){
-							equiSet = localMap.get(re);
-						}else if (equiSet != localMap.get(re)){
-							equiSet.addAll(localMap.get(re));
+					for(T re : eqsList){
+						if(re.getURI() != null && iriEquiMap.containsKey(re)){
+							Set<T> subEquiSet = iriEquiMap.get(re);
+							if(equiSet==null) {
+								equiSet = subEquiSet;
+							}else if (equiSet != subEquiSet){
+								equiSet.addAll(subEquiSet);
+							}
 						}
 					}
 
