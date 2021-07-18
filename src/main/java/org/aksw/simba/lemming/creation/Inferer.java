@@ -123,14 +123,13 @@ public class Inferer {
 			}while(curSize != newSize);
 		}
 
-
+		// uniform the names of the classes
+		renameClasses(newModel, this.classesEquiNameMap);
 
 		// infer type statements, a single property name is also enforced here
 		iterateStmts(newModel, sourceModel, this.propertiesEquiNameMap, this.propertyDRPropertyMap);
 		checkEmptyTypes(set, newModel);
 
-		// uniform the names of the classes
-		renameClasses(newModel, this.classesEquiNameMap);
 		return newModel;
 	}
 
