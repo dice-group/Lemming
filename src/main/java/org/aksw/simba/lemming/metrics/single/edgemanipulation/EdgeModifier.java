@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 public class EdgeModifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
@@ -44,7 +46,6 @@ public class EdgeModifier {
         // initialize EdgeModification
         mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
                 (int) mMapMetricValues.get("#edgetriangles"));
-
         // Initialize the UpdatableMetricResult for all metrics
         mMapPrevMetricsResult = new HashMap<>();
         mMapPrevMetricsResultRemoveEdge = new HashMap<>();
@@ -52,7 +53,6 @@ public class EdgeModifier {
         for (SingleValueMetric singleMetric : lstMetrics) {
             mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
         }
-
     }
 
     private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
@@ -112,7 +112,6 @@ public class EdgeModifier {
             }
 
             ColouredGraph graph = mEdgeModification.getGraph();
-
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
@@ -179,7 +178,6 @@ public class EdgeModifier {
             // mEdgeModification.removeEdgeFromGraph(triple.edgeId);
             mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int) mMapMetricValues.get("#nodetriangles"),
                     (int) mMapMetricValues.get("#edgetriangles"));
-
             return mapMetricValues;
         } else {
             LOGGER.warn("Invalid triple for adding an edge!");
