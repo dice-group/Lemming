@@ -17,7 +17,7 @@ public class GetMetricsFromExpressions {
 
 	private Set<String> directProportionalMetricsSet = new HashSet<>(); // Store metrics which should be increased.
 	private Set<String> inverseProportionalMetricsSet = new HashSet<>(); // Store metrics which should be decreased.
-
+ 
 	/**
 	 * Constructor
 	 * 
