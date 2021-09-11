@@ -243,4 +243,8 @@ public class EdgeModifier {
 	public ObjectDoubleOpenHashMap<String> getOptimizedMetricValues() {
 		return mMapMetricValues;
 	}
+	
+	public HashMap<String, UpdatableMetricResult> getmMapPrevMetricsResult() {
+		return mMapPrevMetricsResult;
+	}
 }
