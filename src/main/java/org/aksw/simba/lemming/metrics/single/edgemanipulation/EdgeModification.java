@@ -162,7 +162,6 @@ public class EdgeModification {
             }
         }
         return graph.addEdge(tail, head, color);
-
     }
 
     private IntSet getVerticesInCommon(int v1, int v2) {
@@ -229,7 +228,7 @@ public class EdgeModification {
             subGraphTrianglesAfterRemovingEdge += (mul * numAfterRemovingEdge);
         }
 
-        return oldSubGraphEdgeTriangles-subGraphTrianglesAfterRemovingEdge;
+        return change==-1 ? (oldSubGraphEdgeTriangles-subGraphTrianglesAfterRemovingEdge) : (subGraphTrianglesAfterRemovingEdge-oldSubGraphEdgeTriangles);
     }
     
     public void removeEdgeFromGraph(int edgeId, int newNodeTriangles, int newEdgeTriangles) {
