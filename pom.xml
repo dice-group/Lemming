@@ -188,6 +188,53 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<mainClass>org.aksw.simba.lemming.tools.PrecomputingValues</mainClass>
+					<arguments>
+						<argument>swdf</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+				<!--configuration>
+					<mainClass>org.aksw.simba.lemming.tools.PrecomputingValues</mainClass>
+					<arguments>
+						<argument>swdf</argument>
+					</arguments>
+				</configuration-->
+				<configuration>
+					<mainClass>org.aksw.simba.lemming.tools.GraphGenerationTest</mainClass>
+					<arguments>
+						<argument>-ds</argument>
+						<argument>swdf</argument>
+						<argument>-nv</argument>
+						<argument>45420</argument>
+						<argument>-op</argument>
+						<argument>30000</argument>
+					</arguments>
+			   </configuration>
+			</plugin>
 		</plugins>
 	</build>
 </project>
