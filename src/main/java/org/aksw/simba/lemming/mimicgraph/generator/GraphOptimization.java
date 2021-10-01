@@ -82,15 +82,16 @@ public class GraphOptimization {
 		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
-			
+			System.out.println("Optimization Round " + i + ":");
+			Long start = System.currentTimeMillis();
+
 			// add errorScore to tracking list result
 			mLstErrorScore.add(pErrScore);
 			
 			// go left by removing an edge
 			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-			//System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
-			
+
 			//if the removal cannot happen, the error is set to max as not to be chosen
 			if(metricValuesOfLeft == null) {
 				lErrScore = Double.MAX_VALUE;
@@ -112,8 +113,8 @@ public class GraphOptimization {
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 			
-			System.out.println("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore 
-					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
+			System.out.println("\tMid: "+ pErrScore
+					+ " - Left: " + lErrScore +" - Right: " + rErrScore);
 			
 			if(minErrScore == lErrScore){
 				
@@ -122,6 +123,9 @@ public class GraphOptimization {
 				noOfRepeatedParent = 0;
 				//mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
 				mEdgeModifier.executeRemovingAnEdge(metricValuesOfLeft);
+				System.out.println("\tGo to left -- Remove edge!");
+				Long end = System.currentTimeMillis();
+				System.out.println("\t Time for one round : " + (start - end));
 				continue;
 			}
 			if(minErrScore == rErrScore){
@@ -131,6 +135,9 @@ public class GraphOptimization {
 				noOfRepeatedParent = 0;
 				//mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
 				mEdgeModifier.executeAddingAnEdge(metricValuesOfRight);
+				System.out.println("\tGo to right -- Add edge!");
+				Long end = System.currentTimeMillis();
+				System.out.println("\t Time for one round : " + (start - end));
 				continue;
 			}
 			
@@ -141,6 +148,10 @@ public class GraphOptimization {
 				LOGGER.info("Cannot find better refined graph! Break the loop!");
 				break;
 			}
+
+			System.out.println("\tStay in middle: " + noOfRepeatedParent);
+			Long end = System.currentTimeMillis();
+			System.out.println("\t Time for one round : " + (start - end));
 		}
 		
 		if(mTrueNoOfIteration == 0 ){
