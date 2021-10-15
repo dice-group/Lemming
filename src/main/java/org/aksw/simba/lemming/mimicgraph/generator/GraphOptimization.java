@@ -113,6 +113,9 @@ public class GraphOptimization {
 			// find min error score
 			double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 
+			System.out.println("("+i+"/ "+mMaxIteration+") Mid: "+ pErrScore
+					+ " - Left: "+ lErrScore +" - Right: " + rErrScore);
+
 			if(minErrScore == lErrScore){
 				
 				pErrScore = lErrScore;
