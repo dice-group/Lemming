@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.tools.PrecomputingValues;
@@ -32,8 +33,8 @@ public class EdgeModifier {
 		//list of metric
 		mLstMetrics = lstMetrics;
 		//initialize two list removed edges and added edges
-		mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
-		mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
+		mLstRemovedEdges = new ArrayList<>();
+		mLstAddedEdges = new ArrayList<>();
 		//compute metric values
 		computeMetricValues(clonedGraph, lstMetrics);
 		//initialize EdgeModification
@@ -44,7 +45,7 @@ public class EdgeModifier {
 		
 		LOGGER.info("Compute "+lstMetrics.size()+ " metrics on the current mimic graph!");
 		
-		mMapMetricValues  = new ObjectDoubleOpenHashMap<String>();
+		mMapMetricValues  = new ObjectDoubleOpenHashMap<>();
 		if(lstMetrics != null && lstMetrics.size()> 0 ){
 			
 			for(SingleValueMetric metric : lstMetrics){
@@ -84,7 +85,7 @@ public class EdgeModifier {
 			//add to list of removed edges
 			//mLstRemovedEdges.add(triple);
 			
-			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
+			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<>();
 			
 			mEdgeModification.removeEdgeFromGraph(triple.edgeId);
 			if(isCountingNodeTriangles){
@@ -102,7 +103,14 @@ public class EdgeModifier {
 	        for(SingleValueMetric metric: mLstMetrics){
 	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
 	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
-        			double metVal = metric.apply(graph);
+	        		double metVal;
+	        		if(metric.getName().equalsIgnoreCase("maxInDegree")){
+	        			metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, -1, false);
+					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
+						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, -1, false);
+					}else{
+						metVal = metric.apply(graph);
+					}
 	        		mapChangedMetricValues.put(metric.getName(), metVal);   
 	        	}
 	        }
@@ -128,7 +136,7 @@ public class EdgeModifier {
 			//add to list of added edges
 			mLstAddedEdges.add(triple);
 			
-			ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<String>();
+			ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 			triple.edgeId = mEdgeModification.addEdgeToGraph(triple.tailId,triple.headId, triple.edgeColour);
 			
 			if(isCountingNodeTriangles){
@@ -145,12 +153,18 @@ public class EdgeModifier {
 		    for(SingleValueMetric metric: mLstMetrics){
 	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
 	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
-	        		
-        			double metVal = metric.apply(graph);
+					double metVal;
+					if(metric.getName().equalsIgnoreCase("maxInDegree")){
+						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, 1, false);
+					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
+						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, 1, false);
+					}else{
+						metVal = metric.apply(graph);
+					}
 	        		mapMetricValues.put(metric.getName(), metVal);   
 	        	}
 	        }
-		    
+
 		    //mEdgeModification.removeEdgeFromGraph(triple.edgeId);
 		    mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int)mMapMetricValues.get("#nodetriangles"), 
 		    		(int)mMapMetricValues.get("#edgetriangles"));
@@ -177,7 +191,15 @@ public class EdgeModifier {
 			
 			mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
 					(int) newMetricValues.get("#edgetriangles"));
-			
+
+			ColouredGraph graph = mEdgeModification.getGraph();
+			for(SingleValueMetric metric: mLstMetrics){
+				if(metric.getName().equalsIgnoreCase("maxInDegree")){
+					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, -1, true);
+				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
+					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, -1, true);
+				}
+			}
 		}
 	}
 	
@@ -197,6 +219,15 @@ public class EdgeModifier {
 			mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId, 
 									lastTriple.edgeColour, (int) newMetricValues.get("#nodetriangles"),
 									(int) newMetricValues.get("#edgetriangles"));
+
+			ColouredGraph graph = mEdgeModification.getGraph();
+			for(SingleValueMetric metric: mLstMetrics){
+				if(metric.getName().equalsIgnoreCase("maxInDegree")){
+					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, 1, true);
+				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
+					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, 1, true);
+				}
+			}
 		}
 	}
 	
