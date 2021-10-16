@@ -220,7 +220,7 @@
 				<!--configuration>
 					<mainClass>org.aksw.simba.lemming.tools.PrecomputingValues</mainClass>
 					<arguments>
-						<argument>swdf</argument>
+						<argument>geology</argument>
 					</arguments>
 				</configuration-->
 				<configuration>

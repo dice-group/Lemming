@@ -150,7 +150,7 @@ public class GraphOptimization {
 			}
 
 			Long end = System.currentTimeMillis();
-			System.out.println("\tTime for one round " + i + ": " +  (end - start));
+			System.out.println("\tTime for round " + i + ": " +  (end - start));
 		}
 		
 		if(mTrueNoOfIteration == 0 ){
