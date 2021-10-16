@@ -41,7 +41,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @param vertex it is a vertexId of the removed/added edge.
      *               If DIRECTION.in: vertexId = headId, else vertexId = tailId.
      * @param change removing edge: change = -1, adding edge: change = +1
-     * @param update if need to update map the field maxInDegree/maxOutDegree update=true. Else, update=false;
+     * @param update if need to update the field maxInDegree/maxOutDegree update=true. Else, update=false;
      * @return maxInEdge/maxOutEdge degree of the given modified graph
      */
     public double recompute(ColouredGraph graph, int vertex, int change, boolean update){

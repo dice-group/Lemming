@@ -7,7 +7,7 @@ import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MaxVertexDegreeMetricTest {
+public class MaxVertexDegreeMetricTest extends MetricTest {
 
     @Test
     public void test1(){
@@ -52,7 +52,6 @@ public class MaxVertexDegreeMetricTest {
         value = metric.recompute(graph, 0, +1, true);
         Assert.assertEquals(2.0, value);
         Assert.assertEquals(2.0, metric.getCachedMaximumOutDegree());
-
     }
 
     @Test
@@ -100,38 +99,5 @@ public class MaxVertexDegreeMetricTest {
         value = metric.recompute(graph, 0, +1, true);
         Assert.assertEquals(3.0, value);
         Assert.assertEquals(3.0, metric.getCachedMaximumOutDegree());
-
-    }
-
-    private ColouredGraph buildGraph1(){
-        Grph graph = new InMemoryGrph();
-        int v1 = graph.addVertex();
-        int v2 = graph.addVertex();
-        int v3 = graph.addVertex();
-        graph.addDirectedSimpleEdge(v1, v2);
-        graph.addDirectedSimpleEdge(v1, v3);
-        return new ColouredGraph(graph, null, null);
-    }
-
-    private ColouredGraph buildGraph2(){
-        Grph graph = new InMemoryGrph();
-        int v1 = graph.addVertex();
-        int v2 = graph.addVertex();
-        graph.addDirectedSimpleEdge(v1, v1);
-        graph.addDirectedSimpleEdge(v1, v2);
-        graph.addDirectedSimpleEdge(v1, v2);
-        return new ColouredGraph(graph, null, null);
-    }
-
-    private ColouredGraph removeEdge(ColouredGraph graph, int edge){
-        Grph grph = graph.getGraph();
-        grph.removeEdge(edge);
-        return new ColouredGraph(grph, null, null);
-    }
-
-    private ColouredGraph addEdge(ColouredGraph graph, int tail, int head){
-        Grph grph = graph.getGraph();
-        grph.addDirectedSimpleEdge(tail, head);
-        return new ColouredGraph(grph, null, null);
     }
 }
