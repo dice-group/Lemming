@@ -21,17 +21,43 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
         super(name);
     }
 
+    protected int numOfVertices;
+
+    protected double sum;
+
     @Override
     public double apply(ColouredGraph graph) {
         return calculateAvg(graph.getGraph().getAllInEdgeDegrees());
     }
 
     protected double calculateAvg(IntArrayList degrees) {
-        double sum = 0;
+        sum = 0;
         for (int i = 0; i < degrees.size(); ++i) {
             sum += degrees.getInt(i);
         }
+        numOfVertices = degrees.size();
         return sum / degrees.size();
     }
 
+    /**
+     * This method can be used after running apply one time, it computes the avgInEdgeDegree after
+     * removing/adding an edge.
+     * @param change removing edge: change = -1, adding edge: change = +1
+     * @param update if need to update the filed sum (sum of all inEdgeDegrees). Else, update=false;
+     * @return avgVertexDegree after modifying graph
+     */
+    public double recompute(int change, boolean update){
+        double newAvgVertexDegree = (sum + change)/numOfVertices;
+        if(update){
+            sum += change;
+        }
+        return newAvgVertexDegree;
+    }
+
+    public int getCachedNumOfVertices(){
+        return this.numOfVertices;
+    }
+    public double getCachedSum(){
+        return this.sum;
+    }
 }
