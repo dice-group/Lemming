@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -108,7 +109,9 @@ public class EdgeModifier {
 	        			metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, -1, false);
 					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
 						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, -1, false);
-					}else{
+					}else if(metric.getName().equalsIgnoreCase("avgDegree")){
+	        			metVal = ((AvgVertexDegreeMetric)metric).recompute(-1, false);
+					}else {
 						metVal = metric.apply(graph);
 					}
 	        		mapChangedMetricValues.put(metric.getName(), metVal);   
@@ -158,6 +161,8 @@ public class EdgeModifier {
 						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, 1, false);
 					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
 						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, 1, false);
+					}else if(metric.getName().equalsIgnoreCase("avgDegree")){
+						metVal = ((AvgVertexDegreeMetric)metric).recompute(1, false);
 					}else{
 						metVal = metric.apply(graph);
 					}
@@ -198,6 +203,8 @@ public class EdgeModifier {
 					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, -1, true);
 				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
 					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, -1, true);
+				}else if(metric.getName().equalsIgnoreCase("avgDegree")){
+					((AvgVertexDegreeMetric)metric).recompute(-1, true);
 				}
 			}
 		}
@@ -226,6 +233,8 @@ public class EdgeModifier {
 					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, 1, true);
 				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
 					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, 1, true);
+				}else if(metric.getName().equalsIgnoreCase("avgDegree")){
+					((AvgVertexDegreeMetric)metric).recompute(1, true);
 				}
 			}
 		}
