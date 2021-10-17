@@ -25,10 +25,10 @@ public class MaxVertexDegreeMetricTest extends MetricTest {
         graph = addEdge(graph, 0, 2);
         value = metric.recompute(graph, 2, +1, false);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(1.0, metric.getCachedMaximumInDegree());
+        Assert.assertEquals(1.0, metric.getCachedMaximumDegree());
         value = metric.recompute(graph, 2, +1, true);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumInDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
 
         metric = new MaxVertexDegreeMetric(Grph.DIRECTION.out);
         graph = buildGraph1();
@@ -38,20 +38,20 @@ public class MaxVertexDegreeMetricTest extends MetricTest {
         graph = removeEdge(graph, 0);
         value = metric.recompute(graph, 0,-1, false);
         Assert.assertEquals(1.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
 
         value = metric.recompute(graph, 0,-1, true);
         Assert.assertEquals(1.0, value);
-        Assert.assertEquals(1.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(1.0, metric.getCachedMaximumDegree());
 
         graph = addEdge(graph, 0, 2);
         value = metric.recompute(graph, 0, +1, false);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(1.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(1.0, metric.getCachedMaximumDegree());
 
         value = metric.recompute(graph, 0, +1, true);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
     }
 
     @Test
@@ -64,20 +64,18 @@ public class MaxVertexDegreeMetricTest extends MetricTest {
         graph = removeEdge(graph, 1);
         value = metric.recompute(graph, 1,-1, false);
         Assert.assertEquals(1.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumInDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
         value = metric.recompute(graph, 1,-1, true);
         Assert.assertEquals(1.0, value);
-        Assert.assertEquals(1.0, metric.getCachedMaximumInDegree());
-
+        Assert.assertEquals(1.0, metric.getCachedMaximumDegree());
 
         graph = addEdge(graph, 1, 1);
         value = metric.recompute(graph, 1, +1, false);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(1.0, metric.getCachedMaximumInDegree());
+        Assert.assertEquals(1.0, metric.getCachedMaximumDegree());
         value = metric.recompute(graph, 1, +1, true);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumInDegree());
-
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
 
         metric = new MaxVertexDegreeMetric(Grph.DIRECTION.out);
         graph = buildGraph2();
@@ -87,17 +85,17 @@ public class MaxVertexDegreeMetricTest extends MetricTest {
         graph = removeEdge(graph, 1);
         value = metric.recompute(graph, 0,-1, false);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(3.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(3.0, metric.getCachedMaximumDegree());
         value = metric.recompute(graph, 0,-1, true);
         Assert.assertEquals(2.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
 
         graph = addEdge(graph, 0, 0);
         value = metric.recompute(graph, 0, +1, false);
         Assert.assertEquals(3.0, value);
-        Assert.assertEquals(2.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(2.0, metric.getCachedMaximumDegree());
         value = metric.recompute(graph, 0, +1, true);
         Assert.assertEquals(3.0, value);
-        Assert.assertEquals(3.0, metric.getCachedMaximumOutDegree());
+        Assert.assertEquals(3.0, metric.getCachedMaximumDegree());
     }
 }
