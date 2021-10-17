@@ -14,8 +14,7 @@ import grph.Grph.DIRECTION;
 public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValueMetric {
 
     protected DIRECTION direction;
-    protected int maxInDegree = -1;
-    protected int maxOutDegree = -1;
+    protected int maxDegree = -1;
 
     public MaxVertexDegreeMetric(DIRECTION direction) {
         super(direction == DIRECTION.in ? "maxInDegree" : "maxOutDegree");
@@ -26,11 +25,11 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     public double apply(ColouredGraph graph) {
 
         if (direction == DIRECTION.in) {
-            maxInDegree = graph.getGraph().getMaxInEdgeDegrees();
-            return this.maxInDegree;
+            maxDegree = graph.getGraph().getMaxInEdgeDegrees();
+            return this.maxDegree;
         } else {
-            maxOutDegree = graph.getGraph().getMaxOutEdgeDegrees();
-            return this.maxOutDegree;
+            maxDegree = graph.getGraph().getMaxOutEdgeDegrees();
+            return this.maxDegree;
         }
     }
 
@@ -41,53 +40,38 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @param vertex it is a vertexId of the removed/added edge.
      *               If DIRECTION.in: vertexId = headId, else vertexId = tailId.
      * @param change removing edge: change = -1, adding edge: change = +1
-     * @param update if need to update the field maxInDegree/maxOutDegree update=true. Else, update=false;
+     * @param update if need to update the field maxDegree update=true. Else, update=false;
      * @return maxInEdge/maxOutEdge degree of the given modified graph
      */
     public double recompute(ColouredGraph graph, int vertex, int change, boolean update){
-        if(direction == DIRECTION.in){
+
+        int changedDegree, oriDegree;
+        if(direction == DIRECTION.in) {
             //note: the given graph has been already modified
-            int changedDegree = graph.getGraph().getInEdgeDegree(vertex);
-            int oriDegree = changedDegree - change;
-            int newMaxInDegree = maxInDegree;
-            if(change == -1){
-                if(oriDegree==maxInDegree){
-                    newMaxInDegree = graph.getGraph().getMaxInEdgeDegrees();
-                }
-            }else{
-                if(oriDegree==maxInDegree){
-                    newMaxInDegree = changedDegree;
-                }
-            }
-            if(update){
-                maxInDegree = newMaxInDegree;
-            }
-            return newMaxInDegree;
-        }else{
-            int changedDegree = graph.getGraph().getOutEdgeDegree(vertex);
-            int oriDegree = changedDegree - change;
-            int newMaxOutDegree = maxOutDegree;
-            if(change == -1){
-                if(oriDegree==maxOutDegree){
-                    newMaxOutDegree = graph.getGraph().getMaxOutEdgeDegrees();
-                }
-            }else{
-                if(oriDegree==maxOutDegree){
-                    newMaxOutDegree = changedDegree;
-                }
-            }
-            if(update){
-                maxOutDegree = newMaxOutDegree;
-            }
-            return newMaxOutDegree;
+            changedDegree = graph.getGraph().getInEdgeDegree(vertex);
+        }else {
+            changedDegree = graph.getGraph().getOutEdgeDegree(vertex);
         }
+        oriDegree = changedDegree - change;
+        int newMaxDegree = maxDegree;
+        if(change == -1) {
+            if(oriDegree==maxDegree) {
+                if(direction == DIRECTION.in) {
+                    newMaxDegree = graph.getGraph().getMaxInEdgeDegrees();
+                }else {
+                    newMaxDegree = graph.getGraph().getMaxOutEdgeDegrees();
+                }
+            }
+        }else {
+            newMaxDegree = changedDegree;
+        }
+        if(update){
+            maxDegree = newMaxDegree;
+        }
+        return newMaxDegree;
     }
 
-    public double getCachedMaximumInDegree(){
-        return this.maxInDegree;
-    }
-
-    public double getCachedMaximumOutDegree(){
-        return this.maxOutDegree;
+    public double getCachedMaximumDegree(){
+        return this.maxDegree;
     }
 }
