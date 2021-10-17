@@ -82,17 +82,12 @@ public class GraphOptimization {
     public ErrorScores tryToRemoveAnEdgeThread() {
         double lErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfLeft;
-        // System.out.println("In tryToRemoveAnEdgeThread");
-        // go left by removing an edge
+        TripleBaseSingleID lTriple = new TripleBaseSingleID();
         synchronized (mEdgeModifier) {
-            TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
-            // System.out.println("Removed tripleId: " + lTriple.edgeId + ", headId: " +
-            // lTriple.headId + ", tailId: "
-            // + lTriple.tailId);
+            lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
             metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-            // System.out.println("[L]Aft -Number of edges: "+
-            // mEdgeModifier.getGraph().getEdges().size());
         }
+
         // if the removal cannot happen, the error is set to max as not to be chosen
         if (metricValuesOfLeft == null) {
             lErrScore = Double.MAX_VALUE;
@@ -100,7 +95,6 @@ public class GraphOptimization {
         } else {
             lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
         }
-        // System.out.println("Left = "+ lErrScore + " " + metricValuesOfLeft);
         return new ErrorScores(true, lErrScore, metricValuesOfLeft);
 
     }
@@ -108,15 +102,10 @@ public class GraphOptimization {
     public ErrorScores tryToAddAnEdgeThread() {
         double rErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfRight;
-        // System.out.println("In tryToAddAnEdgeThread");
-        // go right by adding a new edge
+        TripleBaseSingleID rTriple = new TripleBaseSingleID();
         synchronized (mEdgeModifier) {
-            TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
-            // System.out.println("Added tripleId: "+rTriple.edgeId +", headId:
-            // "+rTriple.headId +", tailId: "+rTriple.tailId);
+            rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
             metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
-            // System.out.println("[R]Aft -Number of edges: "+
-            // mEdgeModifier.getGraph().getEdges().size());
         }
 
         if (metricValuesOfRight == null) {
@@ -124,7 +113,6 @@ public class GraphOptimization {
         } else {
             rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
         }
-        // System.out.println("Right = "+rErrScore + " " + metricValuesOfRight);
         return new ErrorScores(false, rErrScore, metricValuesOfRight);
     }
 
@@ -163,12 +151,8 @@ public class GraphOptimization {
                 System.exit(1);
             }
 
-            // errScoreLeft = tryToRemoveAnEdgeThread();
-            // errScoreRight = tryToAddAnEdgeThread();
             lErrScore = errScoreLeft.getErrorScore();
             rErrScore = errScoreRight.getErrorScore();
-            // System.out.println(errScoreLeft.getMetricValues());
-            // System.out.println(errScoreRight.getMetricValues());
             // find min error score
             double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 
@@ -180,8 +164,6 @@ public class GraphOptimization {
                 pErrScore = lErrScore;
 
                 noOfRepeatedParent = 0;
-                // mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
-                // System.out.println("Left: "+errScoreLeft.getMetricValues());
                 mEdgeModifier.executeRemovingAnEdge(errScoreLeft.getMetricValues());
                 continue;
             }
@@ -190,8 +172,6 @@ public class GraphOptimization {
                 pErrScore = rErrScore;
 
                 noOfRepeatedParent = 0;
-                // mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
-                // System.out.println("Right: "+ errScoreRight.getMetricValues());
                 mEdgeModifier.executeAddingAnEdge(errScoreRight.getMetricValues());
                 continue;
             }
