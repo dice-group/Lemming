@@ -7,6 +7,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.tools.PrecomputingValues;
 import org.slf4j.Logger;
@@ -102,20 +103,35 @@ public class EdgeModifier {
 	        ColouredGraph graph = mEdgeModification.getGraph();
 	        
 	        for(SingleValueMetric metric: mLstMetrics){
-	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
-	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
-	        		double metVal;
-	        		if(metric.getName().equalsIgnoreCase("maxInDegree")){
-	        			metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, -1, false);
-					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
-						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, -1, false);
-					}else if(metric.getName().equalsIgnoreCase("avgDegree")){
-	        			metVal = ((AvgVertexDegreeMetric)metric).recompute(-1, false);
-					}else {
-						metVal = metric.apply(graph);
+
+				if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
+						!metric.getName().equalsIgnoreCase("#nodetriangles")){
+
+					String metricName = metric.getName().toLowerCase();
+					double metVal;
+
+					switch (metricName) {
+						case "maxindegree":
+							metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, -1, false);
+							break;
+						case "maxoutdegree":
+							metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, -1, false);
+							break;
+						case "avgdegree":
+							metVal = ((AvgVertexDegreeMetric)metric).recompute(-1, false);
+							break;
+						case "stddevindegree":
+							metVal = ((StdDevVertexDegree)metric).recompute(graph, triple.headId, -1, false);
+							break;
+						case "stddevoutdegree":
+							metVal = ((StdDevVertexDegree)metric).recompute(graph, triple.tailId, -1, false);
+							break;
+						default:
+							metVal = metric.apply(graph);
+							break;
 					}
-	        		mapChangedMetricValues.put(metric.getName(), metVal);   
-	        	}
+					mapChangedMetricValues.put(metric.getName(), metVal);
+				}
 	        }
 	        
 	        //reverse the graph
@@ -153,21 +169,37 @@ public class EdgeModifier {
 			}
 		    
 		    ColouredGraph graph = mEdgeModification.getGraph();
+
 		    for(SingleValueMetric metric: mLstMetrics){
-	        	if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
-	        			!metric.getName().equalsIgnoreCase("#nodetriangles")){
+
+				if(!metric.getName().equalsIgnoreCase("#edgetriangles") &&
+						!metric.getName().equalsIgnoreCase("#nodetriangles")){
+
+					String metricName = metric.getName().toLowerCase();
 					double metVal;
-					if(metric.getName().equalsIgnoreCase("maxInDegree")){
-						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, 1, false);
-					}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
-						metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, 1, false);
-					}else if(metric.getName().equalsIgnoreCase("avgDegree")){
-						metVal = ((AvgVertexDegreeMetric)metric).recompute(1, false);
-					}else{
-						metVal = metric.apply(graph);
+
+					switch (metricName) {
+						case "maxindegree":
+							metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.headId, 1, false);
+							break;
+						case "maxoutdegree":
+							metVal = ((MaxVertexDegreeMetric)metric).recompute(graph, triple.tailId, 1, false);
+							break;
+						case "avgdegree":
+							metVal = ((AvgVertexDegreeMetric)metric).recompute(-1, false);
+							break;
+						case "stddevindegree":
+							metVal = ((StdDevVertexDegree)metric).recompute(graph, triple.headId, 1, false);
+							break;
+						case "stddevoutdegree":
+							metVal = ((StdDevVertexDegree)metric).recompute(graph, triple.tailId, 1, false);
+							break;
+						default:
+							metVal = metric.apply(graph);
+							break;
 					}
-	        		mapMetricValues.put(metric.getName(), metVal);   
-	        	}
+					mapMetricValues.put(metric.getName(), metVal);
+				}
 	        }
 
 		    //mEdgeModification.removeEdgeFromGraph(triple.edgeId);
@@ -199,12 +231,27 @@ public class EdgeModifier {
 
 			ColouredGraph graph = mEdgeModification.getGraph();
 			for(SingleValueMetric metric: mLstMetrics){
-				if(metric.getName().equalsIgnoreCase("maxInDegree")){
-					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, -1, true);
-				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
-					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, -1, true);
-				}else if(metric.getName().equalsIgnoreCase("avgDegree")){
-					((AvgVertexDegreeMetric)metric).recompute(-1, true);
+
+				String metricName = metric.getName().toLowerCase();
+
+				switch (metricName) {
+					case "maxindegree":
+						((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, -1, true);
+						break;
+					case "maxoutdegree":
+						((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, -1, true);
+						break;
+					case "avgdegree":
+						((AvgVertexDegreeMetric)metric).recompute(-1, true);
+						break;
+					case "stddevindegree":
+						((StdDevVertexDegree)metric).recompute(graph, lastTriple.headId, -1, true);
+						break;
+					case "stddevoutdegree":
+						((StdDevVertexDegree)metric).recompute(graph, lastTriple.tailId, -1, true);
+						break;
+					default:
+						break;
 				}
 			}
 		}
@@ -229,12 +276,26 @@ public class EdgeModifier {
 
 			ColouredGraph graph = mEdgeModification.getGraph();
 			for(SingleValueMetric metric: mLstMetrics){
-				if(metric.getName().equalsIgnoreCase("maxInDegree")){
-					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, 1, true);
-				}else if(metric.getName().equalsIgnoreCase("maxOutDegree")) {
-					((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, 1, true);
-				}else if(metric.getName().equalsIgnoreCase("avgDegree")){
-					((AvgVertexDegreeMetric)metric).recompute(1, true);
+				String metricName = metric.getName().toLowerCase();
+
+				switch (metricName) {
+					case "maxindegree":
+						((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.headId, 1, true);
+						break;
+					case "maxoutdegree":
+						((MaxVertexDegreeMetric)metric).recompute(graph, lastTriple.tailId, 1, true);
+						break;
+					case "avgdegree":
+						((AvgVertexDegreeMetric)metric).recompute(-1, true);
+						break;
+					case "stddevindegree":
+						((StdDevVertexDegree)metric).recompute(graph, lastTriple.headId, 1, true);
+						break;
+					case "stddevoutdegree":
+						((StdDevVertexDegree)metric).recompute(graph, lastTriple.tailId, 1, true);
+						break;
+					default:
+						break;
 				}
 			}
 		}
