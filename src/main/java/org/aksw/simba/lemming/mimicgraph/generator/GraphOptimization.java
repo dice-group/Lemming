@@ -84,7 +84,7 @@ public class GraphOptimization {
         ObjectDoubleOpenHashMap<String> metricValuesOfLeft;
         TripleBaseSingleID lTriple = new TripleBaseSingleID();
         synchronized (mEdgeModifier) {
-            lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
+            lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getCopyOfGraph());
             metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
         }
 
@@ -107,7 +107,6 @@ public class GraphOptimization {
             rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
             metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
         }
-
         if (metricValuesOfRight == null) {
             rErrScore = Double.MAX_VALUE;
         } else {
