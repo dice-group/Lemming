@@ -8,3 +8,4 @@ bin
 .settings
 *.log
 SemanticWebDogFood
+pom.xml
