@@ -63,7 +63,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                 }
             }
         }else {
-            newMaxDegree = changedDegree;
+            if(oriDegree==maxDegree) {
+                newMaxDegree = changedDegree;
+            }
         }
         if(update){
             maxDegree = newMaxDegree;
