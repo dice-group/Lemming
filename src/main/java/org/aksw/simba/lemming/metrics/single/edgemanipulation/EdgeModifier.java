@@ -28,7 +28,6 @@ public class EdgeModifier {
     private List<TripleBaseSingleID> mLstAddedEdges;
     private boolean isCoutingEdgeTriangles = false;
     private boolean isCountingNodeTriangles = false;
-    private boolean useCopyOfGraph = true;
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
         // list of metric
@@ -79,10 +78,6 @@ public class EdgeModifier {
         return mEdgeModification.getGraph();
     }
 
-    public ColouredGraph getCopyOfGraph() {
-        return mEdgeModification.getCopyOfGraph();
-    }
-
     public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
         if (triple != null && triple.edgeId != -1 && triple.edgeColour != null && triple.tailId != -1
                 && triple.headId != -1) {
@@ -103,7 +98,7 @@ public class EdgeModifier {
                 mapChangedMetricValues.put("#edgetriangles", newEdgeTri);
             }
 
-            ColouredGraph graph = mEdgeModification.getCopyOfGraph();
+            ColouredGraph graph = mEdgeModification.getGraph();
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
@@ -116,8 +111,7 @@ public class EdgeModifier {
             // mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId,
             // triple.edgeColour);
             int removedEdgeID = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour,
-                    (int) mMapMetricValues.get("#nodetriangles"), (int) mMapMetricValues.get("#edgetriangles"),
-                    useCopyOfGraph);
+                    (int) mMapMetricValues.get("#nodetriangles"), (int) mMapMetricValues.get("#edgetriangles"));
 
             TripleBaseSingleID removedTriple = new TripleBaseSingleID(triple.tailId, triple.headColour, triple.headId,
                     triple.tailColour, removedEdgeID, triple.edgeColour);
@@ -160,7 +154,7 @@ public class EdgeModifier {
 
             // mEdgeModification.removeEdgeFromGraph(triple.edgeId);
             mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int) mMapMetricValues.get("#nodetriangles"),
-                    (int) mMapMetricValues.get("#edgetriangles"), !useCopyOfGraph);
+                    (int) mMapMetricValues.get("#edgetriangles"));
             return mapMetricValues;
         } else {
             LOGGER.warn("Invalid triple for adding an edge!");
@@ -183,8 +177,7 @@ public class EdgeModifier {
             // mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId);
 
             mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
-                    (int) newMetricValues.get("#edgetriangles"), useCopyOfGraph);
-            mEdgeModification.setGraph(getCopyOfGraph());
+                    (int) newMetricValues.get("#edgetriangles"));
 
         }
     }
@@ -204,9 +197,7 @@ public class EdgeModifier {
             // mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId,
             // lastTriple.edgeColour);
             mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId, lastTriple.edgeColour,
-                    (int) newMetricValues.get("#nodetriangles"), (int) newMetricValues.get("#edgetriangles"),
-                    !useCopyOfGraph);
-            mEdgeModification.setGraph(getGraph());
+                    (int) newMetricValues.get("#nodetriangles"), (int) newMetricValues.get("#edgetriangles"));
         }
     }
 
