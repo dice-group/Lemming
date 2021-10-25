@@ -5,7 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.tools.PrecomputingValues;
 import org.slf4j.Logger;
@@ -78,6 +80,20 @@ public class EdgeModifier {
         return mEdgeModification.getGraph();
     }
 
+    /**
+     * Returns decorator object for Edge addition thread
+     */
+    public ColouredGraphDecorator getAddEdgeDecorator() {
+        return mEdgeModification.getAddEdgeDecorator();
+    }
+
+    /**
+     * Returns decorator object for Edge removal thread
+     */
+    public ColouredGraphDecorator getRemoveEdgeDecorator() {
+        return mEdgeModification.getRemoveEdgeDecorator();
+    }
+
     public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
         if (triple != null && triple.edgeId != -1 && triple.edgeColour != null && triple.tailId != -1
                 && triple.headId != -1) {
@@ -98,7 +114,7 @@ public class EdgeModifier {
                 mapChangedMetricValues.put("#edgetriangles", newEdgeTri);
             }
 
-            ColouredGraph graph = mEdgeModification.getGraph();
+            ColouredGraph graph = getRemoveEdgeDecorator().getDecoratedGraph();
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
@@ -142,7 +158,7 @@ public class EdgeModifier {
                 mapMetricValues.put("#edgetriangles", newEdgeTri);
             }
 
-            ColouredGraph graph = mEdgeModification.getGraph();
+            ColouredGraph graph = getAddEdgeDecorator().getDecoratedGraph();
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
