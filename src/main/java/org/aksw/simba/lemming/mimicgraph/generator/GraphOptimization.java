@@ -202,7 +202,7 @@ public class GraphOptimization {
      * @param pErrScore the error score at the parent node
      * @param lErrScore the error score if go left
      * @param rErrScore the error score if go right
-     * @return the smalles error score among them
+     * @return the smallest error score among them
      */
     private double minValues(double pErrScore, double lErrScore, double rErrScore) {
         double minErrScore = Double.MAX_VALUE;
