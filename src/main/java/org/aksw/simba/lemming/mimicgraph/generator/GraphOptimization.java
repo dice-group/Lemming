@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
@@ -79,19 +80,18 @@ public class GraphOptimization {
         mProcessRandomly = isRandom;
     }
 
-    public ErrorScores tryToRemoveAnEdgeThread() {
+    /**
+     * Method to separate Edge Removal into a thread
+     * 
+     * @param TripleBaseSingleID rTriple - Edge to be removed from the graph
+     * @return ErrorScores - Error Score and updated metric values after removing
+     *         the edge to the graph
+     */
+    public ErrorScores tryToRemoveAnEdgeThread(TripleBaseSingleID lTriple) {
         double lErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfLeft;
-        // System.out.println("In tryToRemoveAnEdgeThread");
-        // go left by removing an edge
         synchronized (mEdgeModifier) {
-            TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
-            // System.out.println("Removed tripleId: " + lTriple.edgeId + ", headId: " +
-            // lTriple.headId + ", tailId: "
-            // + lTriple.tailId);
             metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-            // System.out.println("[L]Aft -Number of edges: "+
-            // mEdgeModifier.getGraph().getEdges().size());
         }
         // if the removal cannot happen, the error is set to max as not to be chosen
         if (metricValuesOfLeft == null) {
@@ -100,31 +100,29 @@ public class GraphOptimization {
         } else {
             lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
         }
-        // System.out.println("Left = "+ lErrScore + " " + metricValuesOfLeft);
         return new ErrorScores(true, lErrScore, metricValuesOfLeft);
 
     }
 
-    public ErrorScores tryToAddAnEdgeThread() {
+    /**
+     * Method to separate Edge Addition into a thread
+     * 
+     * @param TripleBaseSingleID rTriple - Edge to be added to the graph
+     * @return ErrorScores - Error Score and updated metric values after adding the
+     *         edge to the graph
+     */
+    public ErrorScores tryToAddAnEdgeThread(TripleBaseSingleID rTriple) {
         double rErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfRight;
-        // System.out.println("In tryToAddAnEdgeThread");
-        // go right by adding a new edge
         synchronized (mEdgeModifier) {
-            TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
-            // System.out.println("Added tripleId: "+rTriple.edgeId +", headId:
-            // "+rTriple.headId +", tailId: "+rTriple.tailId);
             metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
-            // System.out.println("[R]Aft -Number of edges: "+
-            // mEdgeModifier.getGraph().getEdges().size());
         }
-
         if (metricValuesOfRight == null) {
             rErrScore = Double.MAX_VALUE;
+            LOGGER.warn("Edge Addition Prevented. Setting rErrScore: " + rErrScore);
         } else {
             rErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfRight);
         }
-        // System.out.println("Right = "+rErrScore + " " + metricValuesOfRight);
         return new ErrorScores(false, rErrScore, metricValuesOfRight);
     }
 
@@ -137,8 +135,9 @@ public class GraphOptimization {
         ErrorScores errScoreRight = null;
         double lErrScore = Double.NaN;
         double rErrScore = Double.NaN;
-
         ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
+        ColouredGraphDecorator mAddEdgeDecorator = mEdgeModifier.getAddEdgeDecorator();
+        ColouredGraphDecorator mRemoveEdgeDecorator = mEdgeModifier.getRemoveEdgeDecorator();
 
         double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues);
 
@@ -148,27 +147,25 @@ public class GraphOptimization {
         for (int i = 0; i < mMaxIteration; ++i) {
             // add errorScore to tracking list result
             mLstErrorScore.add(pErrScore);
-            Future<ErrorScores> leftFutureScore = executor.submit(() -> tryToRemoveAnEdgeThread());
-            Future<ErrorScores> rightFutureScore = executor.submit(() -> tryToAddAnEdgeThread());
+
+            // Arguments passed to a 'Callable task' have to be final
+            final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator.getDecoratedGraph());
+            final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator.getDecoratedGraph());
+
+            Future<ErrorScores> leftFutureScore = executor.submit(() -> tryToRemoveAnEdgeThread(lTriple));
+            Future<ErrorScores> rightFutureScore = executor.submit(() -> tryToAddAnEdgeThread(rTriple));
 
             try {
                 errScoreLeft = leftFutureScore.get();
                 errScoreRight = rightFutureScore.get();
             } catch (InterruptedException | ExecutionException e) {
-                // TODO Auto-generated catch block
-                // System.out.println(
-                // "Hey, the code actually reached here!! So, there was an error in fetching the
-                // values from the future threads");
+                LOGGER.warn("Cannot fetch error scores from threads. Check: " + e.getMessage());
                 e.printStackTrace();
                 System.exit(1);
             }
 
-            // errScoreLeft = tryToRemoveAnEdgeThread();
-            // errScoreRight = tryToAddAnEdgeThread();
             lErrScore = errScoreLeft.getErrorScore();
             rErrScore = errScoreRight.getErrorScore();
-            // System.out.println(errScoreLeft.getMetricValues());
-            // System.out.println(errScoreRight.getMetricValues());
             // find min error score
             double minErrScore = minValues(pErrScore, lErrScore, rErrScore);
 
@@ -180,8 +177,6 @@ public class GraphOptimization {
                 pErrScore = lErrScore;
 
                 noOfRepeatedParent = 0;
-                // mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
-                // System.out.println("Left: "+errScoreLeft.getMetricValues());
                 mEdgeModifier.executeRemovingAnEdge(errScoreLeft.getMetricValues());
                 continue;
             }
@@ -190,8 +185,6 @@ public class GraphOptimization {
                 pErrScore = rErrScore;
 
                 noOfRepeatedParent = 0;
-                // mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
-                // System.out.println("Right: "+ errScoreRight.getMetricValues());
                 mEdgeModifier.executeAddingAnEdge(errScoreRight.getMetricValues());
                 continue;
             }
@@ -222,7 +215,7 @@ public class GraphOptimization {
      * @param pErrScore the error score at the parent node
      * @param lErrScore the error score if go left
      * @param rErrScore the error score if go right
-     * @return the smalles error score among them
+     * @return the smallest error score among them
      */
     private double minValues(double pErrScore, double lErrScore, double rErrScore) {
         double minErrScore = Double.MAX_VALUE;

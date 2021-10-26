@@ -5,6 +5,7 @@ import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
@@ -23,6 +24,9 @@ public class EdgeModification {
     private int newEdgeTriangles;
     private int subGraphTrianglesAfterRemovingEdge = 0;
 
+    private ColouredGraphDecorator mAddEdgeDecorator;
+    private ColouredGraphDecorator mRemoveEdgeDecorator;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModification.class);
 
     private VertexDegrees mVertexDegrees;
@@ -35,6 +39,9 @@ public class EdgeModification {
         this.oldNodeTriangles = (int) getNumberOfNodeTriangles();
         this.oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
         mVertexDegrees = new VertexDegrees(graph);
+
+        this.mAddEdgeDecorator = new ColouredGraphDecorator(graph, true);
+        this.mRemoveEdgeDecorator = new ColouredGraphDecorator(graph, false);
     }
 
     public EdgeModification(ColouredGraph graph, int numberOfNodeTriangles, int numberOfEdgeTriangles) {
@@ -43,6 +50,9 @@ public class EdgeModification {
         this.oldNodeTriangles = numberOfNodeTriangles;
         this.oldEdgeTriangles = numberOfEdgeTriangles;
         mVertexDegrees = new VertexDegrees(graph);
+
+        this.mAddEdgeDecorator = new ColouredGraphDecorator(graph, true);
+        this.mRemoveEdgeDecorator = new ColouredGraphDecorator(graph, false);
     }
 
     public ColouredGraph getGraph() {
@@ -89,6 +99,14 @@ public class EdgeModification {
         return edgeMetric.apply(graph);
     }
 
+    public ColouredGraphDecorator getAddEdgeDecorator() {
+        return mAddEdgeDecorator;
+    }
+
+    public ColouredGraphDecorator getRemoveEdgeDecorator() {
+        return mRemoveEdgeDecorator;
+    }
+
     void removeEdgeFromGraph(int edgeId) {
         if (newNodeTriangles != 0 && newEdgeTriangles != 0) {
             oldNodeTriangles = newNodeTriangles;
@@ -102,7 +120,7 @@ public class EdgeModification {
         // newNodeTriangles = 0;
         // newEdgeTriangles = 0;
 
-        Grph grph = graph.getGraph();
+        Grph grph = mRemoveEdgeDecorator.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
 
         int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
@@ -135,7 +153,7 @@ public class EdgeModification {
         }
         subGraphTrianglesAfterRemovingEdge = 0;
 
-        this.graph.removeEdge(edgeId);
+        mRemoveEdgeDecorator.getGraph().removeEdge(edgeId);
 
         // For removing an edge from a graph, update the vertex in and out degrees.
         mVertexDegrees.updateVertexInDegree(headId, -1);
@@ -217,7 +235,7 @@ public class EdgeModification {
         // if (oldEdgeTriangles == 0)
         // oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
-        Grph grph = graph.getGraph();
+        Grph grph = mAddEdgeDecorator.getGraph();
         int numEdgesBetweenVertices = IntSetUtil
                 .intersection(grph.getEdgesIncidentTo(tail), grph.getEdgesIncidentTo(head)).size();
 
@@ -241,11 +259,11 @@ public class EdgeModification {
                 newSubGraphEdgeTriangles += (mul * (numEdgesBetweenVertices + 1));
             }
             this.newEdgeTriangles = oldEdgeTriangles + (newSubGraphEdgeTriangles - oldSubGraphEdgeTriangles);
-            edgeId = graph.addEdge(tail, head, color);
+            edgeId = mAddEdgeDecorator.getDecoratedGraph().addEdge(tail, head, color);
         } else {
             // no connection between vertices
             this.newNodeTriangles = oldNodeTriangles + verticesInCommon.size();
-            edgeId = graph.addEdge(tail, head, color);
+            edgeId = mAddEdgeDecorator.getDecoratedGraph().addEdge(tail, head, color);
             numEdgesBetweenVertices += 1;
             int subGraphEdgeTriangles = 0;
             for (int vertex : verticesInCommon) {
@@ -274,11 +292,11 @@ public class EdgeModification {
         }
         this.newNodeTriangles = newNodeTriangles;
         this.newEdgeTriangles = newEdgeTriangles;
-        this.graph.removeEdge(edgeId);
 
+        mAddEdgeDecorator.getDecoratedGraph().removeEdge(edgeId);
         // For removing an edge from a graph, update the vertex in and out degrees.
-        int headId = graph.getGraph().getDirectedSimpleEdgeHead(edgeId);
-        int tailId = graph.getGraph().getDirectedSimpleEdgeTail(edgeId);
+        int headId = this.graph.getGraph().getDirectedSimpleEdgeHead(edgeId);
+        int tailId = this.graph.getGraph().getDirectedSimpleEdgeTail(edgeId);
         mVertexDegrees.updateVertexInDegree(headId, -1);
         mVertexDegrees.updateVertexOutDegree(tailId, -1);
 
@@ -296,6 +314,7 @@ public class EdgeModification {
         mVertexDegrees.updateVertexInDegree(head, 1);
         mVertexDegrees.updateVertexOutDegree(tail, 1);
 
-        return graph.addEdge(tail, head, color);
+        return mRemoveEdgeDecorator.getDecoratedGraph().addEdge(tail, head, color);
+
     }
 }
