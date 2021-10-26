@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetricResult.GRAPHOPERATION;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import it.unimi.dsi.fastutil.ints.IntIterator;
@@ -39,13 +38,18 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * The method checks if we need to compute in degree or out-degree and then
      * calls the metricComputationMaxDegree with correct parameters.
      * 
-     * @param triple         - edge on which graph operation is performed.
-     * @param metric         - input metric which needs to be computed.
-     * @param graph          - input graph.
-     * @param graphOperation - boolean value indicating graph operation. ("true" for
-     *                       adding an edge and "false" for removing an edge)
-     * @param previousResult - UpdatableMetricResult object containing the previous
-     *                       computed results.
+     * @param triple
+     *            - edge on which graph operation is performed.
+     * @param metric
+     *            - input metric which needs to be computed.
+     * @param graph
+     *            - input graph.
+     * @param graphOperation
+     *            - boolean value indicating graph operation. ("true" for adding an
+     *            edge and "false" for removing an edge)
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
      * @return
      */
     @Override
@@ -56,19 +60,19 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         if (direction == DIRECTION.in) {
 
             if (graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge
-                newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeIndegree, DIRECTION.in,
+                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in,
                         triple.headId, triple, 1, previousResult, mVertexDegrees);
             } else {
-                newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeIndegree, DIRECTION.in,
+                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in,
                         triple.headId, triple, -1, previousResult, mVertexDegrees);
             }
 
         } else {
             if (graphOperation) {
-                newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.AddAnEdgeOutdegree, DIRECTION.out,
+                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out,
                         triple.tailId, triple, 1, previousResult, mVertexDegrees);
             } else {
-                newMetricResult = metricComputationMaxDegree(graph, GRAPHOPERATION.RemoveAnEdgeOutdegree, DIRECTION.out,
+                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out,
                         triple.tailId, triple, -1, previousResult, mVertexDegrees);
             }
 
@@ -81,15 +85,20 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * The method contains logic that reduces the number of calls to apply method
      * for the max vertex degree metric.
      * 
-     * @param metric     - metric which should be calculated.
-     * @param graph      - input graph.
-     * @param metricName - can be "RemoveAnEdge" or "AddAnEdge" indicating how the
-     *                   edge is modified.
-     * @param direction  - this is in or out based on the operation.
-     * @param vertexID   - The vertex that is modified.
+     * @param metric
+     *            - metric which should be calculated.
+     * @param graph
+     *            - input graph.
+     * @param metricName
+     *            - can be "RemoveAnEdge" or "AddAnEdge" indicating how the edge is
+     *            modified.
+     * @param direction
+     *            - this is in or out based on the operation.
+     * @param vertexID
+     *            - The vertex that is modified.
      * @return
      */
-    private UpdatableMetricResult metricComputationMaxDegree(ColouredGraph graph, GRAPHOPERATION metricName,
+    private UpdatableMetricResult metricComputationMaxDegree(ColouredGraph graph, 
             DIRECTION direction, int vertexID, TripleBaseSingleID triple, int updateVertexDegree,
             UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
         double metVal;
@@ -99,12 +108,12 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         if (previousResult instanceof MaxVertexDegreeMetricResult) {
             // Set previously stored maps
             metricResultTempObj
-                    .setmMapCandidatesMetric(((MaxVertexDegreeMetricResult) previousResult).getmMapCandidatesMetric());
-            metricResultTempObj.setmMapCandidatesMetricValues(
-                    ((MaxVertexDegreeMetricResult) previousResult).getmMapCandidatesMetricValues());
+                    .setCandidatesMetricSet(((MaxVertexDegreeMetricResult) previousResult).getmMapCandidatesMetric());
+            metricResultTempObj.setMaxVertexDegree(
+                    ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexDegree());
         }
 
-        IntSet intSetTemp = metricResultTempObj.getmMapCandidatesMetric().get(metricName);
+        IntSet intSetTemp = metricResultTempObj.getmMapCandidatesMetric();
         // Get the current candidate set
 
         if (intSetTemp.size() == 0) { // Initially the Candidate set will be empty, hence need to call the apply
@@ -118,23 +127,13 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             intSetTemp.addAll(maxDegreeVertices); // store the vertex with metric value in candidate set
 
             // Store the metric value for later use
-            if ((metricName == GRAPHOPERATION.AddAnEdgeIndegree)
-                    || (metricName == GRAPHOPERATION.RemoveAnEdgeIndegree)) {
-                metricResultTempObj.getmMapCandidatesMetricValues().put(GRAPHOPERATION.AddAnEdgeIndegree, metVal);
-                metricResultTempObj.getmMapCandidatesMetricValues().put(GRAPHOPERATION.RemoveAnEdgeIndegree, metVal);
-                metricResultTempObj.getmMapCandidatesMetric().put(GRAPHOPERATION.AddAnEdgeIndegree, intSetTemp);
-                metricResultTempObj.getmMapCandidatesMetric().put(GRAPHOPERATION.RemoveAnEdgeIndegree, intSetTemp);
-            } else {
-                metricResultTempObj.getmMapCandidatesMetricValues().put(GRAPHOPERATION.AddAnEdgeOutdegree, metVal);
-                metricResultTempObj.getmMapCandidatesMetricValues().put(GRAPHOPERATION.RemoveAnEdgeOutdegree, metVal);
-                metricResultTempObj.getmMapCandidatesMetric().put(GRAPHOPERATION.AddAnEdgeOutdegree, intSetTemp);
-                metricResultTempObj.getmMapCandidatesMetric().put(GRAPHOPERATION.RemoveAnEdgeOutdegree, intSetTemp);
-            }
+            metricResultTempObj.setCandidatesMetricSet(intSetTemp);
+            metricResultTempObj.setMaxVertexDegree(metVal);
 
         } else {
 
             if (intSetTemp.contains(vertexID)) { // The Edge for vertex in candidate set is modified
-                metVal = metricResultTempObj.getmMapCandidatesMetricValues().get(metricName);
+                metVal = metricResultTempObj.getMaxVertexDegree();
 
                 if (intSetTemp.size() == 1) {
                     // If there is only single vertex in the candidate list then update the max
@@ -149,10 +148,10 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                         // Get the vertex with the metric value
 
                         // store the vertex with metric value in candidate set
-                        metricResultTempObj.getmMapCandidatesMetric().replace(metricName, maxDegreeVertices);
+                        metricResultTempObj.setCandidatesMetricSet(maxDegreeVertices);
 
                     }
-                    metricResultTempObj.getmMapCandidatesMetricValues().replace(metricName, metVal);
+                    metricResultTempObj.setMaxVertexDegree(metVal);
                     // Store the metric value for later use
 
                 } else {
@@ -161,15 +160,14 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                         // The other vertices that exist in the candidate set can be removed since the
                         // max degree will be increased
 
-                        metricResultTempObj.getmMapCandidatesMetric().replace(metricName, new IntOpenHashSet());
+                        //metricResultTempObj.setmMapCandidatesMetric(new IntOpenHashSet());
 
                         IntSet candidate = new IntOpenHashSet();
                         candidate.add(vertexID);
-                        metricResultTempObj.getmMapCandidatesMetric().replace(metricName, candidate);
+                        metricResultTempObj.setCandidatesMetricSet(candidate);
 
                         metVal = metVal + updateVertexDegree;
-                        metricResultTempObj.getmMapCandidatesMetricValues().replace(metricName,
-                                metVal + updateVertexDegree);
+                        metricResultTempObj.setMaxVertexDegree(metVal);
                     } else {
                         // The current vertex can be removed from the candidate set since
                         // its degree is reduced
@@ -181,13 +179,13 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                             if (vertexID != tempTripleId)
                                 candidates.add(iterator.nextInt());
                         }
-                        metricResultTempObj.getmMapCandidatesMetric().replace(metricName, candidates);
+                        metricResultTempObj.setCandidatesMetricSet( candidates);
                     }
                 }
 
             } else { // If Edge for vertex in candidate set is not modified then we can use the
                      // previously stored values
-                metVal = metricResultTempObj.getmMapCandidatesMetricValues().get(metricName);
+                metVal = metricResultTempObj.getMaxVertexDegree();
                 int inVertexDegreeTemp;
                 inVertexDegreeTemp = mVertexDegrees.getVertexDegree(vertexID, direction);
 
@@ -201,7 +199,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                     while (iterator.hasNext()) {
                         candidates.add(iterator.nextInt());
                     }
-                    metricResultTempObj.getmMapCandidatesMetric().replace(metricName, candidates);
+                    metricResultTempObj.setCandidatesMetricSet(candidates);
 
                 }
 
@@ -209,33 +207,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         }
         metricResultTempObj.setResult(metVal);// Set the new computed metric value as result
 
-        // verify if degrees for previously stored candidates is not changed.
-        if (updateVertexDegree == 1) {
-            verifyCandidates(metricName, triple, metricResultTempObj);
-        } else {
-            verifyCandidates(metricName, triple, metricResultTempObj);
-        }
-
         return metricResultTempObj;
     }
 
-    /**
-     * Checks If previous candidates are not changed.
-     * 
-     * @param metricName - name of the metric.
-     * @param triple     - triple containing the vertices which have been updated.
-     */
-    public void verifyCandidates(GRAPHOPERATION metricName, TripleBaseSingleID triple,
-            MaxVertexDegreeMetricResult metricResultTempObj) {
-        for (GRAPHOPERATION key : metricResultTempObj.getmMapCandidatesMetric().keySet()) {
-            if (!(key == metricName)) {
-                IntSet intSet = metricResultTempObj.getmMapCandidatesMetric().get(key);
-                if (intSet.contains(triple.headId) || intSet.contains(triple.tailId)) {
-                    metricResultTempObj.getmMapCandidatesMetric().replace(key, new IntOpenHashSet());
-                    metricResultTempObj.getmMapCandidatesMetricValues().replace(key, 0.0);
-                }
-            }
-        }
-    }
 
 }
