@@ -42,8 +42,8 @@ public class VertexDegrees {
         IntIterator iterator = vertices.iterator();
         while (iterator.hasNext()) {
             int nextInt = iterator.nextInt();
-            int inVertexDegree = graph.getGraph().getInVertexDegree(nextInt);
-            int outVertexDegree = graph.getGraph().getOutVertexDegree(nextInt);
+            int inVertexDegree = graph.getGraph().getInEdgeDegree(nextInt);
+            int outVertexDegree = graph.getGraph().getOutEdgeDegree(nextInt);
 
             mMapVerticesInDegree[index] = inVertexDegree;
             mMapVerticesOutDegree[index] = outVertexDegree;

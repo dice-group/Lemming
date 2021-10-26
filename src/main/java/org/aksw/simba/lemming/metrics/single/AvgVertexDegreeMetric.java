@@ -42,13 +42,18 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * degrees stored in VertexDegrees else it will update the previously stored sum
      * value.
      * 
-     * @param triple         - edge on which graph operation is performed.
-     * @param metric         - input metric which needs to be computed.
-     * @param graph          - input graph.
-     * @param graphOperation - boolean value indicating graph operation. ("true" for
-     *                       adding an edge and "false" for removing an edge)
-     * @param previousResult - UpdatableMetricResult object containing the previous
-     *                       computed results.
+     * @param triple
+     *            - edge on which graph operation is performed.
+     * @param metric
+     *            - input metric which needs to be computed.
+     * @param graph
+     *            - input graph.
+     * @param graphOperation
+     *            - boolean value indicating graph operation. ("true" for adding an
+     *            edge and "false" for removing an edge)
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
      * @return UpdatableMetricResult object with updated values that can be used in
      *         further computations
      */

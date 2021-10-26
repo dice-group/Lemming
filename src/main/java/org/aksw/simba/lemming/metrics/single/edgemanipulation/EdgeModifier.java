@@ -188,7 +188,8 @@ public class EdgeModifier {
     /**
      * execute removing an edge
      * 
-     * @param newMetricValues the already calculated metric from trial
+     * @param newMetricValues
+     *            the already calculated metric from trial
      */
     public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
         if (mLstRemovedEdges.size() > 0) {
@@ -211,7 +212,8 @@ public class EdgeModifier {
     /**
      * execute adding an edge
      * 
-     * @param newMetricValues the already calculated metric from trial
+     * @param newMetricValues
+     *            the already calculated metric from trial
      */
     public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
         if (mLstAddedEdges.size() > 0) {
@@ -240,5 +242,9 @@ public class EdgeModifier {
 
     public ObjectDoubleOpenHashMap<String> getOptimizedMetricValues() {
         return mMapMetricValues;
+    }
+
+    public HashMap<String, UpdatableMetricResult> getmMapPrevMetricsResult() {
+        return mMapPrevMetricsResult;
     }
 }
