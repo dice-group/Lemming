@@ -20,6 +20,7 @@ public class EdgeModifier {
 	
 	private EdgeModification mEdgeModification;
 
+	private ColouredGraph graph;
 	private List<SingleValueMetric> mLstMetrics;
 	private ObjectDoubleOpenHashMap<String> mMapMetricValues;
 	private ObjectDoubleOpenHashMap<String> mMapOrignalMetricValues;
@@ -29,6 +30,7 @@ public class EdgeModifier {
 	private boolean isCountingNodeTriangles = false;
 	
 	public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics){
+		graph = clonedGraph;
 		//list of metric
 		mLstMetrics = lstMetrics;
 		//initialize two list removed edges and added edges

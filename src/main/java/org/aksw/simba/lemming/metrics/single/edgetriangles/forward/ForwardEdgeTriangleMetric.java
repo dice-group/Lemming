@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.result.EdgeTriangleMetricResult;
+import org.aksw.simba.lemming.metrics.single.result.SingleValueMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
     }
 
     @Override
-    public double apply(ColouredGraph coloredGraph) {
+    public SingleValueMetricResult apply(ColouredGraph coloredGraph) {
         List<HashSet<Integer>> adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
         DegreeBasedDecreasingNodeOrdering nodeOrdering;
         int amountOfTriangles = 0;
@@ -49,7 +51,7 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
                 amountOfTriangles += processNeighborsOf(nodeId, coloredGraph, adjacencyDatastructure, nodeOrdering);
             visitedNodes.add(nodeId);
         }
-        return amountOfTriangles;
+        return new EdgeTriangleMetricResult(amountOfTriangles, -1);
     }
 
     /**

@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
+import org.aksw.simba.lemming.metrics.single.result.SingleValueMetricResult;
 
 /**
  * A metric that generates a single double value.
@@ -16,7 +17,7 @@ public interface SingleValueMetric extends Metric {
      * 
      * @param graph
      *            the graph for which the metric should be calculated.
-     * @return the value of the metric.
+     * @return the result of the metric.
      */
-    public double apply(ColouredGraph graph);
+    public SingleValueMetricResult apply(ColouredGraph graph);
 }

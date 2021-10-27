@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.result.EdgeTriangleMetricResult;
+import org.aksw.simba.lemming.metrics.single.result.SingleValueMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 import java.util.*;
@@ -20,8 +22,8 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return countTriangles(graph);
+    public SingleValueMetricResult apply(ColouredGraph graph) {
+        return new EdgeTriangleMetricResult(countTriangles(graph), -1);
     }
 
     protected double countTriangles(ColouredGraph graph) {

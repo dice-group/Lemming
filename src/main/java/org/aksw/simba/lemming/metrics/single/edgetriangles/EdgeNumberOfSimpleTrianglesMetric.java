@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.result.EdgeTriangleMetricResult;
+import org.aksw.simba.lemming.metrics.single.result.SingleValueMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
@@ -27,9 +29,10 @@ public class EdgeNumberOfSimpleTrianglesMetric extends AbstractMetric implements
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public SingleValueMetricResult apply(ColouredGraph graph) {
         MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
-        return process.calculate();
+        double metric = process.calculate();
+        return new EdgeTriangleMetricResult(metric, -1);
     }
 
     @Override
