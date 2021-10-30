@@ -6,11 +6,11 @@ package org.aksw.simba.lemming;
 import grph.Grph;
 
 /**
- * Stub Decorator of the ColouredGraph Class
+ * Stub wrapper for the ColouredGraph Class
  * 
  * @author Pranav
  */
-public class ColouredGraphDecorator extends ColouredGraph {
+public class ColouredGraphDecorator {
 
     protected ColouredGraph graph;
     protected boolean isAddingEdge;
