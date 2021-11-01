@@ -15,6 +15,7 @@ import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator_new;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ public class GraphOptimization {
 	
 	private IGraphGeneration mGraphGenerator;
 	private EdgeModifier mEdgeModifier;
-	private ErrorScoreCalculator mErrScoreCalculator;
+	private ErrorScoreCalculator_new mErrScoreCalculator;
 	private List<Double> mLstErrorScore; 
 	private double mOptimizedTime =0;
 	
@@ -47,7 +48,27 @@ public class GraphOptimization {
 	 -----------------------------------------------*/
 	
 	
-	public GraphOptimization(ColouredGraph[] origGrphs,
+	public EdgeModifier getmEdgeModifier() {
+        return mEdgeModifier;
+    }
+
+
+    public void setmEdgeModifier(EdgeModifier mEdgeModifier) {
+        this.mEdgeModifier = mEdgeModifier;
+    }
+
+
+    public ErrorScoreCalculator_new getmErrScoreCalculator() {
+        return mErrScoreCalculator;
+    }
+
+
+    public void setmErrScoreCalculator(ErrorScoreCalculator_new mErrScoreCalculator) {
+        this.mErrScoreCalculator = mErrScoreCalculator;
+    }
+
+
+    public GraphOptimization(ColouredGraph[] origGrphs,
 			IGraphGeneration graphGenerator, List<SingleValueMetric> metrics,  ConstantValueStorage valueCarriers, long seed) {
 		this.seed = seed;
 		mLstErrorScore = new ArrayList<Double>();
@@ -55,7 +76,7 @@ public class GraphOptimization {
 		 *  mErrScoreCalculator is used to compute the error score compared to original
 		 *  constant values of the original graphs
 		 */
-		mErrScoreCalculator = new ErrorScoreCalculator(origGrphs, valueCarriers);
+		mErrScoreCalculator = new ErrorScoreCalculator_new(origGrphs, valueCarriers);
 		
 		// the graph generator
 		mGraphGenerator = graphGenerator;
