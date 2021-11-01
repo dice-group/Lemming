@@ -51,7 +51,9 @@ public interface SingleValueMetric extends Metric {
 	 * @return - metric result.
 	 */
 	public default UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+			UpdatableMetricResult previousResult
+			//, VertexDegrees mVertexDegrees
+			) {
 		return applyUpdatable(graph);
 	}
 }

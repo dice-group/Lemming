@@ -56,17 +56,18 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      */
     @Override
     public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+            UpdatableMetricResult previousResult
+            //, VertexDegrees mVertexDegrees
+            ) {
         SimpleMetricResult newMetricResult = new SimpleMetricResult(this.name, 0);
-        int[] degreesArray;
         IntArrayList degreesList;
         if (this.direction == DIRECTION.in) {
-            degreesArray = mVertexDegrees.getMapVerticesInDegree();
-            degreesList = new IntArrayList(degreesArray);
+            
+            degreesList = graph.getGraph().getAllInEdgeDegrees();
             newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
         } else if (this.direction == DIRECTION.out) {
-            degreesArray = mVertexDegrees.getMapVerticesOutDegree();
-            degreesList = new IntArrayList(degreesArray);
+            
+            degreesList = graph.getGraph().getAllOutEdgeDegrees();
             newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
         } else {
             // If metric is other than stdDevInDegree and stdDevOutDegree then apply the
