@@ -111,12 +111,14 @@ public class GetMetricsFromExpressions {
 		inverseProportionalMetricsSet = new HashSet<>();
 
 		//System.out.println("Expession : " + exp);
-		if (exp.getOperator() == Operator.DIV) { // If operator is division then we have numerator and denominator.
-			checkDirectProportionalMetric(exp.getLeft());
-			checkInverseProportionalMetric(exp.getRight());
+		if (exp.getOperator() == Operator.DIV) { // If operator is division then we have numerator and denominator. 
+		    // Sample Expression: (Numerator/Denominator)
+			checkDirectProportionalMetric(exp.getLeft()); // Numerator
+			checkInverseProportionalMetric(exp.getRight()); // Denominator
 		} else {
-			checkDirectProportionalMetric(exp.getLeft());
-			checkDirectProportionalMetric(exp.getRight());
+		    // Sample Expression : (Metric1 + Metric2)
+			checkDirectProportionalMetric(exp.getLeft()); // Metric1
+			checkDirectProportionalMetric(exp.getRight()); // Metric2
 		}
 
 		//System.out.println("Direct Proportional metrics : " + directProportionalMetricsSet);
@@ -133,14 +135,17 @@ public class GetMetricsFromExpressions {
 	 *            - expression.
 	 */
 	private void checkDirectProportionalMetric(Expression exp) {
-		if (exp.isAtomic() && !exp.isConstant()) {
+		if (exp.isAtomic() && !exp.isConstant()) { // Recursion Termination condition
+		    // Sample Expression : Metric1
 			directProportionalMetricsSet.add(exp.toString());
 		} else if ((exp.getOperator() == Operator.PLUS) || (exp.getOperator() == Operator.TIMES)) {
-			checkDirectProportionalMetric(exp.getLeft());
-			checkDirectProportionalMetric(exp.getRight());
+		    // Sample Expression: Metric1 + Metric2, Metric1 * Metric2
+			checkDirectProportionalMetric(exp.getLeft()); // Metric1
+			checkDirectProportionalMetric(exp.getRight()); // Metric2
 		} else {
-			checkDirectProportionalMetric(exp.getLeft());
-			checkInverseProportionalMetric(exp.getRight());
+		    //Sample Expression: Metric1 - Metric2, Metric1 / Metric2
+			checkDirectProportionalMetric(exp.getLeft()); // Metric1
+			checkInverseProportionalMetric(exp.getRight()); // Metric2 ----> Inverse Proportional 
 		}
 	}
 
