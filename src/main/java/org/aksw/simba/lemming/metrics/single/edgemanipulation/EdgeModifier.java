@@ -49,9 +49,6 @@ public class EdgeModifier {
         mMapPrevMetricsResult = new HashMap<>();
         mMapPrevMetricsResultRemoveEdge = new HashMap<>();
         mMapPrevMetricsResultAddEdge = new HashMap<>();
-        for (SingleValueMetric singleMetric : lstMetrics) {
-            mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-        }
 
     }
 
@@ -74,6 +71,7 @@ public class EdgeModifier {
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
                 mMapMetricValues.put(name, metVal);
+                mMapPrevMetricsResult.put(name, new SimpleMetricResult(name, metVal));
             }
         }
         if (!isCountingNodeTriangles) {
