@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 /**

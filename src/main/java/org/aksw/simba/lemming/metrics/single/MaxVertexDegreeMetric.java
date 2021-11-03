@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -117,7 +116,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             metVal = apply(graph);
         } else {
 
-            int changedDegree = graph.getGraph().getInEdgeDegree(vertexID);
+            int changedDegree = getChangedDegree(graph, vertexID, direction);
             int degree = changedDegree - updateVertexDegree;
             if (updateVertexDegree == -1) {
                 if (degree == metVal // && mVertexDegrees.getDegreeCount(degree, direction) == 0
@@ -134,6 +133,14 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         metricResultTempObj.setResult(metVal);// Set the new computed metric value as result
 
         return metricResultTempObj;
+    }
+    
+    private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
+        if(direction == DIRECTION.in) {
+            return graph.getGraph().getInEdgeDegree(vertexID);
+        }else {
+            return graph.getGraph().getOutEdgeDegree(vertexID);
+        }
     }
 
 }
