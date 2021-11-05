@@ -91,7 +91,7 @@ public class Sampling {
     
     public int numOfSampleVertices(ColouredGraph graph, BitSet colour){
         NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
-        double gSize = metric.apply(graph);
+        double gSize = metric.apply(graph).getResult();
         ObjectObjectOpenHashMap<BitSet,Double> distribution = vertexColourDistribution(graph);
         
         //we choose ceil and not round because we want to keep at least one vertex for each colour
@@ -103,7 +103,7 @@ public class Sampling {
     public ObjectObjectOpenHashMap<BitSet,Double> vertexColourDistribution(ColouredGraph graph){
         ObjectObjectOpenHashMap<BitSet,Double> distribution = new ObjectObjectOpenHashMap<BitSet,Double>();
         NumberOfVerticesMetric metric = new NumberOfVerticesMetric();
-        double gSize = metric.apply(graph);
+        double gSize = metric.apply(graph).getResult();
         
         ColouredVerticesMetric colouredVertices = new ColouredVerticesMetric();
         ObjectObjectOpenHashMap<BitSet, IntSet> map = colouredVertices.getVerticesForEachColour(graph);

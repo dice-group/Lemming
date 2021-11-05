@@ -7,7 +7,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
@@ -19,7 +21,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public UpdatableMetricResult apply(ColouredGraph graph) {
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfVertices()];
       
         Grph grph = getUndirectedGraph(graph.getGraph());
@@ -50,7 +52,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
             }
             visitedVertices.add(vertex);
         }
-        return numberOfTriangles;
+        return new SingleValueMetricResult(this.name, numberOfTriangles);
     }
 
 

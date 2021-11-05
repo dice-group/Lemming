@@ -24,8 +24,9 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return calculateAvg(graph.getGraph().getAllInEdgeDegrees());
+    public UpdatableMetricResult apply(ColouredGraph graph) {
+        double result = calculateAvg(graph.getGraph().getAllInEdgeDegrees());
+        return new SingleValueMetricResult(this.name, result);
     }
 
     protected double calculateAvg(IntArrayList degrees) {
@@ -44,8 +45,6 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * 
      * @param triple
      *            - edge on which graph operation is performed.
-     * @param metric
-     *            - input metric which needs to be computed.
      * @param graph
      *            - input graph.
      * @param graphOperation

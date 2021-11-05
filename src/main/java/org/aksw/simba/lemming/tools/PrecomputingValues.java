@@ -231,7 +231,7 @@ public class PrecomputingValues {
                         || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
                     starGraphMetrics.putOrAdd(metric.getName(), 0, 0);
                 } else {
-                    double val = metric.apply(startColouredGraph);
+                    double val = metric.apply(startColouredGraph).getResult();
                     starGraphMetrics.putOrAdd(metric.getName(), val, val);
                 }
             }
@@ -252,7 +252,7 @@ public class PrecomputingValues {
                         || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
                     gridGraphMetrics.putOrAdd(metric.getName(), 0, 0);
                 } else {
-                    double val = metric.apply(gridColouredGraph);
+                    double val = metric.apply(gridColouredGraph).getResult();
                     gridGraphMetrics.putOrAdd(metric.getName(), val, val);
                 }
             }
@@ -276,7 +276,7 @@ public class PrecomputingValues {
                         ringGraphMetrics.putOrAdd(metric.getName(), 0, 0);
                     }
                 } else {
-                    double val = metric.apply(gridColouredGraph);
+                    double val = metric.apply(gridColouredGraph).getResult();
                     ringGraphMetrics.putOrAdd(metric.getName(), val, val);
                 }
             }
@@ -302,7 +302,7 @@ public class PrecomputingValues {
                         cliqueGraphMetrics.putOrAdd(metric.getName(), noOfValues, noOfValues);
                     }
                 } else {
-                    double val = metric.apply(gridColouredGraph);
+                    double val = metric.apply(gridColouredGraph).getResult();
                     cliqueGraphMetrics.putOrAdd(metric.getName(), val, val);
                 }
             }
@@ -326,7 +326,7 @@ public class PrecomputingValues {
                         || metric.getName().equalsIgnoreCase("avgClusterCoefficient")) {
                     bipartiteGraphMetrics.putOrAdd(metric.getName(), 0, 0);
                 } else {
-                    double val = metric.apply(gridColouredGraph);
+                    double val = metric.apply(gridColouredGraph).getResult();
                     bipartiteGraphMetrics.putOrAdd(metric.getName(), val, val);
                 }
             }

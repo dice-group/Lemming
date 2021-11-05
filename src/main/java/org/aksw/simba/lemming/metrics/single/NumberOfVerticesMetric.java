@@ -16,8 +16,8 @@ public class NumberOfVerticesMetric extends AbstractMetric implements SingleValu
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return graph.getGraph().getNumberOfVertices();
+    public UpdatableMetricResult apply(ColouredGraph graph) {
+        return new SingleValueMetricResult(this.name, graph.getGraph().getNumberOfVertices());
     }
 
 }

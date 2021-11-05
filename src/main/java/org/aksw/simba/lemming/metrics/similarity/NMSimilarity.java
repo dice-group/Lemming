@@ -49,8 +49,8 @@ public class NMSimilarity {
             this.idCorrespondenceB = idCorrespondenceB;
             
             this.size = new NumberOfVerticesMetric();
-            this.graphSizeA = (int) size.apply(this.colouredGraphA);
-            this.graphSizeB = (int) size.apply(this.colouredGraphB);
+            this.graphSizeA = (int) size.apply(this.colouredGraphA).getResult();
+            this.graphSizeB = (int) size.apply(this.colouredGraphB).getResult();
 
             this.epsilon = epsilon;
             
@@ -271,10 +271,10 @@ public class NMSimilarity {
         getNodeMapping();
 
        //I am dividing with max size of the two graphs instead of min ! 
-        if (this.size.apply(this.colouredGraphA) > this.size.apply(this.colouredGraphB)) {
-            finalGraphSimilarity = enumerationFunction(this.colouredGraphA.getVertices().toIntArray(), this.colouredGraphB.getVertices().toIntArray(), 0) / this.size.apply(this.colouredGraphA);
+        if (this.size.apply(this.colouredGraphA).getResult() > this.size.apply(this.colouredGraphB).getResult()) {
+            finalGraphSimilarity = enumerationFunction(this.colouredGraphA.getVertices().toIntArray(), this.colouredGraphB.getVertices().toIntArray(), 0) / this.size.apply(this.colouredGraphA).getResult();
         } else {
-            finalGraphSimilarity = enumerationFunction(this.colouredGraphB.getVertices().toIntArray(), this.colouredGraphA.getVertices().toIntArray(), 1) / this.size.apply(this.colouredGraphB);
+            finalGraphSimilarity = enumerationFunction(this.colouredGraphB.getVertices().toIntArray(), this.colouredGraphA.getVertices().toIntArray(), 1) / this.size.apply(this.colouredGraphB).getResult();
         }
         
         

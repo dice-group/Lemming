@@ -7,7 +7,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 /**
  * This metric is the number of triangles of the graph.
@@ -22,9 +24,10 @@ public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric 
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public UpdatableMetricResult apply(ColouredGraph graph) {
         MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
-        return process.calculate();
+        double result =  process.calculate();
+        return new SingleValueMetricResult(this.name, result);
     }
 
     @Override

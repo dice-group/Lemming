@@ -52,7 +52,7 @@ public class MetricUtils {
             List<SingleValueMetric> metrics) {
         ObjectDoubleOpenHashMap<String> vector = new ObjectDoubleOpenHashMap<>(2 * metrics.size());
         for (SingleValueMetric metric : metrics) {
-            vector.put(metric.getName(), metric.apply(graph));
+            vector.put(metric.getName(), metric.apply(graph).getResult());
         }
         return vector;
     }

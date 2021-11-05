@@ -19,7 +19,7 @@ public class DuolionMetricTest {
         final double edgeSurvivalProbability = 0.9;
         DuolionMetric metric = new DuolionMetric(new ForwardNodeTriangleMetric(), edgeSurvivalProbability,
                 new Random().nextLong());
-        double countedTriangles = metric.apply(graph);
+        double countedTriangles = metric.apply(graph).getResult();
 
         double range = 0.25;
         double minRange = expectedNumOfTriangles - (expectedNumOfTriangles * range);

@@ -16,8 +16,9 @@ public class AvgClusteringCoefficientMetric extends AbstractMetric implements Si
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return graph.getGraph().getAverageClusteringCoefficient();
+    public UpdatableMetricResult apply(ColouredGraph graph) {
+        double result =  graph.getGraph().getAverageClusteringCoefficient();
+        return new SingleValueMetricResult(this.name, result);
     }
 
 }

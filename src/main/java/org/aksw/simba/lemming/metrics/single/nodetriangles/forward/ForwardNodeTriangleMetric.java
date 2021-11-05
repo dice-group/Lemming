@@ -11,7 +11,9 @@ import com.google.common.collect.Sets;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
@@ -36,7 +38,7 @@ public class ForwardNodeTriangleMetric extends AbstractMetric implements Triangl
     }
 
     @Override
-    public double apply(ColouredGraph coloredGraph) {
+    public UpdatableMetricResult apply(ColouredGraph coloredGraph) {
         List<HashSet<Integer>> adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
         DegreeBasedDecreasingNodeOrdering nodeOrdering;
         int amountOfTriangles = 0;
@@ -52,7 +54,7 @@ public class ForwardNodeTriangleMetric extends AbstractMetric implements Triangl
                 amountOfTriangles += processNeighborsOf(nodeId, coloredGraph, adjacencyDatastructure, nodeOrdering);
             visitedNodes.add(nodeId);
         }
-        return amountOfTriangles;
+        return new SingleValueMetricResult(this.name, amountOfTriangles);
     }
 
     /**

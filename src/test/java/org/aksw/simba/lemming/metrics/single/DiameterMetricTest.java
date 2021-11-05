@@ -77,7 +77,7 @@ public class DiameterMetricTest {
 	@Test
 	public void run() {
 		DiameterMetric metric = new DiameterMetric();
-		double diameter = metric.apply(graph);
+		double diameter = metric.apply(graph).getResult();
 		Assert.assertEquals(expectedDiameter, diameter, DELTA);
 	}
 }

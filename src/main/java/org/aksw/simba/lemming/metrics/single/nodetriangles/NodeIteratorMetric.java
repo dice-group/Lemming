@@ -9,7 +9,9 @@ import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.ints.IntSets;
 
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
 
@@ -63,9 +65,10 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public UpdatableMetricResult apply(ColouredGraph graph) {
         IntSet vertices = IntSets.EMPTY_SET;
-        return calculateTriangles(graph, vertices);
+        double result = calculateTriangles(graph, vertices);
+        return new SingleValueMetricResult(this.name, result);
     }
 
     private Grph getUndirectedGraph(Grph graph) {
