@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -59,7 +58,9 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      */
     @Override
     public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+            UpdatableMetricResult previousResult
+            //, VertexDegrees mVertexDegrees
+            ) {
 
         AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
         if (previousResult instanceof AvgVertexDegreeMetricResult) {
@@ -78,11 +79,11 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
                 // Get the Array from VertexDegrees class (Note: This can be replaced with
                 // getAllInEdgeDegrees method of Grph package)
-                int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
-                for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
-                    sum += getmMapVerticesinDegree[key];
+                IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
+                for (Integer vertexDegree: getmMapVerticesinDegree) { // Compute sum in iteration
+                    sum += vertexDegree;
                 }
-                numberOfVertices = getmMapVerticesinDegree.length;
+                numberOfVertices = getmMapVerticesinDegree.size();
 
             } else { // Re-using the previously computed values
                 sum = metricResultTempObj.getSumVertexDeg() + 1;
@@ -99,12 +100,11 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
             if (metricResultTempObj.getSumVertexDeg() == 0.0) {
                 // Computing the Avg Vertex Degree Metric for the first time
 
-                int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
-
-                for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
-                    sum += getmMapVerticesinDegree[key];
+                IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
+                for (Integer vertexDegree: getmMapVerticesinDegree) { // Compute sum in iteration
+                    sum += vertexDegree;
                 }
-                numberOfVertices = getmMapVerticesinDegree.length;
+                numberOfVertices = getmMapVerticesinDegree.size();
 
             } else { // Re-using the previously computed values
                 sum = metricResultTempObj.getSumVertexDeg() - 1;
