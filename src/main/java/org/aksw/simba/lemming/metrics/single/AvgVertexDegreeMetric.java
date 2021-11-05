@@ -60,20 +60,12 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
             UpdatableMetricResult previousResult) {
 
         AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
-        if (previousResult instanceof AvgVertexDegreeMetricResult) {
-            // Copying previously computed values in temporary variables
-            metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
-            metricResultTempObj
-                    .setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
-            metricResultTempObj.setResult(((AvgVertexDegreeMetricResult) previousResult).getResult());
-        }
         
         int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1; 
-        // variable w track remove an edge or add an edge operation.
 
         double sum = 0;
         double numberOfVertices = 1;
-        if (Double.isNaN(metricResultTempObj.getResult())) {
+        if ( !(previousResult instanceof AvgVertexDegreeMetricResult) ) {
             // Computing the Avg Vertex Degree Metric for the first time
 
             IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
@@ -83,9 +75,9 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
             numberOfVertices = getmMapVerticesinDegree.size();
 
         } else { // Re-using the previously computed values
-            sum = metricResultTempObj.getSumVertexDeg() + updateVertexDegree;
+            sum = ((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg() + updateVertexDegree;
             // Get the previous computed sum and add 1/subtract 1 to previous sum since edge is added.
-            numberOfVertices = metricResultTempObj.getNumberOfVertices();
+            numberOfVertices = ((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices();
         }
 
         // Set values in Temporary object
