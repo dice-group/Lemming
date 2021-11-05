@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -57,7 +58,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      *         further computations
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple,  Operation graphOperation,
             UpdatableMetricResult previousResult
             //, VertexDegrees mVertexDegrees
             ) {
@@ -72,7 +73,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
         double sum = 0;
         double numberOfVertices = 1;
-        if (graphOperation) { // If Add an Edge
+        if (graphOperation == Operation.ADD) { // If Add an Edge
 
             if (metricResultTempObj.getSumVertexDeg() == 0.0) {
                 // Computing the Avg Vertex Degree Metric for the first time

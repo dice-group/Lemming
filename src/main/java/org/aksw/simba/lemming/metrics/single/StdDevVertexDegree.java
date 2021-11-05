@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -57,7 +58,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult object.
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
             UpdatableMetricResult previousResult) {
 
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), 0.0);
@@ -81,7 +82,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         double oldDegree = 0;
 
         if (this.direction == DIRECTION.in) { // Calculate Std Dev of in degrees
-            if (graphOperation) { // If Edge is added
+            if (graphOperation == Operation.ADD) { // If Edge is added
                 if (metricResultObj.getAvgVertexInDegree() == 0.0) {
                     // no previous result is found
                     List<Double> listOfValues = computeValuesForFirstTime(graph);
@@ -122,7 +123,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             }
             metricResultObj.setVarianceVertexInDegree(variance);
         } else if (this.direction == DIRECTION.out) { // Calculate Std Dev out degrees
-            if (graphOperation) { // If Edge is added
+            if (graphOperation == Operation.ADD) { // If Edge is added
                 if (metricResultObj.getAvgVertexOutDegree() == 0.0) {
                     List<Double> listOfValues = computeValuesForFirstTime(graph);
                     numberOfVertices = listOfValues.get(0);
@@ -179,9 +180,9 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return Double - new variance
      */
     private double computeVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
-            double oldDegree, boolean graphOperation) {
+            double oldDegree, Operation graphOperation) {
 
-        double flag = graphOperation ? 1 : -1;
+        double flag = graphOperation == Operation.ADD ? 1 : -1;
         double newDegree = oldDegree + flag;
         double newAvg = avg + (flag / numberOfVertices);
         return (variance + Math.pow(numberOfVertices, -2)

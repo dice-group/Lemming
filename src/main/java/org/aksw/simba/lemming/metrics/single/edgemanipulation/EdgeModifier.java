@@ -116,7 +116,7 @@ public class EdgeModifier {
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
+                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(graph, triple, Operation.REMOVE,
                             mMapPrevMetricsResult.get(metric.getName())
                             //, mEdgeModification.getmVertexDegrees()
                             ));
@@ -168,7 +168,7 @@ public class EdgeModifier {
 
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
+                    mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(graph, triple, Operation.ADD,
                             mMapPrevMetricsResult.get(metric.getName())
                             //, mEdgeModification.getmVertexDegrees()
                             ));

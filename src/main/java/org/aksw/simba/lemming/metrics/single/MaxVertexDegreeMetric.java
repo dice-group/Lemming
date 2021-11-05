@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -52,7 +53,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple,  Operation graphOperation,
             UpdatableMetricResult previousResult
     // , VertexDegrees mVertexDegrees
     ) {
@@ -60,7 +61,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
         if (direction == DIRECTION.in) {
 
-            if (graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge
+            if (graphOperation == Operation.ADD) { // graphOperation is true then add an edge otherwise its remove an edge
                 newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in, triple.headId, triple, 1,
                         previousResult);
             } else {
@@ -69,7 +70,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             }
 
         } else {
-            if (graphOperation) {
+            if (graphOperation == Operation.ADD) {
                 newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out, triple.tailId, triple, 1,
                         previousResult);
             } else {
