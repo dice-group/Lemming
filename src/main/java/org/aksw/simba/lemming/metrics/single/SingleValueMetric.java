@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 /**
@@ -43,7 +42,9 @@ public interface SingleValueMetric extends Metric {
      * @return - metric result.
      */
     public default UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+			UpdatableMetricResult previousResult
+			//, VertexDegrees mVertexDegrees
+			) {
         return applyUpdatable(graph);
     }
 }
