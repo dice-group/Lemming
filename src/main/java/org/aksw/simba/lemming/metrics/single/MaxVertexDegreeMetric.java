@@ -40,80 +40,36 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * 
      * @param triple
      *            - edge on which graph operation is performed.
-     * @param metric
-     *            - input metric which needs to be computed.
      * @param graph
      *            - input graph.
      * @param graphOperation
-     *            - boolean value indicating graph operation. ("true" for adding an
-     *            edge and "false" for removing an edge)
+     *            - Enum indicating graph operation. ("ADD" for adding an edge and
+     *            "REMOVE" for removing an edge)
      * @param previousResult
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @return
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple,  Operation graphOperation,
-            UpdatableMetricResult previousResult
-    // , VertexDegrees mVertexDegrees
-    ) {
-        UpdatableMetricResult newMetricResult;
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
+        // Need to compute MaxVertexInDegree metric or MaxVertexOutDegree
 
-        if (direction == DIRECTION.in) {
+        int vertexID = direction == DIRECTION.in ? triple.headId : triple.tailId;
+        // For MaxVertexInDegree, need to use triple.headId else triple.tailId
+        int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1;
+        // variable to track remove an edge or add an edge operation.
 
-            if (graphOperation == Operation.ADD) { // graphOperation is true then add an edge otherwise its remove an edge
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in, triple.headId, triple, 1,
-                        previousResult);
-            } else {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in, triple.headId, triple, -1,
-                        previousResult);
-            }
+        double metVal; // metric value
 
-        } else {
-            if (graphOperation == Operation.ADD) {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out, triple.tailId, triple, 1,
-                        previousResult);
-            } else {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out, triple.tailId, triple, -1,
-                        previousResult);
-            }
-
-        }
-
-        return newMetricResult;
-    }
-
-    /**
-     * The method contains logic that reduces the number of calls to apply method
-     * for the max vertex degree metric.
-     * 
-     * @param metric
-     *            - metric which should be calculated.
-     * @param graph
-     *            - input graph.
-     * @param metricName
-     *            - can be "RemoveAnEdge" or "AddAnEdge" indicating how the edge is
-     *            modified.
-     * @param direction
-     *            - this is in or out based on the operation.
-     * @param vertexID
-     *            - The vertex that is modified.
-     * @return
-     */
-    private UpdatableMetricResult metricComputationMaxDegree(ColouredGraph graph, DIRECTION direction, int vertexID,
-            TripleBaseSingleID triple, int updateVertexDegree, UpdatableMetricResult previousResult
-    // ,VertexDegrees mVertexDegrees
-    ) {
-        double metVal;
-
-        SimpleMetricResult metricResultTempObj = new SimpleMetricResult(getName(), 0.0);
+        SimpleMetricResult metricResultTempObj = new SimpleMetricResult(getName(), Double.NaN);
         if (previousResult instanceof SimpleMetricResult) {
             metricResultTempObj.setResult(((SimpleMetricResult) previousResult).getResult());
         }
         metVal = metricResultTempObj.getResult();
 
         // Get the current candidate set
-        if (metVal == 0.0) {
+        if (metVal == Double.NaN) {
             metVal = apply(graph);
         } else {
 
@@ -134,12 +90,13 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         metricResultTempObj.setResult(metVal);// Set the new computed metric value as result
 
         return metricResultTempObj;
+
     }
-    
+
     private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
-        if(direction == DIRECTION.in) {
+        if (direction == DIRECTION.in) {
             return graph.getGraph().getInEdgeDegree(vertexID);
-        }else {
+        } else {
             return graph.getGraph().getOutEdgeDegree(vertexID);
         }
     }

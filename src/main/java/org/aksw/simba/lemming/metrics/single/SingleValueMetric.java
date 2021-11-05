@@ -43,8 +43,8 @@ public interface SingleValueMetric extends Metric {
 	 * @param graph
 	 *            - input graph.
 	 * @param graphOperation
-	 *            - boolean value indicating graph operation. ("true" for adding an
-	 *            edge and "false" for removing an edge)
+	 *            - Enum indicating graph operation. ("ADD" for adding an
+	 *            edge and "REMOVE" for removing an edge)
 	 * @param previousResult
 	 *            - UpdatableMetricResult object containing the previous computed
 	 *            results.
