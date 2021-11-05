@@ -65,6 +65,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
             metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
             metricResultTempObj
                     .setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
+            metricResultTempObj.setResult(((AvgVertexDegreeMetricResult) previousResult).getResult());
         }
         
         int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1; 
