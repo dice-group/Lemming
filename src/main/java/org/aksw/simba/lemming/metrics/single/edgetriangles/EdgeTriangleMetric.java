@@ -6,7 +6,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.EdgeTriangleMetricSelection;
-import org.aksw.simba.lemming.metrics.single.SimpleMetricResult;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -48,7 +48,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;
 		newResult = newResult >= 0 ? newResult: 0;
 
-		return new SimpleMetricResult(previousResult.getMetricName(), newResult);
+		return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
 	}
 
 	/**

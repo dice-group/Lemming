@@ -6,10 +6,9 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.NodeTriangleMetricSelection;
-import org.aksw.simba.lemming.metrics.single.SimpleMetricResult;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -60,6 +59,6 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 			newResult = newResult + numberOfCommon;
 		}
 
-		return new SimpleMetricResult(previousResult.getMetricName(), newResult);
+		return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
 	}
 }

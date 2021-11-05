@@ -28,7 +28,7 @@ public interface SingleValueMetric extends Metric {
      * @return - metric result.
      */
     public default UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
-        return new SimpleMetricResult(getName(), apply(graph));
+        return new SingleValueMetricResult(getName(), apply(graph));
     }
 
     /**

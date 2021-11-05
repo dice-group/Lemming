@@ -5,11 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.SimpleMetricResult;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.tools.PrecomputingValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,9 @@ public class EdgeModifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
 
+    //should be removed
     private EdgeModification mEdgeModification;
+    private ColouredGraph graph;
 
     private List<SingleValueMetric> mLstMetrics;
     private ObjectDoubleOpenHashMap<String> mMapMetricValues;
@@ -34,6 +35,7 @@ public class EdgeModifier {
     private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge; // Map to store results for add an edge
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
+        graph = clonedGraph;
         // list of metric
         mLstMetrics = lstMetrics;
         // initialize two list removed edges and added edges
@@ -50,7 +52,7 @@ public class EdgeModifier {
         mMapPrevMetricsResultRemoveEdge = new HashMap<>();
         mMapPrevMetricsResultAddEdge = new HashMap<>();
         for (SingleValueMetric singleMetric : lstMetrics) {
-            mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
+            mMapPrevMetricsResult.put(singleMetric.getName(), new SingleValueMetricResult(singleMetric.getName(), 0.0));
         }
 
     }

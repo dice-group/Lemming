@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author Atul
  *
  */
-public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
+public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
     private IntSet candidatesMetricSet = new IntOpenHashSet();
     // Set for storing candidate vertices for Max Degree metric computation
