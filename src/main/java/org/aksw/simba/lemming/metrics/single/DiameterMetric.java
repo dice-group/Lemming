@@ -16,11 +16,11 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
 	}
 
 	@Override
-	public UpdatableMetricResult apply(ColouredGraph graph) {
+	public double apply(ColouredGraph graph) {
 		try {
-			return new SingleValueMetricResult(this.name, graph.getDiameter());
+			return graph.getDiameter();
 		} catch (Exception e) {
-			return new SingleValueMetricResult(this.name, Double.NaN);
+			return Double.NaN;
 		}
 	}
 

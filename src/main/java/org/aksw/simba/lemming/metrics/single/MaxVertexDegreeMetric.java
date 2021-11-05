@@ -26,11 +26,11 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         if (direction == DIRECTION.in) {
-            return new SingleValueMetricResult(this.name, graph.getGraph().getMaxInEdgeDegrees());
+            return graph.getGraph().getMaxInEdgeDegrees();
         } else {
-            return new SingleValueMetricResult(this.name, graph.getGraph().getMaxOutEdgeDegrees());
+            return graph.getGraph().getMaxOutEdgeDegrees();
         }
     }
 
@@ -40,6 +40,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * 
      * @param triple
      *            - edge on which graph operation is performed.
+     * @param metric
+     *            - input metric which needs to be computed.
      * @param graph
      *            - input graph.
      * @param graphOperation
@@ -82,8 +84,14 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     /**
      * The method contains logic that reduces the number of calls to apply method
      * for the max vertex degree metric.
+     * 
+     * @param metric
+     *            - metric which should be calculated.
      * @param graph
      *            - input graph.
+     * @param metricName
+     *            - can be "RemoveAnEdge" or "AddAnEdge" indicating how the edge is
+     *            modified.
      * @param direction
      *            - this is in or out based on the operation.
      * @param vertexID
@@ -111,7 +119,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         if (intSetTemp.size() == 0) { // Initially the Candidate set will be empty, hence need to call the apply
                                       // method and store the candidates
 
-            metVal = apply(graph).getResult(); // apply the metric and get the value
+            metVal = apply(graph); // apply the metric and get the value
 
             IntSet maxDegreeVertices;
             maxDegreeVertices = mVertexDegrees.getVerticesForDegree((int) metVal, direction);
@@ -134,7 +142,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                     if (updateVertexDegree > 0) {
                         metVal = metVal + updateVertexDegree;
                     } else {
-                        metVal = apply(graph).getResult(); // apply the metric and get the value
+                        metVal = apply(graph); // apply the metric and get the value
                         IntSet maxDegreeVertices;
                         maxDegreeVertices = mVertexDegrees.getVerticesForDegree((int) metVal, direction);
                         // Get the vertex with the metric value

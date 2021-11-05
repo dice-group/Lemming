@@ -19,7 +19,7 @@ public class EmptyVertices  extends AbstractMetric implements SingleValueMetric 
 	}
 
 	@Override
-	public UpdatableMetricResult apply(ColouredGraph graph) {
+	public double apply(ColouredGraph graph) {
 		IntSet setOfVertices = graph.getVertices();
 		int[] arrayIDs = setOfVertices.toIntArray();
 		double noOfVertices = 0 ;
@@ -29,7 +29,7 @@ public class EmptyVertices  extends AbstractMetric implements SingleValueMetric 
 				noOfVertices ++;
 			}
 		}
-		return new SingleValueMetricResult(this.name, noOfVertices);
+		return noOfVertices;
 	}
 
 }

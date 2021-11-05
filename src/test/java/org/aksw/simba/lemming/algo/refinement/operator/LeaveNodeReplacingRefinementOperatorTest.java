@@ -14,8 +14,6 @@ import org.aksw.simba.lemming.algo.expression.Operation;
 import org.aksw.simba.lemming.algo.expression.Operator;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -270,8 +268,8 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         }
 
         @Override
-        public UpdatableMetricResult apply(ColouredGraph graph) {
-            return new SingleValueMetricResult(this.name, 0);
+        public double apply(ColouredGraph graph) {
+            return 0;
         }
 
     }

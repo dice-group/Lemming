@@ -7,9 +7,7 @@ import grph.DefaultIntSet;
 import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -36,7 +34,7 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements TriangleMe
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         Grph grph = graph.getGraph();
 
         int[] degrees = new int[grph.getVertices().size()];
@@ -73,7 +71,7 @@ public class NodeIteratorCoreMetric extends AbstractMetric implements TriangleMe
             }
             vertexWithMinimumDegree = getNodeWithMinimumDegree(degrees);
         }
-        return new SingleValueMetricResult(this.name, numberOfTriangles);
+        return numberOfTriangles;
     }
 
 

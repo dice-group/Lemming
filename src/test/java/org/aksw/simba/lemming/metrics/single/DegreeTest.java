@@ -68,13 +68,13 @@ public class DegreeTest {
         SingleValueMetric metric;
         double value;
         metric = new MaxVertexDegreeMetric(DIRECTION.in);
-        value = metric.apply(graph).getResult();
+        value = metric.apply(graph);
         Assert.assertEquals(expectedMaxInDegree, value, DELTA);
         metric = new MaxVertexDegreeMetric(DIRECTION.out);
-        value = metric.apply(graph).getResult();
+        value = metric.apply(graph);
         Assert.assertEquals(expectedMaxOutDegree, value, DELTA);
         metric = new AvgVertexDegreeMetric();
-        value = metric.apply(graph).getResult();
+        value = metric.apply(graph);
         Assert.assertEquals(expectedAvgDegree, value, DELTA);
     }
 

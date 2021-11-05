@@ -71,7 +71,7 @@ public class EdgeModifier {
                     isCountingNodeTriangles = true;
                 }
 
-                double metVal = metric.apply(clonedGraph).getResult();
+                double metVal = metric.apply(clonedGraph);
                 String name = metric.getName();
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics

@@ -336,7 +336,7 @@ public class GraphGenerationTest {
 					//compute list of metrics
 					
 					for(SingleValueMetric metric: lstMetrics){
-						double val = metric.apply(grph).getResult();
+						double val = metric.apply(grph);
 						mapMetricValues.putOrAdd(metric.getName(), 0, 0);
 						mapMetricValues.put(metric.getName(), val);
 					}
@@ -373,7 +373,7 @@ public class GraphGenerationTest {
 				fWriter.write("#----------------------------------------------------------------------#\n");
 				fWriter.write("# Graph "+iIndex +".\n");
 				for(SingleValueMetric metric : lstMetrics){
-					double val = metric.apply(grph).getResult();
+					double val = metric.apply(grph);				
 					fWriter.write("\t Metric: "+metric.getName() +": "+ val+"\n");					
 				}
 				iIndex ++;

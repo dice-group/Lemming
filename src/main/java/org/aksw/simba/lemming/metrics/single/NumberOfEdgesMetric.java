@@ -16,8 +16,8 @@ public class NumberOfEdgesMetric extends AbstractMetric implements SingleValueMe
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
-        return new SingleValueMetricResult(this.name, graph.getGraph().getNumberOfEdges());
+    public double apply(ColouredGraph graph) {
+        return  graph.getGraph().getNumberOfEdges();
     }
 
 }
