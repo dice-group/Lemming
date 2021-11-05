@@ -72,8 +72,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
         double sum = 0;
         double numberOfVertices = 1;
-        
-        if (metricResultTempObj.getSumVertexDeg() == Double.NaN) {
+        if (Double.isNaN(metricResultTempObj.getResult())) {
             // Computing the Avg Vertex Degree Metric for the first time
 
             IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();

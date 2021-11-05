@@ -69,7 +69,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         metVal = metricResultTempObj.getResult();
 
         // Get the current candidate set
-        if (metVal == Double.NaN) {
+        if (Double.isNaN(metVal)) {
             metVal = apply(graph);
         } else {
 
