@@ -16,7 +16,7 @@ public class MetricTester {
 		for(ColouredGraph grph: grphs){
 			System.out.println("Graph " + ith + " has matric values: ");
 			for(SingleValueMetric metric: metrics){
-				double val = metric.apply(grph).getResult();
+				double val = metric.apply(grph);
 				System.out.print(metric.getName() + " = " + val + " \t ");
 			}
 			System.out.println();
@@ -30,7 +30,7 @@ public class MetricTester {
 		int ith = 1;
 		System.out.println("Single graph has values: ");
 		for(SingleValueMetric metric: metrics){
-			double val = metric.apply(grph).getResult();
+			double val = metric.apply(grph);
 			System.out.print(metric.getName() + " = " + val + " \t ");
 		}
 		System.out.println();

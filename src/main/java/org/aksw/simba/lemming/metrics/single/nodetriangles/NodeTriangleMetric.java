@@ -21,13 +21,13 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 	}
 
 	@Override
-	public UpdatableMetricResult apply(ColouredGraph graph) {
+	public double apply(ColouredGraph graph) {
 		
 		NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
 		SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
 		
 		//get number of edge triangles
-		return new SingleValueMetricResult(this.name, nodeTriangleMetric.apply(graph).getResult());
+		return nodeTriangleMetric.apply(graph);
 	}
 
 	//@Override //TODO: parameters' form not determined, especially the graphOperation

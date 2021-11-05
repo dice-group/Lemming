@@ -82,11 +82,11 @@ public class EdgeModification {
     }
 
     private double getNumberOfNodeTriangles() {
-        return nodeMetric.apply(graph).getResult();
+        return nodeMetric.apply(graph);
     }
 
     private double getNumberOfEdgeTriangles() {
-        return edgeMetric.apply(graph).getResult();
+        return edgeMetric.apply(graph);
     }
 
     void removeEdgeFromGraph(int edgeId) {

@@ -18,14 +18,14 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         IntArrayList degrees = null;
         if (direction == DIRECTION.in) {
             degrees = graph.getGraph().getAllInEdgeDegrees();
         } else {
             degrees = graph.getGraph().getAllOutEdgeDegrees();
         }
-        return new SingleValueMetricResult(this.name, calculateStdDev(degrees, calculateAvg(degrees)));
+        return calculateStdDev(degrees, calculateAvg(degrees));
     }
 
     protected double calculateStdDev(IntArrayList degrees, double avg) {
@@ -44,7 +44,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * calculate new StdDev Value. If previously variance, average were not
      * calculated, it will calculate them once
      * 
-     * {@link //https://math.stackexchange.com/q/3112715}
+     * {@link https://math.stackexchange.com/q/3112715}
      * 
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
@@ -168,7 +168,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * and the previous variance and mean are known. It uses the formula mentioned
      * in the link
      * 
-     * {@link //https://math.stackexchange.com/q/3112715}
+     * {@link https://math.stackexchange.com/q/3112715}
      * 
      * @param numberOfVertices - total number of nodes in the graph
      * @param avg              - average of previous set of nodes in the graph

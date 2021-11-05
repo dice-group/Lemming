@@ -7,8 +7,6 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.ayz.matrix.MatrixMultiplicationNumberOfTrianglesMetric;
 
@@ -46,7 +44,7 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
 
         double threshold = Math.pow(graph.getGraph().getNumberOfEdges(), EXPONENT);
         IntSet highDegreeVertices = new DefaultIntSet(graph.getVertices().size());
@@ -63,7 +61,7 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
         numberOfTriangles += countTrianglesViaNodeIterator(graph, highDegreeVertices);
         numberOfTriangles += countTrianglesViaMatrixMultiplication(graph, highDegreeVertices);
 
-        return new SingleValueMetricResult(this.name, numberOfTriangles);
+        return numberOfTriangles;
     }
 
     /**
@@ -89,7 +87,7 @@ public class ListingAyzMetric extends AbstractMetric implements SingleValueMetri
         ColouredGraph subgraph = new ColouredGraph(graph.getGraph().getSubgraphInducedByVertices(vertices),
                 graph.getVertexPalette(), graph.getEdgePalette());
         MatrixMultiplicationNumberOfTrianglesMetric matrixMultiplication = new MatrixMultiplicationNumberOfTrianglesMetric();
-        return matrixMultiplication.apply(subgraph).getResult();
+        return matrixMultiplication.apply(subgraph);
     }
 
 }

@@ -23,7 +23,7 @@ public abstract class NumberOfTrianglesMetricTest {
      */
     public void test() {
         Assert.assertNotNull(graph);
-        double actualNumOfTriangles = metric.apply(graph).getResult();
+        double actualNumOfTriangles = metric.apply(graph);
         Assert.assertEquals(expectedNumOfTriangles, actualNumOfTriangles, DOUBLE_COMPARISON_DELTA);
     }
 

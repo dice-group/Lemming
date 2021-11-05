@@ -18,7 +18,7 @@ public interface SingleValueMetric extends Metric {
      * @param graph the graph for which the metric should be calculated.
      * @return the value of the metric.
      */
-    public UpdatableMetricResult apply(ColouredGraph graph);
+    public double apply(ColouredGraph graph);
 
     /**
      * Returns metric results that can be reused for further computations.
@@ -27,13 +27,14 @@ public interface SingleValueMetric extends Metric {
      * @return - metric result.
      */
     public default UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
-        return new SingleValueMetricResult(getName(), apply(graph).getResult());
+        return new SingleValueMetricResult(getName(), apply(graph));
     }
 
     /**
      * Returns metric results which is computed as per the following inputs.
      * 
      * @param triple         - edge on which graph operation is performed.
+     * @param metric         - input metric which needs to be computed.
      * @param graph          - input graph.
      * @param graphOperation - boolean value indicating graph operation. ("true" for
      *                       adding an edge and "false" for removing an edge)

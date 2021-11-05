@@ -16,8 +16,8 @@ public class MinVertexOutDegreeMetric extends AbstractMetric implements SingleVa
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
-        return new SingleValueMetricResult(this.name, graph.getGraph().getMinOutVertexDegrees());
+    public double apply(ColouredGraph graph) {
+        return graph.getGraph().getMinOutVertexDegrees();
     }
 
 }

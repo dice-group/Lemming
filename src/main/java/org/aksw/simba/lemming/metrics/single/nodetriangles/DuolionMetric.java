@@ -5,8 +5,7 @@ import java.util.Random;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
+
 
 
 /**
@@ -42,8 +41,9 @@ public class DuolionMetric extends AbstractMetric implements SingleValueMetric {
         random = new Random(seed);
     }
 
+
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         graphCopy = graph.copy();
         for (int edge:graph.getGraph().getEdges()) {
             if (random.nextDouble() > edgeSurvivalProbability) {
@@ -51,7 +51,8 @@ public class DuolionMetric extends AbstractMetric implements SingleValueMetric {
             }
         }
 
-        double result = triangleCountingAlgorithm.apply(graphCopy).getResult() * (1 / Math.pow(edgeSurvivalProbability, 3));
-        return new SingleValueMetricResult(this.name, result);
+        return triangleCountingAlgorithm.apply(graphCopy) * (1 / Math.pow(edgeSurvivalProbability, 3));
     }
+
+
 }

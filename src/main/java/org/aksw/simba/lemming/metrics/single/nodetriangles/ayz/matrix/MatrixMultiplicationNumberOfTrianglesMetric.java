@@ -4,8 +4,6 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import toools.math.IntMatrix;
 
 
@@ -32,9 +30,9 @@ public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric 
 
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         if (graph.getVertices().size() < 3 || graph.getGraph().getEdges().size() < 3) {
-            return new SingleValueMetricResult(this.name, 0);
+            return 0;
         }
         // NOTE: This implementation only works under the assumption that no two nodes are connected
         // by more than one edge
@@ -43,7 +41,7 @@ public class MatrixMultiplicationNumberOfTrianglesMetric extends AbstractMetric 
         IntMatrix cubicAdjacencyMatrix = MultiEdgeIgnoringAdjacencyMatrix.power(adjacencyMatrix, 3);
 
         double trace = getSumOfDiagonal(cubicAdjacencyMatrix);
-        return new SingleValueMetricResult(this.name, trace / 6);
+        return trace / 6;
     }
 
     /**
