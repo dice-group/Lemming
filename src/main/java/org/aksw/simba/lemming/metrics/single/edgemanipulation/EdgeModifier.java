@@ -18,7 +18,7 @@ public class EdgeModifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
 
-    //should be removed
+    // should be removed
     private EdgeModification mEdgeModification;
     private ColouredGraph graph;
 
@@ -41,16 +41,17 @@ public class EdgeModifier {
         // initialize two list removed edges and added edges
         mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
         mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
-        // compute metric values
-        computeMetricValues(clonedGraph, lstMetrics);
-        // initialize EdgeModification
-        mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
-                (int) mMapMetricValues.get("#edgetriangles"));
 
         // Initialize the UpdatableMetricResult for all metrics
         mMapPrevMetricsResult = new HashMap<>();
         mMapPrevMetricsResultRemoveEdge = new HashMap<>();
         mMapPrevMetricsResultAddEdge = new HashMap<>();
+
+        // compute metric values
+        computeMetricValues(clonedGraph, lstMetrics);
+        // initialize EdgeModification
+        mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
+                (int) mMapMetricValues.get("#edgetriangles"));
 
     }
 
@@ -118,9 +119,9 @@ public class EdgeModifier {
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
-                            mMapPrevMetricsResult.get(metric.getName())
-                            //, mEdgeModification.getmVertexDegrees()
+                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(),
+                            metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName())
+                            // , mEdgeModification.getmVertexDegrees()
                             ));
                     double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new
                                                                                                       // metric value
@@ -170,9 +171,9 @@ public class EdgeModifier {
 
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
-                            mMapPrevMetricsResult.get(metric.getName())
-                            //, mEdgeModification.getmVertexDegrees()
+                    mMapPrevMetricsResultAddEdge.put(metric.getName(),
+                            metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName())
+                            // , mEdgeModification.getmVertexDegrees()
                             ));
                     double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric
                                                                                                    // value
@@ -194,8 +195,7 @@ public class EdgeModifier {
     /**
      * execute removing an edge
      * 
-     * @param newMetricValues
-     *            the already calculated metric from trial
+     * @param newMetricValues the already calculated metric from trial
      */
     public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
         if (mLstRemovedEdges.size() > 0) {
@@ -218,8 +218,7 @@ public class EdgeModifier {
     /**
      * execute adding an edge
      * 
-     * @param newMetricValues
-     *            the already calculated metric from trial
+     * @param newMetricValues the already calculated metric from trial
      */
     public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
         if (mLstAddedEdges.size() > 0) {

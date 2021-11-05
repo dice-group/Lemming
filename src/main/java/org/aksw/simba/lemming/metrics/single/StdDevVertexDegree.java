@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -57,7 +58,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult object.
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
             UpdatableMetricResult previousResult) {
 
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), 0.0);
@@ -118,9 +119,9 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return Double - new variance
      */
     private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
-            double oldDegree, boolean graphOperation) {
+            double oldDegree, Operation graphOperation) {
         List<Double> list = new ArrayList<Double>();
-        double flag = graphOperation ? 1 : -1;
+        double flag = graphOperation == Operation.ADD ? 1 : -1;
         double newDegree = oldDegree + flag;
         double newAvg = avg + (flag / numberOfVertices);
         double newVariance = (variance + Math.pow(numberOfVertices, -2)
