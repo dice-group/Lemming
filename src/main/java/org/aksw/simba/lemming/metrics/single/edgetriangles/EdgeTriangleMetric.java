@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
@@ -9,6 +8,7 @@ import org.aksw.simba.lemming.metrics.metricselection.EdgeTriangleMetricSelectio
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -25,26 +25,24 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 		
 		EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
 		SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
-		
-		//get number of edge triangles
+
 		return edgeTriangleMetric.apply(graph);
 	}
 
-	//@Override //TODO: parameters' form not determined, especially the graphOperation
-	public UpdatableMetricResult update(@Nonnull TripleBaseSingleID triple, @Nonnull ColouredGraph graph, boolean graphOperation,
+	@Override
+	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
 										@Nonnull UpdatableMetricResult previousResult){
 
-		Grph grph = graph.getGraph();
-		IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(triple.edgeId);
+		IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
 
 		int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
 				: verticesConnectedToRemovingEdge.toIntArray()[0];
 		int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
 
-		int numEdgesBetweenVertices = IntSetUtil.intersection(grph.getEdgesIncidentTo(tailId), grph.getEdgesIncidentTo(headId)).size();
+		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
-		int change = graphOperation ? -1 : 1 ;
-		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(grph, headId, tailId, numEdgesBetweenVertices, change);
+		int change = opt==Operation.REMOVE ? -1 : 1 ;
+		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices, change);
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;
 		newResult = newResult >= 0 ? newResult: 0;
 
@@ -59,16 +57,16 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 	 * @param change removing an edge, then -1, add an edge, then +1
 	 * @return the difference of edge triangles in subgraph after removing or adding an edge
 	 */
-	private int calculateDifferenceOfSubGraphEdge(Grph grph, int headId, int tailId, int numEdgesBetweenVertices, int change) {
+	private int calculateDifferenceOfSubGraphEdge(ColouredGraph graph, int headId, int tailId, int numEdgesBetweenVertices, int change) {
 		int oldSubGraphEdgeTriangles = 0;
 		int newSubGraphTriangles = 0;
 		int newNumEdgesBetweenVertices = numEdgesBetweenVertices + change;
 
-		for (int vertex : MetricUtils.getVerticesInCommon(grph, headId, tailId)) {
-			int numEdgesFromHead = IntSetUtil.intersection(grph.getEdgesIncidentTo(headId),
-					grph.getEdgesIncidentTo(vertex)).size();
-			int numEdgesFromTail = IntSetUtil.intersection(grph.getEdgesIncidentTo(tailId),
-					grph.getEdgesIncidentTo(vertex)).size();
+		for (int vertex : MetricUtils.getVerticesInCommon(graph, headId, tailId)) {
+			int numEdgesFromHead = IntSetUtil.intersection(graph.getEdgesIncidentTo(headId),
+					graph.getEdgesIncidentTo(vertex)).size();
+			int numEdgesFromTail = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId),
+					graph.getEdgesIncidentTo(vertex)).size();
 			int mul = numEdgesFromHead * numEdgesFromTail;
 			oldSubGraphEdgeTriangles += (mul * numEdgesBetweenVertices);
 			newSubGraphTriangles += (mul * newNumEdgesBetweenVertices);

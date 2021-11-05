@@ -57,19 +57,19 @@ public class MetricUtils {
         return vector;
     }
 
-    public static IntSet getVerticesInCommon(Grph grph, int v1, int v2) {
+    public static IntSet getVerticesInCommon(ColouredGraph graph, int v1, int v2) {
         IntSet[] neighborsOfConnectedVertices = new IntSet[2];
 
-        neighborsOfConnectedVertices[0] = grph.getInNeighbors(v1);
-        neighborsOfConnectedVertices[0].addAll(grph.getOutNeighbors(v1));
+        neighborsOfConnectedVertices[0] = graph.getInNeighbors(v1);
+        neighborsOfConnectedVertices[0].addAll(graph.getOutNeighbors(v1));
 
         if (neighborsOfConnectedVertices[0].contains(v1))
             neighborsOfConnectedVertices[0].remove(v1);
         if (neighborsOfConnectedVertices[0].contains(v2))
             neighborsOfConnectedVertices[0].remove(v2);
 
-        neighborsOfConnectedVertices[1] = grph.getInNeighbors(v2);
-        neighborsOfConnectedVertices[1].addAll(grph.getOutNeighbors(v2));
+        neighborsOfConnectedVertices[1] = graph.getInNeighbors(v2);
+        neighborsOfConnectedVertices[1].addAll(graph.getOutNeighbors(v2));
 
         if (neighborsOfConnectedVertices[1].contains(v1))
             neighborsOfConnectedVertices[1].remove(v1);
