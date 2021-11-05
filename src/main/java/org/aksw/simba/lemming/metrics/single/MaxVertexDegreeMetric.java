@@ -25,11 +25,11 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public UpdatableMetricResult apply(ColouredGraph graph) {
+    public double apply(ColouredGraph graph) {
         if (direction == DIRECTION.in) {
-            return new SingleValueMetricResult(this.name, graph.getGraph().getMaxInEdgeDegrees());
+            return graph.getGraph().getMaxInEdgeDegrees();
         } else {
-            return new SingleValueMetricResult(this.name, graph.getGraph().getMaxOutEdgeDegrees());
+            return graph.getGraph().getMaxOutEdgeDegrees();
         }
     }
 
@@ -100,16 +100,15 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         // Get the current candidate set
         if (metVal == 0.0) {
             // metVal = apply(graph);
-            metVal = apply(graph).getResult(); // apply the metric and get the value
+            metVal = apply(graph); // apply the metric and get the value
         } else {
-            metVal = apply(graph).getResult(); // apply the metric and get the value
-
+            
             int changedDegree = getChangedDegree(graph, vertexID, direction);
             int degree = changedDegree - updateVertexDegree;
             if (updateVertexDegree == -1) {
                 if (degree == metVal // && mVertexDegrees.getDegreeCount(degree, direction) == 0
                 ) {
-                    metVal = apply(graph).getResult();
+                    metVal = apply(graph);
                 }
             } else {
                 if (degree == metVal) {
