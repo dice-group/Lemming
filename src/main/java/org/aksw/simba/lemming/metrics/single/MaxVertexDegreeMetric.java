@@ -63,16 +63,12 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         double metVal; // metric value
 
         SimpleMetricResult metricResultTempObj = new SimpleMetricResult(getName(), Double.NaN);
-        if (previousResult instanceof SimpleMetricResult) {
-            metricResultTempObj.setResult(((SimpleMetricResult) previousResult).getResult());
-        }
-        metVal = metricResultTempObj.getResult();
 
-        // Get the current candidate set
-        if (Double.isNaN(metVal)) {
+        if (!(previousResult instanceof SimpleMetricResult)) {
             metVal = apply(graph);
         } else {
 
+            metVal = ((SimpleMetricResult) previousResult).getResult();
             int changedDegree = getChangedDegree(graph, vertexID, direction);
             int degree = changedDegree - updateVertexDegree;
             if (updateVertexDegree == -1) {
