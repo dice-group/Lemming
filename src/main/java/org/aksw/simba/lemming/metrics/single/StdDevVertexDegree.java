@@ -44,7 +44,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * calculate new StdDev Value. If previously variance, average were not
      * calculated, it will calculate them once
      * 
-     * {@link https://math.stackexchange.com/q/3112715}
+     * {@link //https://math.stackexchange.com/q/3112715}
      * 
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
@@ -63,14 +63,9 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), 0.0);
         if (previousResult instanceof StdDevVertexDegreeMetricResult) {
             // Copying previously computed values in temporary variables
-            metricResultObj.setVarianceVertexInDegree(
-                    ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexInDegree());
-            metricResultObj
-                    .setAvgVertexInDegree(((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexInDegree());
-            metricResultObj.setVarianceVertexOutDegree(
-                    ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexOutDegree());
-            metricResultObj
-                    .setAvgVertexOutDegree(((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexOutDegree());
+            metricResultObj.setVarianceVertexDegree(
+                    ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexDegree());
+            metricResultObj.setAvgVertexDegree(((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexDegree());
             metricResultObj
                     .setNumberOfVertices(((StdDevVertexDegreeMetricResult) previousResult).getNumberOfVertices());
         }
@@ -79,85 +74,29 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         double variance = 0;
         double numberOfVertices = 1;
         double oldDegree = 0;
-
-        if (this.direction == DIRECTION.in) { // Calculate Std Dev of in degrees
-            if (graphOperation) { // If Edge is added
-                if (metricResultObj.getAvgVertexInDegree() == 0.0) {
-                    // no previous result is found
-                    List<Double> listOfValues = computeValuesForFirstTime(graph);
-                    // get values of average and variance from the list
-                    numberOfVertices = listOfValues.get(0);
-                    avg = listOfValues.get(1);
-                    variance = listOfValues.get(2);
-                    metricResultObj.setAvgVertexOutDegree(avg);
-                } else {
-                    // get values of average and variance from previous result
-                    numberOfVertices = metricResultObj.getNumberOfVertices();
-                    avg = metricResultObj.getAvgVertexInDegree();
-                    variance = metricResultObj.getVarianceVertexInDegree();
-                    oldDegree = graph.getGraph().getInEdgeDegree(triple.headId); // graph.getGraph().getInEdgeDegree(triple.headId)
-                    variance = computeVarianceFromPreviousResult(numberOfVertices, avg, variance, oldDegree,
-                            graphOperation);
-                    metricResultObj.setAvgVertexInDegree(avg + (1 / numberOfVertices));
-                }
-            } else { // If Edge is removed
-                if (metricResultObj.getAvgVertexInDegree() == 0.0) {
-                    // no previous result is found
-                    List<Double> listOfValues = computeValuesForFirstTime(graph);
-                    // get values of average and variance from the list
-                    numberOfVertices = listOfValues.get(0);
-                    avg = listOfValues.get(1);
-                    variance = listOfValues.get(2);
-                    metricResultObj.setAvgVertexInDegree(avg);
-                } else {
-                    // get values of average and variance from previous result
-                    numberOfVertices = metricResultObj.getNumberOfVertices();
-                    avg = metricResultObj.getAvgVertexInDegree();
-                    variance = metricResultObj.getVarianceVertexInDegree();
-                    oldDegree = graph.getGraph().getInEdgeDegree(triple.headId);
-                    variance = computeVarianceFromPreviousResult(numberOfVertices, avg, variance, oldDegree,
-                            graphOperation);
-                    metricResultObj.setAvgVertexInDegree(avg - (1 / numberOfVertices));
-                }
-            }
-            metricResultObj.setVarianceVertexInDegree(variance);
-        } else if (this.direction == DIRECTION.out) { // Calculate Std Dev out degrees
-            if (graphOperation) { // If Edge is added
-                if (metricResultObj.getAvgVertexOutDegree() == 0.0) {
-                    List<Double> listOfValues = computeValuesForFirstTime(graph);
-                    numberOfVertices = listOfValues.get(0);
-                    avg = listOfValues.get(1);
-                    variance = listOfValues.get(2);
-                    metricResultObj.setAvgVertexOutDegree(avg);
-                } else {
-                    numberOfVertices = metricResultObj.getNumberOfVertices();
-                    avg = metricResultObj.getAvgVertexOutDegree();
-                    variance = metricResultObj.getVarianceVertexOutDegree();
-                    oldDegree = graph.getGraph().getOutEdgeDegree(triple.tailId); // graph.getGraph().getOutEdgeDegree(triple.tailId);
-                    variance = computeVarianceFromPreviousResult(numberOfVertices, avg, variance, oldDegree,
-                            graphOperation);
-                    metricResultObj.setAvgVertexOutDegree(avg + (1 / numberOfVertices));
-                }
-            } else { // If Edge is removed
-                if (metricResultObj.getAvgVertexOutDegree() == 0.0) {
-                    List<Double> listOfValues = computeValuesForFirstTime(graph);
-                    numberOfVertices = listOfValues.get(0);
-                    avg = listOfValues.get(1);
-                    variance = listOfValues.get(2);
-                    metricResultObj.setAvgVertexOutDegree(avg);
-                } else {
-                    numberOfVertices = metricResultObj.getNumberOfVertices();
-                    avg = metricResultObj.getAvgVertexOutDegree();
-                    variance = metricResultObj.getVarianceVertexOutDegree();
-                    oldDegree = graph.getGraph().getOutEdgeDegree(triple.tailId);
-                    variance = computeVarianceFromPreviousResult(numberOfVertices, avg, variance, oldDegree,
-                            graphOperation);
-                    metricResultObj.setAvgVertexOutDegree(avg - (1 / numberOfVertices));
-                }
-            }
-            metricResultObj.setVarianceVertexOutDegree(variance);
+        List<Double> avgAndVariance;
+        if (metricResultObj.getAvgVertexDegree() == 0.0) {
+            // no previous result is found
+            List<Double> listOfValues = computeValuesForFirstTime(graph);
+            // get values of average and variance from the list
+            numberOfVertices = listOfValues.get(0);
+            avg = listOfValues.get(1);
+            variance = listOfValues.get(2);
+        } else {
+            // get values of average and variance from previous result
+            numberOfVertices = metricResultObj.getNumberOfVertices();
+            avg = metricResultObj.getAvgVertexDegree();
+            variance = metricResultObj.getVarianceVertexDegree();
+            oldDegree = (this.direction == DIRECTION.in) ? graph.getGraph().getInEdgeDegree(triple.headId)
+                    : graph.getGraph().getOutEdgeDegree(triple.tailId);
+            avgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance, oldDegree,
+                    graphOperation);
+            avg = avgAndVariance.get(0);
+            variance = avgAndVariance.get(1);
         }
 
+        metricResultObj.setAvgVertexDegree(avg);
+        metricResultObj.setVarianceVertexDegree(variance);
         metricResultObj.setNumberOfVertices(numberOfVertices);
         metricResultObj.setResult(Math.sqrt(variance));
         return metricResultObj;
@@ -168,7 +107,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * and the previous variance and mean are known. It uses the formula mentioned
      * in the link
      * 
-     * {@link https://math.stackexchange.com/q/3112715}
+     * {@link //https://math.stackexchange.com/q/3112715}
      * 
      * @param numberOfVertices - total number of nodes in the graph
      * @param avg              - average of previous set of nodes in the graph
@@ -178,14 +117,17 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @param graphOperation   - denotes if an edge was added or removed
      * @return Double - new variance
      */
-    private double computeVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
+    private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
             double oldDegree, boolean graphOperation) {
-
+        List<Double> list = new ArrayList<Double>();
         double flag = graphOperation ? 1 : -1;
         double newDegree = oldDegree + flag;
         double newAvg = avg + (flag / numberOfVertices);
-        return (variance + Math.pow(numberOfVertices, -2)
+        double newVariance = (variance + Math.pow(numberOfVertices, -2)
                 + (Math.pow((newDegree - newAvg), 2) - Math.pow((oldDegree - newAvg), 2)) / numberOfVertices);
+        list.add(newAvg);
+        list.add(newVariance);
+        return list;
     }
 
     /**
@@ -207,23 +149,19 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         } else {
             vertexDegrees = graph.getGraph().getAllOutEdgeDegrees();
         }
-        double sumOfDegrees = 0.0;
-        int numberOfVertices = vertexDegrees.size();
-        for (Integer vertexDegree: vertexDegrees) { // Compute sum in iteration
-            sumOfDegrees += vertexDegree;
-        }
-        double averageOfDegrees = sumOfDegrees / numberOfVertices;
+
+        double averageOfDegrees = super.calculateAvg(vertexDegrees);
         double sumForVariance = 0.0;
         double temp;
-        for (Integer vertexDegree: vertexDegrees) {
+        for (Integer vertexDegree : vertexDegrees) {
             temp = averageOfDegrees - vertexDegree;
             temp *= temp;
             sumForVariance += temp;
         }
 
-        double variance = sumForVariance / numberOfVertices;
+        double variance = sumForVariance / vertexDegrees.size();
 
-        listOfValues.add((double) numberOfVertices);
+        listOfValues.add((double) vertexDegrees.size());
         listOfValues.add(averageOfDegrees);
         listOfValues.add(variance);
 
