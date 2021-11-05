@@ -39,16 +39,19 @@ public class EdgeModifier {
         // initialize two list removed edges and added edges
         mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
         mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
+        
+        // Initialize the UpdatableMetricResult for all metrics
+        mMapPrevMetricsResult = new HashMap<>();
+        mMapPrevMetricsResultRemoveEdge = new HashMap<>();
+        mMapPrevMetricsResultAddEdge = new HashMap<>();
+        
         // compute metric values
         computeMetricValues(clonedGraph, lstMetrics);
         // initialize EdgeModification
         mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
                 (int) mMapMetricValues.get("#edgetriangles"));
 
-        // Initialize the UpdatableMetricResult for all metrics
-        mMapPrevMetricsResult = new HashMap<>();
-        mMapPrevMetricsResultRemoveEdge = new HashMap<>();
-        mMapPrevMetricsResultAddEdge = new HashMap<>();
+
 
     }
 
