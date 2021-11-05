@@ -73,7 +73,7 @@ public class EdgeModifier {
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
                 mMapMetricValues.put(name, metVal);
-                mMapPrevMetricsResult.put(name, new SimpleMetricResult(name, metVal));
+                mMapPrevMetricsResult.put(name, new SingleValueMetricResult(name, metVal));
             }
         }
         if (!isCountingNodeTriangles) {
