@@ -39,6 +39,11 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 				: verticesConnectedToRemovingEdge.toIntArray()[0];
 		int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
 
+		//if headId = tailId, result is not change.
+		if(headId == tailId){
+			return previousResult;
+		}
+
 		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
 		int change = opt==Operation.REMOVE ? -1 : 1 ;
