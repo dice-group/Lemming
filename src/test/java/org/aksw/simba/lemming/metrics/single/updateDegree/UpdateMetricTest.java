@@ -6,7 +6,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 
 public class UpdateMetricTest {
 
-    protected ColouredGraph buildGraph1(){
+    public ColouredGraph buildGraph1(){
         Grph graph = new InMemoryGrph();
         int v1 = graph.addVertex();
         int v2 = graph.addVertex();
@@ -18,7 +18,7 @@ public class UpdateMetricTest {
         return new ColouredGraph(graph, null, null);
     }
 
-    protected ColouredGraph buildGraph2(){
+    public ColouredGraph buildGraph2(){
         Grph graph = new InMemoryGrph();
         int v1 = graph.addVertex();
         int v2 = graph.addVertex();
@@ -28,13 +28,13 @@ public class UpdateMetricTest {
         return new ColouredGraph(graph, null, null);
     }
 
-    protected ColouredGraph removeEdge(ColouredGraph graph, int edge){
+    public ColouredGraph removeEdge(ColouredGraph graph, int edge){
         Grph grph = graph.getGraph();
         grph.removeEdge(edge);
         return new ColouredGraph(grph, null, null);
     }
 
-    protected ColouredGraph addEdge(ColouredGraph graph, int tail, int head){
+    public ColouredGraph addEdge(ColouredGraph graph, int tail, int head){
         Grph grph = graph.getGraph();
         grph.addDirectedSimpleEdge(tail, head);
         return new ColouredGraph(grph, null, null);
