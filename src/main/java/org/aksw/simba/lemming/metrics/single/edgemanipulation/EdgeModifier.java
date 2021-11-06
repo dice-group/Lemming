@@ -18,58 +18,57 @@ public class EdgeModifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
 
-    // should be removed
-    private EdgeModification mEdgeModification;
     private ColouredGraph graph;
 
     private List<SingleValueMetric> mLstMetrics;
     private ObjectDoubleOpenHashMap<String> mMapMetricValues;
     private ObjectDoubleOpenHashMap<String> mMapOrignalMetricValues;
+
+    //Todo: why we store all try to removed/added edges??
     private List<TripleBaseSingleID> mLstRemovedEdges;
     private List<TripleBaseSingleID> mLstAddedEdges;
-    private boolean isCoutingEdgeTriangles = false;
+
+    //TODO: should be optional???
+    private boolean isCountingEdgeTriangles = false;
     private boolean isCountingNodeTriangles = false;
+
     private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
-    private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge; // Map to store results for remove
+    private HashMap<String, UpdatableMetricResult> mMapMetricsResultRemoveEdge; // Map to store results for remove
                                                                                     // an edge
-    private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge; // Map to store results for add an edge
+    private HashMap<String, UpdatableMetricResult> mMapMetricsResultAddEdge; // Map to store results for add an edge
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
         graph = clonedGraph;
         // list of metric
         mLstMetrics = lstMetrics;
         // initialize two list removed edges and added edges
-        mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
-        mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
+        mLstRemovedEdges = new ArrayList<>();
+        mLstAddedEdges = new ArrayList<>();
 
         // Initialize the UpdatableMetricResult for all metrics
         mMapPrevMetricsResult = new HashMap<>();
-        mMapPrevMetricsResultRemoveEdge = new HashMap<>();
-        mMapPrevMetricsResultAddEdge = new HashMap<>();
+        mMapMetricsResultRemoveEdge = new HashMap<>();
+        mMapMetricsResultAddEdge = new HashMap<>();
 
         // compute metric values
-        computeMetricValues(clonedGraph, lstMetrics);
-        // initialize EdgeModification
-        mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
-                (int) mMapMetricValues.get("#edgetriangles"));
-
+        computeMetricValues(graph, lstMetrics);
     }
 
-    private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
+    private void computeMetricValues(ColouredGraph graph, List<SingleValueMetric> lstMetrics) {
 
         LOGGER.info("Compute " + lstMetrics.size() + " metrics on the current mimic graph!");
 
-        mMapMetricValues = new ObjectDoubleOpenHashMap<String>();
+        mMapMetricValues = new ObjectDoubleOpenHashMap<>();
         if (lstMetrics != null && lstMetrics.size() > 0) {
 
             for (SingleValueMetric metric : lstMetrics) {
                 if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
-                    isCoutingEdgeTriangles = true;
+                    isCountingEdgeTriangles = true;
                 } else if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     isCountingNodeTriangles = true;
                 }
 
-                double metVal = metric.apply(clonedGraph);
+                double metVal = metric.apply(graph);
                 String name = metric.getName();
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
@@ -80,7 +79,7 @@ public class EdgeModifier {
         if (!isCountingNodeTriangles) {
             mMapMetricValues.put("#nodetriangles", 0);
         }
-        if (!isCoutingEdgeTriangles) {
+        if (!isCountingEdgeTriangles) {
             mMapMetricValues.put("#edgetriangles", 0);
         }
 
@@ -89,57 +88,54 @@ public class EdgeModifier {
     }
 
     public ColouredGraph getGraph() {
-        return mEdgeModification.getGraph();
+        return this.graph;
     }
 
     public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
         if (triple != null && triple.edgeId != -1 && triple.edgeColour != null && triple.tailId != -1
                 && triple.headId != -1) {
 
-            // add to list of removed edges
-            // mLstRemovedEdges.add(triple);
+            mLstRemovedEdges.add(triple);
+            ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-            ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
+            for (SingleValueMetric metric : mLstMetrics) {
+                if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#nodetriangles",result);
 
-            mEdgeModification.removeEdgeFromGraph(triple.edgeId);
-            if (isCountingNodeTriangles) {
-                int newNodeTri = mEdgeModification.getNewNodeTriangles();
-                mapChangedMetricValues.put("#nodetriangles", newNodeTri);
+                    //todo: should optional??
+                    if(isCountingNodeTriangles){
+                        mapMetricValues.put("#nodetriangles", result.getResult());
+                    }
+                }
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#edgetriangles",result);
+
+                    //todo: should optional??
+                    if(isCountingNodeTriangles){
+                        mapMetricValues.put("#edgetriangles", result.getResult());
+                    }
+                }
             }
 
-            if (isCoutingEdgeTriangles) {
-                int newEdgeTri = mEdgeModification.getNewEdgeTriangles();
-                mapChangedMetricValues.put("#edgetriangles", newEdgeTri);
-            }
-
-            ColouredGraph graph = mEdgeModification.getGraph();
+            this.graph.removeEdge(triple.edgeId);
 
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
-                    // double metVal = metric.apply(graph);
+
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(),
-                            metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName())
-                            // , mEdgeModification.getmVertexDegrees()
-                            ));
-                    double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new
-                                                                                                      // metric value
-                    mapChangedMetricValues.put(metric.getName(), metVal);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put(metric.getName(), result);
+                    mapMetricValues.put(metric.getName(), result.getResult());
                 }
             }
 
             // reverse the graph
-            // mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId,
-            // triple.edgeColour);
-            int removedEdgeID = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour,
-                    (int) mMapMetricValues.get("#nodetriangles"), (int) mMapMetricValues.get("#edgetriangles"));
+            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
-            TripleBaseSingleID removedTriple = new TripleBaseSingleID(triple.tailId, triple.headColour, triple.headId,
-                    triple.tailColour, removedEdgeID, triple.edgeColour);
-            mLstRemovedEdges.add(removedTriple);
-
-            return mapChangedMetricValues;
+            return mapMetricValues;
         } else {
             LOGGER.warn("Invalid triple for removing an edge!");
             return null;
@@ -151,39 +147,44 @@ public class EdgeModifier {
             // add to list of added edges
             mLstAddedEdges.add(triple);
 
-            ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<String>();
-            triple.edgeId = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
+            ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-            if (isCountingNodeTriangles) {
-                int newNodeTri = mEdgeModification.getNewNodeTriangles();
-                mapMetricValues.put("#nodetriangles", newNodeTri);
+            for (SingleValueMetric metric : mLstMetrics) {
+                if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#nodetriangles",result);
+
+                    //todo: should optional??
+                    if(isCountingNodeTriangles){
+                        mapMetricValues.put("#nodetriangles", result.getResult());
+                    }
+                }
+                if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#edgetriangles",result);
+
+                    //todo: should optional??
+                    if(isCountingNodeTriangles){
+                        mapMetricValues.put("#edgetriangles", result.getResult());
+                    }
+                }
             }
 
-            if (isCoutingEdgeTriangles) {
-                int newEdgeTri = mEdgeModification.getNewEdgeTriangles();
-                mapMetricValues.put("#edgetriangles", newEdgeTri);
-            }
+            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
-            ColouredGraph graph = mEdgeModification.getGraph();
             for (SingleValueMetric metric : mLstMetrics) {
                 if (!metric.getName().equalsIgnoreCase("#edgetriangles")
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
 
-                    // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultAddEdge.put(metric.getName(),
-                            metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName())
-                            // , mEdgeModification.getmVertexDegrees()
-                            ));
-                    double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric
-                                                                                                   // value
-                    mapMetricValues.put(metric.getName(), metVal);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put(metric.getName(), result);
+                    mapMetricValues.put(metric.getName(), result.getResult());
                 }
             }
 
-            // mEdgeModification.removeEdgeFromGraph(triple.edgeId);
-            mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int) mMapMetricValues.get("#nodetriangles"),
-                    (int) mMapMetricValues.get("#edgetriangles"));
+            // reverse the graph
+            graph.removeEdge(triple.edgeId);
 
             return mapMetricValues;
         } else {
@@ -201,23 +202,21 @@ public class EdgeModifier {
         if (mLstRemovedEdges.size() > 0) {
             // store metric values got from trial
             updateMapMetricValues(newMetricValues);
-            // get the last removed edge
+
+            // get the last try to removed edge
             TripleBaseSingleID lastTriple = mLstRemovedEdges.get(mLstRemovedEdges.size() - 1);
             // remove the edge from graph again
-            // mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId);
+            this.graph.removeEdge(lastTriple.edgeId);
 
-            mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
-                    (int) newMetricValues.get("#edgetriangles"));
             // Update the previously computed values
-            mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultRemoveEdge);
-            mMapPrevMetricsResultRemoveEdge.clear();
+            mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultRemoveEdge);
+            mMapMetricsResultRemoveEdge.clear();
 
         }
     }
 
     /**
      * execute adding an edge
-     * 
      * @param newMetricValues the already calculated metric from trial
      */
     public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
@@ -227,13 +226,11 @@ public class EdgeModifier {
             // get the last added edge
             TripleBaseSingleID lastTriple = mLstAddedEdges.get(mLstAddedEdges.size() - 1);
             // add the edge to graph again
-            // mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId,
-            // lastTriple.edgeColour);
-            mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId, lastTriple.edgeColour,
-                    (int) newMetricValues.get("#nodetriangles"), (int) newMetricValues.get("#edgetriangles"));
+            this.graph.addEdge(lastTriple.tailId, lastTriple.headId, lastTriple.edgeColour);
+
             // Update the previously computed values
-            mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultAddEdge);
-            mMapPrevMetricsResultAddEdge.clear();
+            mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultAddEdge);
+            mMapMetricsResultAddEdge.clear();
         }
     }
 
