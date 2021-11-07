@@ -35,8 +35,11 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     /**
-     * The method checks if we need to compute in degree or out-degree and then
-     * calls the metricComputationMaxDegree with correct parameters.
+     * The method contains logic that computes the maximum vertex degree metric
+     * efficiently. It will check the previously stored maximum vertex degree and the
+     * vertex on which add or remove an edge graph operation is performed. If the vertex
+     * has the same degree as the maximum vertex degree then the metric value will
+     * be updated depending upon the graph operation. 
      * 
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
@@ -56,37 +59,22 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1;
         // variable to track remove an edge or add an edge operation.
 
-        double metVal; // metric value
-
-        SingleValueMetricResult metricResultTempObj = new SingleValueMetricResult(getName(), Double.NaN);
-        if (previousResult instanceof SingleValueMetricResult) {
-            metricResultTempObj.setResult(((SingleValueMetricResult) previousResult).getResult());
-        }
-        metVal = metricResultTempObj.getResult();
-
-        // Get the current candidate set
-        if (Double.isNaN(metVal)) {
-            // metVal = apply(graph);
+        double metVal = ((SingleValueMetricResult) previousResult).getResult();
             metVal = apply(graph); // apply the metric and get the value
-        } else {
-
-            int changedDegree = getChangedDegree(graph, vertexID, direction);
-            int degree = changedDegree - updateVertexDegree;
-            if (updateVertexDegree == -1) {
-                if (degree == metVal // && mVertexDegrees.getDegreeCount(degree, direction) == 0
-                ) {
-                    metVal = apply(graph);
-                }
-            } else {
-                if (degree == metVal) {
-                    metVal = changedDegree;
-                }
+        int changedDegree = getChangedDegree(graph, vertexID, direction);
+        int degree = changedDegree - updateVertexDegree;
+        if (updateVertexDegree == -1) { // Remove an edge
+            if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then apply method is called.
+                metVal = apply(graph);
             }
-
+        } else { // Add an edge
+            if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then max vertex degree is
+                                   // changed.
+                metVal = changedDegree;
+            }
         }
-        metricResultTempObj.setResult(metVal);// Set the new computed metric value as result
 
-        return metricResultTempObj;
+        return new SingleValueMetricResult(getName(), metVal);
 
     }
 

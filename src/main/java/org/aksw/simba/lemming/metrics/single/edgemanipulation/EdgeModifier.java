@@ -67,13 +67,17 @@ public class EdgeModifier {
                 } else if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     isCountingNodeTriangles = true;
                 }
-
-                double metVal = metric.apply(graph);
+                
+                //Calling applyUpdatable
+                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(clonedGraph);
+                
+                double metVal = metricResultTemp.getResult();
+                
                 String name = metric.getName();
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
                 mMapMetricValues.put(name, metVal);
-                mMapPrevMetricsResult.put(name, new SingleValueMetricResult(name, metVal));
+                mMapPrevMetricsResult.put(name, metricResultTemp);
             }
         }
         if (!isCountingNodeTriangles) {
