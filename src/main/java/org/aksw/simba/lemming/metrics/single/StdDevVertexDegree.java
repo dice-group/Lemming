@@ -47,14 +47,12 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * 
      * {@link //https://math.stackexchange.com/q/3112715}
      * 
-     * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
+     * @param triple         - edge on which graph operation is performed.
      * @param graphOperation - boolean value indicating graph operation. ("true" for
      *                       adding an edge and "false" for removing an edge)
      * @param previousResult - UpdatableMetricResult object containing the previous
      *                       computed results.
-     * @param mVertexDegrees - Object of VertexDegrees class which contains degrees
-     *                       of all the nodes
      * @return UpdatableMetricResult object.
      */
     @Override
@@ -116,7 +114,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @param oldDegree        - the degree which was updated after adding or
      *                         removing an edge
      * @param graphOperation   - denotes if an edge was added or removed
-     * @return Double - new variance
+     * @return List<Double> - a list containing average and variance in that order.
      */
     private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
             double oldDegree, Operation graphOperation) {
@@ -137,7 +135,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * 
      * This method calculates the average and Variance for the first time.
      * 
-     * @param mVertexDegrees - degrees of all nodes
+     * @param graph - the graph object
      * @return List<Double> - a list containing number of nodes, average and
      *         variance in that order.
      */
