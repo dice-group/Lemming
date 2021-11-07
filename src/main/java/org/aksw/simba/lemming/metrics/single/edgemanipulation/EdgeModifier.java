@@ -24,17 +24,17 @@ public class EdgeModifier {
     private ObjectDoubleOpenHashMap<String> mMapMetricValues;
     private ObjectDoubleOpenHashMap<String> mMapOrignalMetricValues;
 
-    //Todo: why we store all try to removed/added edges??
+    // Todo: why we store all try to removed/added edges??
     private List<TripleBaseSingleID> mLstRemovedEdges;
     private List<TripleBaseSingleID> mLstAddedEdges;
 
-    //TODO: should be optional???
+    // TODO: should be optional???
     private boolean isCountingEdgeTriangles = false;
     private boolean isCountingNodeTriangles = false;
 
     private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
     private HashMap<String, UpdatableMetricResult> mMapMetricsResultRemoveEdge; // Map to store results for remove
-                                                                                    // an edge
+                                                                                // an edge
     private HashMap<String, UpdatableMetricResult> mMapMetricsResultAddEdge; // Map to store results for add an edge
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
@@ -67,12 +67,12 @@ public class EdgeModifier {
                 } else if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     isCountingNodeTriangles = true;
                 }
-                
-                //Calling applyUpdatable
-                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(clonedGraph);
-                
+
+                // Calling applyUpdatable
+                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(graph);
+
                 double metVal = metricResultTemp.getResult();
-                
+
                 String name = metric.getName();
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
@@ -104,20 +104,22 @@ public class EdgeModifier {
 
             for (SingleValueMetric metric : mLstMetrics) {
                 if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
-                    mMapMetricsResultRemoveEdge.put("#nodetriangles",result);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE,
+                            mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#nodetriangles", result);
 
-                    //todo: should optional??
-                    if(isCountingNodeTriangles){
+                    // todo: should optional??
+                    if (isCountingNodeTriangles) {
                         mapMetricValues.put("#nodetriangles", result.getResult());
                     }
                 }
                 if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
-                    mMapMetricsResultRemoveEdge.put("#edgetriangles",result);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE,
+                            mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#edgetriangles", result);
 
-                    //todo: should optional??
-                    if(isCountingNodeTriangles){
+                    // todo: should optional??
+                    if (isCountingNodeTriangles) {
                         mapMetricValues.put("#edgetriangles", result.getResult());
                     }
                 }
@@ -130,7 +132,8 @@ public class EdgeModifier {
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
 
                     // Calling update method to get the metric values based on previous results
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE, mMapPrevMetricsResult.get(metric.getName()));
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE,
+                            mMapPrevMetricsResult.get(metric.getName()));
                     mMapMetricsResultRemoveEdge.put(metric.getName(), result);
                     mapMetricValues.put(metric.getName(), result.getResult());
                 }
@@ -155,20 +158,22 @@ public class EdgeModifier {
 
             for (SingleValueMetric metric : mLstMetrics) {
                 if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
-                    mMapMetricsResultRemoveEdge.put("#nodetriangles",result);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD,
+                            mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#nodetriangles", result);
 
-                    //todo: should optional??
-                    if(isCountingNodeTriangles){
+                    // todo: should optional??
+                    if (isCountingNodeTriangles) {
                         mapMetricValues.put("#nodetriangles", result.getResult());
                     }
                 }
                 if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
-                    mMapMetricsResultRemoveEdge.put("#edgetriangles",result);
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD,
+                            mMapPrevMetricsResult.get(metric.getName()));
+                    mMapMetricsResultRemoveEdge.put("#edgetriangles", result);
 
-                    //todo: should optional??
-                    if(isCountingNodeTriangles){
+                    // todo: should optional??
+                    if (isCountingNodeTriangles) {
                         mapMetricValues.put("#edgetriangles", result.getResult());
                     }
                 }
@@ -181,7 +186,8 @@ public class EdgeModifier {
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
 
                     // Calling update method to get the metric values based on previous results
-                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD, mMapPrevMetricsResult.get(metric.getName()));
+                    UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD,
+                            mMapPrevMetricsResult.get(metric.getName()));
                     mMapMetricsResultRemoveEdge.put(metric.getName(), result);
                     mapMetricValues.put(metric.getName(), result.getResult());
                 }
@@ -221,6 +227,7 @@ public class EdgeModifier {
 
     /**
      * execute adding an edge
+     * 
      * @param newMetricValues the already calculated metric from trial
      */
     public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
