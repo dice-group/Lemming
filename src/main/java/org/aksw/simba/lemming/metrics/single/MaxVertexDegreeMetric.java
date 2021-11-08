@@ -36,10 +36,10 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     /**
      * The method contains logic that computes the maximum vertex degree metric
-     * efficiently. It will check the previously stored maximum vertex degree and the
-     * vertex on which add or remove an edge graph operation is performed. If the vertex
-     * has the same degree as the maximum vertex degree then the metric value will
-     * be updated depending upon the graph operation. 
+     * efficiently. It will check the previously stored maximum vertex degree and
+     * the vertex on which add or remove an edge graph operation is performed. If
+     * the vertex has the same degree as the maximum vertex degree then the metric
+     * value will be updated depending upon the graph operation.
      * 
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
@@ -60,7 +60,6 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         // variable to track remove an edge or add an edge operation.
 
         double metVal = ((SingleValueMetricResult) previousResult).getResult();
-            metVal = apply(graph); // apply the metric and get the value
         int changedDegree = getChangedDegree(graph, vertexID, direction);
         int degree = changedDegree - updateVertexDegree;
         if (updateVertexDegree == -1) { // Remove an edge
