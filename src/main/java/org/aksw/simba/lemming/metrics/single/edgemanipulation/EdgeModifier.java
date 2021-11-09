@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -22,7 +21,7 @@ public class EdgeModifier {
 
     private List<SingleValueMetric> mLstMetrics;
     private ObjectDoubleOpenHashMap<String> mMapMetricValues;
-    private ObjectDoubleOpenHashMap<String> mMapOrignalMetricValues;
+    private ObjectDoubleOpenHashMap<String> mMapOriginalMetricValues;
 
     // Todo: why we store all try to removed/added edges??
     private List<TripleBaseSingleID> mLstRemovedEdges;
@@ -88,7 +87,7 @@ public class EdgeModifier {
         }
 
         // create a backup map metric values
-        mMapOrignalMetricValues = mMapMetricValues.clone();
+        mMapOriginalMetricValues = mMapMetricValues.clone();
     }
 
     public ColouredGraph getGraph() {
@@ -250,7 +249,7 @@ public class EdgeModifier {
     }
 
     public ObjectDoubleOpenHashMap<String> getOriginalMetricValues() {
-        return mMapOrignalMetricValues;
+        return mMapOriginalMetricValues;
     }
 
     public ObjectDoubleOpenHashMap<String> getOptimizedMetricValues() {
