@@ -1,98 +1,142 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
-	protected DIRECTION direction;
+    protected DIRECTION direction;
 
-	public StdDevVertexDegree(DIRECTION direction) {
-		super(direction == DIRECTION.in ? "stdDevInDegree" : "stdDevOutDegree");
-		this.direction = direction;
-	}
+    public StdDevVertexDegree(DIRECTION direction) {
+        super(direction == DIRECTION.in ? "stdDevInDegree" : "stdDevOutDegree");
+        this.direction = direction;
+    }
 
-	@Override
-	public double apply(ColouredGraph graph) {
-		IntArrayList degrees = null;
-		if (direction == DIRECTION.in) {
-			degrees = graph.getGraph().getAllInEdgeDegrees();
-		} else {
-			degrees = graph.getGraph().getAllOutEdgeDegrees();
-		}
-		return calculateStdDev(degrees, calculateAvg(degrees));
-	}
+    @Override
+    public double apply(ColouredGraph graph) {
+        IntArrayList degrees = null;
+        if (direction == DIRECTION.in) {
+            degrees = graph.getGraph().getAllInEdgeDegrees();
+        } else {
+            degrees = graph.getGraph().getAllOutEdgeDegrees();
+        }
+        return calculateStdDev(degrees, calculateAvg(degrees));
+    }
 
-	protected double calculateStdDev(IntArrayList degrees, double avg) {
-		double temp, sum = 0;
-		for (int i = 0; i < degrees.size(); ++i) {
-			temp = avg - degrees.getInt(i);
-			temp *= temp;
-			sum += temp;
-		}
-		return Math.sqrt(sum / degrees.size());
-	}
+    protected double calculateStdDev(IntArrayList degrees, double avg) {
+        double temp, sum = 0;
+        for (int i = 0; i < degrees.size(); ++i) {
+            temp = avg - degrees.getInt(i);
+            temp *= temp;
+            sum += temp;
+        }
+        return Math.sqrt(sum / degrees.size());
+    }
 
-	/**
-	 * The method calculates the StdDev of an array of updated degrees.
-	 * 
-	 * @param triple         - edge on which graph operation is performed.
-	 * @param graph          - input graph.
-	 * @param graphOperation - boolean value indicating graph operation. ("true" for
-	 *                       adding an edge and "false" for removing an edge)
-	 * @param previousResult - UpdatableMetricResult object containing the previous
-	 *                       computed results.
-	 * @return SimpleMetricResult object.
-	 */
-	@Override
-	public SimpleMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-			UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-		SimpleMetricResult newMetricResult = (SimpleMetricResult) previousResult;
-		int[] degreesArray;
-		IntArrayList degreesList;
-		switch (getName()) {
-		case "stdDevInDegree":
-			degreesArray = mVertexDegrees.getmMapVerticesinDegree();
-			degreesList = new IntArrayList(degreesArray);// Arrays.asList(ArrayUtils.toObject(degreesArray));
-			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-			break;
+    /**
+     * This method calculates the average and Variance for the first time. It
+     * returns a UpdatableMetricResult object that can be reused to compute
+     * StdDeviation in the next iterations
+     * 
+     * @param graph - the graph object
+     * @return UpdatableMetricResult - metric result object
+     */
+    @Override
+    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+        StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
+        IntArrayList vertexDegrees = (this.direction == DIRECTION.in) ? graph.getGraph().getAllInEdgeDegrees()
+                : graph.getGraph().getAllOutEdgeDegrees();
 
-		case "stdDevOutDegree":
-			degreesArray = mVertexDegrees.getmMapVerticesoutDegree();
-			degreesList = new IntArrayList(degreesArray);
-			newMetricResult.setResult(calculateStdDev(degreesList, calculateAvg(degreesList)));
-			break;
+        double averageOfDegrees = super.calculateAvg(vertexDegrees);
+        double sumForVariance = 0.0;
+        double temp;
+        for (Integer vertexDegree : vertexDegrees) {
+            temp = averageOfDegrees - vertexDegree;
+            temp *= temp;
+            sumForVariance += temp;
+        }
+        double variance = sumForVariance / vertexDegrees.size();
 
-		default:// If metric is other than maxInDegree and maxOutDegree then apply the metric
-			newMetricResult = applyUpdatable(graph, previousResult);
-		}
+        metricResultObj.setAvgVertexDegree(averageOfDegrees);
+        metricResultObj.setVarianceVertexDegree(variance);
+        metricResultObj.setNumberOfVertices(vertexDegrees.size());
+        metricResultObj.setResult(Math.sqrt(variance));
 
-		return newMetricResult;
-	}
+        return metricResultObj;
 
-	/**
-	 * Stores the previously computed values in UpdateMetricResult object
-	 * 
-	 * @param graph
-	 *            - input graph.
-	 * @param newMetricResult
-	 *            - UpdatableMetricResult object containing the results that should
-	 *            be updated.
-	 * @return UpdatableMetricResult object with updated sum that can be used in
-	 *         further iterations.
-	 */
-	@Override
-	public SimpleMetricResult applyUpdatable(ColouredGraph graph, UpdatableMetricResult previousResult) {
+    }
 
-		SimpleMetricResult metricResultTempObj = new SimpleMetricResult(getName(), 0.0);
-		if (previousResult instanceof SimpleMetricResult) {
-			// Copying previously computed values in temporary variables
-			metricResultTempObj.setResult(((SimpleMetricResult) previousResult).result);
-		}
+    /**
+     * The method calculates the StdDev of an array of updated degrees. It fetches
+     * the previous variance and mean and uses formula described in the link to
+     * calculate new StdDev Value. If previously variance, average were not
+     * calculated, it will calculate them once
+     * 
+     * {@link //https://math.stackexchange.com/q/3112715}
+     * 
+     * @param graph          - input graph.
+     * @param triple         - edge on which graph operation is performed.
+     * @param graphOperation - boolean value indicating graph operation. ("true" for
+     *                       adding an edge and "false" for removing an edge)
+     * @param previousResult - UpdatableMetricResult object containing the previous
+     *                       computed results.
+     * @return UpdatableMetricResult object.
+     */
+    @Override
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
 
-		return metricResultTempObj;
-	}
+        StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
+
+        double avg = ((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexDegree();
+        double variance = ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexDegree();
+        double numberOfVertices = ((StdDevVertexDegreeMetricResult) previousResult).getNumberOfVertices();
+        double oldDegree = (this.direction == DIRECTION.in) ? graph.getGraph().getInEdgeDegree(triple.headId)
+                : graph.getGraph().getOutEdgeDegree(triple.tailId);
+        List<Double> newAvgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance,
+                oldDegree, graphOperation);
+        avg = newAvgAndVariance.get(0);
+        variance = newAvgAndVariance.get(1);
+
+        metricResultObj.setAvgVertexDegree(avg);
+        metricResultObj.setVarianceVertexDegree(variance);
+        metricResultObj.setNumberOfVertices(numberOfVertices);
+        metricResultObj.setResult(Math.sqrt(variance));
+        return metricResultObj;
+    }
+
+    /**
+     * This method calculates the StdDev of an array given the number of vertices
+     * and the previous variance and mean are known. It uses the formula mentioned
+     * in the link
+     * 
+     * {@link //https://math.stackexchange.com/q/3112715}
+     * 
+     * @param numberOfVertices - total number of nodes in the graph
+     * @param avg              - average of previous set of nodes in the graph
+     * @param variance         - variance of previous set of nodes
+     * @param oldDegree        - the degree which was updated after adding or
+     *                         removing an edge
+     * @param graphOperation   - denotes if an edge was added or removed
+     * @return List<Double> - a list containing average and variance in that order.
+     */
+    private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
+            double oldDegree, Operation graphOperation) {
+        List<Double> list = new ArrayList<Double>();
+        double flag = graphOperation == Operation.ADD ? 1 : -1;
+        double newDegree = oldDegree + flag;
+        double newAvg = avg + (flag / numberOfVertices);
+        double newVariance = (variance + Math.pow(numberOfVertices, -2)
+                + (Math.pow((newDegree - newAvg), 2) - Math.pow((oldDegree - newAvg), 2)) / numberOfVertices);
+        list.add(newAvg);
+        list.add(newVariance);
+        return list;
+    }
+
 }
