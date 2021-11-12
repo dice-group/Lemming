@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
-public class ColouredGraph {
+public class ColouredGraph implements IColouredGraph {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class);
 
@@ -721,38 +720,95 @@ public class ColouredGraph {
 	}
 
 
+    /**
+     * Get list of all Edge IDs connecting to vertex
+     *
+     * @param verticeId - verticeId the id of an vertex
+     * @return IntSet - set of edge IDs
+     */
+    @Override
     public IntSet getEdgesIncidentTo(int verticeId) {
         return graph.getEdgesIncidentTo(verticeId);
     }
 
+    /**
+     * Get in edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - in edge degree value
+     */
+    @Override
     public int getInEdgeDegree(int vertexId) {
         return graph.getInEdgeDegree(vertexId);
     }
 
+    /**
+     * Get out edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - out edge degree value
+     */
+    @Override
     public int getOutEdgeDegree(int vertexId) {
         return graph.getOutEdgeDegree(vertexId);
     }
 
+    /**
+     * Get max in edge degree of the graph
+     * 
+     * @return double
+     */
+    @Override
     public double getMaxInEdgeDegrees() {
         return graph.getMaxInEdgeDegrees();
     }
 
+    /**
+     * Get max out edge degree of the graph
+     * 
+     * @return double
+     */
+    @Override
     public double getMaxOutEdgeDegrees() {
         return graph.getMaxOutEdgeDegrees();
     }
 
+    /**
+     * Get in edge degrees of all the vertices
+     * 
+     * @return IntArrayList
+     */
+    @Override
     public IntArrayList getAllInEdgeDegrees() {
         return graph.getAllInEdgeDegrees();
     }
 
+    /**
+     * Get out edge degrees of all the vertices
+     * 
+     * @return IntArrayList
+     */
+    @Override
     public IntArrayList getAllOutEdgeDegrees() {
         return graph.getAllOutEdgeDegrees();
     }
 
+    /**
+     * Get number of edges in the graph
+     * 
+     * @return double
+     */
+    @Override
     public double getNumberOfEdges() {
         return graph.getNumberOfEdges();
     }
 
+    /**
+     * Get number of nodes in the graph
+     * 
+     * @return double
+     */
+    @Override
     public double getNumberOfVertices() {
         return graph.getNumberOfVertices();
     }
