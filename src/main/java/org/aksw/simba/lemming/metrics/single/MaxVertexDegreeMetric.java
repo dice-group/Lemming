@@ -12,7 +12,7 @@ import grph.Grph.DIRECTION;
 
 /**
  * This metric is the highest degree of in or outgoing edges in the graph.
- * 
+ *
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
@@ -28,9 +28,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     @Override
     public double apply(ColouredGraph graph) {
         if (direction == DIRECTION.in) {
-            return graph.getGraph().getMaxInEdgeDegrees();
+            return graph.getMaxInEdgeDegrees();
         } else {
-            return graph.getGraph().getMaxOutEdgeDegrees();
+            return graph.getMaxOutEdgeDegrees();
         }
     }
 
@@ -40,7 +40,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * the vertex on which add or remove an edge graph operation is performed. If
      * the vertex has the same degree as the maximum vertex degree then the metric
      * value will be updated depending upon the graph operation.
-     * 
+     *
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
      * @param graphOperation - Enum indicating graph operation. ("ADD" for adding an
@@ -79,9 +79,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
         if (direction == DIRECTION.in) {
-            return graph.getGraph().getInEdgeDegree(vertexID);
+            return graph.getInEdgeDegree(vertexID);
         } else {
-            return graph.getGraph().getOutEdgeDegree(vertexID);
+            return graph.getOutEdgeDegree(vertexID);
         }
     }
 

@@ -5,7 +5,7 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
  * This metric is the number of edges of the graph.
- * 
+ *
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
@@ -17,7 +17,7 @@ public class NumberOfEdgesMetric extends AbstractMetric implements SingleValueMe
 
     @Override
     public double apply(ColouredGraph graph) {
-        return  graph.getGraph().getNumberOfEdges();
+        return graph.getNumberOfEdges();
     }
 
 }

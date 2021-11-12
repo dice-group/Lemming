@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * This metric determines the average degree of outgoing edges in the graph.
- * 
+ *
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
@@ -25,7 +25,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     @Override
     public double apply(ColouredGraph graph) {
-        return calculateAvg(graph.getGraph().getAllInEdgeDegrees());
+        return calculateAvg(graph.getAllInEdgeDegrees());
     }
 
     protected double calculateAvg(IntArrayList degrees) {
@@ -41,9 +41,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * metric result object is initialized. Storing the Sum of degree of Vertices
      * and Number of vertices which can be used to compute the average vertex degree
      * metric.
-     * 
-     * @param graph
-     *            - input graph.
+     *
+     * @param graph - input graph.
      * @return - metric result.
      */
     @Override
@@ -54,7 +53,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
         double sum = 0;
 
         // Computing the Avg Vertex Degree Metric for the first time
-        IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
+        IntArrayList getmMapVerticesinDegree = graph.getAllInEdgeDegrees();
         for (Integer vertexDegree : getmMapVerticesinDegree) { // Compute sum in iteration
             sum += vertexDegree;
         }
@@ -74,7 +73,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * The method contains logic that computes the average vertex degree metric
      * efficiently. It will update the previously stored sum value to compute the
      * new value for the metric.
-     * 
+     *
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
      * @param graphOperation - Enum indicating graph operation. ("ADD" for adding an
