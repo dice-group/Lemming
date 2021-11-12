@@ -5,6 +5,7 @@ import grph.Grph;
 import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import java.util.ArrayList;
@@ -721,6 +722,38 @@ public class ColouredGraph {
 
 
     public IntSet getEdgesIncidentTo(int verticeId) {
-	    return graph.getEdgesIncidentTo(verticeId);
+        return graph.getEdgesIncidentTo(verticeId);
+    }
+
+    public int getInEdgeDegree(int vertexId) {
+        return graph.getInEdgeDegree(vertexId);
+    }
+
+    public int getOutEdgeDegree(int vertexId) {
+        return graph.getOutEdgeDegree(vertexId);
+    }
+
+    public double getMaxInEdgeDegrees() {
+        return graph.getMaxInEdgeDegrees();
+    }
+
+    public double getMaxOutEdgeDegrees() {
+        return graph.getMaxOutEdgeDegrees();
+    }
+
+    public IntArrayList getAllInEdgeDegrees() {
+        return graph.getAllInEdgeDegrees();
+    }
+
+    public IntArrayList getAllOutEdgeDegrees() {
+        return graph.getAllOutEdgeDegrees();
+    }
+
+    public double getNumberOfEdges() {
+        return graph.getNumberOfEdges();
+    }
+
+    public double getNumberOfVertices() {
+        return graph.getNumberOfVertices();
     }
 }
