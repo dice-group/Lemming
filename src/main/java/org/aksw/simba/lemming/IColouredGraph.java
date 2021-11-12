@@ -4,7 +4,6 @@
 package org.aksw.simba.lemming;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * This interface is used for the decorator pattern to simplify multithreading
@@ -20,7 +19,7 @@ public interface IColouredGraph {
      * @param verticeId - verticeId the id of an vertex
      * @return IntSet - set of edge IDs
      */
-    public IntSet getEdgesIncidentTo(int verticeId);
+    // IntSet getEdgesIncidentTo(int verticeId);
 
     /**
      * Get in edge degree of a vertex
@@ -86,6 +85,6 @@ public interface IColouredGraph {
      * @param edgeId the id of an edge connecting 1-2 vertices together
      * @return set of vertex ID's
      */
-    IntSet getVerticesIncidentToEdge(int edgeId);
+    // IntSet getVerticesIncidentToEdge(int edgeId);
 
 }
