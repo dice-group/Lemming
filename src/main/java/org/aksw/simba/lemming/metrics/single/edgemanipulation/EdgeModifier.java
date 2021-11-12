@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
