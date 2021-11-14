@@ -52,12 +52,10 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.triple;
     }
 
-    /*
-     * @Override
-     * 
-     * public IntSet getEdgesIncidentTo(int verticeId) { return
-     * this.graph.getEdgesIncidentTo(verticeId); }
-     */
+    @Override
+    public IntSet getEdgesIncidentTo(int verticeId) {
+        return this.graph.getEdgesIncidentTo(verticeId);
+    }
 
     @Override
     public int getInEdgeDegree(int vertexId) {
@@ -99,11 +97,19 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.graph.getNumberOfVertices();
     }
 
-    /*
-     * @Override
-     * 
-     * public IntSet getVerticesIncidentToEdge(int edgeId) { return
-     * this.graph.getVerticesIncidentToEdge(edgeId); }
-     */
+    @Override
+    public IntSet getVerticesIncidentToEdge(int edgeId) {
+        return this.graph.getVerticesIncidentToEdge(edgeId);
+    }
+
+    @Override
+    public IntSet getInNeighbors(int vertexId) {
+        return this.graph.getInNeighbors(vertexId);
+    }
+
+    @Override
+    public IntSet getOutNeighbors(int vertexId) {
+        return this.graph.getOutNeighbors(vertexId);
+    }
 
 }

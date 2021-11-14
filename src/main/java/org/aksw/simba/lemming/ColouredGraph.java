@@ -726,7 +726,6 @@ public class ColouredGraph implements IColouredGraph {
      * @param verticeId - verticeId the id of an vertex
      * @return IntSet - set of edge IDs
      */
-    @Override
     public IntSet getEdgesIncidentTo(int verticeId) {
         return graph.getEdgesIncidentTo(verticeId);
     }
