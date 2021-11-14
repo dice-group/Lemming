@@ -149,8 +149,8 @@ public class GraphOptimization {
             mLstErrorScore.add(pErrScore);
 
             // Arguments passed to a 'Callable task' have to be final
-            final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator.getDecoratedGraph());
-            final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator.getDecoratedGraph());
+            final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator);
+            final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator);
 
             Future<ErrorScores> leftFutureScore = executor.submit(() -> tryToRemoveAnEdgeThread(lTriple));
             Future<ErrorScores> rightFutureScore = executor.submit(() -> tryToAddAnEdgeThread(rTriple));
@@ -237,7 +237,7 @@ public class GraphOptimization {
      * @param clonedGrph the target graph
      * @a
      */
-    private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraph clonedGrph) {
+    private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraphDecorator clonedGrph) {
         int edgeId = -1;
         BitSet edgeColour = null;
         Random rand = new Random(seed);
@@ -271,7 +271,7 @@ public class GraphOptimization {
      * 
      * @param mimicGrph the target graph
      */
-    private TripleBaseSingleID getOfferedEdgeForAdding(ColouredGraph mimicGrph) {
+    private TripleBaseSingleID getOfferedEdgeForAdding(ColouredGraphDecorator mimicGrph) {
         return mGraphGenerator.getProposedTriple(mProcessRandomly);
     }
 

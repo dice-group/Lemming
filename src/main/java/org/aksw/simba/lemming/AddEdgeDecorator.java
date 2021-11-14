@@ -19,11 +19,11 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
     }
 
     /**
-     * @param clonedGraph
+     * @param graph
      * @param isAddingEdgeFlag
      */
-    public AddEdgeDecorator(ColouredGraph clonedGraph, boolean isAddingEdgeFlag) {
-        super(clonedGraph, isAddingEdgeFlag);
+    public AddEdgeDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
+        super(graph, isAddingEdgeFlag);
     }
 
     /*
