@@ -5,6 +5,7 @@ import java.util.List;
 import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -57,7 +58,7 @@ public class MetricUtils {
         return vector;
     }
 
-    public static IntSet getVerticesInCommon(ColouredGraph graph, int v1, int v2) {
+    public static IntSet getVerticesInCommon(ColouredGraphDecorator graph, int v1, int v2) {
         IntSet[] neighborsOfConnectedVertices = new IntSet[2];
 
         neighborsOfConnectedVertices[0] = graph.getInNeighbors(v1);

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import grph.Grph.DIRECTION;
@@ -48,7 +50,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult - metric result object
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
         IntArrayList vertexDegrees = (this.direction == DIRECTION.in) ? graph.getAllInEdgeDegrees()
                 : graph.getAllOutEdgeDegrees();
@@ -89,8 +91,8 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult object.
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
-            UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
+            Operation graphOperation, UpdatableMetricResult previousResult) {
 
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
 

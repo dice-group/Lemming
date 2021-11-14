@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -46,7 +48,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return - metric result.
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
 
         AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
 
@@ -84,8 +86,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      *         further computations
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
-            UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
+            Operation graphOperation, UpdatableMetricResult previousResult) {
 
         AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
 
