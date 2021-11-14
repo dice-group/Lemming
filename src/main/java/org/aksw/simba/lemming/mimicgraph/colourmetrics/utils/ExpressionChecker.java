@@ -9,6 +9,7 @@ import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -240,7 +241,7 @@ public class ExpressionChecker {
         setMetricsToIncrease.removeAll(duplicateSet);
 
         for (String metric : setMetricsToDecrease) {
-            if (maxDifferenceDecreaseMetric < mMapexpressions.get(expr)) {
+            if (maxDifferenceDecreaseMetric < mMapexpressions.get(expr) && !NumberUtils.isParsable(metric) ) {
                 if (!metric.equals("#vertices") && !metric.equals("#edges")) {
                     metricToDecrease = metric;
                     maxDifferenceDecreaseMetric = mMapexpressions.get(expr);
@@ -250,7 +251,7 @@ public class ExpressionChecker {
 
         for (String metric : setMetricsToIncrease) {
             if (maxDifferenceIncreaseMetric < mMapexpressions.get(expr)) {
-                if (!metric.equals("#vertices") && !metric.equals("#edges")) {
+                if (!metric.equals("#vertices") && !metric.equals("#edges") && !NumberUtils.isParsable(metric) ) {
                     metricToIncrease = metric;
                     maxDifferenceIncreaseMetric = mMapexpressions.get(expr);
                 }
