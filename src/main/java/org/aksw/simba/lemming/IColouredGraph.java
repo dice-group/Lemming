@@ -3,7 +3,10 @@
  */
 package org.aksw.simba.lemming;
 
+import com.carrotsearch.hppc.BitSet;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * This interface is used for the decorator pattern to simplify multithreading
@@ -19,7 +22,7 @@ public interface IColouredGraph {
      * @param verticeId - verticeId the id of an vertex
      * @return IntSet - set of edge IDs
      */
-    // IntSet getEdgesIncidentTo(int verticeId);
+    IntSet getEdgesIncidentTo(int verticeId);
 
     /**
      * Get in edge degree of a vertex
@@ -80,11 +83,82 @@ public interface IColouredGraph {
     double getNumberOfVertices();
 
     /**
+     * Add given edge to the graph
+     * 
+     * @param tailId
+     * @param headId
+     * @param edgeColour
+     * @return int -
+     */
+    int addEdge(int tailId, int headId, BitSet edgeColour);
+
+    /**
+     * Remove edge from the graph
+     * 
+     * @param edgeId
+     */
+    void removeEdge(int edgeId);
+
+    /**
+     * Get Set of all edges in the graph
+     * 
+     * @return IntSet
+     */
+    IntSet getEdges();
+
+    /**
+     * Get edge colour
+     * 
+     * @param edgeId
+     * @return BitSet
+     */
+    BitSet getEdgeColour(int edgeId);
+
+    /**
+     * Get property colour
+     * 
+     * @return Object
+     */
+    Object getRDFTypePropertyColour();
+
+    /**
+     * Get the vertex id of the tail if the edge
+     * 
+     * @param edgeId
+     * @return int
+     */
+    int getTailOfTheEdge(int edgeId);
+
+    /**
+     * Get the vertex id of the head if the edge
+     * 
+     * @param edgeId
+     * @return int
+     */
+    int getHeadOfTheEdge(int edgeId);
+
+    /**
      * Get list of all vertex IDs connecting to the the edgeId
      *
-     * @param edgeId the id of an edge connecting 1-2 vertices together
+     * @param edgeId - the id of an edge connecting 1-2 vertices together
      * @return set of vertex ID's
      */
-    // IntSet getVerticesIncidentToEdge(int edgeId);
+    IntSet getVerticesIncidentToEdge(int edgeId);
+
+    /**
+     * Get set of all in neighbors to a vertex
+     * 
+     * @param vertexId
+     * @return set of all in neighbors
+     */
+    IntSet getInNeighbors(int vertexId);
+
+    /**
+     * Get set of all out neighbors to a vertex
+     * 
+     * @param vertexId
+     * @return set of all out neighbors
+     */
+    IntSet getOutNeighbors(int vertexId);
 
 }
