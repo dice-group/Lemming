@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -50,8 +52,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
-            UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
+            Operation graphOperation, UpdatableMetricResult previousResult) {
         // Need to compute MaxVertexInDegree metric or MaxVertexOutDegree
 
         int vertexID = direction == DIRECTION.in ? triple.headId : triple.tailId;
@@ -64,7 +66,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         int degree = changedDegree - updateVertexDegree;
         if (updateVertexDegree == -1) { // Remove an edge
             if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then apply method is called.
-                metVal = apply(graph);
+                metVal = (direction == DIRECTION.in) ? graph.getMaxInEdgeDegrees() : graph.getMaxOutEdgeDegrees();
             }
         } else { // Add an edge
             if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then max vertex degree is
@@ -77,7 +79,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     }
 
-    private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
+    private int getChangedDegree(ColouredGraphDecorator graph, int vertexID, DIRECTION direction) {
         if (direction == DIRECTION.in) {
             return graph.getInEdgeDegree(vertexID);
         } else {
