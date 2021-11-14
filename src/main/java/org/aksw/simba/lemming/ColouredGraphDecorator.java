@@ -5,6 +5,8 @@ package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
+import com.carrotsearch.hppc.BitSet;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -30,24 +32,38 @@ public class ColouredGraphDecorator implements IColouredGraph {
      * 
      * @param isAddingEdge
      */
-    public ColouredGraphDecorator(ColouredGraph clonedGraph, boolean isAddingEdgeFlag) {
-        this.graph = clonedGraph;
+    public ColouredGraphDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
+        this.graph = graph;
         this.isAddingEdge = isAddingEdgeFlag;
     }
 
+    public ColouredGraphDecorator(IColouredGraph graph) {
+        this.graph = graph;
+    }
+
     /**
-     * Returns ColouredGraph object
+     * Returns ColouredGraphDecorator object
      * 
-     * @return ColouredGraph graph
+     * @return ColouredGraphDecorator graph
      */
     public IColouredGraph getGraph() {
         return this.graph;
     }
 
+    /**
+     * Store current triple data
+     * 
+     * @param edge - Triple data
+     */
     public void setTriple(TripleBaseSingleID edge) {
         this.triple = edge;
     }
 
+    /**
+     * Get current triple offered for adding or removing to the ColouredGraph
+     * 
+     * @return TripleBaseSingleID
+     */
     public TripleBaseSingleID getTriple() {
         return this.triple;
     }
@@ -95,6 +111,46 @@ public class ColouredGraphDecorator implements IColouredGraph {
     @Override
     public double getNumberOfVertices() {
         return this.graph.getNumberOfVertices();
+    }
+
+    public void setGraph(IColouredGraph graph) {
+        this.graph = graph;
+
+    }
+
+    @Override
+    public int addEdge(int tailId, int headId, BitSet edgeColour) {
+        return this.graph.addEdge(tailId, headId, edgeColour);
+    }
+
+    @Override
+    public void removeEdge(int edgeId) {
+        this.graph.removeEdge(edgeId);
+    }
+
+    @Override
+    public IntSet getEdges() {
+        return this.graph.getEdges();
+    }
+
+    @Override
+    public BitSet getEdgeColour(int edgeId) {
+        return this.graph.getEdgeColour(edgeId);
+    }
+
+    @Override
+    public Object getRDFTypePropertyColour() {
+        return this.graph.getRDFTypePropertyColour();
+    }
+
+    @Override
+    public int getTailOfTheEdge(int edgeId) {
+        return this.graph.getTailOfTheEdge(edgeId);
+    }
+
+    @Override
+    public int getHeadOfTheEdge(int edgeId) {
+        return this.graph.getHeadOfTheEdge(edgeId);
     }
 
     @Override
