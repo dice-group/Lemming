@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
@@ -90,9 +91,8 @@ public class GraphOptimization {
     public ErrorScores tryToRemoveAnEdgeThread(TripleBaseSingleID lTriple) {
         double lErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfLeft;
-        synchronized (mEdgeModifier) {
-            metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-        }
+        metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
+
         // if the removal cannot happen, the error is set to max as not to be chosen
         if (metricValuesOfLeft == null) {
             lErrScore = Double.MAX_VALUE;
@@ -114,9 +114,8 @@ public class GraphOptimization {
     public ErrorScores tryToAddAnEdgeThread(TripleBaseSingleID rTriple) {
         double rErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfRight;
-        synchronized (mEdgeModifier) {
-            metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
-        }
+        metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
+
         if (metricValuesOfRight == null) {
             rErrScore = Double.MAX_VALUE;
             LOGGER.warn("Edge Addition Prevented. Setting rErrScore: " + rErrScore);
@@ -188,7 +187,7 @@ public class GraphOptimization {
                 mEdgeModifier.executeAddingAnEdge(errScoreRight.getMetricValues());
                 continue;
             }
-
+            mEdgeModifier.updateDecorators();
             noOfRepeatedParent++;
 
             if (noOfRepeatedParent == mMaxRepeatedSelection) {
