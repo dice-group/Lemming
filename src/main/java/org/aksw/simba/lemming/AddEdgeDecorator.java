@@ -27,19 +27,6 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         super(graph, isAddingEdgeFlag);
     }
 
-    @Override
-    public IntSet getEdgesIncidentTo(int verticeId) {
-        IntSet resultObject = super.getEdgesIncidentTo(verticeId);
-
-        if (this.triple.headId == verticeId && !resultObject.contains(this.triple.edgeId)) {
-            resultObject.add(this.triple.edgeId);
-        }
-        // TODO: Is tailId check also necessary ?
-        if (this.triple.tailId == verticeId && !resultObject.contains(this.triple.edgeId)) {
-            resultObject.add(this.triple.edgeId);
-        }
-        return resultObject;
-    }
 
     @Override
     public int getInEdgeDegree(int vertexId) {

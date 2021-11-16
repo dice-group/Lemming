@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
@@ -30,15 +31,14 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
         return nodeTriangleMetric.apply(graph);
     }
 
-    /**
-     * @param graph the given graph is already modified!
-     */
     @Override
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
+        IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
 
-        int headId = triple.headId;
-        int tailId = triple.edgeId;
+        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+                : verticesConnectedToRemovingEdge.toIntArray()[0];
+        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
 
         // if headId = tailId, result is not change.
         if (headId == tailId) {
@@ -55,12 +55,12 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 
         // 1.case: remove an edge, and number of edges between head and tail is 1
         // -> new metric = old metric - number of common vertices
-        if (numEdgesBetweenVertices == 0 && opt == Operation.REMOVE) {
+        if (numEdgesBetweenVertices == 1 && opt == Operation.REMOVE) {
             newResult = newResult - numberOfCommon;
 
             // 2.case: add an edge, and number of edges between head and tail is 0
             // -> new metric = old metric + number of common vertices
-        } else if (numEdgesBetweenVertices == 1 && opt == Operation.ADD) {
+        } else if (numEdgesBetweenVertices == 0 && opt == Operation.ADD) {
             newResult = newResult + numberOfCommon;
         }
 

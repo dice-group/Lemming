@@ -35,18 +35,21 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
 
-        int headId = triple.headId;
-        int tailId = triple.tailId;
+        IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
+
+        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+                : verticesConnectedToRemovingEdge.toIntArray()[0];
+        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
 
         // if headId = tailId, result is not change.
         if (headId == tailId) {
             return previousResult;
         }
 
-        int change = opt == Operation.REMOVE ? -1 : 1;
         int numEdgesBetweenVertices = IntSetUtil
-                .intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size() - change;
+                .intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
+        int change = opt == Operation.REMOVE ? -1 : 1;
         int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices,
                 change);
         double newResult = previousResult.getResult() + change * differenceOfSubGraph;
