@@ -188,7 +188,7 @@ public class EdgeModifier {
                 // Calling update method to get the metric values based on previous results
                 UpdatableMetricResult result = metric.update(this.mAddEdgeDecorator, triple, Operation.ADD,
                         mMapPrevMetricsResult.get(metric.getName()));
-                mMapMetricsResultRemoveEdge.put(metric.getName(), result);
+                mMapMetricsResultAddEdge.put(metric.getName(), result);
                 mapMetricValues.put(metric.getName(), result.getResult());
                 // }
             }
