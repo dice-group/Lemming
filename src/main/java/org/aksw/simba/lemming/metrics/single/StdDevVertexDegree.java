@@ -99,10 +99,10 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         double avg = ((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexDegree();
         double variance = ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexDegree();
         double numberOfVertices = ((StdDevVertexDegreeMetricResult) previousResult).getNumberOfVertices();
-        double oldDegree = (this.direction == DIRECTION.in) ? graph.getInEdgeDegree(triple.headId)
+        double newDegree = (this.direction == DIRECTION.in) ? graph.getGraph().getInEdgeDegree(triple.headId)
                 : graph.getOutEdgeDegree(triple.tailId);
         List<Double> newAvgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance,
-                oldDegree, graphOperation);
+                newDegree, graphOperation);
         avg = newAvgAndVariance.get(0);
         variance = newAvgAndVariance.get(1);
 
@@ -129,10 +129,10 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return List<Double> - a list containing average and variance in that order.
      */
     private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
-            double oldDegree, Operation graphOperation) {
+            double newDegree, Operation graphOperation) {
         List<Double> list = new ArrayList<Double>();
         double flag = graphOperation == Operation.ADD ? 1 : -1;
-        double newDegree = oldDegree + flag;
+        double oldDegree = newDegree - flag;
         double newAvg = avg + (flag / numberOfVertices);
         double newVariance = (variance + Math.pow(numberOfVertices, -2)
                 + (Math.pow((newDegree - newAvg), 2) - Math.pow((oldDegree - newAvg), 2)) / numberOfVertices);
