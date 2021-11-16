@@ -187,7 +187,6 @@ public class GraphOptimization {
                 mEdgeModifier.executeAddingAnEdge(errScoreRight.getMetricValues());
                 continue;
             }
-            mEdgeModifier.updateDecorators();
             noOfRepeatedParent++;
 
             if (noOfRepeatedParent == mMaxRepeatedSelection) {

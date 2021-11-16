@@ -220,6 +220,7 @@ public class EdgeModifier {
         // Update the previously computed values
         mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultRemoveEdge);
         mMapMetricsResultRemoveEdge.clear();
+        updateDecorators();
     }
 
     /**
@@ -238,6 +239,7 @@ public class EdgeModifier {
         // Update the previously computed values
         mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultAddEdge);
         mMapMetricsResultAddEdge.clear();
+        updateDecorators();
     }
 
     private void updateMapMetricValues(ObjectDoubleOpenHashMap<String> newMetricValues) {
