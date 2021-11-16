@@ -161,4 +161,11 @@ public interface IColouredGraph {
      */
     IntSet getOutNeighbors(int vertexId);
 
+    /**
+     * Get set of all vertices
+     * 
+     * @return set of all vertices
+     */
+    IntSet getVertices();
+
 }

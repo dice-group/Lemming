@@ -61,7 +61,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     @Override
     public double getMaxInEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) ((ColouredGraph) this.graph).getVertices();
+        IntArrayList vertices = (IntArrayList) super.getVertices();
         double maxValue = 0.0;
         for (int i = 0; i < vertices.size(); i++) {
             int nodeDegree = getInEdgeDegree(vertices.getInt(i));
@@ -74,7 +74,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     @Override
     public double getMaxOutEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) ((ColouredGraph) this.graph).getVertices();
+        IntArrayList vertices = (IntArrayList) super.getVertices();
         double maxValue = 0.0;
         for (int i = 0; i < vertices.size(); i++) {
             int nodeDegree = getOutEdgeDegree(vertices.getInt(i));
@@ -87,7 +87,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     @Override
     public IntArrayList getAllInEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) ((ColouredGraph) this.graph).getVertices();
+        IntArrayList vertices = (IntArrayList) super.getVertices();
         IntArrayList inDegrees = new IntArrayList();
         for (int i = 0; i < vertices.size(); i++) {
             inDegrees.add(i, getInEdgeDegree(vertices.getInt(i)));
@@ -97,7 +97,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     @Override
     public IntArrayList getAllOutEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) ((ColouredGraph) this.graph).getVertices();
+        IntArrayList vertices = (IntArrayList) super.getVertices();
         IntArrayList outDegrees = new IntArrayList();
         for (int i = 0; i < vertices.size(); i++) {
             outDegrees.add(i, getOutEdgeDegree(vertices.getInt(i)));

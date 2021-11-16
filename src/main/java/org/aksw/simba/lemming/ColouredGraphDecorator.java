@@ -168,4 +168,9 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.graph.getOutNeighbors(vertexId);
     }
 
+    @Override
+    public IntSet getVertices() {
+        return this.graph.getVertices();
+    }
+
 }
