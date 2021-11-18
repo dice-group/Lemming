@@ -99,7 +99,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         double avg = ((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexDegree();
         double variance = ((StdDevVertexDegreeMetricResult) previousResult).getVarianceVertexDegree();
         double numberOfVertices = ((StdDevVertexDegreeMetricResult) previousResult).getNumberOfVertices();
-        double newDegree = (this.direction == DIRECTION.in) ? graph.getGraph().getInEdgeDegree(triple.headId)
+        double newDegree = (this.direction == DIRECTION.in) ? graph.getInEdgeDegree(triple.headId)
                 : graph.getOutEdgeDegree(triple.tailId);
         List<Double> newAvgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance,
                 newDegree, graphOperation);
