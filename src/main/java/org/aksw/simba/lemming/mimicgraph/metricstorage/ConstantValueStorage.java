@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -231,5 +232,24 @@ public class ConstantValueStorage implements Serializable	{
 	
 	public static String generateGraphKey(ColouredGraph graph) {
 	    return graph.getGraph().getNumberOfVertices() + "-" + graph.getGraph().getNumberOfEdges();
+	}
+	
+	/** The method returns the list of metrics which are present in characteristics expressions.
+	 * @param lstMetrics - The list which contains all the input metrics.
+	 * @return List of metrics
+	 */
+	public List<SingleValueMetric> getMetrics(List<SingleValueMetric> lstMetrics){
+	    List<SingleValueMetric> metrics = new ArrayList<>();
+	    Set<Expression> constantExpressions = getConstantExpressions();
+	    for(SingleValueMetric metric: lstMetrics){
+	        for(Expression expression:constantExpressions) {
+	            if(expression.toString().contains(metric.getName())) {
+	                metrics.add(metric);
+	                break;
+	            }
+	        }
+	    }
+	    
+	    return metrics;
 	}
 }
