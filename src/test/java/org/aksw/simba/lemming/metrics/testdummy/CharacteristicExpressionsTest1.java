@@ -47,7 +47,7 @@ public class CharacteristicExpressionsTest1 {
                                 new AtomicVariable(new StdDevVertexDegree(DIRECTION.out)), Operator.TIMES),
                         new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.PLUS),
                 Operator.DIV);
-        // System.out.println(operation1.toString());
+        System.out.println(operation1.toString());
         setOfExpressions.add(operation1);
 
         Operation operation2 = new Operation(new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)),
@@ -56,7 +56,7 @@ public class CharacteristicExpressionsTest1 {
                                 new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.PLUS),
                         new AtomicVariable(new StdDevVertexDegree(DIRECTION.out)), Operator.MINUS),
                 Operator.DIV);
-        // System.out.println(operation2.toString());
+        System.out.println(operation2.toString());
         setOfExpressions.add(operation2);
 
         Operation operation3 = new Operation(new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)),
@@ -65,7 +65,7 @@ public class CharacteristicExpressionsTest1 {
                                 new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.DIV),
                         new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.PLUS),
                 Operator.DIV);
-        // System.out.println(operation3.toString());
+        System.out.println(operation3.toString());
         setOfExpressions.add(operation3);
 
         Operation operation4 = new Operation(new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)),
@@ -74,7 +74,7 @@ public class CharacteristicExpressionsTest1 {
                                 new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.PLUS),
                         new AtomicVariable(new StdDevVertexDegree(DIRECTION.out)), Operator.MINUS),
                 Operator.DIV);
-        // System.out.println(operation4.toString());
+        System.out.println(operation4.toString());
         setOfExpressions.add(operation4);
 
         Operation operation5 = new Operation(new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)),
@@ -83,7 +83,7 @@ public class CharacteristicExpressionsTest1 {
                                 new AtomicVariable(new StdDevVertexDegree(DIRECTION.out)), Operator.DIV),
                         new AtomicVariable(new MaxVertexDegreeMetric(DIRECTION.in)), Operator.PLUS),
                 Operator.DIV);
-        // System.out.println(operation5.toString());
+        System.out.println(operation5.toString());
         setOfExpressions.add(operation5);
         mapMetricValues.put(operation1.toString(), 0.0926);
         mapMetricValues.put(operation2.toString(), -0.1751);
