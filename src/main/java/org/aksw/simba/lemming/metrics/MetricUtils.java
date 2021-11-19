@@ -2,10 +2,13 @@ package org.aksw.simba.lemming.metrics;
 
 import java.util.List;
 
+import grph.Grph;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 /**
  * This class contains helper methods for the usage of {@link Metric}s.
@@ -47,10 +50,32 @@ public class MetricUtils {
      */
     public static ObjectDoubleOpenHashMap<String> calculateGraphMetrics(ColouredGraph graph,
             List<SingleValueMetric> metrics) {
-        ObjectDoubleOpenHashMap<String> vector = new ObjectDoubleOpenHashMap<String>(2 * metrics.size());
+        ObjectDoubleOpenHashMap<String> vector = new ObjectDoubleOpenHashMap<>(2 * metrics.size());
         for (SingleValueMetric metric : metrics) {
             vector.put(metric.getName(), metric.apply(graph));
         }
         return vector;
+    }
+
+    public static IntSet getVerticesInCommon(ColouredGraph graph, int v1, int v2) {
+        IntSet[] neighborsOfConnectedVertices = new IntSet[2];
+
+        neighborsOfConnectedVertices[0] = graph.getInNeighbors(v1);
+        neighborsOfConnectedVertices[0].addAll(graph.getOutNeighbors(v1));
+
+        if (neighborsOfConnectedVertices[0].contains(v1))
+            neighborsOfConnectedVertices[0].remove(v1);
+        if (neighborsOfConnectedVertices[0].contains(v2))
+            neighborsOfConnectedVertices[0].remove(v2);
+
+        neighborsOfConnectedVertices[1] = graph.getInNeighbors(v2);
+        neighborsOfConnectedVertices[1].addAll(graph.getOutNeighbors(v2));
+
+        if (neighborsOfConnectedVertices[1].contains(v1))
+            neighborsOfConnectedVertices[1].remove(v1);
+        if (neighborsOfConnectedVertices[1].contains(v2))
+            neighborsOfConnectedVertices[1].remove(v2);
+
+        return IntSetUtil.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
     }
 }

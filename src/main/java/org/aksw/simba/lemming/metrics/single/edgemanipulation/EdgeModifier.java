@@ -1,250 +1,186 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.SimpleMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.tools.PrecomputingValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+import javax.annotation.Nonnull;
+
 public class EdgeModifier {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
 
-	private EdgeModification mEdgeModification;
+    private ColouredGraph graph;
 
-	private List<SingleValueMetric> mLstMetrics;
-	private ObjectDoubleOpenHashMap<String> mMapMetricValues;
-	private ObjectDoubleOpenHashMap<String> mMapOrignalMetricValues;
-	private List<TripleBaseSingleID> mLstRemovedEdges;
-	private List<TripleBaseSingleID> mLstAddedEdges;
-	private boolean isCoutingEdgeTriangles = false;
-	private boolean isCountingNodeTriangles = false;
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultRemoveEdge; // Map to store results for remove
-																					// an edge
-	private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResultAddEdge; // Map to store results for add an edge
+    private List<SingleValueMetric> mLstMetrics;
+    private ObjectDoubleOpenHashMap<String> mMapMetricValues;
+    private ObjectDoubleOpenHashMap<String> mMapOriginalMetricValues;
 
-	public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
-		// list of metric
-		mLstMetrics = lstMetrics;
-		// initialize two list removed edges and added edges
-		mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
-		mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
-		// compute metric values
-		computeMetricValues(clonedGraph, lstMetrics);
-		// initialize EdgeModification
-		mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
-				(int) mMapMetricValues.get("#edgetriangles"));
+    private TripleBaseSingleID tryToRemovedEdge;
+    private TripleBaseSingleID tryToAddedEdge;
 
-		// Initialize the UpdatableMetricResult for all metrics
-		mMapPrevMetricsResult = new HashMap<>();
-		mMapPrevMetricsResultRemoveEdge = new HashMap<>();
-		mMapPrevMetricsResultAddEdge = new HashMap<>();
-		for (SingleValueMetric singleMetric : lstMetrics) {
-			mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-		}
+    private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
+    private HashMap<String, UpdatableMetricResult> mMapMetricsResultRemoveEdge; // Map to store results for remove
+                                                                                // an edge
+    private HashMap<String, UpdatableMetricResult> mMapMetricsResultAddEdge; // Map to store results for add an edge
 
-	}
+    public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
+        graph = clonedGraph;
+        // list of metric
+        mLstMetrics = lstMetrics;
 
-	private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
+        // Initialize the UpdatableMetricResult for all metrics
+        mMapPrevMetricsResult = new HashMap<>();
+        mMapMetricsResultRemoveEdge = new HashMap<>();
+        mMapMetricsResultAddEdge = new HashMap<>();
 
-		LOGGER.info("Compute " + lstMetrics.size() + " metrics on the current mimic graph!");
+        // compute metric values
+        computeMetricValues(graph, lstMetrics);
+    }
 
-		mMapMetricValues = new ObjectDoubleOpenHashMap<String>();
-		if (lstMetrics != null && lstMetrics.size() > 0) {
+    private void computeMetricValues(ColouredGraph graph, @Nonnull List<SingleValueMetric> lstMetrics) {
 
-			for (SingleValueMetric metric : lstMetrics) {
-				if (metric.getName().equalsIgnoreCase("#edgetriangles")) {
-					isCoutingEdgeTriangles = true;
-				} else if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
-					isCountingNodeTriangles = true;
-				}
+        LOGGER.info("Compute " + lstMetrics.size() + " metrics on the current mimic graph!");
 
-				double metVal = metric.apply(clonedGraph);
-				String name = metric.getName();
-				LOGGER.info("Value of " + metric.getName() + " is " + metVal);
-				// compute value for each of metrics
-				mMapMetricValues.put(name, metVal);
-			}
-		}
-		if (!isCountingNodeTriangles) {
-			mMapMetricValues.put("#nodetriangles", 0);
-		}
-		if (!isCoutingEdgeTriangles) {
-			mMapMetricValues.put("#edgetriangles", 0);
-		}
+        mMapMetricValues = new ObjectDoubleOpenHashMap<>();
+        if (lstMetrics.size() > 0) {
 
-		// create a backup map metric values
-		mMapOrignalMetricValues = mMapMetricValues.clone();
-	}
+            for (SingleValueMetric metric : lstMetrics) {
+                // Calling applyUpdatable
+                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(graph);
 
-	public ColouredGraph getGraph() {
-		return mEdgeModification.getGraph();
-	}
+                double metVal = metricResultTemp.getResult();
 
-	public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
-		if (triple != null && triple.edgeId != -1 && triple.edgeColour != null && triple.tailId != -1
-				&& triple.headId != -1) {
+                String name = metric.getName();
+                LOGGER.info("Value of " + metric.getName() + " is " + metVal);
 
-			// add to list of removed edges
-			// mLstRemovedEdges.add(triple);
+                mMapMetricValues.put(name, metVal);
+                mMapPrevMetricsResult.put(name, metricResultTemp);
+            }
+        }
+        // create a backup map metric values
+        mMapOriginalMetricValues = mMapMetricValues.clone();
+    }
 
-			ObjectDoubleOpenHashMap<String> mapChangedMetricValues = new ObjectDoubleOpenHashMap<String>();
+    public ColouredGraph getGraph() {
+        return this.graph;
+    }
 
-			mEdgeModification.removeEdgeFromGraph(triple.edgeId);
-			if (isCountingNodeTriangles) {
-				int newNodeTri = mEdgeModification.getNewNodeTriangles();
-				mapChangedMetricValues.put("#nodetriangles", newNodeTri);
-			}
+    public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
+        if (triple != null && triple.edgeId != -1 && triple.edgeColour != null && triple.tailId != -1
+                && triple.headId != -1) {
 
-			if (isCoutingEdgeTriangles) {
-				int newEdgeTri = mEdgeModification.getNewEdgeTriangles();
-				mapChangedMetricValues.put("#edgetriangles", newEdgeTri);
-			}
+            tryToRemovedEdge = triple;
+            ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-			ColouredGraph graph = mEdgeModification.getGraph();
+            this.graph.removeEdge(triple.edgeId);
 
-			for (SingleValueMetric metric : mLstMetrics) {
-				if (!metric.getName().equalsIgnoreCase("#edgetriangles")
-						&& !metric.getName().equalsIgnoreCase("#nodetriangles")) {
-					// double metVal = metric.apply(graph);
-					// Calling update method to get the metric values based on previous results
-					mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
-							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
-					double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new
-																										// metric value
-					mapChangedMetricValues.put(metric.getName(), metVal);
-				}
-			}
+            for (SingleValueMetric metric : mLstMetrics) {
+                // Calling update method to get the metric values based on previous results
+                UpdatableMetricResult result = metric.update(graph, triple, Operation.REMOVE,
+                        mMapPrevMetricsResult.get(metric.getName()));
+                mMapMetricsResultRemoveEdge.put(metric.getName(), result);
+                mapMetricValues.put(metric.getName(), result.getResult());
+            }
 
-			// reverse the graph
-			// mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId,
-			// triple.edgeColour);
-			int removedEdgeID = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour,
-					(int) mMapMetricValues.get("#nodetriangles"), (int) mMapMetricValues.get("#edgetriangles"));
+            // reverse the graph
+            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
-			TripleBaseSingleID removedTriple = new TripleBaseSingleID(triple.tailId, triple.headColour, triple.headId,
-					triple.tailColour, removedEdgeID, triple.edgeColour);
-			mLstRemovedEdges.add(removedTriple);
+            return mapMetricValues;
+        } else {
+            LOGGER.warn("Invalid triple for removing an edge!");
+            return null;
+        }
+    }
 
-			return mapChangedMetricValues;
-		} else {
-			LOGGER.warn("Invalid triple for removing an edge!");
-			return null;
-		}
-	}
+    public ObjectDoubleOpenHashMap<String> tryToAddAnEdge(TripleBaseSingleID triple) {
+        if (triple != null && triple.edgeColour != null && triple.headId != -1 && triple.tailId != -1) {
 
-	public ObjectDoubleOpenHashMap<String> tryToAddAnEdge(TripleBaseSingleID triple) {
-		if (triple != null && triple.edgeColour != null && triple.headId != -1 && triple.tailId != -1) {
-			// add to list of added edges
-			mLstAddedEdges.add(triple);
+            tryToAddedEdge = triple;
+            ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-			ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<String>();
-			triple.edgeId = mEdgeModification.addEdgeToGraph(triple.tailId, triple.headId, triple.edgeColour);
+            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
-			if (isCountingNodeTriangles) {
-				int newNodeTri = mEdgeModification.getNewNodeTriangles();
-				mapMetricValues.put("#nodetriangles", newNodeTri);
-			}
+            for (SingleValueMetric metric : mLstMetrics) {
+                // Calling update method to get the metric values based on previous results
+                UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD,
+                        mMapPrevMetricsResult.get(metric.getName()));
+                mMapMetricsResultAddEdge.put(metric.getName(), result);
+                mapMetricValues.put(metric.getName(), result.getResult());
+            }
 
-			if (isCoutingEdgeTriangles) {
-				int newEdgeTri = mEdgeModification.getNewEdgeTriangles();
-				mapMetricValues.put("#edgetriangles", newEdgeTri);
-			}
+            // reverse the graph
+            graph.removeEdge(triple.edgeId);
 
-			ColouredGraph graph = mEdgeModification.getGraph();
-			for (SingleValueMetric metric : mLstMetrics) {
-				if (!metric.getName().equalsIgnoreCase("#edgetriangles")
-						&& !metric.getName().equalsIgnoreCase("#nodetriangles")) {
+            return mapMetricValues;
+        } else {
+            LOGGER.warn("Invalid triple for adding an edge!");
+            return null;
+        }
+    }
 
-					// double metVal = metric.apply(graph);
-					// Calling update method to get the metric values based on previous results
-					mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
-							mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
-					double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric
-																									// value
-					mapMetricValues.put(metric.getName(), metVal);
-				}
-			}
+    /**
+     * execute removing an edge
+     * 
+     * @param newMetricValues the already calculated metric from trial
+     */
+    public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
+        if (tryToRemovedEdge != null) {
+            // store metric values got from trial
+            updateMapMetricValues(newMetricValues);
 
-			// mEdgeModification.removeEdgeFromGraph(triple.edgeId);
-			mEdgeModification.removeEdgeFromGraph(triple.edgeId, (int) mMapMetricValues.get("#nodetriangles"),
-					(int) mMapMetricValues.get("#edgetriangles"));
+            // remove the edge from graph again
+            this.graph.removeEdge(tryToRemovedEdge.edgeId);
+            tryToRemovedEdge = null;
 
-			return mapMetricValues;
-		} else {
-			LOGGER.warn("Invalid triple for adding an edge!");
-			return null;
-		}
-	}
+            // Update the previously computed values
+            mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultRemoveEdge);
+            mMapMetricsResultRemoveEdge.clear();
+        }
+    }
 
-	/**
-	 * execute removing an edge
-	 * 
-	 * @param newMetricValues the already calculated metric from trial
-	 */
-	public void executeRemovingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
-		if (mLstRemovedEdges.size() > 0) {
-			// store metric values got from trial
-			updateMapMetricValues(newMetricValues);
-			// get the last removed edge
-			TripleBaseSingleID lastTriple = mLstRemovedEdges.get(mLstRemovedEdges.size() - 1);
-			// remove the edge from graph again
-			// mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId);
+    /**
+     * execute adding an edge
+     * 
+     * @param newMetricValues the already calculated metric from trial
+     */
+    public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
+        if (tryToAddedEdge != null) {
+            // store metric values got from trial
+            updateMapMetricValues(newMetricValues);
 
-			mEdgeModification.removeEdgeFromGraph(lastTriple.edgeId, (int) newMetricValues.get("#nodetriangles"),
-					(int) newMetricValues.get("#edgetriangles"));
-			// Update the previously computed values
-			mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultRemoveEdge);
-			mMapPrevMetricsResultRemoveEdge.clear();
+            // add the edge to graph again
+            this.graph.addEdge(tryToAddedEdge.tailId, tryToAddedEdge.headId, tryToAddedEdge.edgeColour);
+            tryToAddedEdge = null;
 
-		}
-	}
+            // Update the previously computed values
+            mMapPrevMetricsResult = new HashMap<>(mMapMetricsResultAddEdge);
+            mMapMetricsResultAddEdge.clear();
+        }
+    }
 
-	/**
-	 * execute adding an edge
-	 * 
-	 * @param newMetricValues the already calculated metric from trial
-	 */
-	public void executeAddingAnEdge(ObjectDoubleOpenHashMap<String> newMetricValues) {
-		if (mLstAddedEdges.size() > 0) {
-			// store metric values got from trial
-			updateMapMetricValues(newMetricValues);
-			// get the last added edge
-			TripleBaseSingleID lastTriple = mLstAddedEdges.get(mLstAddedEdges.size() - 1);
-			// add the edge to graph again
-			// mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId,
-			// lastTriple.edgeColour);
-			mEdgeModification.addEdgeToGraph(lastTriple.tailId, lastTriple.headId, lastTriple.edgeColour,
-					(int) newMetricValues.get("#nodetriangles"), (int) newMetricValues.get("#edgetriangles"));
-			// Update the previously computed values
-			mMapPrevMetricsResult = new HashMap<>(mMapPrevMetricsResultAddEdge);
-			mMapPrevMetricsResultAddEdge.clear();
-		}
-	}
+    private void updateMapMetricValues(ObjectDoubleOpenHashMap<String> newMetricValues) {
+        mMapMetricValues = newMetricValues;
+    }
 
-	private void updateMapMetricValues(ObjectDoubleOpenHashMap<String> newMetricValues) {
-		mMapMetricValues = newMetricValues;
-	}
+    public ObjectDoubleOpenHashMap<String> getOriginalMetricValues() {
+        return mMapOriginalMetricValues;
+    }
 
-	public ObjectDoubleOpenHashMap<String> getOriginalMetricValues() {
-		return mMapOrignalMetricValues;
-	}
+    public ObjectDoubleOpenHashMap<String> getOptimizedMetricValues() {
+        return mMapMetricValues;
+    }
 
-	public ObjectDoubleOpenHashMap<String> getOptimizedMetricValues() {
-		return mMapMetricValues;
-	}
-	
-	public HashMap<String, UpdatableMetricResult> getmMapPrevMetricsResult() {
-		return mMapPrevMetricsResult;
-	}
+    public HashMap<String, UpdatableMetricResult> getMapPrevMetricsResult() {
+        return mMapPrevMetricsResult;
+    }
+
 }
