@@ -81,7 +81,7 @@ public class EdgeModifier {
             tryToRemovedEdge = triple;
             ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-            this.graph.removeEdge(triple.edgeId);
+            //this.graph.removeEdge(triple.edgeId);
 
             for (SingleValueMetric metric : mLstMetrics) {
                 // Calling update method to get the metric values based on previous results
@@ -92,7 +92,7 @@ public class EdgeModifier {
             }
 
             // reverse the graph
-            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
+            //graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
             return mapMetricValues;
         } else {
@@ -107,7 +107,7 @@ public class EdgeModifier {
             tryToAddedEdge = triple;
             ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
-            graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
+            //graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
             for (SingleValueMetric metric : mLstMetrics) {
                 // Calling update method to get the metric values based on previous results
@@ -118,7 +118,7 @@ public class EdgeModifier {
             }
 
             // reverse the graph
-            graph.removeEdge(triple.edgeId);
+            //graph.removeEdge(triple.edgeId);
 
             return mapMetricValues;
         } else {

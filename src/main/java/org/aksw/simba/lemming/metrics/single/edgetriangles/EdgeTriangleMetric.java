@@ -30,23 +30,33 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 	}
 
 	/**
-	 * @param graph   the given graph is already modified!
+	 * @param graph   the given graph is not modified!
 	 */
 	@Override
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
 										@Nonnull UpdatableMetricResult previousResult){
 
 
-		int headId = triple.headId;
-		int tailId = triple.tailId;
+		//int headId = triple.headId;
+		//int tailId = triple.tailId;
 
+		int headId, tailId;
+		if(opt == Operation.REMOVE){
+			IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
+			headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+					: verticesConnectedToRemovingEdge.toIntArray()[0];
+			tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
+		}else{
+			headId = triple.headId;
+			tailId = triple.tailId;
+		}
 		//if headId = tailId, result is not change.
 		if(headId == tailId){
 			return previousResult;
 		}
 
 		int change = opt==Operation.REMOVE ? -1 : 1 ;
-		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size()-change;
+		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
 		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices, change);
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;

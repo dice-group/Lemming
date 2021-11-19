@@ -21,31 +21,29 @@ public class EdgeTriangleMetricTest extends UpdateMetricTest{
 
         UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
-        //delete an edge 0 = (0, 1)
-        graph = removeEdge(graph, 0);
+        //try to remove an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertEquals(0.0, newResult.getResult());
+        graph = removeEdge(graph, 0);
         prevResult = newResult;
 
-        //add an edge 0 = (0, 1)
-        graph = addEdge(graph, 0, 1);
+        //try to add an edge 0 = (0, 1)
         newResult = metric.update(graph, triple, Operation.ADD, prevResult);
         Assert.assertEquals(2.0, newResult.getResult());
+        graph = addEdge(graph, 0, 1);
         prevResult = newResult;
 
-        //add an edge 4 = (0, 1);
-        graph = addEdge(graph, 0, 1);
+        //try to add an edge 4 = (0, 1);
         triple = new TripleBaseSingleID(0, null, 1, null, 4, null);
         newResult = metric.update(graph, triple, Operation.ADD, prevResult);
         Assert.assertEquals(4.0, newResult.getResult());
+        graph = addEdge(graph, 0, 1);
         prevResult = newResult;
 
-        //add an edge 5 = (1, 1);
-        graph = addEdge(graph, 1, 1);
-        triple = new TripleBaseSingleID(1, null, 1, null, 5, null);
-        newResult = metric.update(graph, triple, Operation.ADD, prevResult);
-        Assert.assertEquals(4.0, newResult.getResult());
+        //try to remove an edge 4 = (0, 1);
+        newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
+        Assert.assertEquals(2.0, newResult.getResult());
     }
 
     @Test
@@ -58,15 +56,12 @@ public class EdgeTriangleMetricTest extends UpdateMetricTest{
 
         UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
-        //delete an edge 0 = (0, 1)
-        graph = removeEdge(graph, 0);
+        //try an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertEquals(0.0, newResult.getResult());
-        prevResult = newResult;
 
         //add an edge 0 = (1, 1);
-        graph = addEdge(graph, 1, 1);
         triple = new TripleBaseSingleID(1, null, 1, null, 0, null);
         newResult = metric.update(graph, triple, Operation.ADD, prevResult);
         Assert.assertEquals(0.0, newResult.getResult());
