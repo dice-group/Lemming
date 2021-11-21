@@ -88,7 +88,7 @@ public class ExpressionChecker {
         mValueCarrier = valueCarrier;
 
         mMapOfMeanValues = errScoreCalculator.getmMapOfMeanValues();
-        mMapPrevMetricsResult = edgeModifier.getmMapPrevMetricsResult();
+        //mMapPrevMetricsResult = edgeModifier.getmMapPrevMetricsResult();
 
     }
 
