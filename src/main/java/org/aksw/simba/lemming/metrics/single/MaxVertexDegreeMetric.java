@@ -4,6 +4,9 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+
+import com.carrotsearch.hppc.BitSet;
+
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -35,6 +38,41 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     /**
+     * Returns metric results that can be reused for further computations. Here, the
+     * metric result object is initialized. Storing the maximum vertex degree and
+     * the vertex having that degree.
+     * 
+     * @param graph
+     *            - input graph.
+     * @return - metric result.
+     */
+    @Override
+    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
+
+        IntSet vertices = graph.getGraph().getVertices();
+        if (direction == DIRECTION.in) {
+            for (int vertex : vertices) {
+                int degree = graph.getGraph().getInEdgeDegree(vertex);
+                if (degree > metricResultTempObj.getResult()) {
+                    metricResultTempObj.setResult(degree);
+                    metricResultTempObj.setVertexID(vertex);
+                }
+            }
+        } else {
+            for (int vertex : vertices) {
+                int degree = graph.getGraph().getOutEdgeDegree(vertex);
+                if (degree > metricResultTempObj.getResult()) {
+                    metricResultTempObj.setResult(degree);
+                    metricResultTempObj.setVertexID(vertex);
+                }
+            }
+        }
+
+        return metricResultTempObj;
+    }
+    
+    /**
      * The method contains logic that computes the maximum vertex degree metric
      * efficiently. It will check the previously stored maximum vertex degree and
      * the vertex on which add or remove an edge graph operation is performed. If
@@ -59,21 +97,21 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1;
         // variable to track remove an edge or add an edge operation.
 
-        double metVal = ((SingleValueMetricResult) previousResult).getResult();
+        double metVal = ((MaxVertexDegreeMetricResult) previousResult).getResult();
         int changedDegree = getChangedDegree(graph, vertexID, direction);
         int degree = changedDegree - updateVertexDegree;
         if (updateVertexDegree == -1) { // Remove an edge
             if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then apply method is called.
-                metVal = apply(graph);
+                previousResult = applyUpdatable(graph);
             }
         } else { // Add an edge
             if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then max vertex degree is
                                    // changed.
-                metVal = changedDegree;
+                ((MaxVertexDegreeMetricResult) previousResult).setResult(changedDegree);
             }
         }
 
-        return new SingleValueMetricResult(getName(), metVal);
+        return previousResult;
 
     }
 
@@ -85,4 +123,74 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         }
     }
 
+    /**
+     * The method returns the triple to remove by using the previous metric result object.
+     *      * 
+     * @param graph
+     *            - Input Graph
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param seed
+     *            - Seed Value
+     * @param indicator
+     *            - boolean variable to indicate if metric value should be decreased or not.
+     * @return
+     */
+    @Override
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+            boolean indicator) {
+        TripleBaseSingleID tripleRemove = null;
+
+        if (indicator) {// Need to reduce the metric
+
+            // Initialization
+            IntSet edges = null;
+            int edgeId = -1;
+            BitSet edgeColour = null;
+
+            // Checking the metric, if in-degree or out-degree
+            if ((direction == DIRECTION.in) && indicator) {
+                edges = graph.getInEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
+                System.out.println("Maximum Vertex In Degree");
+             // Getting the edge of a vertex having maximum degree
+                for (int edge : edges) {
+                    edgeColour = graph.getEdgeColour(edge);
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getVertexID() ) {
+                        edgeId = edge;
+                        break;
+                    }
+                }
+                
+            } else if ((direction == DIRECTION.out) && indicator) {
+                edges = graph.getOutEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
+                System.out.println("Maximum Vertex Out Degree");
+             // Getting the edge of a vertex having maximum degree
+                for (int edge : edges) {
+                    edgeColour = graph.getEdgeColour(edge);
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getTailOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getVertexID()) {
+                        edgeId = edge;
+                        break;
+                    }
+                }
+            }
+
+            
+
+            if (edgeId != -1) {// If Edge is found
+                tripleRemove = new TripleBaseSingleID();
+                tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
+                tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
+                tripleRemove.edgeId = edgeId;
+                tripleRemove.edgeColour = edgeColour;
+            }
+        }
+        
+        if(tripleRemove == null) { // If triple couldn't be found for the maximum vertex degree or we don't need to reduce the metric
+            tripleRemove = getTripleRemove(graph, seed);
+        }
+        
+
+        return tripleRemove;
+    }
 }
