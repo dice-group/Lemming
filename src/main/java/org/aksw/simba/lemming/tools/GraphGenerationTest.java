@@ -25,6 +25,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
+import org.aksw.simba.lemming.mimicgraph.generator.BiasedGraphGenerator;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
@@ -55,6 +56,7 @@ public class GraphGenerationTest {
 		IGraphGeneration mGrphGenerator;
 		IDatasetManager mDatasetManager;
 		boolean isStop = true;
+		boolean isPoissonFlow = true;
 
 		// For this test, we do not need assertions
         ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
@@ -192,8 +194,8 @@ public class GraphGenerationTest {
         }else if(typeGenerator.equalsIgnoreCase("C")){
         	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
-        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
-        } else{
+        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, isPoissonFlow);
+        }else{
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 

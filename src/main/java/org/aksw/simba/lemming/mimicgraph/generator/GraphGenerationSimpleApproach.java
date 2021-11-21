@@ -466,6 +466,4 @@ public class GraphGenerationSimpleApproach extends AbstractGraphGeneration imple
 			return super.getProposedTriple(true);
 		}
 	}
-	
-	
 }

@@ -75,7 +75,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	protected IOfferedItem<BitSet> mEdgeColoProposer;
 	
 	private Random mRandom ;
-	protected long seed;
+	protected static long seed;
 	
 	protected BitSet mRdfTypePropertyColour;
 	

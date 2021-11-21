@@ -1,17 +1,24 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -31,18 +38,19 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+import com.google.common.collect.Multiset.Entry;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration implements IGraphGeneration{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationClusteringBased2.class);
+	protected static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationClusteringBased2.class);
 	
-	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
-	private List<TripleColourDistributionMetric> mLstEVColorMapping;
-	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
-//	private long seed;
+	protected Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
+	protected List<TripleColourDistributionMetric> mLstEVColorMapping;
+	protected Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
+//	protected long seed;
 	
 	/*
 	 * the key1: the out-edge's colors, the key2: the vertex's colors and the value is the map of potential degree 
@@ -56,7 +64,10 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	 */
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
 	
-	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+	Set<BitSet> edges = null;
+	ColouredGraph[] origGrph = null;
+	protected ArrayList<Double> probabilitiesList = new ArrayList<Double>();
+	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed, boolean isPoissonFlow) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
@@ -82,8 +93,11 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		
 		//assign specific number of vertices to each grouped triple
 		computeNoOfVerticesInTriples();
+	
+		origGrph = origGrphs;
 	}
 
+	 
 	public ColouredGraph generateGraph(){
 		if(mNumberOfThreads == 1){
 			LOGGER.info("Run graph generation with single thread!");
@@ -100,7 +114,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		return mMimicGraph;
 	}
 	
-	private void testInfo(){
+	protected void testInfo(){
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		for(BitSet tailColo: setVertColo){
 					
@@ -130,8 +144,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						continue;
 					}
 					
-					System.out.println("[T:"+tailColo+"]="+triple.tailIDs.size()+
-							" [E:"+edgeColo+"]="+triple.edgeIDs.size()+ " [H:"+headColo+"]="+triple.headIDs.size());
+					System.out.println("[T:"+tailColo+"]="+triple.tailIDs.size()+" [E:"+edgeColo+"]="+triple.edgeIDs.size()+" [H:"+headColo+"]="+triple.headIDs.size());
 				}
 			}
 		}
@@ -143,7 +156,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	/**
 	 * assign vertices to triples
 	 */
-	private void assignVerticesToTriples(){
+	protected void assignVerticesToTriples(){
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
 		for(BitSet tailColo: setVertColo){
@@ -165,6 +178,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
 				
 				Set<BitSet> setEdgeColours = mapEdgeToGrpTriples.keySet();
+				
+				edges = setEdgeColours;
 				
 				for(BitSet edgeColo: setEdgeColours){
 					
@@ -209,7 +224,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void generateGraphMultiThreads(){
+	protected void generateGraphMultiThreads(){
 		//exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
 		//int iNumberOfThreads = 4;
@@ -221,7 +236,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		
 		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -296,6 +310,8 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						BitSet checkedColo = tripleColours.get(1);
 						BitSet headColo = tripleColours.get(2);
 						
+						//System.out.println("Here at 318 printing the values of tailColo : "+tailColo+" and headColo : "+headColo);
+						
 						if(checkedColo.equals(edgeColo)){
 							
 							Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeTriples = mTrippleMapOfTailHeadEdgeRates.get(tailColo);
@@ -324,6 +340,28 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							
 							IOfferedItem<Integer> tailIdsProposer = mapTailIdProposers.get(tailColo);
 							IOfferedItem<Integer> headIdsProposer = mapHeadIdProposers.get(headColo);
+							
+							List<ArrayList<Integer>> verticesList = new ArrayList<ArrayList<Integer>>();
+							for(BitSet edge : edges) {
+								//System.out.println("Printing the size of Edge color : "+edge.size()+" ; and the set : "+edge+" ; and the whole list : "+edges);
+								verticesList = PoissonFlow(triples, edge, origGrph);
+								for(ArrayList<Integer> vertices : verticesList) {
+									int headId = vertices.get(0);
+									int tailId = vertices.get(1);
+									//System.out.println("Printing at 387 the vertices."+ tailId +" ; "+ headId +" ; "+ edge);
+									
+									boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edge);
+									if(isFoundVerticesConnected){
+										System.out.println("Printing at 389 as the vertices are connected."+ tailId +" ; "+ headId +" ; "+ edge);
+										j++;
+										continue;
+									}
+									else {
+										System.out.println("Printing at 394 as the vertices are not connected."+ tailId +" ; "+ headId +" ; "+ edge);								
+									}
+								}
+							}
+							
 							
 							// select a random tail
 							int tailId = -1;
@@ -358,13 +396,11 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							}
 							
 							Set<Integer> setHeadIds = new HashSet<Integer>(setHeadIDs);
+							
+							//System.out.println("Printing the value at 362 : "+ setHeadIDs.size() +";"+ setTailIds.size());
+
 							int headId = headIdsProposer.getPotentialItem(setHeadIds);
 							
-							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
-							if(isFoundVerticesConnected){
-								j++;
-								continue;
-							}
 							
 						}else{
 							LOGGER.error("Not match edge colour: " + checkedColo + " and "+ edgeColo);
@@ -395,7 +431,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		};
 	}
 	
-	private void generateGraphSingleThread(){
+	protected void generateGraphSingleThread(){
 		
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
@@ -450,19 +486,30 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 							 *  this makes sure there is no pair of vertices are connected by 
 							 *  2 edges in same colour 
 							 */
+							
+							
 							if(setHeadIds.size() * setTailIds.size() < noOfEdges){
-								LOGGER.warn("Not generate " + (noOfEdges - (setHeadIds.size() * setTailIds.size())) + " edges in "+ edgeColo );
+								LOGGER.warn("Not generate " + (noOfEdges - (setHeadIds.size() * setTailIds.size())) + " edges in "+ edgeColo+" at 462.");
 								noOfEdges = setHeadIds.size() * setTailIds.size();
 							}
 							
 							int headId = -1;
 							int i = 0 ; 
 							while(i < noOfEdges){
+							
+								/*
+								 * ArrayList<Integer> vertices = new ArrayList<Integer>(); for(int j=0;
+								 * j<tailColo.size(); j++) { ColouredGraph grph = new ColouredGraph(); vertices
+								 * = PoissonFlow(triples, edge, origGrph); }
+								 */
 								
 								setOfRandomHeadIds = new DefaultIntSet(triple.headIDs.size());
 								setOfRandomHeadIds.addAll(triple.headIDs);
 
 								// select a random tail
+								
+								LOGGER.info("Printing the value of SetTailIds at 475 : "+ setTailIds);
+								
 								int tailId = tailIdsProposer.getPotentialItem(setTailIds);
 								
 								int[] arrConnectedHeads = getConnectedHeads(tailId, edgeColo).toIntArray(); 
@@ -477,10 +524,17 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 								}
 								Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setOfRandomHeadIds);
 								
+								LOGGER.info("Printing the value of setFilteredHeadIDs at 491 : "+ setFilteredHeadIDs);
+								
 								headId = headIdsProposer.getPotentialItem(setFilteredHeadIDs);
+							
+								/*
+								 * headId = vertices.get(0); tailId = vertices.get(1);
+								 */
 								
 								if(connectableVertices(tailId, headId, triple.edgeColour)){
 									mMimicGraph.addEdge(tailId, headId, edgeColo);
+									//System.out.println("Printing at 523 as the vertices are connected.");
 									i++;
 								}
 							}// end while	
@@ -491,7 +545,51 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices){
+	protected List<ArrayList<Integer>> PoissonFlow(TripleBaseSetOfIDs triples, BitSet edge, ColouredGraph[] origGrph) {
+		// TODO Auto-generated method stub
+		/*
+		 * int hcount = 0, tcount = 0; setHeadSingles = new HashMap<Integer, Integer>();
+		 * setTailSingles = new HashMap<Integer, Integer>(); Iterator<Integer> hitr =
+		 * setHeadIds.iterator(); Iterator<Integer> titr = setTailIds.iterator();
+		 * //System.out.println("In here at 516 : "+setHeadIds.size()+ ";" +
+		 * setTailIds.size()); while (hitr.hasNext()) { if
+		 * (origGrph2.getGraph().getOutEdgeDegree(hitr.next()) > 0) {
+		 * //System.out.println("In here at 550 : "+origGrph2.getGraph().getOutEdgeDegree(
+		 * hitr.next())); hmean = hmean +
+		 * origGrph2.getGraph().getOutEdgeDegree(hitr.next()); hcount++; } else {
+		 * setHeadSingles.put(hitr.next(), null); } } while (titr.hasNext()) { if
+		 * (origGrph2.getGraph().getInEdgeDegree(titr.next()) > 0) {
+		 * //System.out.println("In here at 559 : "+origGrph2.length.getInEdgeDegree(titr.
+		 * next())); tmean = tmean + origGrph2.getGraph().getInEdgeDegree(titr.next());
+		 * tcount++; } else { setTailSingles.put(titr.next(), null); } } hmean = hmean /
+		 * hcount; tmean = tmean / tcount;
+		 */
+		AvrgOutDegreeDistBaseVEColo avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrph);
+		
+		AvrgInDegreeDistBaseVEColo avrgInDegreeAnalyzer = new AvrgInDegreeDistBaseVEColo(origGrph);
+		
+		Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edge);
+		Set<BitSet> setHeadColours = mColourMapper.getTailColoursFromEdgeColour(edge);
+		//System.out.println("Printing the values of setTailColours and setHeadColours sizes : "+setTailColours.size()+" ; "+setHeadColours.size());
+		List<ArrayList<Integer>> verticesList = new ArrayList<ArrayList<Integer>>();
+		for(int i=0; i<setHeadColours.size(); i++) {
+			double avrgOutDegree = avrgOutDegreeAnalyzer.getAvarageOutDegreeOf((BitSet) setTailColours.toArray()[i], edge);
+			double avrgInDegree = avrgInDegreeAnalyzer.getAvarageInDegreeOf(edge, (BitSet) setTailColours.toArray()[i]);
+			Set<Integer> setTailIds = new HashSet<Integer>();
+			setTailIds.addAll(triples.tailIDs);
+			Set<Integer> setHeadIds = new HashSet<Integer>();
+			setHeadIds.addAll(triples.headIDs);
+			ArrayList<Integer> vertices = new ArrayList<Integer>();
+			//System.out.println("Printing the vertices here at 570 "+setHeadIds.size()+" ; "+setTailIds.size());
+			vertices = assignWeights(avrgInDegree, avrgOutDegree, setHeadIds, setTailIds);
+			//System.out.println("Printing the vertices here at 570 "+ vertices+" ; "+setHeadIds.size()+" ; "+setTailIds.size());
+			verticesList.add(vertices);
+		}
+		
+		return verticesList;
+	}
+
+	protected IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices){
 		IntSet setVertices = mMapColourToVertexIDs.get(vertColo);
 		if(setVertices != null){
 			
@@ -538,7 +636,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		return null;
 	}
 	
-	private IntSet getRandomVerticesWithDegree(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
+	protected IntSet getRandomVerticesWithDegree(BitSet vertColo, double iNoOfVertices, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>  mapVertexIdsProposers){
 		IntSet setVertices = new DefaultIntSet(mMapColourToVertexIDs.get(vertColo).size());
 		setVertices.addAll(mMapColourToVertexIDs.get(vertColo));
 		
@@ -560,6 +658,9 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 			}
 			
 			while(iNoOfVertices > 0){
+				
+				LOGGER.info("Printing the value of tmpSetOfVertices at 610 : "+ tmpSetOfVertices);
+
 				int vertId = vertexIdsProposer.getPotentialItem(tmpSetOfVertices);
 				if(!res.contains(vertId) && !mReversedMapClassVertices.containsKey(vertId)){
 					res.add(vertId);
@@ -595,7 +696,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		return null;
 	}
 	
-	private void computeEVColoDist(ColouredGraph[] origGrphs){
+	protected void computeEVColoDist(ColouredGraph[] origGrphs){
 		for(ColouredGraph grph: origGrphs){
 			TripleColourDistributionMetric colorMapping = new TripleColourDistributionMetric();
 			colorMapping.applyWithSingleThread(grph);
@@ -603,7 +704,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void computeAverageEVColoDistribution(){
+	protected void computeAverageEVColoDistribution(){
 		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
 		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		
@@ -660,7 +761,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void putToMap(BitSet firstKey, BitSet secondKey, BitSet thirdKey, TripleBaseSetOfIDs val, 
+	protected void putToMap(BitSet firstKey, BitSet secondKey, BitSet thirdKey, TripleBaseSetOfIDs val, 
 			Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> changedMap){
 		if(changedMap == null){
 			changedMap = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
@@ -688,7 +789,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void computeNoOfEdgesInTriples() {
+	protected void computeNoOfEdgesInTriples() {
 		Set<BitSet> setEdgeColo = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		
@@ -756,7 +857,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		LOGGER.info("Done assing edges to grouped triples");
 	}
 	
-	private void computeNoOfVerticesInTriples(){
+	protected void computeNoOfVerticesInTriples(){
 		Set<BitSet> setVertColours = mMapColourToVertexIDs.keySet();
 		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		
@@ -812,7 +913,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-	private void computePotentialIODegreePerVert(ColouredGraph[] origGrphs){
+	protected void computePotentialIODegreePerVert(ColouredGraph[] origGrphs){
 		
 		// compute for each vertex's colour, the average in-degree associated with a specific edge's colour
 		AvrgOutDegreeDistBaseVEColo avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrphs);
@@ -836,7 +937,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				seed++;
 				
 				double avrgOutDegree = avrgOutDegreeAnalyzer.getAvarageOutDegreeOf(tailColo, edgeColo);
-				
 				// get list tailIDs 
 				int[] arrTailIDs = mMapColourToVertexIDs.get(tailColo).toIntArray();
 				double[] possOutDegreePerTailIDs = new double[arrTailIDs.length];
@@ -883,7 +983,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 				seed++;
 				
 				double avrgInDegree = avrgInDegreeAnalyzer.getAvarageInDegreeOf(edgeColo, headColo);
-				
 				int [] arrHeadIDs = mMapColourToVertexIDs.get(headColo).toIntArray();
 				
 				double[] possInDegreePerHeadDs = new double[arrHeadIDs.length];
@@ -918,6 +1017,98 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 		}
 	}	
 	
+	protected ArrayList<Integer> assignWeights(Double hmean, Double tmean, Set<Integer> setHeadIDs, Set<Integer> setTailIDs) {
+
+		int total_weight = 0;
+		HashMap<Integer, Integer> setHeadSingles = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> setTailSingles = new HashMap<Integer, Integer>();
+		//System.out.println("Head mean : "+ hmean+ " ; Tail mean : "+ tmean);
+		for (int id : setHeadIDs) {
+			//System.out.println("In the for loop here @ 1027.");
+			int weight = getPoissonRandom(hmean);
+			setHeadSingles.put(id, weight);
+			total_weight = total_weight + weight;
+			//System.out.println("Head vertices and their weights : "+ id+ ";"+ weight);
+		}
+		
+		int HeadVertex = getProbability(setHeadSingles, total_weight);
+		
+		total_weight = 0;
+		for (int id1 : setTailIDs) {
+			//System.out.println("In here at 1018 testing");
+			int weight1 = getPoissonRandom(tmean);
+			setTailSingles.put(id1, weight1);
+			total_weight = total_weight + weight1;
+			//System.out.println("Tail vertices and their weights : "+ id1+ ";"+ weight1);
+		}
+		int TailVertex = getProbability(setTailSingles, total_weight);
+
+		ArrayList<Integer> VerticesList = new ArrayList<Integer>();
+		if(HeadVertex!=-1 && TailVertex!=-1) {
+			VerticesList.add(HeadVertex);
+			VerticesList.add(TailVertex);
+		}
+		
+		return VerticesList;
+	}
+
+	protected int getProbability(HashMap<Integer, Integer> setSingles, int weight) {
+
+		HashMap<Integer, Double> VertexList = new HashMap<Integer, Double>();
+		
+		for (int id : setSingles.keySet()) {
+			double probability = ((double)setSingles.get(id) / (double)weight);
+			VertexList.put(id, probability);
+		}
+		//System.out.println("Vertices and their probabilities: " + VertexList);
+		
+		/*
+		 * Stream<HashMap.Entry<Integer, Double>> sorted =
+		 * VertexList.entrySet().stream().sorted(Collections.reverseOrder(HashMap.Entry.
+		 * comparingByValue())).limit(1); Map<Object, Object> VerList =
+		 * sorted.collect(Collectors.toMap(HashMap.Entry::getKey,HashMap.Entry::getValue
+		 * )); for(Object i : VerList.keySet()) { int id = (Integer) i; double
+		 * probability = (Double) VerList.get(i); VertexList.clear(); VertexList.put(id,
+		 * probability); //System.out.println("Vertices : " + VertexList.keySet()+
+		 * "; and their probabilities : "+ VertexList.values()); return VertexList; }
+		 */
+		
+		//Implementing Roulette wheel selection.
+		Random rand = new Random(); //instance of random class
+	    double double_random=rand.nextDouble();
+	    ArrayList<List> vertList = new ArrayList<List>();
+		double start = 0.0, end = 0.0;
+		for(int id : VertexList.keySet()) {
+			ArrayList<Object> l = new ArrayList<>();
+			start = end;
+			end = start+VertexList.get(id);
+			l.add(id);
+			l.add(start);
+			l.add(end);
+			vertList.add(l);
+		}
+		int id = -1;
+		for(List v : vertList){
+		    if(double_random >= (double)v.get(1) && double_random < (double)v.get(2)){
+    		    //System.out.println("Printing the id here : "+ v.get(0));
+    		    id = (int) v.get(0);
+		    }
+		}
+		return id;
+	}
+	
+	protected static int getPoissonRandom(double mean) {
+		Random r = new Random();
+		double L = Math.exp(-mean);
+		int k = 0;
+		double p = 1.0;
+		do {
+			p = p * r.nextDouble();
+			k++;
+		} while (p > L);
+		////System.out.println("In 1085 printing the value of k-1 : "+(k-1));
+		return k - 1;
+	}
 	@Override
 	public TripleBaseSingleID getProposedTriple(boolean isRandom){
 		int maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
@@ -987,39 +1178,49 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						}
 						
 						Set<Integer> setTmpTails = new HashSet<Integer>(offeredGrpTriple.tailIDs);
-						int tId = tailIdsProposer.getPotentialItem(setTmpTails);
 						
-						int[] arrConnectedHeads = getConnectedHeads(tId, offeredGrpTriple.edgeColour).toIntArray();
+						//LOGGER.info("Printing the value of setTmpTails at 1085 : "+ setTmpTails);
+
+						if(tailIdsProposer.getPotentialItem(setTmpTails) != null) {
+							
+							int tId = tailIdsProposer.getPotentialItem(setTmpTails);
 						
-						IntSet setAvailableHeads = new DefaultIntSet(offeredGrpTriple.headIDs.size());
-						setAvailableHeads.addAll(offeredGrpTriple.headIDs);
-						
-						for(int connectedHead : arrConnectedHeads){
-							if(setAvailableHeads.contains(connectedHead)){
-								setAvailableHeads.remove(connectedHead);
+							int[] arrConnectedHeads = getConnectedHeads(tId, offeredGrpTriple.edgeColour).toIntArray();
+							
+							IntSet setAvailableHeads = new DefaultIntSet(offeredGrpTriple.headIDs.size());
+							setAvailableHeads.addAll(offeredGrpTriple.headIDs);
+							
+							for(int connectedHead : arrConnectedHeads){
+								if(setAvailableHeads.contains(connectedHead)){
+									setAvailableHeads.remove(connectedHead);
+								}
+							}
+							
+							if(setAvailableHeads.size() == 0){
+								continue;
+							}
+							
+							Set<Integer> setTmpHeads = new HashSet<Integer>(setAvailableHeads);
+							
+							//LOGGER.info("Printing the value of setTmpHeads at 1106 : "+ setTmpHeads);
+	
+							if(headIdsProposer.getPotentialItem(setTmpHeads) != null) {
+								int hId = headIdsProposer.getPotentialItem(setTmpHeads);
+							
+								TripleBaseSingleID singleTriple = new TripleBaseSingleID();
+								singleTriple.edgeColour = offeredGrpTriple.edgeColour;
+								//head
+								singleTriple.headId = hId;
+								singleTriple.headColour = offeredGrpTriple.headColour;
+								
+								//tail 
+								singleTriple.tailId = tId;
+								singleTriple.tailColour = offeredGrpTriple.tailColour;
+								
+								maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+								return singleTriple;
 							}
 						}
-						
-						if(setAvailableHeads.size() == 0){
-							continue;
-						}
-						
-						Set<Integer> setTmpHeads = new HashSet<Integer>(setAvailableHeads);
-						int hId = headIdsProposer.getPotentialItem(setTmpHeads);
-						
-						
-						TripleBaseSingleID singleTriple = new TripleBaseSingleID();
-						singleTriple.edgeColour = offeredGrpTriple.edgeColour;
-						//head
-						singleTriple.headId = hId;
-						singleTriple.headColour = offeredGrpTriple.headColour;
-						
-						//tail 
-						singleTriple.tailId = tId;
-						singleTriple.tailColour = offeredGrpTriple.tailColour;
-						
-						maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
-						return singleTriple;
 					}
 					maxIterationFor1EdgeColo --;
 				}
