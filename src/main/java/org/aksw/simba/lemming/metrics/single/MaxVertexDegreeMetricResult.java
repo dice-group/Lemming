@@ -1,8 +1,5 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-
 /**
  * The class stores the candidate's set and their metric values, which is used
  * for computing the max vertex degrees for different metrics.
@@ -12,8 +9,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
-    private double maxVertexDegree = 0.0;
-    // Variable for storing max degree
+
+    private int vertexID = -1;
+    // Variable for storing vertex id having maximum degree
 
     /**
      * Initialization calls super class with the name of metric and metric value.
@@ -28,22 +26,21 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
     }
 
     /**
-     * Returns the current max vertex degree.
+     * Returns the vertex having maximum degree.
      * 
-     * @return - max vertex degree.
+     * @return
      */
-    public double getMaxVertexDegree() {
-        return maxVertexDegree;
+    public int getVertexID() {
+        return vertexID;
     }
 
     /**
-     * Update the  max vertex degree metric values.
+     * Updates the vertex having maximum degree.
      * 
-     * @param maxVertexDegreeTemp
-     *            - - Input vertex degree metric value that needs to be updated.
+     * @param vertexID
      */
-    public void setMaxVertexDegree( double maxVertexDegreeTemp) {
-        maxVertexDegree = maxVertexDegreeTemp;
+    public void setVertexID(int vertexID) {
+        this.vertexID = vertexID;
     }
 
 }
