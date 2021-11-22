@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -36,20 +35,9 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
 										@Nonnull UpdatableMetricResult previousResult){
 
+		int headId = triple.headId;
+		int tailId = triple.tailId;
 
-		//int headId = triple.headId;
-		//int tailId = triple.tailId;
-
-		int headId, tailId;
-		if(opt == Operation.REMOVE){
-			IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
-			headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
-					: verticesConnectedToRemovingEdge.toIntArray()[0];
-			tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
-		}else{
-			headId = triple.headId;
-			tailId = triple.tailId;
-		}
 		//if headId = tailId, result is not change.
 		if(headId == tailId){
 			return previousResult;
