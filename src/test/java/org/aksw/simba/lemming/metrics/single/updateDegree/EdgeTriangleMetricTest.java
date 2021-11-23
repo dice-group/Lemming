@@ -36,8 +36,8 @@ public class EdgeTriangleMetricTest extends UpdateMetricTest {
         ColouredGraphDecorator addDecorator = new AddEdgeDecorator(graph, false);
         addDecorator.setTriple(triple);
         newResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);
-        graph = addEdge(graph, 0, 1);
         Assert.assertEquals(2.0, newResult.getResult());
+        graph = addEdge(graph, 0, 1);
         prevResult = newResult;
 
         // add an edge 4 = (0, 1);
@@ -50,12 +50,11 @@ public class EdgeTriangleMetricTest extends UpdateMetricTest {
         prevResult = newResult;
 
         // add an edge 5 = (1, 1);
-        triple = new TripleBaseSingleID(1, null, 1, null, 5, null);
         addDecorator.setGraph(graph);
         addDecorator.setTriple(triple);
         newResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);
         graph = addEdge(graph, 1, 1);
-        Assert.assertEquals(4.0, newResult.getResult());
+        Assert.assertEquals(6.0, newResult.getResult());
     }
 
     @Test
@@ -75,7 +74,6 @@ public class EdgeTriangleMetricTest extends UpdateMetricTest {
         UpdatableMetricResult newResult = metric.update(remDecorator, triple, Operation.REMOVE, prevResult);
         Assert.assertEquals(0.0, newResult.getResult());
         graph = removeEdge(graph, 0);
-        prevResult = newResult;
 
         // add an edge 0 = (1, 1);
         triple = new TripleBaseSingleID(1, null, 1, null, 0, null);

@@ -1,9 +1,7 @@
 package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
-import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -31,14 +29,15 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
         return nodeTriangleMetric.apply(graph);
     }
 
+    /**
+     * @param graph the given graph is not modified!
+     */
     @Override
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
-        IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
 
-        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
-                : verticesConnectedToRemovingEdge.toIntArray()[0];
-        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
+        int headId = triple.headId;
+        int tailId = triple.tailId;
 
         // if headId = tailId, result is not change.
         if (headId == tailId) {

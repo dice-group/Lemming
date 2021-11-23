@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
@@ -31,25 +30,25 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
         return edgeTriangleMetric.apply(graph);
     }
 
+    /**
+     * @param graph the given graph is not modified!
+     */
     @Override
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
 
-        IntSet verticesConnectedToRemovingEdge = graph.getVerticesIncidentToEdge(triple.edgeId);
-
-        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
-                : verticesConnectedToRemovingEdge.toIntArray()[0];
-        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
+        int headId = triple.headId;
+        int tailId = triple.tailId;
 
         // if headId = tailId, result is not change.
         if (headId == tailId) {
             return previousResult;
         }
 
+        int change = opt == Operation.REMOVE ? -1 : 1;
         int numEdgesBetweenVertices = IntSetUtil
                 .intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
-        int change = opt == Operation.REMOVE ? -1 : 1;
         int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices,
                 change);
         double newResult = previousResult.getResult() + change * differenceOfSubGraph;
