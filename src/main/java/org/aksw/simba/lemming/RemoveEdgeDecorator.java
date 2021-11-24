@@ -28,6 +28,20 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
     }
 
     @Override
+    public IntSet getEdgesIncidentTo(int verticeId) {
+        IntSet resultObject = super.getEdgesIncidentTo(verticeId);
+        if (this.triple.headId == verticeId && resultObject.contains(this.triple.edgeId)) {
+            resultObject.remove(this.triple.edgeId);
+        }
+        // TODO: Is tailId check also necessary ?
+        if (this.triple.tailId == verticeId && resultObject.contains(this.triple.edgeId)) {
+            resultObject.add(this.triple.edgeId);
+        }
+
+        return resultObject;
+    }
+
+    @Override
     public int getInEdgeDegree(int vertexId) {
         int inDegree = super.getInEdgeDegree(vertexId);
         if (this.triple.headId == vertexId) {
