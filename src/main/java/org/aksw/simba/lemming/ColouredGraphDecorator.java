@@ -173,4 +173,8 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.graph.getVertices();
     }
 
+    public int getNumberOfEdgesBetweenVertices() {
+        return IntSetUtil.intersection(graph.getEdgesIncidentTo(this.triple.tailId),
+                graph.getEdgesIncidentTo(this.triple.headId)).size();
+    }
 }

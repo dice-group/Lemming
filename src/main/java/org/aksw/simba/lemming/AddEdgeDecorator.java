@@ -100,4 +100,7 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
      * @Override public IntSet getVerticesIncidentToEdge(int edgeId) { return
      * this.graph.getVerticesIncidentToEdge(edgeId); }
      */
+    public int getNumberOfEdgesBetweenVertices() {
+        return super.getNumberOfEdgesBetweenVertices() + 1;
+    }
 }

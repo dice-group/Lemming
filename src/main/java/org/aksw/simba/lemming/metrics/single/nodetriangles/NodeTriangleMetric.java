@@ -44,9 +44,8 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
             return previousResult;
         }
 
-        int numEdgesBetweenVertices = IntSetUtil
-                .intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
-
+        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices();
+                
         int numberOfCommon = MetricUtils.getVerticesInCommon(graph, headId, tailId).size();
 
         // the previous result could be maintained except for 2 cases:

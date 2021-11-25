@@ -46,8 +46,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
         }
 
         int change = opt == Operation.REMOVE ? -1 : 1;
-        int numEdgesBetweenVertices = IntSetUtil
-                .intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size() - change;
+        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices() - change;
 
         int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices,
                 change);
