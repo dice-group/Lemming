@@ -4,6 +4,7 @@
 package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.util.IntSetUtil;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -177,4 +178,5 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return IntSetUtil.intersection(graph.getEdgesIncidentTo(this.triple.tailId),
                 graph.getEdgesIncidentTo(this.triple.headId)).size();
     }
+
 }

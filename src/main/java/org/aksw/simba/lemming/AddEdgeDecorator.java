@@ -3,6 +3,8 @@
  */
 package org.aksw.simba.lemming;
 
+import org.aksw.simba.lemming.util.IntSetUtil;
+
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -96,10 +98,29 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return super.getNumberOfEdges() + 1;
     }
 
-    /*
-     * @Override public IntSet getVerticesIncidentToEdge(int edgeId) { return
-     * this.graph.getVerticesIncidentToEdge(edgeId); }
-     */
+    @Override
+    public IntSet getInNeighbors(int vertexId) {
+        IntSet neighbors = super.getInNeighbors(vertexId);
+        neighbors = addNeighbor(neighbors, vertexId);
+        return neighbors;
+    }
+
+    @Override
+    public IntSet getOutNeighbors(int vertexId) {
+        IntSet neighbors = super.getOutNeighbors(vertexId);
+        neighbors = addNeighbor(neighbors, vertexId);
+        return neighbors;
+    }
+
+    private IntSet addNeighbor(IntSet neighbors, int vertexId) {
+        if (vertexId == this.triple.tailId && !neighbors.contains(this.triple.headId)) {
+            neighbors.add(this.triple.headId);
+        } else if (vertexId == this.triple.headId && !neighbors.contains(this.triple.tailId)) {
+            neighbors.add(this.triple.tailId);
+        }
+        return neighbors;
+    }
+
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() + 1;
     }

@@ -96,10 +96,29 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
         return super.getNumberOfEdges() - 1;
     }
 
-    /*
-     * @Override public IntSet getVerticesIncidentToEdge(int edgeId) { return
-     * this.graph.getVerticesIncidentToEdge(edgeId); }
-     */
+    @Override
+    public IntSet getInNeighbors(int vertexId) {
+        IntSet neighbors = super.getInNeighbors(vertexId);
+        neighbors = removeNeighbor(neighbors, vertexId);
+        return neighbors;
+    }
+
+    @Override
+    public IntSet getOutNeighbors(int vertexId) {
+        IntSet neighbors = super.getOutNeighbors(vertexId);
+        neighbors = removeNeighbor(neighbors, vertexId);
+        return neighbors;
+    }
+
+    private IntSet removeNeighbor(IntSet neighbors, int vertexId) {
+        if (vertexId == this.triple.tailId && neighbors.contains(this.triple.headId)) {
+            neighbors.remove(this.triple.headId);
+        } else if (vertexId == this.triple.headId && neighbors.contains(this.triple.tailId)) {
+            neighbors.remove(this.triple.tailId);
+        }
+        return neighbors;
+    }
+
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() - 1;
     }
