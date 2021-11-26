@@ -15,6 +15,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.algo.expression.ExpressionIterator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.tools.RefinementTest;
 import org.slf4j.Logger;
@@ -239,15 +240,26 @@ public class ConstantValueStorage implements Serializable	{
 	 * @return List of metrics
 	 */
 	public List<SingleValueMetric> getMetrics(List<SingleValueMetric> lstMetrics){
-	    List<SingleValueMetric> metrics = new ArrayList<>();
+	    List<SingleValueMetric> metrics = new ArrayList<>();// List which will contain metrics present in Expressions
 	    Set<Expression> constantExpressions = getConstantExpressions();
-	    for(SingleValueMetric metric: lstMetrics){
-	        for(Expression expression:constantExpressions) {
-	            if(expression.toString().contains(metric.getName())) {
-	                metrics.add(metric);
-	                break;
+	    Set<String> expressionsSet = new HashSet<>(); // Set to store atomic expression
+	    
+	    //Iterate over all expressions and add atomic expression in set.
+	    for(Expression expression:constantExpressions) {
+	        ExpressionIterator iterator = new ExpressionIterator(expression);
+	        while(iterator.hasNext()) {
+	            Expression subExpression = iterator.next();
+	            if(subExpression.isAtomic()) {
+	                expressionsSet.add(subExpression.toString());
 	            }
 	        }
+	    }
+	    
+	    //Iterate over input list of metrics and check which metrics are present in expressions
+	    for(SingleValueMetric metric: lstMetrics){
+	            if(expressionsSet.contains(metric.getName())) {
+	                metrics.add(metric);
+	           }
 	    }
 	    
 	    return metrics;
