@@ -8,7 +8,7 @@ package org.aksw.simba.lemming.metrics.single;
  * @author Atul
  *
  */
-public class AvgVertexDegreeMetricResult extends SimpleMetricResult {
+public class AvgVertexDegreeMetricResult extends SingleValueMetricResult {
 
     private double sumVertexDeg = 0.0; // Variable for storing sum of vertex degrees
 

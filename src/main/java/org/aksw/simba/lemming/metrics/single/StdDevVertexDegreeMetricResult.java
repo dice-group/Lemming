@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
+public class StdDevVertexDegreeMetricResult extends SingleValueMetricResult {
     /**
      * The class stores the average, variance and the number of vertices, which is
      * used for computing the standard deviation vertex degrees metric in multiple
@@ -10,13 +10,9 @@ public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
      *
      */
 
-    private double varianceVertexInDegrees = 0.0; // Variable for storing variance
+    private double varianceVertexDegrees = 0.0; // Variable for storing variance
 
-    private double varianceVertexOutDegrees = 0.0; // Variable for storing variance
-
-    private double avgVertexInDegrees = 0.0; // Variable for storing average of vertices.
-
-    private double avgVertexOutDegrees = 0.0; // Variable for storing average of vertices.
+    private double avgVertexDegrees = 0.0; // Variable for storing average of vertices.
 
     private double numberOfVertices = 0.0; // Variable for storing number of vertices.
 
@@ -36,8 +32,8 @@ public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
      * 
      * @return Double - variance of in degrees
      */
-    public double getVarianceVertexInDegree() {
-        return varianceVertexInDegrees;
+    public double getVarianceVertexDegree() {
+        return varianceVertexDegrees;
     }
 
     /**
@@ -46,8 +42,8 @@ public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
      * 
      * @param variance - variance of in degrees
      */
-    public void setVarianceVertexInDegree(double variance) {
-        this.varianceVertexInDegrees = variance;
+    public void setVarianceVertexDegree(double variance) {
+        this.varianceVertexDegrees = variance;
     }
 
     /**
@@ -56,8 +52,8 @@ public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
      * 
      * @return Double - average of in degrees
      */
-    public double getAvgVertexInDegree() {
-        return avgVertexInDegrees;
+    public double getAvgVertexDegree() {
+        return avgVertexDegrees;
     }
 
     /**
@@ -66,40 +62,8 @@ public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
      * 
      * @param avg - average of in degrees
      */
-    public void setAvgVertexInDegree(double avg) {
-        this.avgVertexInDegrees = avg;
-    }
-
-    /**
-     * @return
-     */
-    public double getVarianceVertexOutDegree() {
-        return varianceVertexOutDegrees;
-    }
-
-    /**
-     * Updates the variance of out degrees for the graph.
-     * 
-     * @param variance - variance of out degrees
-     */
-    public void setVarianceVertexOutDegree(double variance) {
-        this.varianceVertexOutDegrees = variance;
-    }
-
-    /**
-     * @return
-     */
-    public double getAvgVertexOutDegree() {
-        return avgVertexOutDegrees;
-    }
-
-    /**
-     * Updates the average of out degrees for the graph.
-     * 
-     * @param avg - average of out degrees
-     */
-    public void setAvgVertexOutDegree(double avg) {
-        this.avgVertexOutDegrees = avg;
+    public void setAvgVertexDegree(double avg) {
+        this.avgVertexDegrees = avg;
     }
 
     /**
