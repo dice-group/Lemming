@@ -12,9 +12,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
 
-    private IntSet candidatesMetricSet = new IntOpenHashSet();
-    // Set for storing candidate vertices for Max Degree metric computation
-
     private double maxVertexDegree = 0.0;
     // Variable for storing max degree
 
@@ -28,16 +25,6 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
      */
     public MaxVertexDegreeMetricResult(String metricName, double result) {
         super(metricName, result);
-    }
-
-    /**
-     * Update the temporary candidate Set.
-     * 
-     * @param candidatesMetricSetTemp
-     *            - Input set containing the candidates that needs to be updated.
-     */
-    public void setCandidatesMetricSet( IntSet candidatesMetricSetTemp) {
-        candidatesMetricSet = candidatesMetricSetTemp;
     }
 
     /**
@@ -57,15 +44,6 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
      */
     public void setMaxVertexDegree( double maxVertexDegreeTemp) {
         maxVertexDegree = maxVertexDegreeTemp;
-    }
-
-    /**
-     * Returns the Set containing the candiate set.
-     * 
-     * @return - Map.
-     */
-    public IntSet getmMapCandidatesMetric() {
-        return candidatesMetricSet;
     }
 
 }

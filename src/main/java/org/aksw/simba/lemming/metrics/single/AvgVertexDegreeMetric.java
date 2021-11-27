@@ -2,7 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -37,20 +37,51 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     /**
+     * Returns metric results that can be reused for further computations. Here, the
+     * metric result object is initialized. Storing the Sum of degree of Vertices
+     * and Number of vertices which can be used to compute the average vertex degree
+     * metric.
+     * 
+     * @param graph
+     *            - input graph.
+     * @return - metric result.
+     */
+    @Override
+    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+
+        AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
+
+        double sum = 0;
+
+        // Computing the Avg Vertex Degree Metric for the first time
+        IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
+        for (Integer vertexDegree : getmMapVerticesinDegree) { // Compute sum in iteration
+            sum += vertexDegree;
+        }
+        double numberOfVertices = getmMapVerticesinDegree.size();
+
+        // Set values in Temporary object
+        metricResultTempObj.setSumVertexDeg(sum);
+        metricResultTempObj.setNumberOfVertices(numberOfVertices);
+
+        sum = sum / numberOfVertices; // Compute Metric value
+        metricResultTempObj.setResult(sum);
+
+        return metricResultTempObj;
+    }
+
+    /**
      * The method contains logic that computes the average vertex degree metric
-     * efficiently. If the metric is computed for the first time then it uses the
-     * degrees stored in VertexDegrees else it will update the previously stored sum
-     * value.
+     * efficiently. It will update the previously stored sum value to compute the
+     * new value for the metric.
      * 
      * @param triple
      *            - edge on which graph operation is performed.
-     * @param metric
-     *            - input metric which needs to be computed.
      * @param graph
      *            - input graph.
      * @param graphOperation
-     *            - boolean value indicating graph operation. ("true" for adding an
-     *            edge and "false" for removing an edge)
+     *            - Enum indicating graph operation. ("ADD" for adding an edge and
+     *            "REMOVE" for removing an edge)
      * @param previousResult
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
@@ -58,66 +89,21 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      *         further computations
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
 
-        AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), 0.0);
-        if (previousResult instanceof AvgVertexDegreeMetricResult) {
-            // Copying previously computed values in temporary variables
-            metricResultTempObj.setSumVertexDeg(((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg());
-            metricResultTempObj
-                    .setNumberOfVertices(((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices());
-        }
+        AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
 
-        double sum = 0;
-        double numberOfVertices = 1;
-        if (graphOperation) { // If Add an Edge
+        int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1;
 
-            if (metricResultTempObj.getSumVertexDeg() == 0.0) {
-                // Computing the Avg Vertex Degree Metric for the first time
+        double sum = ((AvgVertexDegreeMetricResult) previousResult).getSumVertexDeg() + updateVertexDegree;
+        // Get the previous computed sum and add 1/subtract 1 to previous sum since edge
+        // is added.
+        double numberOfVertices = ((AvgVertexDegreeMetricResult) previousResult).getNumberOfVertices();
 
-                // Get the Array from VertexDegrees class (Note: This can be replaced with
-                // getAllInEdgeDegrees method of Grph package)
-                int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
-                for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
-                    sum += getmMapVerticesinDegree[key];
-                }
-                numberOfVertices = getmMapVerticesinDegree.length;
-
-            } else { // Re-using the previously computed values
-                sum = metricResultTempObj.getSumVertexDeg() + 1;
-                // Get the previous computed sum and add 1 to previous sum since edge is added.
-                numberOfVertices = metricResultTempObj.getNumberOfVertices();
-            }
-
-            // Set values in Temporary object
-            metricResultTempObj.setSumVertexDeg(sum);
-            metricResultTempObj.setNumberOfVertices(numberOfVertices);
-
-        } else { // If Remove an Edge
-
-            if (metricResultTempObj.getSumVertexDeg() == 0.0) {
-                // Computing the Avg Vertex Degree Metric for the first time
-
-                int[] getmMapVerticesinDegree = mVertexDegrees.getMapVerticesInDegree();
-
-                for (int key = 0; key < getmMapVerticesinDegree.length; key++) { // Compute sum in iteration
-                    sum += getmMapVerticesinDegree[key];
-                }
-                numberOfVertices = getmMapVerticesinDegree.length;
-
-            } else { // Re-using the previously computed values
-                sum = metricResultTempObj.getSumVertexDeg() - 1;
-                // Get the previous computed sum and subtract 1 to previous sum since edge is
-                // removed.
-
-                numberOfVertices = metricResultTempObj.getNumberOfVertices();
-
-            }
-
-            metricResultTempObj.setSumVertexDeg(sum);
-            metricResultTempObj.setNumberOfVertices(numberOfVertices);
-        }
+        // Set values in Temporary object
+        metricResultTempObj.setSumVertexDeg(sum);
+        metricResultTempObj.setNumberOfVertices(numberOfVertices);
 
         sum = sum / numberOfVertices; // Compute Metric value
         metricResultTempObj.setResult(sum);

@@ -42,18 +42,18 @@ public class EdgeModifier {
         // initialize two list removed edges and added edges
         mLstRemovedEdges = new ArrayList<TripleBaseSingleID>();
         mLstAddedEdges = new ArrayList<TripleBaseSingleID>();
+        
+        // Initialize the UpdatableMetricResult for all metrics
+        mMapPrevMetricsResult = new HashMap<>();
+        mMapPrevMetricsResultRemoveEdge = new HashMap<>();
+        mMapPrevMetricsResultAddEdge = new HashMap<>();
+        
         // compute metric values
         computeMetricValues(clonedGraph, lstMetrics);
         // initialize EdgeModification
         mEdgeModification = new EdgeModification(clonedGraph, (int) mMapMetricValues.get("#nodetriangles"),
                 (int) mMapMetricValues.get("#edgetriangles"));
-        // Initialize the UpdatableMetricResult for all metrics
-        mMapPrevMetricsResult = new HashMap<>();
-        mMapPrevMetricsResultRemoveEdge = new HashMap<>();
-        mMapPrevMetricsResultAddEdge = new HashMap<>();
-        for (SingleValueMetric singleMetric : lstMetrics) {
-            mMapPrevMetricsResult.put(singleMetric.getName(), new SimpleMetricResult(singleMetric.getName(), 0.0));
-        }
+
     }
 
     private void computeMetricValues(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
@@ -69,12 +69,17 @@ public class EdgeModifier {
                 } else if (metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     isCountingNodeTriangles = true;
                 }
-
-                double metVal = metric.apply(clonedGraph);
+                
+                //Calling applyUpdatable
+                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(clonedGraph);
+                
+                double metVal = metricResultTemp.getResult();
+                
                 String name = metric.getName();
                 LOGGER.info("Value of " + metric.getName() + " is " + metVal);
                 // compute value for each of metrics
                 mMapMetricValues.put(name, metVal);
+                mMapPrevMetricsResult.put(name, metricResultTemp);
             }
         }
         if (!isCountingNodeTriangles) {
@@ -132,8 +137,10 @@ public class EdgeModifier {
                         && !metric.getName().equalsIgnoreCase("#nodetriangles")) {
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(triple, graph, false,
-                            mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+                    mMapPrevMetricsResultRemoveEdge.put(metric.getName(), metric.update(graph, triple, Operation.REMOVE,
+                            mMapPrevMetricsResult.get(metric.getName())
+                            //, mEdgeModification.getmVertexDegrees()
+                            ));
                     double metVal = mMapPrevMetricsResultRemoveEdge.get(metric.getName()).getResult();// Get the new
                                                                                                       // metric value
                     mapChangedMetricValues.put(metric.getName(), metVal);
@@ -182,8 +189,10 @@ public class EdgeModifier {
 
                     // double metVal = metric.apply(graph);
                     // Calling update method to get the metric values based on previous results
-                    mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(triple, graph, true,
-                            mMapPrevMetricsResult.get(metric.getName()), mEdgeModification.getmVertexDegrees()));
+                    mMapPrevMetricsResultAddEdge.put(metric.getName(), metric.update(graph, triple, Operation.ADD,
+                            mMapPrevMetricsResult.get(metric.getName())
+                            //, mEdgeModification.getmVertexDegrees()
+                            ));
                     double metVal = mMapPrevMetricsResultAddEdge.get(metric.getName()).getResult();// Get the new metric
                                                                                                    // value
                     mapMetricValues.put(metric.getName(), metVal);
