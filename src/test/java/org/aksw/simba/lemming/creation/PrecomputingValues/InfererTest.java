@@ -1,20 +1,12 @@
-package org.aksw.simba.lemming.creation;
+package org.aksw.simba.lemming.creation.PrecomputingValues;
 
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.aksw.simba.lemming.creation.Inferer;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.junit.Test;
@@ -33,14 +25,10 @@ public class InfererTest {
 		Model personModel = ModelFactory.createDefaultModel();
 		personModel.read(ttlFileName, "TTL");
 
-		//TODO: use inferer to build ontModel
 		Map<String, String> rdfsMap = new HashMap<>();
 		rdfsMap.put("22-rdf-syntax-ns", "TURTLE");
 		rdfsMap.put("rdf-schema", "TURTLE");
 		Inferer inferer = new Inferer(false, ontFilePath, null, rdfsMap);
-		OntModel ontModel = inferer.readOntology(ontFilePath, null);
-		ontModel.read("22-rdf-syntax-ns", "TURTLE");
-		ontModel.read("rdf-schema", "TURTLE");
 
 		Model actualModel = inferer.process(personModel);
 
@@ -110,9 +98,7 @@ public class InfererTest {
 		containerModel = inferer.process(containerModel);
 		int afterSize = Iterators.size(containerModel.listStatements(null, RDFS.member, (RDFNode)null));
 		Assert.assertEquals(afterSize, 9);
-		
-		
-		
+
 	}
 
 }
