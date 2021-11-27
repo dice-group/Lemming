@@ -185,7 +185,7 @@ public class Inferer {
 	 * @param propToName   map each resource uri to a string name which represents equivalent resources
 	 * @param domainRangeMap map each ontproperty to a property which contains all domain and range of equivalent resources
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, String> propToName, Map<OntProperty, OntProperty> domainRangeMap) {
+	private void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, String> propToName, Map<OntProperty, OntProperty> domainRangeMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
 			Set<Statement> newStmts = searchType(curStatement, newModel, propToName, domainRangeMap);
@@ -201,45 +201,6 @@ public class Inferer {
 						ResourceFactory.createStatement(curStatement.getSubject(), RDFS.member, curStatement.getObject()));
 			}
 		}
-	}
-
-	/**
-	 * For a given statement, this method searches for the predicate of a model
-	 * inside the Ontology. If found in the Ontology, it then extracts the domain
-	 * and range. Creating and adding a new triple with the inferred type to the
-	 * model.
-	 * 
-	 * @param statement statement in which we want to check the predicate in the
-	 *                  ontology
-	 * @param model  where we add the new triples and therefore, where we check
-	 *                  if the statement is already existing in the model or not
-	 * @param ontModel  the ontology model
-	 * @return a set of statements inferred from one property
-	 */
-	private Set<Statement> searchType(Statement statement, Model model, OntModel ontModel) {
-		Set<Statement> newStmts = new HashSet<>();
-		Resource subject = statement.getSubject();
-		Property predicate = statement.getPredicate();
-		RDFNode object = statement.getObject();
-
-		// search for the predicate of the model in the ontology
-		OntProperty property = ontModel.getOntProperty(predicate.toString());
-		if (property != null) {
-			List<? extends OntResource> domain = property.listDomain().toList();
-			for (OntResource curResource : domain) {
-				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				newStmts.add(subjType);
-
-			}
-			if (object.isResource()) {
-				List<? extends OntResource> range = property.listRange().toList();
-				for (OntResource curResource : range) {
-					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					newStmts.add(objType);
-				}
-			}
-		}
-		return newStmts;
 	}
 
 	/**
@@ -293,7 +254,7 @@ public class Inferer {
 	 * @param filePath path to the ontology file
 	 * @return OntModel Object
 	 */
-	public OntModel readOntology(String filePath, String base) {
+	private OntModel readOntology(String filePath, String base) {
 		if (base == null)
 			base = "RDF/XML";
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
@@ -311,9 +272,8 @@ public class Inferer {
 	/**
 	 * Searches for the equivalents in an ontology and maps each IRI to a set of equivalent IRIs
 	 * @param ontElements the ontology classes or properties
-	 * @return
 	 */
-	public <T extends OntResource> Map<T, Set<T>> searchEquivalents(Set<T> ontElements) {
+	private <T extends OntResource> Map<T, Set<T>> searchEquivalents(Set<T> ontElements) {
 
 		Map<T, Set<T>> iriEquiMap = new HashMap<>();
 
@@ -382,7 +342,7 @@ public class Inferer {
 	 * @param model   the RDF Model
 	 * @param classes the map between the different IRIs and a uri name representing their equivalent classes
 	 */
-	public void renameClasses(Model model, Map<OntClass, String> classes) {
+	private void renameClasses(Model model, Map<OntClass, String> classes) {
 		Iterator<Entry<OntClass, String>> it = classes.entrySet().iterator();
 		while (it.hasNext()) {
 			Map.Entry<OntClass, String> pair = it.next();
