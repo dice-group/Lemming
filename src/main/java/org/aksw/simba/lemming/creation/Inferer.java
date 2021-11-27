@@ -68,7 +68,6 @@ public class Inferer {
 		Map<OntProperty, Set<OntProperty>> propertiesEquiMap = searchEquivalents(this.ontProperties);
 		propertiesEquiNameMap = findProperName(propertiesEquiMap);
 		propertyDRPropertyMap = collectRangeDomain(propertiesEquiMap);
-
 	}
 
 	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
@@ -87,6 +86,7 @@ public class Inferer {
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
 		Map<OntProperty, Set<OntProperty>> propertiesEquiMap = searchEquivalents(this.ontProperties);
 		propertiesEquiNameMap = findProperName(propertiesEquiMap);
+		propertyDRPropertyMap = collectRangeDomain(propertiesEquiMap);
 	}
 
 	/**
@@ -271,16 +271,14 @@ public class Inferer {
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
 
-			List<? extends OntResource> domain = property.listDomain().toList();
-			for (OntResource curResource : domain) {
+			for (OntResource curResource : property.listDomain().toList()) {
 				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
 				if (!curResource.isAnon()) {
 					newStmts.add(subjNewStmt);
 				}
 			}
 			if (object.isResource()) {
-				List<? extends OntResource> range = property.listRange().toList();
-				for (OntResource curResource : range) {
+				for (OntResource curResource : property.listRange().toList()) {
 					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
 					newStmts.add(objNewStmt);
 				}
@@ -347,18 +345,15 @@ public class Inferer {
 					if(iriEquiMap.containsKey(currentResource)){
 						equiSet = iriEquiMap.get(currentResource);
 					}
-					Map<T, Set<T>> localMap = new HashMap<>();
-					for(T re : eqsList){
-						if(re.getURI()!=null && iriEquiMap.containsKey(re)){
-							localMap.put(re, iriEquiMap.get(re));
-						}
-					}
 
-					for(T re : localMap.keySet()){
-						if(equiSet == null){
-							equiSet = localMap.get(re);
-						}else if (equiSet != localMap.get(re)){
-							equiSet.addAll(localMap.get(re));
+					for(T re : eqsList){
+						if(re.getURI() != null && iriEquiMap.containsKey(re)){
+							Set<T> subEquiSet = iriEquiMap.get(re);
+							if(equiSet==null) {
+								equiSet = subEquiSet;
+							}else if (equiSet != subEquiSet){
+								equiSet.addAll(subEquiSet);
+							}
 						}
 					}
 
@@ -398,6 +393,11 @@ public class Inferer {
 		}
 	}
 
+	/**
+	 * Find a proper name to represent each equivalent resources set from the given map.
+	 * @param iriEquiMap a map that maps a resource to its equivalent resources set.
+	 * @return a map that maps a resource to a string name which represents the its corresponding equivalent resources set.
+	 */
 	private <T extends OntResource> Map<T, String> findProperName(Map<T, Set<T>> iriEquiMap){
 		Map<T, String> iriToName = new HashMap<>();
 		for(T re : iriEquiMap.keySet()){
@@ -417,23 +417,27 @@ public class Inferer {
 		return  iriToName;
 	}
 
-	private Map<OntProperty,OntProperty> collectRangeDomain(Map<OntProperty, Set<OntProperty>> propertyEquiMap){
-		Map<OntProperty,OntProperty> ontProToOntProDR = new HashMap<>();
-		for(OntProperty property : propertyEquiMap.keySet()){
-			List<OntProperty> eqsProperties = new ArrayList<>(propertyEquiMap.get(property));
-			OntProperty collectedProperty = eqsProperties.get(0);
-			for(OntProperty currentProperty : eqsProperties){
+	/**
+	 * Add domains and ranges of all equivalent ontproperties to the an ontproperty which represents all equivalent ontproperties.
+	 * @param propertyEquiMap map each ontproperty to a set of properties which contains its equivalent ontproperties.
+	 * @return a map that maps each ontproperty of given map to itself which carries all domains and ranges of its equivalent resources.
+	 */
+	private Map<OntProperty, OntProperty> collectRangeDomain(Map<OntProperty, Set<OntProperty>> propertyEquiMap) {
+		Map<OntProperty, OntProperty> ontProToOntProDR = new HashMap<>();
+		for (OntProperty property : propertyEquiMap.keySet()) {
+			OntProperty collectedProperty = property;
+			for (OntProperty currentProperty : propertyEquiMap.get(property)) {
 				List<? extends OntResource> domainList = currentProperty.listDomain().toList();
 				for (OntResource domain : domainList) {
 					if (!collectedProperty.hasDomain(domain)) {
-						currentProperty.addDomain(domain);
+						collectedProperty.addDomain(domain);
 					}
 				}
 
 				List<? extends OntResource> rangeList = currentProperty.listRange().toList();
 				for (OntResource range : rangeList) {
 					if (!collectedProperty.hasRange(range)) {
-						currentProperty.addRange(range);
+						collectedProperty.addRange(range);
 					}
 				}
 			}
