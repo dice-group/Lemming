@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
@@ -90,9 +91,8 @@ public class GraphOptimization {
     public ErrorScores tryToRemoveAnEdgeThread(TripleBaseSingleID lTriple) {
         double lErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfLeft;
-        synchronized (mEdgeModifier) {
-            metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
-        }
+        metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
+
         // if the removal cannot happen, the error is set to max as not to be chosen
         if (metricValuesOfLeft == null) {
             lErrScore = Double.MAX_VALUE;
@@ -114,9 +114,8 @@ public class GraphOptimization {
     public ErrorScores tryToAddAnEdgeThread(TripleBaseSingleID rTriple) {
         double rErrScore;
         ObjectDoubleOpenHashMap<String> metricValuesOfRight;
-        synchronized (mEdgeModifier) {
-            metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
-        }
+        metricValuesOfRight = mEdgeModifier.tryToAddAnEdge(rTriple);
+
         if (metricValuesOfRight == null) {
             rErrScore = Double.MAX_VALUE;
             LOGGER.warn("Edge Addition Prevented. Setting rErrScore: " + rErrScore);
@@ -149,8 +148,8 @@ public class GraphOptimization {
             mLstErrorScore.add(pErrScore);
 
             // Arguments passed to a 'Callable task' have to be final
-            final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator.getDecoratedGraph());
-            final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator.getDecoratedGraph());
+            final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator);
+            final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator);
 
             Future<ErrorScores> leftFutureScore = executor.submit(() -> tryToRemoveAnEdgeThread(lTriple));
             Future<ErrorScores> rightFutureScore = executor.submit(() -> tryToAddAnEdgeThread(rTriple));
@@ -188,7 +187,6 @@ public class GraphOptimization {
                 mEdgeModifier.executeAddingAnEdge(errScoreRight.getMetricValues());
                 continue;
             }
-
             noOfRepeatedParent++;
 
             if (noOfRepeatedParent == mMaxRepeatedSelection) {
@@ -237,7 +235,7 @@ public class GraphOptimization {
      * @param clonedGrph the target graph
      * @a
      */
-    private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraph clonedGrph) {
+    private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraphDecorator clonedGrph) {
         int edgeId = -1;
         BitSet edgeColour = null;
         Random rand = new Random(seed);
@@ -271,7 +269,7 @@ public class GraphOptimization {
      * 
      * @param mimicGrph the target graph
      */
-    private TripleBaseSingleID getOfferedEdgeForAdding(ColouredGraph mimicGrph) {
+    private TripleBaseSingleID getOfferedEdgeForAdding(ColouredGraphDecorator mimicGrph) {
         return mGraphGenerator.getProposedTriple(mProcessRandomly);
     }
 

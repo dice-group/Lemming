@@ -6,7 +6,7 @@ package org.aksw.simba.lemming.metrics.single;
  * @author Atul
  *
  */
-public class SimpleMetricResult implements UpdatableMetricResult {
+public class SingleValueMetricResult implements UpdatableMetricResult {
 
     protected String metricName;
     protected double result;
@@ -19,10 +19,9 @@ public class SimpleMetricResult implements UpdatableMetricResult {
      * @param result
      *            - metric value.
      */
-    public SimpleMetricResult(String metricName, double result) {
+    public SingleValueMetricResult(String metricName, double result) {
         this.metricName = metricName;
         this.result = result;
-
     }
 
     @Override

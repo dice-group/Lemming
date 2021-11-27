@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-public class StdDevVertexDegreeMetricResult extends SimpleMetricResult {
+public class StdDevVertexDegreeMetricResult extends SingleValueMetricResult {
     /**
      * The class stores the average, variance and the number of vertices, which is
      * used for computing the standard deviation vertex degrees metric in multiple

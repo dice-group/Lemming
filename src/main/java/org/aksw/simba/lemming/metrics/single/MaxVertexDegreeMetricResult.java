@@ -10,7 +10,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author Atul
  *
  */
-public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
+public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
     private double maxVertexDegree = 0.0;
     // Variable for storing max degree
