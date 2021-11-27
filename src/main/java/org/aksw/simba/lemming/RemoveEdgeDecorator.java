@@ -73,20 +73,20 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     @Override
     public IntArrayList getAllInEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) super.getVertices();
+        int[] vertices = super.getVertices().toIntArray();
         IntArrayList inDegrees = new IntArrayList();
-        for (int i = 0; i < vertices.size(); i++) {
-            inDegrees.add(i, getInEdgeDegree(vertices.getInt(i)));
+        for (int i = 0; i < vertices.length; i++) {
+            inDegrees.add(i, getInEdgeDegree(vertices[i]));
         }
         return inDegrees;
     }
 
     @Override
     public IntArrayList getAllOutEdgeDegrees() {
-        IntArrayList vertices = (IntArrayList) super.getVertices();
+        int[] vertices = super.getVertices().toIntArray();
         IntArrayList outDegrees = new IntArrayList();
-        for (int i = 0; i < vertices.size(); i++) {
-            outDegrees.add(i, getOutEdgeDegree(vertices.getInt(i)));
+        for (int i = 0; i < vertices.length; i++) {
+            outDegrees.add(i, getOutEdgeDegree(vertices[i]));
         }
         return outDegrees;
     }
