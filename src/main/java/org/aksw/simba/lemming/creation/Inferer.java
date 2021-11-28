@@ -89,6 +89,13 @@ public class Inferer {
 		propertyDRPropertyMap = collectRangeDomain(propertiesEquiMap);
 	}
 
+	public Map<OntClass, String> getClassesEquiNameMap(){
+		return this.classesEquiNameMap;
+	}
+	public Map<OntProperty, String> getPropertiesEquiNameMap(){
+		return this.propertiesEquiNameMap;
+	}
+
 	/**
 	 * This method creates a new model with all the statements as sourceModel and
 	 * goes on to populate it further with inferred triples
@@ -286,7 +293,7 @@ public class Inferer {
 				try {
 					if (currentResource.isProperty())
 						eqsList = (List<T>) currentResource.asProperty().listEquivalentProperties().toList();
-					if (currentResource.isClass())
+					else if (currentResource.isClass())
 						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
 					LOGGER.warn(
@@ -294,38 +301,23 @@ public class Inferer {
 							currentResource.toString());
 				}
 
-				Set<T> equiSet = null;
+				Set<T> equiSet = new HashSet<>();
+				equiSet.add(currentResource);
 				if(eqsList == null || eqsList.isEmpty()){
 					if(!iriEquiMap.containsKey(currentResource)){
-						equiSet = new HashSet<>();
-						equiSet.add(currentResource);
 						iriEquiMap.put(currentResource, equiSet);
 					}
 				}else{
 					if(iriEquiMap.containsKey(currentResource)){
 						equiSet = iriEquiMap.get(currentResource);
 					}
-
 					for(T re : eqsList){
-						if(re.getURI() != null && iriEquiMap.containsKey(re)){
-							Set<T> subEquiSet = iriEquiMap.get(re);
-							if(equiSet==null) {
-								equiSet = subEquiSet;
-							}else if (equiSet != subEquiSet){
-								equiSet.addAll(subEquiSet);
+						if(re.getURI() != null){
+							if(iriEquiMap.containsKey(re)){
+								equiSet.addAll(iriEquiMap.get(re));
+							}else{
+								equiSet.add(re);
 							}
-						}
-					}
-
-					if(equiSet==null){
-						equiSet = new HashSet<>();
-						equiSet.add(currentResource);
-					}else{
-						equiSet.add(currentResource);
-					}
-					for(T eq : eqsList){
-						if(eq.getURI() != null){
-							equiSet.add(eq);
 						}
 					}
 					for(T s : equiSet){
