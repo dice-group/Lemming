@@ -6,6 +6,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -108,5 +109,39 @@ public interface SingleValueMetric extends Metric {
     default TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean indicator) {
         return getTripleRemove(graph, seed);
     }
-    
+
+    /**
+     * The method returns the triple to add by calling getProposedTriple method defined in Graph generator class.
+     * 
+     * @param mGrphGenerator
+     *            - Graph Generator used during execution
+     * @param mProcessRandomly
+     *            - boolean value
+     * @return
+     */
+    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly) {
+        return mGrphGenerator.getProposedTriple(mProcessRandomly);
+    }
+
+    /**
+     * The method returns the triple to add.
+     * 
+     * Note:- The implementation of this method in particular metric class could use
+     * the previous UpdatableMetricResult to generate a different triple.
+     * 
+     * @param mGrphGenerator
+     *            - Graph Generator used during execution
+     * @param mProcessRandomly
+     *            - boolean value
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param indicator
+     *            - boolean variable to indicate if metric value should be increased or not.
+     * @return
+     */
+    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+        return getTripleAdd(mGrphGenerator, mProcessRandomly);
+    }
+
 }
