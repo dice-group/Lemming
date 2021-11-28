@@ -1,11 +1,9 @@
 package org.aksw.simba.lemming.metrics.single.updateDegree;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
-import org.aksw.simba.lemming.metrics.single.updateDegree.UpdateMetricTest;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.junit.Test;
 
@@ -23,7 +21,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph1);
         Assert.assertEquals(3.0, result);
         
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph1);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
@@ -61,7 +59,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph1);
         Assert.assertEquals(2.0, result);
         
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph1);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
@@ -104,7 +102,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph2);
         Assert.assertEquals(2.0, result);
         
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph2);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
@@ -135,7 +133,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph2);
         Assert.assertEquals(3.0, result);
         
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph2);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);

@@ -4,6 +4,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -150,7 +151,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             BitSet edgeColour = null;
 
             // Checking the metric, if in-degree or out-degree
-            if ((direction == DIRECTION.in) && indicator) {
+            if ((direction == DIRECTION.in)) {
                 edges = graph.getInEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
                 System.out.println("Maximum Vertex In Degree");
              // Getting the edge of a vertex having maximum degree
@@ -162,7 +163,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                     }
                 }
                 
-            } else if ((direction == DIRECTION.out) && indicator) {
+            } else if ((direction == DIRECTION.out)) {
                 edges = graph.getOutEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
                 System.out.println("Maximum Vertex Out Degree");
              // Getting the edge of a vertex having maximum degree
@@ -192,5 +193,31 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         
 
         return tripleRemove;
+    }
+    
+    /**
+     * The method returns the triple to remove by using the previous metric result object.
+     *      * 
+     * @param mGrphGenerator
+     *            - Graph Generator used during execution
+     * @param mProcessRandomly
+     *            - boolean value
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param indicator
+     *            - boolean variable to indicate if metric value should be increased or not.
+     * @return
+     */
+    @Override
+    public TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+        TripleBaseSingleID tripleAdd = getTripleAdd(mGrphGenerator, mProcessRandomly);
+        
+        if ((direction == DIRECTION.in) && indicator) {
+            tripleAdd.headId = ((MaxVertexDegreeMetricResult) previousResult).getVertexID();
+        } else if ((direction == DIRECTION.out) && indicator) {
+            tripleAdd.tailId = ((MaxVertexDegreeMetricResult) previousResult).getVertexID();
+        }
+        return tripleAdd;
     }
 }
