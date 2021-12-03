@@ -1,11 +1,14 @@
 package org.aksw.simba.lemming.creation.PrecomputingValues;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.aksw.simba.lemming.creation.Inferer;
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -18,7 +21,7 @@ import junit.framework.Assert;
 public class InfererTest {
 
 	@Test
-	public void test() {
+	public void testSimpleCase() {
 		String ttlFileName = "test_literal.ttl";
 		String ontFilePath = "dbpedia_test.owl";
 
@@ -37,7 +40,6 @@ public class InfererTest {
 
 		// checks if the two models have the same set of statements
 		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
-
 	}
 
 	@Test
@@ -51,18 +53,41 @@ public class InfererTest {
 		confModel.read(fileName);
 
 		Inferer inferer = new Inferer(false, ontModel);
+
+		//test a equi to b, but b not equi to a --> {a -> {a,b}, b ->{a,b}}
+		Map<OntClass, OntClass> classStringMap = inferer.getClassEquiMap();
+		Assert.assertEquals(3, classStringMap.size());
+
+		int numOfBreak = 0;
+		int numOfBreakEvent = 0;
+		int numOfAgent = 0;
+
+		for(OntClass ontClass: classStringMap.keySet()){
+			switch (classStringMap.get(ontClass).getURI()){
+				case "https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Break":
+					numOfBreak++;
+					break;
+				case "http://data.semanticweb.org/ns/swc/ontology#BreakEvent":
+					numOfBreakEvent++;
+					break;
+				case "https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Agent":
+					numOfAgent++;
+					break;
+				default:
+					break;
+			}
+		}
+		Assert.assertEquals(2,numOfBreak);
+		Assert.assertEquals(1,numOfAgent);
+		Assert.assertEquals(0,numOfBreakEvent);
+
+		Map<OntProperty, OntProperty>  propertyStringMap = inferer.getPropertyEquiMap();
+		Assert.assertEquals(12, propertyStringMap.size());
+		Assert.assertEquals(7, new HashSet(propertyStringMap.values()).size());
+
 		Model actualModel = inferer.process(confModel);
 
-		//printModel(actualModel, "after");
-
-		// check if the model contains properties or resources that should have been
-		// replaced
-		Property foafName = ResourceFactory.createProperty("http://xmlns.com/foaf/0.1/name");
-		Property subEventof = ResourceFactory
-				.createProperty("http://data.semanticweb.org/ns/swc/ontology#isSubEventOf");
-		Assert.assertFalse(actualModel.contains(null, foafName));
-		Assert.assertFalse(actualModel.contains(null, subEventof));
-
+		//test method renameClasses()
 		Resource breakEvent = ResourceFactory.createResource("http://data.semanticweb.org/ns/swc/ontology#BreakEvent");
 		Assert.assertFalse(actualModel.containsResource(breakEvent));
 
@@ -70,6 +95,26 @@ public class InfererTest {
 				.createResource("https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Break");
 		Assert.assertTrue(actualModel.containsResource(replaced));
 
+
+		//test iterateStmts()
+		Property subEventof = ResourceFactory
+				.createProperty("http://data.semanticweb.org/ns/swc/ontology#isSubEventOf");
+		Property hasLocation = ResourceFactory
+				.createProperty("http://data.semanticweb.org/ns/swc/ontology#hasLocation");
+		Property foafName = ResourceFactory.createProperty("http://xmlns.com/foaf/0.1/name");
+		Property dtstart = ResourceFactory
+				.createProperty("http://www.w3.org/2002/12/cal/icaltzd#dtstart");
+		Property superEventOf = ResourceFactory
+				.createProperty("http://data.semanticweb.org/ns/swc/ontology#isSuperEventOf");
+
+		Assert.assertFalse(actualModel.contains(null, subEventof));
+		Assert.assertFalse(actualModel.contains(null, hasLocation));
+		Assert.assertFalse(actualModel.contains(null, foafName));
+		Assert.assertFalse(actualModel.contains(null, dtstart));
+		Assert.assertFalse(actualModel.contains(null, foafName));
+		Assert.assertFalse(actualModel.contains(null, superEventOf));
+
+	   Assert.assertEquals(33, actualModel.size());
 	}
 	
 	@Test
@@ -85,20 +130,27 @@ public class InfererTest {
 		
 		//prior to inference, 0 resources have a type stmt
 		int count = Iterators.size(geoModel.listResourcesWithProperty(RDF.type));
-		Assert.assertTrue(count==0);
+		Assert.assertEquals(0, count);
 		
 		int afterCount = Iterators.size(actualModel.listResourcesWithProperty(RDF.type));
-		Assert.assertTrue(afterCount==4);
+		Assert.assertEquals(4, afterCount);
 		
 		Model containerModel = ModelFactory.createDefaultModel();
 		containerModel.read("container_graph.ttl");
 		int size = Iterators.size(containerModel.listResourcesWithProperty(RDFS.member));
 		Assert.assertEquals(size, 0);
 		
-		containerModel = inferer.process(containerModel);
-		int afterSize = Iterators.size(containerModel.listStatements(null, RDFS.member, (RDFNode)null));
+		actualModel = inferer.process(containerModel);
+		int afterSize = Iterators.size(actualModel.listStatements(null, RDFS.member, (RDFNode)null));
 		Assert.assertEquals(afterSize, 9);
 
-	}
+		Property p1883 = ResourceFactory
+				.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#_1883");
+		Assert.assertFalse(actualModel.contains(null, p1883));
+		Property p190 = ResourceFactory
+				.createProperty("http://www.w3.org/1999/02/22-rdf-syntax-ns#_190");
+		Assert.assertFalse(actualModel.contains(null, p190));
 
+		Assert.assertEquals(containerModel.size() + 1, actualModel.size());
+	}
 }
