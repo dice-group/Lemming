@@ -43,6 +43,33 @@ public class InfererTest {
 	}
 
 	@Test
+	public void testTransitiveCase() {
+		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+		ontModel.read("src/test/resources/test_tran_ontology", "TTL");
+		Inferer inferer = new Inferer(false, ontModel);
+		//test A equi to B, but B not equi to A --> {a -> {a,b}, b ->{a,b}}
+		Map<OntClass, OntClass> classEquiMap = inferer.getClassEquiMap();
+		Assert.assertEquals(3, classEquiMap.size());
+		Assert.assertEquals(2, new HashSet(classEquiMap.values()).size());
+
+		Map<OntProperty, OntProperty>  propertyEquiMap= inferer.getPropertyEquiMap();
+		Assert.assertEquals(3, propertyEquiMap.size());
+		Assert.assertEquals(1, new HashSet(propertyEquiMap.values()).size());
+
+
+		Model model = ModelFactory.createDefaultModel();
+		model.read("test_tran_literal.ttl", "TTL");
+
+		Model actualModel = inferer.process(model);
+
+		Model expModel = ModelFactory.createDefaultModel();
+		expModel.read("expected_tran_literal.ttl", "TTL");
+
+		// checks if the two models have the same set of statements
+		Assert.assertTrue(actualModel.isIsomorphicWith(expModel));
+	}
+
+	@Test
 	public void testSwdf() {
 		String fileName = "snippet_swdf_2001.rdf";
 
@@ -55,15 +82,15 @@ public class InfererTest {
 		Inferer inferer = new Inferer(false, ontModel);
 
 		//test a equi to b, but b not equi to a --> {a -> {a,b}, b ->{a,b}}
-		Map<OntClass, OntClass> classStringMap = inferer.getClassEquiMap();
-		Assert.assertEquals(3, classStringMap.size());
+		Map<OntClass, OntClass> classEquiMap = inferer.getClassEquiMap();
+		Assert.assertEquals(3, classEquiMap.size());
 
 		int numOfBreak = 0;
 		int numOfBreakEvent = 0;
 		int numOfAgent = 0;
 
-		for(OntClass ontClass: classStringMap.keySet()){
-			switch (classStringMap.get(ontClass).getURI()){
+		for(OntClass ontClass: classEquiMap.keySet()){
+			switch (classEquiMap.get(ontClass).getURI()){
 				case "https://w3id.org/scholarlydata/ontology/conference-ontology.owl#Break":
 					numOfBreak++;
 					break;

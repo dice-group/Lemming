@@ -127,7 +127,6 @@ public class Inferer {
 
 		// uniform the names of properties and infer type statements
 		iterateStmts(newModel, sourceModel, this.propertyEquiMap);
-
 		// uniform the names of the classes
 		renameClasses(newModel, this.classEquiMap);
 		checkEmptyTypes(set, newModel);
