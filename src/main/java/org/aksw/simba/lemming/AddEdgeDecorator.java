@@ -9,26 +9,37 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
+ * 
+ * Concrete Decorator class to simulate adding of an edge to the ColouredGraph
+ * object in the current iteration
+ * 
  * @author Pranav
  *
  */
 public class AddEdgeDecorator extends ColouredGraphDecorator {
 
-    /**
-     * 
-     */
     public AddEdgeDecorator() {
         super();
     }
 
     /**
-     * @param graph
-     * @param isAddingEdgeFlag
+     * Class Constructor
+     * 
+     * @param graph            - ColouredGraph object that is to be decorated
+     * @param isAddingEdgeFlag - represents if an edge is being added to the
+     *                         ColouredGraph. flag is true if edge is being added
+     *                         and false if the edge is being removed
      */
     public AddEdgeDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
         super(graph, isAddingEdgeFlag);
     }
 
+    /**
+     * Get in edge degree of a vertex after a new edge is added to it
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - in edge degree value
+     */
     @Override
     public int getInEdgeDegree(int vertexId) {
         int inDegree = super.getInEdgeDegree(vertexId);
@@ -38,6 +49,12 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return inDegree;
     }
 
+    /**
+     * Get out edge degree of a vertex after a new edge is added to it
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - out edge degree value
+     */
     @Override
     public int getOutEdgeDegree(int vertexId) {
         int outDegree = super.getOutEdgeDegree(vertexId);
@@ -47,6 +64,11 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return outDegree;
     }
 
+    /**
+     * Get max in edge degree of the graph after given edge has been added
+     * 
+     * @return double
+     */
     @Override
     public double getMaxInEdgeDegrees() {
         int[] vertices = super.getVertices().toIntArray();
@@ -60,6 +82,11 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return maxValue;
     }
 
+    /**
+     * Get max out edge degree of the graph after given edge has been added
+     * 
+     * @return double
+     */
     @Override
     public double getMaxOutEdgeDegrees() {
         int[] vertices = super.getVertices().toIntArray();
@@ -73,6 +100,12 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return maxValue;
     }
 
+    /**
+     * Get new in edge degrees of all the vertices. All the vertices will have the
+     * same in degree except the vertex to which edge has been added
+     * 
+     * @return IntArrayList
+     */
     @Override
     public IntArrayList getAllInEdgeDegrees() {
         int[] vertices = super.getVertices().toIntArray();
@@ -83,6 +116,12 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return inDegrees;
     }
 
+    /**
+     * Get new out edge degrees of all the vertices. All the vertices will have the
+     * same out degree except the vertex to which edge has been added
+     * 
+     * @return IntArrayList
+     */
     @Override
     public IntArrayList getAllOutEdgeDegrees() {
         int[] vertices = super.getVertices().toIntArray();
@@ -93,11 +132,22 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return outDegrees;
     }
 
+    /**
+     * Get number of edges in the graph after adding an edge
+     * 
+     * @return double - number of edges
+     */
     @Override
     public double getNumberOfEdges() {
         return super.getNumberOfEdges() + 1;
     }
 
+    /**
+     * Get all in neighbors of a vertex after adding an edge
+     * 
+     * @param vertexId
+     * @return IntSet - set of vertexIds of all in neighbors
+     */
     @Override
     public IntSet getInNeighbors(int vertexId) {
         IntSet neighbors = super.getInNeighbors(vertexId);
@@ -105,6 +155,12 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return neighbors;
     }
 
+    /**
+     * Get all out neighbors of a vertex after adding an edge
+     * 
+     * @param vertexId
+     * @return IntSet - set of vertexIds of all in neighbors
+     */
     @Override
     public IntSet getOutNeighbors(int vertexId) {
         IntSet neighbors = super.getOutNeighbors(vertexId);
@@ -112,6 +168,13 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return neighbors;
     }
 
+    /**
+     * Add new neighbor to the set of all neighbors because an edge has now been
+     * added to the vertex
+     * 
+     * @param vertexId
+     * @return IntSet - set of vertexIds of all in neighbors
+     */
     private IntSet addNeighbor(IntSet neighbors, int vertexId) {
         if (vertexId == this.triple.tailId && !neighbors.contains(this.triple.headId)) {
             neighbors.add(this.triple.headId);
@@ -121,6 +184,12 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return neighbors;
     }
 
+    /**
+     * Get number of edges between two vertices after given edge has been added to
+     * them
+     * 
+     * @return int - number of edges
+     */
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() + 1;
     }

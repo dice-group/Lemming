@@ -88,7 +88,7 @@ public interface IColouredGraph {
      * @param tailId
      * @param headId
      * @param edgeColour
-     * @return int -
+     * @return int - the edgeId of newly added edge
      */
     int addEdge(int tailId, int headId, BitSet edgeColour);
 
