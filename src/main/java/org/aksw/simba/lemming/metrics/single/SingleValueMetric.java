@@ -60,7 +60,7 @@ public interface SingleValueMetric extends Metric {
      * @param graph
      *            - Input Graph
      * @param seed
-     *            - Seed Value
+     *            - Seed Value used to generate random triple.
      * @return
      */
     default TripleBaseSingleID getTripleRemove(ColouredGraph graph, long seed) {
@@ -101,22 +101,27 @@ public interface SingleValueMetric extends Metric {
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param seed
-     *            - Seed Value
-     * @param indicator
-     *            - boolean variable to indicate if metric value should be decreased or not.
+     *            - Seed Value used to generate random triple.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
-    default TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean indicator) {
+    default TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean changeMetricValue) {
         return getTripleRemove(graph, seed);
     }
 
     /**
-     * The method returns the triple to add by calling getProposedTriple method defined in Graph generator class.
+     * The method returns the triple to add by calling getProposedTriple method
+     * defined in Graph generator class.
      * 
      * @param mGrphGenerator
-     *            - Graph Generator used during execution
+     *            - Graph Generator used during execution.
      * @param mProcessRandomly
-     *            - boolean value
+     *            - boolean value If the variable is false, then it will generate a
+     *            triple as per the implementation defined in the Generator class,
+     *            else the triple is generated as per the default implementation.
      * @return
      */
     default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly) {
@@ -132,15 +137,19 @@ public interface SingleValueMetric extends Metric {
      * @param mGrphGenerator
      *            - Graph Generator used during execution
      * @param mProcessRandomly
-     *            - boolean value
+     *            - boolean value If the variable is false, then it will generate a
+     *            triple as per the implementation defined in the Generator class,
+     *            else the triple is generated as per the default implementation.
      * @param previousResult
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
-     * @param indicator
-     *            - boolean variable to indicate if metric value should be increased or not.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
-    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
         return getTripleAdd(mGrphGenerator, mProcessRandomly);
     }
 

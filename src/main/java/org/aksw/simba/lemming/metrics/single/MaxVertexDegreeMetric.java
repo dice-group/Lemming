@@ -52,21 +52,37 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
 
         IntSet vertices = graph.getGraph().getVertices();
+        
+        int tempMinDegree = Integer.MAX_VALUE;
         if (direction == DIRECTION.in) {
             for (int vertex : vertices) {
                 int degree = graph.getGraph().getInEdgeDegree(vertex);
                 if (degree > metricResultTempObj.getResult()) {
                     metricResultTempObj.setResult(degree);
-                    metricResultTempObj.setVertexID(vertex);
+                    metricResultTempObj.setMaxVertexID(vertex);
                 }
+                
+                if((degree < tempMinDegree) && (degree > 0)) {
+                    //Logic to store vertex having minimum degree
+                    metricResultTempObj.setMinVertexID(vertex);
+                    tempMinDegree = degree;
+                }
+                
             }
         } else {
             for (int vertex : vertices) {
                 int degree = graph.getGraph().getOutEdgeDegree(vertex);
                 if (degree > metricResultTempObj.getResult()) {
                     metricResultTempObj.setResult(degree);
-                    metricResultTempObj.setVertexID(vertex);
+                    metricResultTempObj.setMaxVertexID(vertex);
                 }
+                
+                if((degree < tempMinDegree) && (degree > 0)) {
+                    //Logic to store vertex having minimum degree
+                    metricResultTempObj.setMinVertexID(vertex);
+                    tempMinDegree = degree;
+                }
+                
             }
         }
 
@@ -133,17 +149,19 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param seed
-     *            - Seed Value
-     * @param indicator
-     *            - boolean variable to indicate if metric value should be decreased or not.
+     *            - Seed Value used to generate random triple.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
     @Override
     public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
-            boolean indicator) {
+            boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
 
-        if (indicator) {// Need to reduce the metric
+        if (changeMetricValue) {// Need to reduce the metric
 
             // Initialization
             IntSet edges = null;
@@ -152,24 +170,24 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
             // Checking the metric, if in-degree or out-degree
             if ((direction == DIRECTION.in)) {
-                edges = graph.getInEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
-                System.out.println("Maximum Vertex In Degree");
+                edges = graph.getInEdges(((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID());
+                //System.out.println("Maximum Vertex In Degree");
              // Getting the edge of a vertex having maximum degree
                 for (int edge : edges) {
                     edgeColour = graph.getEdgeColour(edge);
-                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getVertexID() ) {
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID() ) {
                         edgeId = edge;
                         break;
                     }
                 }
                 
             } else if ((direction == DIRECTION.out)) {
-                edges = graph.getOutEdges(((MaxVertexDegreeMetricResult) previousResult).getVertexID());
-                System.out.println("Maximum Vertex Out Degree");
+                edges = graph.getOutEdges(((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID());
+                //System.out.println("Maximum Vertex Out Degree");
              // Getting the edge of a vertex having maximum degree
                 for (int edge : edges) {
                     edgeColour = graph.getEdgeColour(edge);
-                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getTailOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getVertexID()) {
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getTailOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID()) {
                         edgeId = edge;
                         break;
                     }
@@ -201,22 +219,26 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @param mGrphGenerator
      *            - Graph Generator used during execution
      * @param mProcessRandomly
-     *            - boolean value
+     *            - boolean value If the variable is false, then it will generate a
+     *            triple as per the implementation defined in the Generator class,
+     *            else the triple is generated as per the default implementation.
      * @param previousResult
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
-     * @param indicator
-     *            - boolean variable to indicate if metric value should be increased or not.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+    public TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
         TripleBaseSingleID tripleAdd = getTripleAdd(mGrphGenerator, mProcessRandomly);
         
-        if ((direction == DIRECTION.in) && indicator) {
-            tripleAdd.headId = ((MaxVertexDegreeMetricResult) previousResult).getVertexID();
-        } else if ((direction == DIRECTION.out) && indicator) {
-            tripleAdd.tailId = ((MaxVertexDegreeMetricResult) previousResult).getVertexID();
+        if ((direction == DIRECTION.in) && changeMetricValue) {
+            tripleAdd.headId = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
+        } else if ((direction == DIRECTION.out) && changeMetricValue) {
+            tripleAdd.tailId = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
         }
         return tripleAdd;
     }
