@@ -10,8 +10,11 @@ package org.aksw.simba.lemming.metrics.single;
 public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
 
-    private int vertexID = -1;
+    private int maxVertexID = -1;
     // Variable for storing vertex id having maximum degree
+    
+    private int minVertexID = -1;
+    // Variable for storing vertex id having minimum degree
 
     /**
      * Initialization calls super class with the name of metric and metric value.
@@ -30,8 +33,8 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
      * 
      * @return
      */
-    public int getVertexID() {
-        return vertexID;
+    public int getMaxVertexID() {
+        return maxVertexID;
     }
 
     /**
@@ -39,8 +42,16 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
      * 
      * @param vertexID
      */
-    public void setVertexID(int vertexID) {
-        this.vertexID = vertexID;
+    public void setMaxVertexID(int vertexID) {
+        this.maxVertexID = vertexID;
+    }
+
+    public int getMinVertexID() {
+        return minVertexID;
+    }
+
+    public void setMinVertexID(int minVertexID) {
+        this.minVertexID = minVertexID;
     }
 
 }
