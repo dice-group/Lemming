@@ -6,10 +6,16 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.NodeTriangleMetricSelection;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
+
+import com.carrotsearch.hppc.BitSet;
+
+import grph.Grph.DIRECTION;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 import javax.annotation.Nonnull;
 
@@ -66,4 +72,57 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 
 		return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
 	}
+	
+	 /**
+     * The method returns the triple to remove by using the previous metric result object.
+     *      * 
+     * @param graph
+     *            - Input Graph
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param seed
+     *            - Seed Value used to generate random triple.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
+     * @return
+     */
+    @Override
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+            boolean changeMetricValue) {
+        TripleBaseSingleID tripleRemove = null;
+
+        if (changeMetricValue) {// Need to reduce the metric
+
+            for(int i = 0; i < graph.getVertices().size(); i++) {
+                
+                IntSet neighborSet = IntSetUtil.union(graph.getOutNeighbors(i), graph.getInNeighbors(i));
+                for (int adjacentNodeId:neighborSet) {
+                    IntSet edgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(i), graph.getEdgesIncidentTo(adjacentNodeId));
+                    if(edgesBetweenVertices.size() == 1) {
+                        int numberOfCommon = MetricUtils.getVerticesInCommon(graph, i, adjacentNodeId).size();
+                        if(numberOfCommon > 0) {
+                            int edgeId = edgesBetweenVertices.iterator().nextInt();
+                            tripleRemove = new TripleBaseSingleID();
+                            tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
+                            tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
+                            tripleRemove.edgeId = edgeId;
+                            tripleRemove.edgeColour = graph.getEdgeColour(edgeId);
+                            break;
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+        if(tripleRemove == null) { // If triple couldn't be found such that the node triangle metric can be reduced.
+            tripleRemove = getTripleRemove(graph, seed);
+        }
+        
+
+        return tripleRemove;
+    }
 }

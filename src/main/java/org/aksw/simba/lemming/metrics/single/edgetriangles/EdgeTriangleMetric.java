@@ -81,4 +81,56 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 		return change==-1 ? (oldSubGraphEdgeTriangles-newSubGraphTriangles) : (newSubGraphTriangles-oldSubGraphEdgeTriangles);
 	}
 
+	/**
+     * The method returns the triple to remove by using the previous metric result object.
+     *      * 
+     * @param graph
+     *            - Input Graph
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param seed
+     *            - Seed Value used to generate random triple.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
+     * @return
+     */
+    @Override
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+            boolean changeMetricValue) {
+        TripleBaseSingleID tripleRemove = null;
+
+        if (changeMetricValue) {// Need to reduce the metric
+
+            for (int i = 0; i < graph.getVertices().size(); i++) {
+
+                IntSet neighborSet = IntSetUtil.union(graph.getOutNeighbors(i), graph.getInNeighbors(i));
+                for (int adjacentNodeId : neighborSet) {
+
+                    if (MetricUtils.getVerticesInCommon(graph, i, adjacentNodeId).size() > 0) {
+
+                        IntSet edgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(i),
+                                graph.getEdgesIncidentTo(adjacentNodeId));
+                        int edgeId = edgesBetweenVertices.iterator().nextInt();
+                        tripleRemove = new TripleBaseSingleID();
+                        tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
+                        tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
+                        tripleRemove.edgeId = edgeId;
+                        tripleRemove.edgeColour = graph.getEdgeColour(edgeId);
+                        break;
+                    }
+                }
+            }
+
+        }
+
+        if (tripleRemove == null) { // If triple couldn't be found such that the node triangle metric can be
+                                    // reduced.
+            tripleRemove = getTripleRemove(graph, seed);
+        }
+
+        return tripleRemove;
+    }
 }
