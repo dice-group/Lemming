@@ -16,6 +16,8 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
     private int minVertexID = -1;
     // Variable for storing vertex id having minimum degree
 
+    private double avgVertexDegrees = -1;
+    
     /**
      * Initialization calls super class with the name of metric and metric value.
      * 
@@ -52,6 +54,14 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
     public void setMinVertexID(int minVertexID) {
         this.minVertexID = minVertexID;
+    }
+
+    public double getAvgVertexDegrees() {
+        return avgVertexDegrees;
+    }
+
+    public void setAvgVertexDegrees(double avgVertexDegrees) {
+        this.avgVertexDegrees = avgVertexDegrees;
     }
 
 }

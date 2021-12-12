@@ -15,7 +15,7 @@ public class StdDevVertexDegreeMetricResult extends SingleValueMetricResult {
     private double avgVertexDegrees = 0.0; // Variable for storing average of vertices.
 
     private double numberOfVertices = 0.0; // Variable for storing number of vertices.
-
+    
     /**
      * Initialization calls super class with the name of metric and metric value.
      * 
