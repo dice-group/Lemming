@@ -226,14 +226,14 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param changeMetricValue
-     *            - boolean variable to indicate if the metric value should be decreased
+     *            - boolean variable to indicate if the metric value should be increased
      *            or not. If the variable is true, then the method will return a
-     *            triple that reduces the metric value.
+     *            triple that increases the metric value.
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(mGrphGenerator, mProcessRandomly);
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
+        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         
         if ((direction == DIRECTION.in) && changeMetricValue) {
             tripleAdd.headId = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();

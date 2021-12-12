@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
@@ -153,19 +154,20 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param seed
-     *            - Seed Value
-     * @param indicator
-     *            - boolean variable to indicate if metric value should be increased or not.
+     *            - Seed Value used to generate random triple.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
-            boolean indicator) {
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
         int vertexID = -1;
-        if (indicator) {// Need to increase the metric
+        if (changeMetricValue) {// Need to reduce the metric
             vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
-        } else {//Need to reduce the metric
+        } else {// Need to increase the metric
             vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMinVertexID();
         }
 
@@ -175,62 +177,78 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         BitSet edgeColour = null;
 
         // Checking the metric, if in-degree or out-degree
-        if ((direction == DIRECTION.in)) {
+        if (direction == DIRECTION.in) {
             edges = graph.getInEdges(vertexID);
-            for (int edge : edges) {
-                edgeColour = graph.getEdgeColour(edge);
-                tripleRemove = new TripleBaseSingleID();
-                if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == vertexID) {
-                    edgeId = edge;
-                    tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
-                    tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
-                    tripleRemove.edgeId = edgeId;
-                    tripleRemove.edgeColour = edgeColour;
-                    break;
-                }else {
-                    edgeId = edge;
-                    tripleRemove.headId = graph.getTailOfTheEdge(edgeId);
-                    tripleRemove.tailId = graph.getHeadOfTheEdge(edgeId);
-                    tripleRemove.edgeId = edgeId;
-                    tripleRemove.edgeColour = edgeColour;
-                    break;
-                }
-            }
-
-        } else if ((direction == DIRECTION.out)) {
+        } else {
             edges = graph.getOutEdges(vertexID);
-            for (int edge : edges) {
-                edgeColour = graph.getEdgeColour(edge);
-                tripleRemove = new TripleBaseSingleID();
-                if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getTailOfTheEdge(edge) == vertexID) {
-                    edgeId = edge;
-                    tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
-                    tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
-                    tripleRemove.edgeId = edgeId;
-                    tripleRemove.edgeColour = edgeColour;
-                    break;
-                }else {
-                    edgeId = edge;
-                    tripleRemove.headId = graph.getTailOfTheEdge(edgeId);
-                    tripleRemove.tailId = graph.getHeadOfTheEdge(edgeId);
-                    tripleRemove.edgeId = edgeId;
-                    tripleRemove.edgeColour = edgeColour;
-                    break;
-                }
-            }
         }
-        
-        /*if (edgeId != -1) {// If Edge is found
-            tripleRemove = new TripleBaseSingleID();
-            tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
-            tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
-            tripleRemove.edgeId = edgeId;
-            tripleRemove.edgeColour = edgeColour;
-        }*/
 
+        // Iterating over edges
+        for (int edge : edges) {
+            edgeColour = graph.getEdgeColour(edge);
 
-        if (tripleRemove == null) { // If triple couldn't be found for the maximum vertex degree or we don't need to
-                                    // reduce the metric
+            /*if (direction == DIRECTION.in) { //Displaying the degrees to track the flow.
+                System.out.println("Degree 1 : " + graph.getGraph().getInEdgeDegree(graph.getTailOfTheEdge(edge)));
+                System.out.println("Degree 2 : " + graph.getGraph().getInEdgeDegree(graph.getHeadOfTheEdge(edge)));
+            } else {
+                System.out.println("Degree 1 : " + graph.getGraph().getOutEdgeDegree(graph.getTailOfTheEdge(edge)));
+                System.out.println("Degree 2 : " + graph.getGraph().getOutEdgeDegree(graph.getHeadOfTheEdge(edge)));
+            }*/
+
+            // Logic to compare vertex degrees with average vertex degree.
+            boolean compareDegrees = false;
+            IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edge);
+            
+            if(verticesIncidentToEdge.size() > 1) // in case of self loop, can get an exception
+                verticesIncidentToEdge.remove(vertexID); // Remove Max vertex or Min vertex
+            
+            Integer vertexForEdge = verticesIncidentToEdge.iterator().nextInt(); // Store the other vertex in a variable
+
+            int vertexDegreeTocheck = -1; // Variable to store vertex which should be compared with average degree
+            if (direction == DIRECTION.in) {
+                vertexDegreeTocheck = graph.getGraph().getInEdgeDegree(vertexForEdge);
+            } else {
+                vertexDegreeTocheck = graph.getGraph().getOutEdgeDegree(vertexForEdge);
+            }
+            
+            //Compare vertex with average vertex degree
+            if (changeMetricValue) {
+                // If metric should be decreased, the degree of other vertex should be large
+                // than average vertex degree
+                compareDegrees = vertexDegreeTocheck > ((MaxVertexDegreeMetricResult) previousResult)
+                        .getAvgVertexDegrees() ? true : false;
+
+            } else {
+                // If metric should be increased, the degree of other vertex should be less than
+                // average vertex degree
+                compareDegrees = vertexDegreeTocheck < ((MaxVertexDegreeMetricResult) previousResult)
+                        .getAvgVertexDegrees() ? true : false;
+
+            }
+
+            // Logic to assign triple details
+            if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == vertexID
+                    && compareDegrees) {
+                edgeId = edge;
+                tripleRemove = new TripleBaseSingleID();
+                tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
+                tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
+                tripleRemove.edgeId = edgeId;
+                tripleRemove.edgeColour = edgeColour;
+                break;
+            } else if (compareDegrees) {
+                edgeId = edge;
+                tripleRemove = new TripleBaseSingleID();
+                tripleRemove.headId = graph.getTailOfTheEdge(edgeId);
+                tripleRemove.tailId = graph.getHeadOfTheEdge(edgeId);
+                tripleRemove.edgeId = edgeId;
+                tripleRemove.edgeColour = edgeColour;
+                break;
+            }
+            
+        }
+
+        if (tripleRemove == null) { // If triple couldn't be found 
             tripleRemove = getTripleRemove(graph, seed);
         }
 
@@ -252,20 +270,60 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(mGrphGenerator, mProcessRandomly);
-        
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator,
+            boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+
         int vertexID = -1;
-        if (indicator) {// Need to reduce the metric
+        if (indicator) {// Need to increase the metric
             vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
-        } else {//Need to increase the metric
+        } else {// Need to reduce the metric
             vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMinVertexID();
         }
-        
+
         if (direction == DIRECTION.in) {
             tripleAdd.headId = vertexID;
+            for (Integer graphVertex : graph.getVertices()) {
+                if (indicator) {
+                    if (graph.getGraph().getInEdgeDegree(graphVertex) > ((MaxVertexDegreeMetricResult) previousResult)
+                            .getAvgVertexDegrees()) {
+                        tripleAdd.tailId = graphVertex;
+                        break;
+                    }
+                } else {
+                    if (graph.getGraph().getInEdgeDegree(graphVertex) < ((MaxVertexDegreeMetricResult) previousResult)
+                            .getAvgVertexDegrees()) {
+                        tripleAdd.tailId = graphVertex;
+                        break;
+                    }
+                }
+
+            }
+            //System.out.println("Degree 1 : " + graph.getGraph().getInEdgeDegree(tripleAdd.headId));
+            //System.out.println("Degree 2 : " + graph.getGraph().getInEdgeDegree(tripleAdd.tailId));
+
         } else if (direction == DIRECTION.out) {
             tripleAdd.tailId = vertexID;
+
+            for (Integer graphVertex : graph.getVertices()) {
+                if (indicator) {
+                    if (graph.getGraph().getOutEdgeDegree(graphVertex) > ((MaxVertexDegreeMetricResult) previousResult)
+                            .getAvgVertexDegrees()) {
+                        tripleAdd.headId = graphVertex;
+                        break;
+                    }
+                } else {
+                    if (graph.getGraph().getOutEdgeDegree(graphVertex) < ((MaxVertexDegreeMetricResult) previousResult)
+                            .getAvgVertexDegrees()) {
+                        tripleAdd.headId = graphVertex;
+                        break;
+                    }
+                }
+
+            }
+
+            //System.out.println("Degree 1 : " + graph.getGraph().getOutEdgeDegree(tripleAdd.headId));
+            //System.out.println("Degree 2 : " + graph.getGraph().getOutEdgeDegree(tripleAdd.tailId));
         }
         return tripleAdd;
     }
