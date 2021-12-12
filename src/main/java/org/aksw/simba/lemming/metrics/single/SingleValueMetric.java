@@ -115,16 +115,17 @@ public interface SingleValueMetric extends Metric {
     /**
      * The method returns the triple to add by calling getProposedTriple method
      * defined in Graph generator class.
-     * 
+     * @param graph TODO
      * @param mGrphGenerator
      *            - Graph Generator used during execution.
      * @param mProcessRandomly
      *            - boolean value If the variable is false, then it will generate a
      *            triple as per the implementation defined in the Generator class,
      *            else the triple is generated as per the default implementation.
+     * 
      * @return
      */
-    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly) {
+    default TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly) {
         return mGrphGenerator.getProposedTriple(mProcessRandomly);
     }
 
@@ -133,7 +134,7 @@ public interface SingleValueMetric extends Metric {
      * 
      * Note:- The implementation of this method in particular metric class could use
      * the previous UpdatableMetricResult to generate a different triple.
-     * 
+     * @param graph TODO
      * @param mGrphGenerator
      *            - Graph Generator used during execution
      * @param mProcessRandomly
@@ -147,10 +148,11 @@ public interface SingleValueMetric extends Metric {
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
+     * 
      * @return
      */
-    default TripleBaseSingleID getTripleAdd(IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
-        return getTripleAdd(mGrphGenerator, mProcessRandomly);
+    default TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
+        return getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
     }
 
 }

@@ -46,7 +46,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 		}
 
 		int change = opt==Operation.REMOVE ? -1 : 1 ;
-		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size()-change;
+		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
 
 		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices, change);
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;
@@ -102,28 +102,34 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
             boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
 
-        if (changeMetricValue) {// Need to reduce the metric
+        for (Integer edge : graph.getEdges()) {// Iterating edges
 
-            for (int i = 0; i < graph.getVertices().size(); i++) {
+            // Get vertices incident to edge
+            IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edge);
 
-                IntSet neighborSet = IntSetUtil.union(graph.getOutNeighbors(i), graph.getInNeighbors(i));
-                for (int adjacentNodeId : neighborSet) {
+            int firstIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
+            int secondIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
 
-                    if (MetricUtils.getVerticesInCommon(graph, i, adjacentNodeId).size() > 0) {
-
-                        IntSet edgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(i),
-                                graph.getEdgesIncidentTo(adjacentNodeId));
-                        int edgeId = edgesBetweenVertices.iterator().nextInt();
-                        tripleRemove = new TripleBaseSingleID();
-                        tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
-                        tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
-                        tripleRemove.edgeId = edgeId;
-                        tripleRemove.edgeColour = graph.getEdgeColour(edgeId);
-                        break;
-                    }
-                }
+            if (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size() > 0
+                    && changeMetricValue) {
+                // if vertices in common then edge triangle exists
+                // Need to reduce the metric
+                tripleRemove = new TripleBaseSingleID();
+                tripleRemove.tailId = graph.getTailOfTheEdge(edge);
+                tripleRemove.headId = graph.getHeadOfTheEdge(edge);
+                tripleRemove.edgeId = edge;
+                tripleRemove.edgeColour = graph.getEdgeColour(edge);
+                break;
+            } else if (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size() == 0
+                    && !changeMetricValue) {
+                // if vertices not in common then edge triangle doesn't exist
+                tripleRemove = new TripleBaseSingleID();
+                tripleRemove.tailId = graph.getTailOfTheEdge(edge);
+                tripleRemove.headId = graph.getHeadOfTheEdge(edge);
+                tripleRemove.edgeId = edge;
+                tripleRemove.edgeColour = graph.getEdgeColour(edge);
+                break;
             }
-
         }
 
         if (tripleRemove == null) { // If triple couldn't be found such that the node triangle metric can be
