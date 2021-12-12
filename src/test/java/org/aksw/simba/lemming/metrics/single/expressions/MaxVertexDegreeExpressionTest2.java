@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.expressions;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GeologyDataset;
@@ -6,6 +6,7 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
+import org.aksw.simba.lemming.metrics.single.updateDegree.UpdateMetricTest;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
@@ -41,7 +42,7 @@ public class MaxVertexDegreeExpressionTest2 extends UpdateMetricTest {
         double metricValue = metric.apply(clonedGraph);
         Assert.assertEquals(metricValue, prevResult.getResult());
 
-        TripleBaseSingleID triple = metric.getTripleAdd(mGrphGenerator, false, prevResult, false);
+        TripleBaseSingleID triple = metric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, false);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
         UpdatableMetricResult newResult = metric.update(clonedGraph, triple, Operation.ADD, prevResult);
         Assert.assertTrue("Edge Added for candidate", newResult.getResult() <= metricValue);
@@ -71,7 +72,7 @@ public class MaxVertexDegreeExpressionTest2 extends UpdateMetricTest {
         double metricValue = metric.apply(clonedGraph);
         Assert.assertEquals(metricValue, prevResult.getResult());
 
-        TripleBaseSingleID triple = metric.getTripleAdd(mGrphGenerator, false, prevResult, true);
+        TripleBaseSingleID triple = metric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, true);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
         UpdatableMetricResult newResult = metric.update(clonedGraph, triple, Operation.ADD, prevResult);
         Assert.assertTrue("Edge Added for candidate", newResult.getResult() > metricValue);
@@ -101,7 +102,7 @@ public class MaxVertexDegreeExpressionTest2 extends UpdateMetricTest {
         double metricValue = metric.apply(clonedGraph);
         Assert.assertEquals(metricValue, prevResult.getResult());
 
-        TripleBaseSingleID triple = metric.getTripleAdd(mGrphGenerator, false, prevResult, false);
+        TripleBaseSingleID triple = metric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, false);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
         UpdatableMetricResult newResult = metric.update(clonedGraph, triple, Operation.ADD, prevResult);
         Assert.assertTrue("Edge Added for candidate", newResult.getResult() <= metricValue);
@@ -130,7 +131,7 @@ public class MaxVertexDegreeExpressionTest2 extends UpdateMetricTest {
         double metricValue = metric.apply(clonedGraph);
         Assert.assertEquals(metricValue, prevResult.getResult());
 
-        TripleBaseSingleID triple = metric.getTripleAdd(mGrphGenerator, false, prevResult, true);
+        TripleBaseSingleID triple = metric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, true);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
         UpdatableMetricResult newResult = metric.update(clonedGraph, triple, Operation.ADD, prevResult);
         Assert.assertTrue("Edge Added for candidate", newResult.getResult() > metricValue);

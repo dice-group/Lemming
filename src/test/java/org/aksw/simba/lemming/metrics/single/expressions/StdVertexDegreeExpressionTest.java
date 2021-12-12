@@ -1,6 +1,8 @@
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.expressions;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GeologyDataset;
@@ -9,12 +11,21 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetricResult;
+import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
+import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
+import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
+import org.aksw.simba.lemming.metrics.single.updateDegree.UpdateMetricTest;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -25,13 +36,13 @@ import grph.Grph.DIRECTION;
 
 public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
     private static final String GRAPH_FILE = "graph1_1.n3"; // graph_loop_2.n3 graph1_1.n3 email-Eu-core.n3
-    //private static final String GRAPH_FILE1 = "graph1_1.n3";
+    // private static final String GRAPH_FILE1 = "graph1_1.n3";
     private static ColouredGraph inputGraph;
 
     public StdVertexDegreeExpressionTest() {
-        inputGraph = getGraph();
+        inputGraph = getGraphSWDF();
     }
-    
+
     public ColouredGraph getGraph() {
         int mNumberOfDesiredVertices = 1281;
 
@@ -46,11 +57,33 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
 
         IGraphGeneration mGrphGenerator;
         mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        mGrphGenerator.generateGraph();
 
-        ColouredGraph clonedGraph = mGrphGenerator.getMimicGraph().clone();
+        // ColouredGraph clonedGraph = mGrphGenerator.getMimicGraph().clone();
+
+        long secSeed = mGrphGenerator.getSeed() + 1;
+        ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+
+        List<SingleValueMetric> metrics = new ArrayList<>();
+        // these are two fixed metrics: NodeTriangleMetric and EdgeTriangleMetric
+        metrics.add(new NodeTriangleMetric());
+        metrics.add(new EdgeTriangleMetric());
+
+        // these are optional metrics
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
+        metrics.add(new NumberOfEdgesMetric());
+        metrics.add(new NumberOfVerticesMetric());
+
+        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
+                secSeed);
+        ColouredGraph clonedGraph = grphOptimizer.getmEdgeModifier().getGraph();
         return clonedGraph;
     }
-    
+
     @SuppressWarnings("deprecation")
     public ColouredGraph getGraphFile() {
         Model model = ModelFactory.createDefaultModel();
@@ -62,7 +95,7 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         ColouredGraph graph = creator.processModel(model);
         return graph;
     }
-    
+
     public ColouredGraph getGraphSWDF() {
         int mNumberOfDesiredVertices = 45420;
 
@@ -78,15 +111,37 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         IGraphGeneration mGrphGenerator;
         mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
 
-        ColouredGraph clonedGraph = mGrphGenerator.getMimicGraph().clone();
+        mGrphGenerator.generateGraph();
+
+        // ColouredGraph clonedGraph = mGrphGenerator.getMimicGraph().clone();
+
+        long secSeed = mGrphGenerator.getSeed() + 1;
+        ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+
+        List<SingleValueMetric> metrics = new ArrayList<>();
+        // these are two fixed metrics: NodeTriangleMetric and EdgeTriangleMetric
+        //metrics.add(new NodeTriangleMetric());
+        //metrics.add(new EdgeTriangleMetric());
+
+        // these are optional metrics
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
+        metrics.add(new NumberOfEdgesMetric());
+        metrics.add(new NumberOfVerticesMetric());
+
+        GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
+                secSeed);
+        ColouredGraph clonedGraph = grphOptimizer.getmEdgeModifier().getGraph();
+        
         return clonedGraph;
     }
-    
-    
+
     @Test
     public void testcase1() {
 
-        
         ColouredGraph graph = inputGraph;
 
         // Test case for in-degree, don't remove edge for vertex having maximum degree
@@ -98,35 +153,38 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         StdDevVertexDegree stdMetric = new StdDevVertexDegree(DIRECTION.in);
         UpdatableMetricResult stdprevResult = stdMetric.applyUpdatable(graph);
         double stdMetricValue = stdMetric.apply(graph);
-        //System.out.println("StdDev metric (apply Uptable) : " + stdprevResult.getResult());
+        // System.out.println("StdDev metric (apply Uptable) : " +
+        // stdprevResult.getResult());
         System.out.println("StdDev metric (Old Value) : " + stdMetricValue);
 
         UpdatableMetricResult prevResult = maxMetric.applyUpdatable(graph);
-        
+
         AvgVertexDegreeMetric avgMetric = new AvgVertexDegreeMetric();
-        double apply = avgMetric.apply(graph);
-        System.out.println("Average Vertex Degree : " + apply);
-        
-       
+        double avgMetricResult = avgMetric.apply(graph);
+        System.out.println("Average Vertex Degree : " + avgMetricResult);
+
+        // set average vertex degree
+        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+
         System.out.println("Maximum Vertex Degree : " + prevResult.getResult());
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, false);
+        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, true);
+
         graph = removeEdge(graph, triple.edgeId);
 
         prevResult = maxMetric.update(graph, triple, Operation.REMOVE, prevResult);
-        
+
         // Standard Deviation
         UpdatableMetricResult updateStdMetric = stdMetric.update(graph, triple, Operation.REMOVE, stdprevResult);
         System.out.println("StdDev metric (New Result) : " + updateStdMetric.getResult());
         System.out.println();
-         
+
         Assert.assertTrue("Metric not decreased!", updateStdMetric.getResult() < stdMetricValue);
 
     }
 
-    
     @Test
     public void testcase2() {
         // Test case for in-degree, remove edge for vertex having maximum degree
@@ -142,20 +200,24 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         StdDevVertexDegree stdMetric = new StdDevVertexDegree(DIRECTION.in);
         UpdatableMetricResult stdprevResult = stdMetric.applyUpdatable(graph);
         double stdMetricValue = stdMetric.apply(graph);
-        //System.out.println("StdDev metric (apply Uptable) : " + stdprevResult.getResult());
+        // System.out.println("StdDev metric (apply Uptable) : " +
+        // stdprevResult.getResult());
         System.out.println("StdDev metric (Old Value) : " + stdMetricValue);
 
         UpdatableMetricResult prevResult = metric.applyUpdatable(graph);
-        
+
         AvgVertexDegreeMetric avgMetric = new AvgVertexDegreeMetric();
-        double apply = avgMetric.apply(graph);
-        System.out.println("Average Vertex Degree : " + apply);
+        double avgMetricResult = avgMetric.apply(graph);
+        System.out.println("Average Vertex Degree : " + avgMetricResult);
         System.out.println("Maximum Vertex Degree : " + prevResult.getResult());
 
+        // set average vertex degree
+        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, true);
+        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, false);
+
         graph = removeEdge(graph, triple.edgeId);
 
         // Standard Deviation
@@ -167,11 +229,9 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
 
     }
 
-    
     @Test
     public void testcase3() {
 
-        
         ColouredGraph graph = inputGraph;
 
         // Test case for in-degree, don't remove edge for vertex having maximum degree
@@ -179,41 +239,45 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         // ColouredGraph buildGraph1 = buildGraph1();
 
         UpdatableMetricResult prevResult = metric.applyUpdatable(graph);
-        
+
         AvgVertexDegreeMetric avgMetric = new AvgVertexDegreeMetric();
-        double apply = avgMetric.apply(graph);
-        System.out.println("Average Vertex Degree : " + apply);
+        double avgMetricResult = avgMetric.apply(graph);
+        System.out.println("Average Vertex Degree : " + avgMetricResult);
         System.out.println("Maximum Vertex Degree : " + prevResult.getResult());
 
+        // set average vertex degree
+        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
 
         // Standard Deviation metric calculation
         System.out.println("Increase StdVertexDegree metric (Out degree)");
         StdDevVertexDegree stdMetric = new StdDevVertexDegree(DIRECTION.out);
         UpdatableMetricResult stdprevResult = stdMetric.applyUpdatable(graph);
         double stdMetricValue = stdMetric.apply(graph);
-        //System.out.println("StdDev metric (apply Uptable) : " + stdprevResult.getResult());
+        // System.out.println("StdDev metric (apply Uptable) : " +
+        // stdprevResult.getResult());
         System.out.println("StdDev metric (Old Value) : " + stdMetricValue);
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, true);
+        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, false);
+
         graph = removeEdge(graph, triple.edgeId);
-        
 
         // Standard Deviation
         UpdatableMetricResult updateStdMetric = stdMetric.update(graph, triple, Operation.REMOVE, stdprevResult);
         System.out.println("StdDev metric (New Result) : " + updateStdMetric.getResult());
-        Assert.assertTrue("Metric not decreased!", updateStdMetric.getResult() > stdMetricValue);
+        Assert.assertTrue("Metric not increased!", updateStdMetric.getResult() > stdMetricValue);
 
         System.out.println();
 
+        
+
     }
 
-    
     @Test
     public void testcase4() {
         // Test case for in-degree, remove edge for vertex having maximum degree
-        
+
         ColouredGraph graph = inputGraph;
 
         // Test case for in-degree, don't remove edge for vertex having maximum degree
@@ -221,18 +285,22 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
         // ColouredGraph buildGraph1 = buildGraph1();
 
         UpdatableMetricResult prevResult = metric.applyUpdatable(graph);
-        
+
         AvgVertexDegreeMetric avgMetric = new AvgVertexDegreeMetric();
-        double apply = avgMetric.apply(graph);
-        System.out.println("Average Vertex Degree : " + apply);
+        double avgMetricResult = avgMetric.apply(graph);
+        System.out.println("Average Vertex Degree : " + avgMetricResult);
         System.out.println("Maximum Vertex Degree : " + prevResult.getResult());
+
+        // set average vertex degree
+        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
 
         // Standard Deviation metric calculation
         System.out.println("Decrease StdVertexDegree metric (Out degree)");
         StdDevVertexDegree stdMetric = new StdDevVertexDegree(DIRECTION.out);
         UpdatableMetricResult stdprevResult = stdMetric.applyUpdatable(graph);
         double stdMetricValue = stdMetric.apply(graph);
-        //System.out.println("StdDev metric (apply Uptable) : " + stdprevResult.getResult());
+        // System.out.println("StdDev metric (apply Uptable) : " +
+        // stdprevResult.getResult());
         System.out.println("StdDev metric (Old Value) : " + stdMetricValue);
 
         /*
@@ -247,9 +315,9 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, false);
+        TripleBaseSingleID triple = stdMetric.getTripleRemove(graph, prevResult, seed, true);
+
         graph = removeEdge(graph, triple.edgeId);
-        
 
         // Standard Deviation
         UpdatableMetricResult updateStdMetric = stdMetric.update(graph, triple, Operation.REMOVE, stdprevResult);
@@ -258,7 +326,7 @@ public class StdVertexDegreeExpressionTest extends UpdateMetricTest {
 
         System.out.println();
 
-    }
 
+    }
 
 }

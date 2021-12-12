@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.expressions;
 
 import java.io.InputStream;
 
@@ -8,6 +8,7 @@ import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
+import org.aksw.simba.lemming.metrics.single.updateDegree.UpdateMetricTest;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.rdf.model.Model;
