@@ -8,6 +8,7 @@ import grph.algo.MultiThreadProcessing;
 import grph.algo.search.GraphSearchListener;
 import grph.algo.search.GraphSearchListener.DECISION;
 import grph.algo.search.SearchResult;
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import toools.collections.primitive.IntQueue;
 import toools.collections.primitive.IntQueue.ACCESS_MODE;
@@ -23,105 +24,127 @@ import toools.collections.primitive.IntQueue.ACCESS_MODE;
  */
 public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	public Integer compute(Grph graph) {
-		if (graph.isNull()) {
-			throw new IllegalStateException("cannot compute the diameter of a null graph");
-		}
-		if (graph.isTrivial()) {
-			return 0;
-		}
-		if (graph.isConnected()) {
-			if (graph.getVertices().size() == 2) {
-				return 1;
-			} else {
-				return performSearch(graph);
-			}
-		} else {
-			throw new IllegalStateException("cannot compute the diameter of a non-connected graph");
-		}
-	}
+    private ArrayListPath diameter = null;
 
-	protected int performSearch(final Grph g) {
-		// computes and cache
-		// we need to do that otherwise multiple threads will call it
-		// simultaneously
-		g.getOutNeighborhoods();
+    @Override
+    public Integer compute(Grph graph) {
+        if (graph.isNull()) {
+            throw new IllegalStateException("cannot compute the diameter of a null graph");
+        }
+        if (graph.isTrivial()) {
+            return 0;
+        }
+        if (graph.isConnected()) {
+            if (graph.getVertices().size() == 2) {
+                return 1;
+            } else {
+                return performSearch(graph);
+            }
+        } else {
+            throw new IllegalStateException("cannot compute the diameter of a non-connected graph");
+        }
+    }
 
-		return performSearch(g, g.getVertices());
-	}
+    protected int performSearch(final Grph g) {
+        // computes and cache
+        // we need to do that otherwise multiple threads will call it
+        // simultaneously
+        g.getOutNeighborhoods();
 
-	protected int performSearch(final Grph g, IntSet sources) {
-		return performSearch(g, Grph.DIRECTION.out, sources);
-	}
+        return performSearch(g, g.getVertices());
+    }
 
-	protected int performSearch(final Grph g, final Grph.DIRECTION d, IntSet sources) {
-		final int[] lengths = new int[Collections.max(sources)+1];
+    protected int performSearch(final Grph g, IntSet sources) {
+        return performSearch(g, Grph.DIRECTION.out, sources);
+    }
 
-		new MultiThreadProcessing(g.getVertices()) {
+    protected int performSearch(final Grph g, final Grph.DIRECTION d, IntSet sources) {
+        final int[] lengths = new int[Collections.max(sources) + 1];
+        final ArrayListPath[] paths = new ArrayListPath[Collections.max(sources) + 1];
+        new MultiThreadProcessing(g.getVertices()) {
 
-			@Override
-			protected void run(int threadID, int source) {
-				lengths[source] = performSearchInThread(g, source, d, null);
-			}
+            @Override
+            protected void run(int threadID, int source) {
+                paths[source] = performSearchInThread(g, source, d, null);
+                try {
+                    lengths[source] = paths[source].getLength();
+                    // System.out
+                    // .println("Source: " + source + "\nLength: " + lengths[source] + "\nPath: " +
+                    // paths[source]);
+                } catch (NullPointerException e) {
+                    // System.out.println("No outgoing edges from this node " + source);
+                    return;
+                }
+            }
+        };
 
-		};
+        int max = 0;
+        for (int i = 0; i < lengths.length; ++i) {
+            if (lengths[i] > max) {
+                max = lengths[i];
+                this.diameter = paths[i];
+            }
+        }
 
-		int max = 0;
-		for (int i = 0; i < lengths.length; ++i) {
-			if (lengths[i] > max) {
-				max = lengths[i];
-			}
-		}
+        return max;
+    }
 
-		return max;
-	}
+    protected ArrayListPath performSearchInThread(Grph graph, int source, Grph.DIRECTION direction,
+            GraphSearchListener listener) {
+        assert graph != null;
+        assert graph.getVertices().contains(source);
+        int[][] adj = graph.getNeighbors(direction);
+        int n = graph.getVertices().getGreatest() + 1;
+        ArrayListPath path = null;
+        SearchResult r = new SearchResult(n);
+        // r.source = source;
+        r.distances[source] = 0;
+        r.visitOrder.add(source);
 
-	protected int performSearchInThread(Grph graph, int source, Grph.DIRECTION direction, GraphSearchListener listener) {
-		assert graph != null;
-		assert graph.getVertices().contains(source);
-		int[][] adj = graph.getNeighbors(direction);
-		int n = graph.getVertices().getGreatest() + 1;
-		SearchResult r = new SearchResult(n);
-		// r.source = source;
-		r.distances[source] = 0;
-		r.visitOrder.add(source);
+        if (listener != null) {
+            listener.searchStarted();
+        }
 
-		if (listener != null) {
-			listener.searchStarted();
-		}
+        IntQueue queue = new IntQueue();
+        queue.add(source);
 
-		IntQueue queue = new IntQueue();
-		queue.add(source);
+        while (queue.getSize() > 0) {
+            int v = queue.extract(ACCESS_MODE.QUEUE);
+            int d = r.distances[v];
 
-		while (queue.getSize() > 0) {
-			int v = queue.extract(ACCESS_MODE.QUEUE);
-			int d = r.distances[v];
+            if (listener != null) {
+                if (listener.vertexFound(v) == DECISION.STOP) {
+                    break;
+                }
+            }
 
-			if (listener != null) {
-				if (listener.vertexFound(v) == DECISION.STOP) {
-					break;
-				}
-			}
+            for (int neighbor : adj[v]) {
+                // if this vertex was not yet visited
+                if (r.distances[neighbor] == -1) {
+                    r.predecessors[neighbor] = v;
+                    r.distances[neighbor] = d + 1;
+                    queue.add(neighbor);
+                    r.visitOrder.add(neighbor);
+                }
 
-			for (int neighbor : adj[v]) {
-				// if this vertex was not yet visited
-				if (r.distances[neighbor] == -1) {
-					r.predecessors[neighbor] = v;
-					r.distances[neighbor] = d + 1;
-					queue.add(neighbor);
-					r.visitOrder.add(neighbor);
-				}
-			}
-		}
+                if (r.distances[neighbor] == r.maxDistance()) {
+                    path = r.computePathTo(neighbor);
+                }
+            }
+        }
 
-		if (listener != null) {
-			listener.searchCompleted();
-		}
+        if (listener != null) {
+            listener.searchCompleted();
+        }
 
-		return r.maxDistance();
-	}
+        // System.out.println(path);
+        // return r.maxDistance();
+        return path;
+    }
 
+    public ArrayListPath getDiameterPath() {
+        return this.diameter;
+    }
 }
