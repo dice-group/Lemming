@@ -67,9 +67,9 @@ public class Inferer {
 		propertyEquiMap = findRepresentationAndDR(propertiesEquiSetMap);
 	}
 
-	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
+	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String fileType, Map<String, String> rdfsFilesMap) {
 		this.isMat = isMat;
-		OntModel ontModel = this.readOntology(filePath, base);
+		OntModel ontModel = this.readOntology(filePath, fileType);
 		for(String fileName : rdfsFilesMap.keySet()){
 			ontModel.read(fileName, rdfsFilesMap.get(fileName));
 		}
@@ -247,15 +247,16 @@ public class Inferer {
 	 * This method reads the ontology file with an InputStream
 	 * 
 	 * @param filePath path to the ontology file
+	 * @param fileType type of ontology file
 	 * @return OntModel Object
 	 */
-	private OntModel readOntology(String filePath, String base) {
-		if (base == null)
-			base = "RDF/XML";
+	private OntModel readOntology(String filePath, String fileType) {
+		if (fileType == null)
+			fileType = "RDF/XML";
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		try (InputStream inputStream = FileManager.get().open(filePath)) {
 			if (inputStream != null) {
-				ontModel.read(inputStream, base);
+				ontModel.read(inputStream, fileType);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Couldn't read ontology file. Returning empty ontology model.", e);
