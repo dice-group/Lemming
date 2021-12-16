@@ -2,6 +2,8 @@ package org.aksw.simba.lemming.grph;
 
 import java.util.Collections;
 
+import org.aksw.simba.lemming.ColouredGraph;
+
 import grph.Grph;
 import grph.GrphAlgorithm;
 import grph.algo.MultiThreadProcessing;
@@ -40,27 +42,28 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
             if (graph.getVertices().size() == 2) {
                 return 1;
             } else {
-                return performSearch(graph);
+                return performSearch(new ColouredGraph(graph, null, null));
+                // TODO: What is the use of vertexPalette and edgePalette in ColouredGraph ?
             }
         } else {
             throw new IllegalStateException("cannot compute the diameter of a non-connected graph");
         }
     }
 
-    protected int performSearch(final Grph g) {
+    protected int performSearch(final ColouredGraph g) {
         // computes and cache
         // we need to do that otherwise multiple threads will call it
         // simultaneously
-        g.getOutNeighborhoods();
+        g.getOutNeighborhoodsArray();
 
         return performSearch(g, g.getVertices());
     }
 
-    protected int performSearch(final Grph g, IntSet sources) {
+    protected int performSearch(final ColouredGraph g, IntSet sources) {
         return performSearch(g, Grph.DIRECTION.out, sources);
     }
 
-    protected int performSearch(final Grph g, final Grph.DIRECTION d, IntSet sources) {
+    public int performSearch(final ColouredGraph g, final Grph.DIRECTION d, IntSet sources) {
         final int[] lengths = new int[Collections.max(sources) + 1];
         final ArrayListPath[] paths = new ArrayListPath[Collections.max(sources) + 1];
         new MultiThreadProcessing(g.getVertices()) {
@@ -74,7 +77,8 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
                     // .println("Source: " + source + "\nLength: " + lengths[source] + "\nPath: " +
                     // paths[source]);
                 } catch (NullPointerException e) {
-                    // System.out.println("No outgoing edges from this node " + source);
+//                    System.out.println("No outgoing edges from this node " + source);
+//                    System.out.println(g.getOutEdgeDegree(source));
                     return;
                 }
             }
@@ -91,12 +95,12 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return max;
     }
 
-    protected ArrayListPath performSearchInThread(Grph graph, int source, Grph.DIRECTION direction,
+    protected ArrayListPath performSearchInThread(ColouredGraph graph, int source, Grph.DIRECTION direction,
             GraphSearchListener listener) {
         assert graph != null;
         assert graph.getVertices().contains(source);
         int[][] adj = graph.getNeighbors(direction);
-        int n = graph.getVertices().getGreatest() + 1;
+        int n = (int) graph.getNumberOfVertices();
         ArrayListPath path = null;
         SearchResult r = new SearchResult(n);
         // r.source = source;
