@@ -8,6 +8,7 @@ import org.aksw.simba.lemming.util.IntSetUtil;
 
 import com.carrotsearch.hppc.BitSet;
 
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -177,6 +178,15 @@ public class ColouredGraphDecorator implements IColouredGraph {
     public int getNumberOfEdgesBetweenVertices() {
         return IntSetUtil.intersection(graph.getEdgesIncidentTo(this.triple.tailId),
                 graph.getEdgesIncidentTo(this.triple.headId)).size();
+    }
+
+    @Override
+    public ArrayListPath getNodesInDiameter() {
+        return this.graph.getNodesInDiameter();
+    }
+
+    public int getDiameter() {
+        return this.graph.getDiameter();
     }
 
 }

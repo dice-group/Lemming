@@ -47,7 +47,7 @@ public class ColouredGraph implements IColouredGraph {
      */
     protected Map<BitSet, String> mapLiteralTypes;
 
-    protected GrphAlgorithmCache<Integer> diameterAlgorithm;
+    protected DiameterAlgorithm diameterAlgorithm;
 
     public ColouredGraph() {
         this(null, null);
@@ -87,7 +87,8 @@ public class ColouredGraph implements IColouredGraph {
 
     protected void setGraph(Grph graph) {
         this.graph = graph;
-        diameterAlgorithm = new DiameterAlgorithm().cacheResultForGraph(graph);
+        diameterAlgorithm = new DiameterAlgorithm();
+        diameterAlgorithm.cacheResultForGraph(graph);
     }
 
     public ObjectArrayList<BitSet> getVertexColours() {
@@ -810,5 +811,10 @@ public class ColouredGraph implements IColouredGraph {
     @Override
     public double getNumberOfVertices() {
         return graph.getNumberOfVertices();
+    }
+
+    @Override
+    public ArrayListPath getNodesInDiameter() {
+        return diameterAlgorithm.getDiameterPath();
     }
 }

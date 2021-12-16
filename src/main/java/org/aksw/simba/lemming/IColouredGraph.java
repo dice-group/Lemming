@@ -5,6 +5,7 @@ package org.aksw.simba.lemming;
 
 import com.carrotsearch.hppc.BitSet;
 
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -167,5 +168,10 @@ public interface IColouredGraph {
      * @return set of all vertices
      */
     IntSet getVertices();
+
+    
+    ArrayListPath getNodesInDiameter();
+
+    int getDiameter();
 
 }
