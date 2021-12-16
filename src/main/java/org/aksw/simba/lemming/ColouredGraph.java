@@ -2,9 +2,11 @@ package org.aksw.simba.lemming;
 
 import grph.DefaultIntSet;
 import grph.Grph;
+import grph.Grph.DIRECTION;
 import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -816,5 +818,18 @@ public class ColouredGraph implements IColouredGraph {
     @Override
     public ArrayListPath getNodesInDiameter() {
         return diameterAlgorithm.getDiameterPath();
+    }
+
+    /**
+     * Get all neighbors of all nodes in the graph. Used to compute the diameter of
+     * given graph
+     * 
+     * @param direction - Direction of edge to consider for neighbors. In-neighbors
+     *                  or Out-neighbors depending on the direction we consider.
+     * @return int[][] - Two dimension integer array containing all neighbors of all
+     *         nodes in the given direction.
+     */
+    public int[][] getNeighbors(DIRECTION direction) {
+        return this.graph.getNeighbors(direction);
     }
 }
