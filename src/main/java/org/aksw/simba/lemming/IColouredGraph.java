@@ -5,6 +5,7 @@ package org.aksw.simba.lemming;
 
 import com.carrotsearch.hppc.BitSet;
 
+import grph.Grph.DIRECTION;
 import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -175,5 +176,7 @@ public interface IColouredGraph {
     int getDiameter();
 
     ArrayListPath getDiameterFromVertex(int source);
+
+    int[][] getNeighbors(DIRECTION direction);
 
 }

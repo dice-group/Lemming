@@ -3,8 +3,11 @@
  */
 package org.aksw.simba.lemming;
 
-import org.aksw.simba.lemming.util.IntSetUtil;
+import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.apache.commons.lang3.ArrayUtils;
 
+import grph.Grph.DIRECTION;
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -123,5 +126,28 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
 
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() + 1;
+    }
+
+    /**
+     * Get all neighbors of all nodes in the graph. Used to compute the diameter of
+     * given graph
+     * 
+     * @param direction - Direction of edge to consider for neighbors. In-neighbors
+     *                  or Out-neighbors depending on the direction we consider.
+     * @return int[][] - Two dimension integer array containing all neighbors of all
+     *         nodes in the given direction.
+     */
+    public int[][] getNeighbors(DIRECTION direction) {
+        int[][] neighbors = super.getNeighbors(direction);
+        System.out.println(neighbors[triple.tailId]);
+        ArrayUtils.add(neighbors[triple.tailId], triple.headId);
+        System.out.println(neighbors[triple.tailId]);
+        return neighbors;
+    }
+
+    @Override
+    public ArrayListPath getDiameterFromVertex(int source) {
+        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
+        return diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);
     }
 }

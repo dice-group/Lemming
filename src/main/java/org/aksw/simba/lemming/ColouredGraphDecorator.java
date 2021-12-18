@@ -8,6 +8,7 @@ import org.aksw.simba.lemming.util.IntSetUtil;
 
 import com.carrotsearch.hppc.BitSet;
 
+import grph.Grph.DIRECTION;
 import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -191,6 +192,10 @@ public class ColouredGraphDecorator implements IColouredGraph {
 
     public ArrayListPath getDiameterFromVertex(int source) {
         return this.graph.getDiameterFromVertex(source);
+    }
+
+    public int[][] getNeighbors(DIRECTION direction) {
+        return this.graph.getNeighbors(direction);
     }
 
 }
