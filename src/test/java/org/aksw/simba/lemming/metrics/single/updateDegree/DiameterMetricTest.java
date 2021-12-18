@@ -75,25 +75,42 @@ public class DiameterMetricTest {
         return new ColouredGraph(graph, null, null);
     }
 
+    private ColouredGraph buildDisconnectedGraph() {
+        Grph graph = new InMemoryGrph();
+        int[] nodeList = new int[numberOfNodes];
+        for (int i = 0; i < numberOfNodes; i++) {
+            nodeList[i] = graph.addVertex();
+
+        }
+        return new ColouredGraph(graph, null, null);
+    }
+
     @Test
     public void testLinearGraph() {
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph graph = buildLinearGraph();
-        Assert.assertEquals((int) metric.apply(graph), numberOfNodes - 1);
+        Assert.assertEquals(numberOfNodes - 1, (int) metric.apply(graph));
     }
 
     @Test
     public void testFullConnectedGraph() {
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph graph = buildFullConnectedGraph();
-        Assert.assertEquals((int) metric.apply(graph), 1);
+        Assert.assertEquals(1, (int) metric.apply(graph));
     }
 
     @Test
     public void testTreeGraph() {
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph graph = buildTree();
-        Assert.assertEquals((int) metric.apply(graph), 1);
+        Assert.assertEquals(1, (int) metric.apply(graph));
+    }
+    
+    @Test
+    public void testDisconnectedGraph() {
+        DiameterMetric metric = new DiameterMetric();
+        ColouredGraph graph = buildDisconnectedGraph();
+        Assert.assertEquals(0, (int) metric.apply(graph));
     }
 
 }
