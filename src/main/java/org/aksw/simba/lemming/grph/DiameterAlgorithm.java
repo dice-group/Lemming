@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.grph;
 import java.util.Collections;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 
 import grph.Grph;
 import grph.GrphAlgorithm;
@@ -63,7 +64,7 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return performSearch(g, Grph.DIRECTION.out, sources);
     }
 
-    public int performSearch(final ColouredGraph g, final Grph.DIRECTION d, IntSet sources) {
+    protected int performSearch(final ColouredGraph g, final Grph.DIRECTION d, IntSet sources) {
         final int[] lengths = new int[Collections.max(sources) + 1];
         final ArrayListPath[] paths = new ArrayListPath[Collections.max(sources) + 1];
         new MultiThreadProcessing(g.getVertices()) {
@@ -95,7 +96,7 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return max;
     }
 
-    protected ArrayListPath performSearchInThread(ColouredGraph graph, int source, Grph.DIRECTION direction,
+    public ArrayListPath performSearchInThread(IColouredGraph graph, int source, Grph.DIRECTION direction,
             GraphSearchListener listener) {
         assert graph != null;
         assert graph.getVertices().contains(source);
