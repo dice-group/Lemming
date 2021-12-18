@@ -174,4 +174,6 @@ public interface IColouredGraph {
 
     int getDiameter();
 
+    int getDiameterFromVertex(int source);
+
 }

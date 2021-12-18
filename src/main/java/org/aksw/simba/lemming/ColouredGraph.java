@@ -20,6 +20,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.IntSetUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -831,5 +832,12 @@ public class ColouredGraph implements IColouredGraph {
      */
     public int[][] getNeighbors(DIRECTION direction) {
         return this.graph.getNeighbors(direction);
+    }
+
+    @Override
+    public int getDiameterFromVertex(int source) {
+        IntSet intSet = new DefaultIntSet(1);
+        intSet.add(source);
+        return this.diameterAlgorithm.performSearch(this, DIRECTION.out, intSet);
     }
 }
