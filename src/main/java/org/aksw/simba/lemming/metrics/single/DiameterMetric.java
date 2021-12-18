@@ -40,10 +40,11 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
             Operation graphOperation, UpdatableMetricResult previousResult) {
         DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
         ArrayListPath path = ((DiameterMetricResult) previousResult).getDiameterPath();
-        if (path.containsVertex(triple.tailId)) {
-            metricResult.setResult(graph.getDiameter());
-            metricResult.setDiameterPath(graph.getNodesInDiameter());
-            // TODO: pass only one vertex to DiameterAlgorithm for computing the diameter
+        if (path.containsVertex(triple.tailId)) { // TODO: Check various cases of Adding/Removing an edge from the
+                                                  // diameter path
+            ArrayListPath newPath = graph.getDiameterFromVertex(triple.tailId);
+            metricResult.setResult(newPath.getLength());
+            metricResult.setDiameterPath(newPath);
         } else {
             metricResult.setResult(previousResult.getResult());
         }

@@ -189,7 +189,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.graph.getDiameter();
     }
 
-    public int getDiameterFromVertex(int source) {
+    public ArrayListPath getDiameterFromVertex(int source) {
         return this.graph.getDiameterFromVertex(source);
     }
 

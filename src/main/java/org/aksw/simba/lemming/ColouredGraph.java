@@ -835,9 +835,7 @@ public class ColouredGraph implements IColouredGraph {
     }
 
     @Override
-    public int getDiameterFromVertex(int source) {
-        IntSet intSet = new DefaultIntSet(1);
-        intSet.add(source);
-        return this.diameterAlgorithm.performSearch(this, DIRECTION.out, intSet);
+    public ArrayListPath getDiameterFromVertex(int source) {
+        return this.diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);
     }
 }
