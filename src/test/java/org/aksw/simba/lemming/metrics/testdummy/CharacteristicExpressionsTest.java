@@ -25,6 +25,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator_new;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ExpressionChecker;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased;
@@ -446,10 +447,10 @@ public class CharacteristicExpressionsTest {
         LOGGER.info("Optimizing the mimic graph ...");
 
      // Initialize Error Score Calculator
-        ErrorScoreCalculator_new mErrScoreCalculator = new ErrorScoreCalculator_new(graphs, valuesCarrier);
+        ErrorScoreCalculator mErrScoreCalculator = new ErrorScoreCalculator(graphs, valuesCarrier);
         
 		// Initialize Expression Checker
-		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator, grphOptimizer.getmEdgeModifier(), valuesCarrier);
+		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator, valuesCarrier);
 		expressionChecker.setManualExpressionsSet(setOfExpressions);
 		expressionChecker.setmMapOfMeanValues(mapMetricValues);
 

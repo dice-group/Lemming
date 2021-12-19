@@ -16,6 +16,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator_new;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ExpressionChecker;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
@@ -36,11 +37,14 @@ public class GraphOptimization {
 	
 	private IGraphGeneration mGraphGenerator;
 	private EdgeModifier mEdgeModifier;
-	private ErrorScoreCalculator_new mErrScoreCalculator;
+	private ErrorScoreCalculator mErrScoreCalculator;
 	private List<Double> mLstErrorScore; 
 	private double mOptimizedTime =0;
 	
 	private long seed;
+	
+	//Declaring Expression Checker class
+	private ExpressionChecker expressionChecker;
 	
 	
 	/*-----------------------------------------------
@@ -58,12 +62,12 @@ public class GraphOptimization {
     }
 
 
-    public ErrorScoreCalculator_new getmErrScoreCalculator() {
+    public ErrorScoreCalculator getmErrScoreCalculator() {
         return mErrScoreCalculator;
     }
 
 
-    public void setmErrScoreCalculator(ErrorScoreCalculator_new mErrScoreCalculator) {
+    public void setmErrScoreCalculator(ErrorScoreCalculator mErrScoreCalculator) {
         this.mErrScoreCalculator = mErrScoreCalculator;
     }
 
@@ -76,13 +80,16 @@ public class GraphOptimization {
 		 *  mErrScoreCalculator is used to compute the error score compared to original
 		 *  constant values of the original graphs
 		 */
-		mErrScoreCalculator = new ErrorScoreCalculator_new(origGrphs, valueCarriers);
+		mErrScoreCalculator = new ErrorScoreCalculator(origGrphs, valueCarriers);
 		
 		// the graph generator
 		mGraphGenerator = graphGenerator;
 		
 		ColouredGraph clonedGrph = mGraphGenerator.getMimicGraph().clone();
 		mEdgeModifier = new EdgeModifier(clonedGrph, metrics);
+		
+		//Expression checker initialization
+		expressionChecker = new ExpressionChecker(mErrScoreCalculator, valueCarriers);
 	}
 	
 	
@@ -101,14 +108,27 @@ public class GraphOptimization {
 		
 		ObjectDoubleOpenHashMap<String> baseMetricValues = mEdgeModifier.getOriginalMetricValues();
 		
+		//Variable to store the metric name that should be changed
+		String metricNameToOptimize = ""; //Initializing with empty string
+		boolean metricValueToDecrease = false; // Variable to track whether value for the metric should be decreased(true) or not(false).
+		
 		double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues); 
 		for(int i = 0 ; i < mMaxIteration ; ++i){
 			
 			// add errorScore to tracking list result
 			mLstErrorScore.add(pErrScore);
 			
-			// go left by removing an edge
-			TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
+			TripleBaseSingleID lTriple;
+			
+            if (metricNameToOptimize.isEmpty()) {
+                // go left by removing an edge
+                lTriple = getOfferedEdgeforRemoving(mEdgeModifier.getGraph());
+            }else {
+                // As per the metric to be optimized, get a specific edge to remove
+                SingleValueMetric metricToOptimizeObject = getMetricObject(metricNameToOptimize);
+                lTriple = metricToOptimizeObject.getTripleRemove(mEdgeModifier.getGraph(), mEdgeModifier.getListPrevMetricsResult(), seed, metricValueToDecrease);
+            }
+            
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
 			//System.out.println("[L]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			
@@ -120,8 +140,19 @@ public class GraphOptimization {
 				lErrScore = mErrScoreCalculator.computeErrorScore(metricValuesOfLeft);
 			}
 
-			 // go right by adding a new edge
-			TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
+			
+			TripleBaseSingleID rTriple;
+			
+            if (metricNameToOptimize.isEmpty()) {
+                // go right by adding a new edge
+                rTriple = getOfferedEdgeForAdding(mEdgeModifier.getGraph());
+            } else {
+                // As per the metric to be optimized, get a specific edge to add
+                SingleValueMetric metricToOptimizeObject = getMetricObject(metricNameToOptimize);
+                rTriple = metricToOptimizeObject.getTripleAdd(mEdgeModifier.getGraph(), mGraphGenerator,
+                        mProcessRandomly, mEdgeModifier.getListPrevMetricsResult(), metricValueToDecrease);
+            }			
+			
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
 			//System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
 			if (metricValuesOfRight == null) {
@@ -143,6 +174,18 @@ public class GraphOptimization {
 				noOfRepeatedParent = 0;
 				//mEdgeModifier.updateMapMetricValues(metricValuesOfLeft);
 				mEdgeModifier.executeRemovingAnEdge(metricValuesOfLeft);
+				
+				//Calling expression checker to get metric that should be changed
+				expressionChecker.storeExpressions(metricValuesOfLeft);
+		        expressionChecker.checkExpressions();
+		        if(expressionChecker.getMaxDifferenceIncreaseMetric() > expressionChecker.getMaxDifferenceDecreaseMetric()) {
+		            metricNameToOptimize = expressionChecker.getMetricToIncrease();
+		            metricValueToDecrease = false;
+		        }else {
+		            metricNameToOptimize = expressionChecker.getMetricToDecrease();
+		            metricValueToDecrease = true;
+		        }
+				
 				continue;
 			}
 			if(minErrScore == rErrScore){
@@ -152,6 +195,18 @@ public class GraphOptimization {
 				noOfRepeatedParent = 0;
 				//mEdgeModifier.updateMapMetricValues(metricValuesOfRight);
 				mEdgeModifier.executeAddingAnEdge(metricValuesOfRight);
+				
+				//Calling expression checker to get metric that should be changed
+                expressionChecker.storeExpressions(metricValuesOfRight);
+                expressionChecker.checkExpressions();
+                if(expressionChecker.getMaxDifferenceIncreaseMetric() > expressionChecker.getMaxDifferenceDecreaseMetric()) {
+                    metricNameToOptimize = expressionChecker.getMetricToIncrease();
+                    metricValueToDecrease = false;
+                }else {
+                    metricNameToOptimize = expressionChecker.getMetricToDecrease();
+                    metricValueToDecrease = true;
+                }
+				
 				continue;
 			}
 			
@@ -381,6 +436,19 @@ public class GraphOptimization {
 	public void setNumberOfOptimizations(int iNumberOfOptimizations){
 		if(iNumberOfOptimizations > 0 )
 			mMaxIteration = iNumberOfOptimizations; 		
+	}
+	
+	public SingleValueMetric getMetricObject(String metricNameToOptimize) {
+	    SingleValueMetric metricToOptimizeObject = null;
+        List<SingleValueMetric> getmLstMetrics = mEdgeModifier.getmLstMetrics();
+        for(SingleValueMetric metric: getmLstMetrics) {
+            if(metric.getName().equals(metricNameToOptimize)) {
+                metricToOptimizeObject = metric;
+                break;
+            }
+        }
+        
+        return metricToOptimizeObject;
 	}
 }
 
