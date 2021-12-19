@@ -10,10 +10,14 @@ import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
 public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMetric{
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(EdgeTriangleMetric.class);
 
 	public EdgeTriangleMetric() {
 		super("#edgetriangles");
@@ -48,7 +52,11 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 
 		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices, change);
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;
-		newResult = newResult >= 0 ? newResult: 0;
+
+		if(newResult < 0){
+			LOGGER.error("The new result of edge triangle metric is negative : " + newResult );
+			newResult = 0;
+		}
 
 		return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
 	}
