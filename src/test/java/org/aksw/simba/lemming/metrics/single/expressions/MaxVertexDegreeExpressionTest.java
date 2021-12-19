@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.metrics.single.expressions;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphCreator;
@@ -52,7 +54,12 @@ public class MaxVertexDegreeExpressionTest extends UpdateMetricTest {
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = metric.getTripleRemove(graph, prevResult, seed, false);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        
+        TripleBaseSingleID triple = metric.getTripleRemove(graph, previousResultList, seed, false);
         graph = removeEdge(graph, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertTrue("Edge removed for candidate", newResult.getResult() <= metricValue);
@@ -95,7 +102,12 @@ public class MaxVertexDegreeExpressionTest extends UpdateMetricTest {
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = metric.getTripleRemove(graph, prevResult, seed, true);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        
+        TripleBaseSingleID triple = metric.getTripleRemove(graph, previousResultList, seed, true);
         graph = removeEdge(graph, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertTrue("Edge not removed for candidate", newResult.getResult() < metricValue);
@@ -138,7 +150,12 @@ public class MaxVertexDegreeExpressionTest extends UpdateMetricTest {
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = metric.getTripleRemove(graph, prevResult, seed, false);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        
+        TripleBaseSingleID triple = metric.getTripleRemove(graph, previousResultList, seed, false);
         graph = removeEdge(graph, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertTrue("Edge removed for candidate", newResult.getResult() <= metricValue);
@@ -191,7 +208,12 @@ public class MaxVertexDegreeExpressionTest extends UpdateMetricTest {
 
         // delete an edge
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = metric.getTripleRemove(graph, prevResult, seed, true);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        
+        TripleBaseSingleID triple = metric.getTripleRemove(graph, previousResultList, seed, true);
         graph = removeEdge(graph, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(graph, triple, Operation.REMOVE, prevResult);
         Assert.assertTrue("Edge not removed for candidate", newResult.getResult() < metricValue);

@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import java.util.List;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
@@ -50,7 +52,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     @Override
     public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
         MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
-
+        metricResultTempObj.setDirection(direction);//set direction
+        
         IntSet vertices = graph.getGraph().getVertices();
         
         int tempMinDegree = Integer.MAX_VALUE;
@@ -145,7 +148,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *      * 
      * @param graph
      *            - Input Graph
-     * @param previousResult
+     * @param previousResultList
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param seed
@@ -157,11 +160,21 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResultList, long seed,
             boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
 
         if (changeMetricValue) {// Need to reduce the metric
+
+            MaxVertexDegreeMetricResult maxResultObject = null;
+            //Logic to iterate over metric result object list and get the required object
+            for (UpdatableMetricResult resultObject : previousResultList) {
+                if (resultObject instanceof MaxVertexDegreeMetricResult) {
+                    maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
+                    break;
+
+                }
+            }
 
             // Initialization
             IntSet edges = null;
@@ -170,31 +183,31 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
             // Checking the metric, if in-degree or out-degree
             if ((direction == DIRECTION.in)) {
-                edges = graph.getInEdges(((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID());
-                //System.out.println("Maximum Vertex In Degree");
-             // Getting the edge of a vertex having maximum degree
+                edges = graph.getInEdges(maxResultObject.getMaxVertexID());
+                // System.out.println("Maximum Vertex In Degree");
+                // Getting the edge of a vertex having maximum degree
                 for (int edge : edges) {
                     edgeColour = graph.getEdgeColour(edge);
-                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getHeadOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID() ) {
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour())
+                            && graph.getHeadOfTheEdge(edge) == maxResultObject.getMaxVertexID()) {
                         edgeId = edge;
                         break;
                     }
                 }
-                
+
             } else if ((direction == DIRECTION.out)) {
-                edges = graph.getOutEdges(((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID());
-                //System.out.println("Maximum Vertex Out Degree");
-             // Getting the edge of a vertex having maximum degree
+                edges = graph.getOutEdges(maxResultObject.getMaxVertexID());
+                // System.out.println("Maximum Vertex Out Degree");
+                // Getting the edge of a vertex having maximum degree
                 for (int edge : edges) {
                     edgeColour = graph.getEdgeColour(edge);
-                    if (!edgeColour.equals(graph.getRDFTypePropertyColour()) && graph.getTailOfTheEdge(edge) == ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID()) {
+                    if (!edgeColour.equals(graph.getRDFTypePropertyColour())
+                            && graph.getTailOfTheEdge(edge) == maxResultObject.getMaxVertexID()) {
                         edgeId = edge;
                         break;
                     }
                 }
             }
-
-            
 
             if (edgeId != -1) {// If Edge is found
                 tripleRemove = new TripleBaseSingleID();
@@ -204,11 +217,11 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
                 tripleRemove.edgeColour = edgeColour;
             }
         }
-        
-        if(tripleRemove == null) { // If triple couldn't be found for the maximum vertex degree or we don't need to reduce the metric
+
+        if (tripleRemove == null) { // If triple couldn't be found for the maximum vertex degree or we don't need to
+                                    // reduce the metric
             tripleRemove = getTripleRemove(graph, seed);
         }
-        
 
         return tripleRemove;
     }
@@ -222,23 +235,36 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *            - boolean value If the variable is false, then it will generate a
      *            triple as per the implementation defined in the Generator class,
      *            else the triple is generated as per the default implementation.
-     * @param previousResult
+     * @param previousResultList
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param changeMetricValue
-     *            - boolean variable to indicate if the metric value should be increased
+     *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
-     *            triple that increases the metric value.
+     *            triple that reduces the metric value.
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResultList, boolean changeMetricValue) {
         TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         
-        if ((direction == DIRECTION.in) && changeMetricValue) {
-            tripleAdd.headId = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
-        } else if ((direction == DIRECTION.out) && changeMetricValue) {
-            tripleAdd.tailId = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
+        if (!changeMetricValue) {
+            
+            MaxVertexDegreeMetricResult maxResultObject = null;
+            //Logic to iterate over metric result object list and get the required object
+            for (UpdatableMetricResult resultObject : previousResultList) {
+                if (resultObject instanceof MaxVertexDegreeMetricResult) {
+                    maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
+                    break;
+
+                }
+            }
+            
+            if (direction == DIRECTION.in) {
+                tripleAdd.headId = maxResultObject.getMaxVertexID();
+            } else if (direction == DIRECTION.out) {
+                tripleAdd.tailId = maxResultObject.getMaxVertexID();
+            }
         }
         return tripleAdd;
     }

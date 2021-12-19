@@ -1,5 +1,9 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import static org.junit.Assert.assertNotNull;
+
+import grph.Grph.DIRECTION;
+
 /**
  * The class stores the candidate's set and their metric values, which is used
  * for computing the max vertex degrees for different metrics.
@@ -16,7 +20,8 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
     private int minVertexID = -1;
     // Variable for storing vertex id having minimum degree
 
-    private double avgVertexDegrees = -1;
+    private DIRECTION direction = null;
+    // Variable for storing direction of metric
     
     /**
      * Initialization calls super class with the name of metric and metric value.
@@ -56,12 +61,12 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
         this.minVertexID = minVertexID;
     }
 
-    public double getAvgVertexDegrees() {
-        return avgVertexDegrees;
+    public DIRECTION getDirection() {
+        return direction;
     }
 
-    public void setAvgVertexDegrees(double avgVertexDegrees) {
-        this.avgVertexDegrees = avgVertexDegrees;
+    public void setDirection(DIRECTION direction) {
+        this.direction = direction;
     }
 
 }
