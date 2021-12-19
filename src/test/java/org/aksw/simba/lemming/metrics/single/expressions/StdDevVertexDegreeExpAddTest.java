@@ -11,7 +11,6 @@ import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
-import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetricResult;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
@@ -36,7 +35,7 @@ public class StdDevVertexDegreeExpAddTest {
     String datasetPath;
     
     public StdDevVertexDegreeExpAddTest() {
-        inputGenerator = getGraphSWDF();
+        inputGenerator = getGraphGeo();
     }
     
     public HashMap<IGraphGeneration,ColouredGraph> getGraphGeo() {
@@ -160,9 +159,15 @@ public class StdDevVertexDegreeExpAddTest {
         System.out.println("Average Vertex Degree : " + avgMetricResult);
 
         // set average vertex degree
-        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        //((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
 
-        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, false);
+        UpdatableMetricResult avgMetricResultObject = avgMetric.applyUpdatable(clonedGraph);
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        previousResultList.add(avgMetricResultObject);
+        
+        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, previousResultList, true);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
         // Standard Deviation
@@ -200,10 +205,16 @@ public class StdDevVertexDegreeExpAddTest {
         System.out.println("Average Vertex Degree : " + avgMetricResult);
 
         // set average vertex degree
-        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        //((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        
+        UpdatableMetricResult avgMetricResultObject = avgMetric.applyUpdatable(clonedGraph);
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        previousResultList.add(avgMetricResultObject);
 
 
-        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, true);
+        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, previousResultList, false);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
         // Standard Deviation
@@ -241,10 +252,15 @@ public class StdDevVertexDegreeExpAddTest {
         System.out.println("Average Vertex Degree : " + avgMetricResult);
 
         // set average vertex degree
-        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        //((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
 
+        UpdatableMetricResult avgMetricResultObject = avgMetric.applyUpdatable(clonedGraph);
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        previousResultList.add(avgMetricResultObject);
 
-        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, false);
+        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, previousResultList, true);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
         // Standard Deviation
@@ -282,10 +298,16 @@ public class StdDevVertexDegreeExpAddTest {
         System.out.println("Average Vertex Degree : " + avgMetricResult);
 
         // set average vertex degree
-        ((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        //((MaxVertexDegreeMetricResult) prevResult).setAvgVertexDegrees(avgMetricResult);
+        
+        UpdatableMetricResult avgMetricResultObject = avgMetric.applyUpdatable(clonedGraph);
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(prevResult);
+        previousResultList.add(stdprevResult);
+        previousResultList.add(avgMetricResultObject);
 
 
-        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, prevResult, true);
+        TripleBaseSingleID triple = stdMetric.getTripleAdd(clonedGraph, mGrphGenerator, false, previousResultList, false);
         clonedGraph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
         
         // Standard Deviation

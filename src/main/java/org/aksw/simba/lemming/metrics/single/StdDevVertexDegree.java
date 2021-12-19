@@ -150,7 +150,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      *      * 
      * @param graph
      *            - Input Graph
-     * @param previousResult
+     * @param previousResultList
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param seed
@@ -162,13 +162,26 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean changeMetricValue) {
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResultList, long seed, boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
+        
+        MaxVertexDegreeMetricResult maxResultObject = null;
+        AvgVertexDegreeMetricResult avgResultObject = null;
+        //Logic to iterate over metric result object list and get the required object
+        for (UpdatableMetricResult resultObject : previousResultList) {
+            if (resultObject instanceof MaxVertexDegreeMetricResult) {
+                if(((MaxVertexDegreeMetricResult) resultObject).getDirection() == direction)
+                    maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
+            }else if(resultObject instanceof AvgVertexDegreeMetricResult) {
+                avgResultObject = (AvgVertexDegreeMetricResult) resultObject;
+            }
+        }
+        
         int vertexID = -1;
         if (changeMetricValue) {// Need to reduce the metric
-            vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
+            vertexID = maxResultObject.getMaxVertexID();
         } else {// Need to increase the metric
-            vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMinVertexID();
+            vertexID = maxResultObject.getMinVertexID();
         }
 
         // Initialization
@@ -215,14 +228,12 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             if (changeMetricValue) {
                 // If metric should be decreased, the degree of other vertex should be large
                 // than average vertex degree
-                compareDegrees = vertexDegreeTocheck > ((MaxVertexDegreeMetricResult) previousResult)
-                        .getAvgVertexDegrees() ? true : false;
+                compareDegrees = vertexDegreeTocheck > avgResultObject.getResult() ? true : false;
 
             } else {
                 // If metric should be increased, the degree of other vertex should be less than
                 // average vertex degree
-                compareDegrees = vertexDegreeTocheck < ((MaxVertexDegreeMetricResult) previousResult)
-                        .getAvgVertexDegrees() ? true : false;
+                compareDegrees = vertexDegreeTocheck < avgResultObject.getResult() ? true : false;
 
             }
 
@@ -262,37 +273,49 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      *            - Graph Generator used during execution
      * @param mProcessRandomly
      *            - boolean value
-     * @param previousResult
+     * @param previousResultList
      *            - UpdatableMetricResult object containing the previous computed
      *            results.
      * @param indicator
-     *            - boolean variable to indicate if metric value should be increased or not.
+     *            - boolean variable to indicate if the metric value should be decreased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
      * @return
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator,
-            boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean indicator) {
+            boolean mProcessRandomly, List<UpdatableMetricResult> previousResultList, boolean indicator) {
         TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+        
+        MaxVertexDegreeMetricResult maxResultObject = null;
+        AvgVertexDegreeMetricResult avgResultObject = null;
+        //Logic to iterate over metric result object list and get the required object
+        for (UpdatableMetricResult resultObject : previousResultList) {
+            if (resultObject instanceof MaxVertexDegreeMetricResult) {
+                if(((MaxVertexDegreeMetricResult) resultObject).getDirection() == direction)
+                       maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
+            }else if(resultObject instanceof AvgVertexDegreeMetricResult) {
+                avgResultObject = (AvgVertexDegreeMetricResult) resultObject;
+            }
+        }
 
         int vertexID = -1;
-        if (indicator) {// Need to increase the metric
-            vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID();
+        if (!indicator) {// Need to increase the metric
+            vertexID = maxResultObject.getMaxVertexID();
         } else {// Need to reduce the metric
-            vertexID = ((MaxVertexDegreeMetricResult) previousResult).getMinVertexID();
+            vertexID = maxResultObject.getMinVertexID();
         }
 
         if (direction == DIRECTION.in) {
             tripleAdd.headId = vertexID;
             for (Integer graphVertex : graph.getVertices()) {
-                if (indicator) {
-                    if (graph.getGraph().getInEdgeDegree(graphVertex) > ((MaxVertexDegreeMetricResult) previousResult)
-                            .getAvgVertexDegrees()) {
+                if (!indicator) {
+                    if (graph.getGraph().getInEdgeDegree(graphVertex) > avgResultObject.getResult()) {
                         tripleAdd.tailId = graphVertex;
                         break;
                     }
                 } else {
-                    if (graph.getGraph().getInEdgeDegree(graphVertex) < ((MaxVertexDegreeMetricResult) previousResult)
-                            .getAvgVertexDegrees()) {
+                    if (graph.getGraph().getInEdgeDegree(graphVertex) < avgResultObject.getResult()) {
                         tripleAdd.tailId = graphVertex;
                         break;
                     }
@@ -306,15 +329,13 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             tripleAdd.tailId = vertexID;
 
             for (Integer graphVertex : graph.getVertices()) {
-                if (indicator) {
-                    if (graph.getGraph().getOutEdgeDegree(graphVertex) > ((MaxVertexDegreeMetricResult) previousResult)
-                            .getAvgVertexDegrees()) {
+                if (!indicator) {
+                    if (graph.getGraph().getOutEdgeDegree(graphVertex) > avgResultObject.getResult()) {
                         tripleAdd.headId = graphVertex;
                         break;
                     }
                 } else {
-                    if (graph.getGraph().getOutEdgeDegree(graphVertex) < ((MaxVertexDegreeMetricResult) previousResult)
-                            .getAvgVertexDegrees()) {
+                    if (graph.getGraph().getOutEdgeDegree(graphVertex) < avgResultObject.getResult()) {
                         tripleAdd.headId = graphVertex;
                         break;
                     }
