@@ -19,6 +19,8 @@ import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 public class NodeTriangleMetric extends AbstractMetric implements SingleValueMetric{
@@ -92,11 +94,9 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResult, long seed,
             boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
-
-        if (changeMetricValue) {// Need to reduce the metric
 
             for (Integer edge : graph.getEdges()) {// Iterating edges
 
@@ -109,9 +109,18 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
                 if ((IntSetUtil.intersection(graph.getEdgesIncidentTo(firstIncidentVertex),
                         graph.getEdgesIncidentTo(secondIncidentVertex)).size() == 1)
                         && (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex)
-                                .size() > 0)) {
+                                .size() > 0) && changeMetricValue) {
                     // if only one edge is present between the vertices then removing the edge will
                     // reduce the node triangle
+                    tripleRemove = new TripleBaseSingleID();
+                    tripleRemove.tailId = graph.getTailOfTheEdge(edge);
+                    tripleRemove.headId = graph.getHeadOfTheEdge(edge);
+                    tripleRemove.edgeId = edge;
+                    tripleRemove.edgeColour = graph.getEdgeColour(edge);
+                    break;
+                }else if((IntSetUtil.intersection(graph.getEdgesIncidentTo(firstIncidentVertex),
+                        graph.getEdgesIncidentTo(secondIncidentVertex)).size() > 1)
+                         && !changeMetricValue) {
                     tripleRemove = new TripleBaseSingleID();
                     tripleRemove.tailId = graph.getTailOfTheEdge(edge);
                     tripleRemove.headId = graph.getHeadOfTheEdge(edge);
@@ -121,7 +130,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
                 }
             }
 
-        }
+        
 
         if (tripleRemove == null) { // If triple couldn't be found such that the node triangle metric can be
                                     // reduced.
@@ -150,7 +159,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
         TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         
         if (changeMetricValue) {// Need to increase the metric
