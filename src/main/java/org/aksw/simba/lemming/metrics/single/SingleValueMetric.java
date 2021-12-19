@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import java.util.List;
 import java.util.Random;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -108,7 +109,7 @@ public interface SingleValueMetric extends Metric {
      *            triple that reduces the metric value.
      * @return
      */
-    default TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed, boolean changeMetricValue) {
+    default TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResult, long seed, boolean changeMetricValue) {
         return getTripleRemove(graph, seed);
     }
 
@@ -151,7 +152,7 @@ public interface SingleValueMetric extends Metric {
      * 
      * @return
      */
-    default TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, UpdatableMetricResult previousResult, boolean changeMetricValue) {
+    default TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
         return getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
     }
 
