@@ -1,13 +1,10 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics.utils;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.algo.expression.Expression;
-import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -26,8 +23,6 @@ public class ExpressionChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionChecker.class);
 
-    // boolean variable configured to read manual expressions
-    private boolean manualExpression = true;
     private Set<Expression> manualExpressionsSet = new HashSet<>();
 
     public void setManualExpressionsSet(Set<Expression> manualExpressionsSet) {
@@ -43,8 +38,6 @@ public class ExpressionChecker {
         this.mMapOfMeanValues = new ObjectDoubleOpenHashMap<>();
         this.mMapOfMeanValues = mMapOfMeanValues;
     }
-
-    private HashMap<String, UpdatableMetricResult> mMapPrevMetricsResult; // Map to store previous metric results
 
     private ConstantValueStorage mValueCarrier;
 
@@ -82,13 +75,11 @@ public class ExpressionChecker {
      * @param edgeModifier
      * @param valueCarrier
      */
-    public ExpressionChecker(ErrorScoreCalculator_new errScoreCalculator, EdgeModifier edgeModifier,
-            ConstantValueStorage valueCarrier) {
+    public ExpressionChecker(ErrorScoreCalculator errScoreCalculator, ConstantValueStorage valueCarrier) {
 
         mValueCarrier = valueCarrier;
 
         mMapOfMeanValues = errScoreCalculator.getmMapOfMeanValues();
-        //mMapPrevMetricsResult = edgeModifier.getmMapPrevMetricsResult();
 
     }
 
@@ -101,7 +92,7 @@ public class ExpressionChecker {
      * @param valueCarrier
      */
     public ExpressionChecker(Set<Expression> manualExpressionsSet, ObjectDoubleOpenHashMap<String> mMapOfMeanValues) {
-
+        // Constructor for testing purposes
         setManualExpressionsSet(manualExpressionsSet);
         setmMapOfMeanValues(mMapOfMeanValues);
 
@@ -152,12 +143,7 @@ public class ExpressionChecker {
             Map<Expression, Map<String, Double>> mapConstantValues = mValueCarrier.getMapConstantValues();
             if (mapConstantValues != null) {
                 Set<Expression> setExpressions = new HashSet<>();
-
-                if (!manualExpression) {
-                    setExpressions = mapConstantValues.keySet();
-                } else {
-
-                }
+                setExpressions = mapConstantValues.keySet();
 
                 for (Expression expr : setExpressions) {
                     String key = expr.toString();
@@ -241,7 +227,7 @@ public class ExpressionChecker {
         setMetricsToIncrease.removeAll(duplicateSet);
 
         for (String metric : setMetricsToDecrease) {
-            if (maxDifferenceDecreaseMetric < mMapexpressions.get(expr) && !NumberUtils.isParsable(metric) ) {
+            if (maxDifferenceDecreaseMetric < mMapexpressions.get(expr) && !NumberUtils.isParsable(metric)) {
                 if (!metric.equals("#vertices") && !metric.equals("#edges")) {
                     metricToDecrease = metric;
                     maxDifferenceDecreaseMetric = mMapexpressions.get(expr);
@@ -251,7 +237,7 @@ public class ExpressionChecker {
 
         for (String metric : setMetricsToIncrease) {
             if (maxDifferenceIncreaseMetric < mMapexpressions.get(expr)) {
-                if (!metric.equals("#vertices") && !metric.equals("#edges") && !NumberUtils.isParsable(metric) ) {
+                if (!metric.equals("#vertices") && !metric.equals("#edges") && !NumberUtils.isParsable(metric)) {
                     metricToIncrease = metric;
                     maxDifferenceIncreaseMetric = mMapexpressions.get(expr);
                 }
