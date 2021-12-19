@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-public class ErrorScoreCalculator_new {
+public class ErrorScoreCalculator {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ErrorScoreCalculator_new.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ErrorScoreCalculator.class);
 	
 	/*
 	 * mean value of each expression
@@ -62,7 +62,7 @@ public class ErrorScoreCalculator_new {
 	 * @param sampleGraphs the array of sampled graph
 	 * @param constExprs the set of constant expressions
 	 */
-	public ErrorScoreCalculator_new(ColouredGraph[] sampleGraphs, ConstantValueStorage valueCarrier){
+	public ErrorScoreCalculator(ColouredGraph[] sampleGraphs, ConstantValueStorage valueCarrier){
 		mValueCarrier = valueCarrier;
 		mINoOfGraphs = sampleGraphs.length;
 		
