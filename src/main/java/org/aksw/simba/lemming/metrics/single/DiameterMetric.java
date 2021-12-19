@@ -38,17 +38,18 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
 
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
-        DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
-        ArrayListPath path = ((DiameterMetricResult) previousResult).getDiameterPath();
-        if (path.containsVertex(triple.tailId)) {
+        DiameterMetricResult metricResult = ((DiameterMetricResult) previousResult);
+        ArrayListPath path = metricResult.getDiameterPath();
+        if (path.containsVertex(triple.tailId) && graphOperation == Operation.ADD) {
             // TODO: Check various cases of Adding/Removing an edge from the
             // diameter path
             int startNode = path.getSource();
             ArrayListPath newPath = graph.getDiameterFromVertex(startNode);
             metricResult.setResult(newPath.getLength());
             metricResult.setDiameterPath(newPath);
-        } else {
-            metricResult.setResult(previousResult.getResult());
+        } else if (path.containsVertex(triple.headId) && path.containsVertex(triple.tailId)
+                && graphOperation == Operation.REMOVE) {
+            metricResult = (DiameterMetricResult) applyUpdatable(graph);
         }
         return metricResult;
 
