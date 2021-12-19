@@ -12,6 +12,8 @@ import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
+import java.util.List;
+
 import javax.annotation.Nonnull;
 
 public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMetric{
@@ -98,7 +100,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return
      */
     @Override
-    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, UpdatableMetricResult previousResult, long seed,
+    public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResult, long seed,
             boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
 

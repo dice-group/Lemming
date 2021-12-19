@@ -153,7 +153,11 @@ public class EdgeTriangleExpressionTest extends UpdateMetricTest {
         System.out.println("Edge Triangle metric (Old Result) : " + edgeTriangleMetricResult.getResult());
 
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = edgeTriangleMetric.getTripleRemove(graph, edgeTriangleMetricResult, seed, true);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(edgeTriangleMetricResult);
+        
+        TripleBaseSingleID triple = edgeTriangleMetric.getTripleRemove(graph, previousResultList, seed, true);
 
         graph = removeEdge(graph, triple.edgeId);
 
@@ -179,7 +183,11 @@ public class EdgeTriangleExpressionTest extends UpdateMetricTest {
         System.out.println("Edge Triangle metric (Old Result) : " + edgeTriangleMetricResult.getResult());
 
         long seed = System.currentTimeMillis();
-        TripleBaseSingleID triple = edgeTriangleMetric.getTripleRemove(graph, edgeTriangleMetricResult, seed, false);
+        
+        List<UpdatableMetricResult> previousResultList = new ArrayList<>();
+        previousResultList.add(edgeTriangleMetricResult);
+        
+        TripleBaseSingleID triple = edgeTriangleMetric.getTripleRemove(graph, previousResultList, seed, false);
 
         graph = removeEdge(graph, triple.edgeId);
 
