@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -181,6 +182,20 @@ public class EdgeModifier {
 
     public HashMap<String, UpdatableMetricResult> getMapPrevMetricsResult() {
         return mMapPrevMetricsResult;
+    }
+    
+    public List<UpdatableMetricResult> getListPrevMetricsResult(){
+        List<UpdatableMetricResult> prevMetricResultList = new ArrayList<>();
+        
+        for(String metricName : mMapPrevMetricsResult.keySet()) {
+            prevMetricResultList.add(mMapPrevMetricsResult.get(metricName));
+        }
+        
+        return prevMetricResultList;
+    }
+
+    public List<SingleValueMetric> getmLstMetrics() {
+        return mLstMetrics;
     }
 
 }
