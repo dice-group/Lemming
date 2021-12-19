@@ -140,7 +140,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
     public int[][] getNeighbors(DIRECTION direction) {
         int[][] neighbors = super.getNeighbors(direction);
         System.out.println(neighbors[triple.tailId]);
-        ArrayUtils.remove(neighbors[triple.tailId], triple.headId);
+        ArrayUtils.removeElements(neighbors[triple.tailId], triple.headId);
         System.out.println(neighbors[triple.tailId]);
         return neighbors;
     }
