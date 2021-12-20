@@ -33,7 +33,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 	}
 
 	/**
-	 * @param graph   the given graph is not modified!
+	 * @param graph the given graph is already modified!
 	 */
 	@Override
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
@@ -48,7 +48,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 		}
 
 		int change = opt==Operation.REMOVE ? -1 : 1 ;
-		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size();
+		int numEdgesBetweenVertices = IntSetUtil.intersection(graph.getEdgesIncidentTo(tailId), graph.getEdgesIncidentTo(headId)).size() - change;
 
 		int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices, change);
 		double newResult = previousResult.getResult() + change*differenceOfSubGraph;
