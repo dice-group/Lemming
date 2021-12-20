@@ -80,6 +80,8 @@ public class EdgeModifier {
 
             tryToRemovedEdge = triple;
             ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
+            //remove an edge
+            graph.removeEdge(triple.edgeId);
 
             for (SingleValueMetric metric : mLstMetrics) {
                 // Calling update method to get the metric values based on previous results
@@ -88,6 +90,8 @@ public class EdgeModifier {
                 mMapMetricsResultRemoveEdge.put(metric.getName(), result);
                 mapMetricValues.put(metric.getName(), result.getResult());
             }
+            //reverse the graph, note: the edgeId could be changed after reversion
+            triple.edgeId = graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
             return mapMetricValues;
         } else {
@@ -102,6 +106,9 @@ public class EdgeModifier {
             tryToAddedEdge = triple;
             ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 
+            //add an edge, note: the edgeId could be changed after adding triple into graph
+            triple.edgeId = graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
+
             for (SingleValueMetric metric : mLstMetrics) {
                 // Calling update method to get the metric values based on previous results
                 UpdatableMetricResult result = metric.update(graph, triple, Operation.ADD,
@@ -110,6 +117,8 @@ public class EdgeModifier {
                 mapMetricValues.put(metric.getName(), result.getResult());
             }
 
+            //reverse the graph
+            graph.removeEdge(triple.edgeId);
             return mapMetricValues;
         } else {
             LOGGER.warn("Invalid triple for adding an edge!");
