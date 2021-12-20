@@ -33,7 +33,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 	}
 
 	/**
-	 * @param graph   the given graph is not modified!
+	 * @param graph   the given graph is already modified!
 	 */
 	@Override
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
@@ -56,12 +56,12 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 
 		//1.case: remove an edge, and number of edges between head and tail is 1
 		// -> new metric = old metric - number of common vertices
-		if(numEdgesBetweenVertices==1 && opt == Operation.REMOVE){
+		if(numEdgesBetweenVertices==0 && opt == Operation.REMOVE){
 			newResult = newResult - numberOfCommon;
 
 		//2.case: add an edge, and number of edges between head and tail is 0
 		// -> new metric = old metric + number of common vertices
-		}else if (numEdgesBetweenVertices==0 && opt == Operation.ADD){
+		}else if (numEdgesBetweenVertices==1 && opt == Operation.ADD){
 			newResult = newResult + numberOfCommon;
 		}
 		if(newResult < 0){
