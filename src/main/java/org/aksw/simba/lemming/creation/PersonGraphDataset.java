@@ -51,16 +51,15 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 					 //read file to model
 					 personModel.read(file.getAbsolutePath(), "TTL");
 					 LOGGER.info("Read data to model - "+ personModel.size() + " triples");			 
-					 
-					 Inferer inferer = new Inferer(true);
+
 					 OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					 ontModel.getDocumentManager().setProcessImports(false);
-					 ontModel.read(modelOntMap.get(fileName));					 
+					 ontModel.read(modelOntMap.get(fileName));
 					 ontModel.read("22-rdf-syntax-ns", "TTL");
 					 ontModel.read("rdf-schema", "TTL");
-					 
+					 Inferer inferer = new Inferer(true, ontModel);
 					 //returns a new model with the added triples
-					 personModel = inferer.process(personModel, ontModel);
+					 personModel = inferer.process(personModel);
 					 
 					 ColouredGraph graph = creator.processModel(personModel);
 					 if (graph != null) {

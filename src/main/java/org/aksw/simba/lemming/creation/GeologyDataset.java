@@ -27,41 +27,27 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 
 		File folder = new File(dataFolderPath);
 		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
+			//build ontology model for Dataset
 			OntModel ontModel = ModelFactory.createOntologyModel();
 			ontModel.getDocumentManager().setProcessImports(false);
 			ontModel.read("22-rdf-syntax-ns", "TTL");
 			ontModel.read("rdf-schema", "TTL");
-			ontModel.read("geology/void.ttl");
-			ontModel.read("geology/foaf.ttl");
-			ontModel.read("geology/skos.ttl");
-			ontModel.read("geology/dcterms.ttl");
-			ontModel.read("geology/owl.ttl");
-			ontModel.read("geology/dc.ttl");
-			ontModel.read("geology/geometry.ttl");
-			ontModel.read("geology/geosparql.ttl");
-			ontModel.read("geology/gts.ttl");
-			ontModel.read("geology/gts-w3c.ttl");
-			ontModel.read("geology/rank.ttl");
-			ontModel.read("geology/sampling.ttl");
-			ontModel.read("geology/sam-lite.ttl");
-			ontModel.read("geology/sf.ttl");
-			ontModel.read("geology/sosa.ttl");
-			ontModel.read("geology/thors.ttl");
-			ontModel.read("geology/time.ttl");
-			ontModel.read("geology/basic.ttl");
-			ontModel.read("geology/temporal.ttl");
-			
+			File ontFolder = new File("geology");
+			for(File file : ontFolder.listFiles()){
+				ontModel.read(file.getAbsolutePath(), "ttl");
+			}
+			// sort files'name ascendently
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
-			// sort ascendently
 			Collections.sort(lstSortedFilesByName);
+
+			Inferer inferer = new Inferer(true, ontModel);
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
 				Model geologyModel = ModelFactory.createDefaultModel();
 				geologyModel.read(file.getAbsolutePath(), "TTL");
 				LOGGER.info("Read data to model - " + geologyModel.size() + " triples " + file.getName());
-				Inferer inferer = new Inferer(true);
 				// returns a new model with the added triples
-				geologyModel = inferer.process(geologyModel, ontModel);
+				geologyModel = inferer.process(geologyModel);
 				ColouredGraph graph = creator.processModel(geologyModel);
 				if (graph != null) {
 					LOGGER.info("Generated graph of " + geologyModel.size() + " triples");

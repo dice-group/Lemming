@@ -70,6 +70,22 @@ public class ObjectDistribution<T> {
     public void setValues(double[] values) {
         this.values = values;
     }
+    
+    /**
+     * 
+     * @return the length of the distribution
+     */
+    public int getLength() {
+    	return sampleSpace.length;
+    }
+    
+    /**
+     * 
+     * @return True if the distribution has no entries
+     */
+    public boolean isEmpty() {
+    	return sampleSpace.length > 0 ? false: true;
+    }
 
     @Override
     public int hashCode() {
