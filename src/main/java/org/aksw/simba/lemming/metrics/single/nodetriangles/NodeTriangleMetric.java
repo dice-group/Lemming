@@ -11,10 +11,14 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 
 public class NodeTriangleMetric extends AbstractMetric implements SingleValueMetric {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NodeTriangleMetric.class);
 
     public NodeTriangleMetric() {
         super("#nodetriangles");
@@ -45,7 +49,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
         }
 
         int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices();
-                
+
         int numberOfCommon = MetricUtils.getVerticesInCommon(graph, headId, tailId).size();
 
         // the previous result could be maintained except for 2 cases:
@@ -61,8 +65,10 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
         } else if (numEdgesBetweenVertices == 1 && opt == Operation.ADD) {
             newResult = newResult + numberOfCommon;
         }
-
-        newResult = newResult >= 0 ? newResult : 0;
+        if (newResult < 0) {
+            LOGGER.error("The new result of node triangle metric is negative : " + newResult);
+            newResult = 0;
+        }
 
         return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
     }
