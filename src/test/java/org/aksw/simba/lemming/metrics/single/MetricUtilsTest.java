@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import junit.framework.Assert;
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.junit.Test;
 
@@ -13,20 +14,20 @@ public class MetricUtilsTest {
 
     @Test
     public void testGetVerticesCommon() {
-        ColouredGraph graph = buildGraph();
-        IntSet commonVertices1 = MetricUtils.getVerticesInCommon(graph, 0, 2);
+        ColouredGraphDecorator decoratedGraph = new ColouredGraphDecorator(buildGraph());
+        IntSet commonVertices1 = MetricUtils.getVerticesInCommon(decoratedGraph, 0, 2);
         IntSet expectedSet1 = createExpectedIntSet(1, 3);
         assertEqualIntSet(expectedSet1, commonVertices1);
 
-        IntSet commonVertices2 = MetricUtils.getVerticesInCommon(graph, 1, 3);
+        IntSet commonVertices2 = MetricUtils.getVerticesInCommon(decoratedGraph, 1, 3);
         IntSet expectedSet2 = createExpectedIntSet(0, 2);
         assertEqualIntSet(expectedSet2, commonVertices2);
 
-        IntSet commonVertices3 = MetricUtils.getVerticesInCommon(graph, 4, 5);
+        IntSet commonVertices3 = MetricUtils.getVerticesInCommon(decoratedGraph, 4, 5);
         IntSet expectedEmptySet = createExpectedIntSet();
         assertEqualIntSet(expectedEmptySet, commonVertices3);
 
-        IntSet commonVertices4 = MetricUtils.getVerticesInCommon(graph, 0, 1);
+        IntSet commonVertices4 = MetricUtils.getVerticesInCommon(decoratedGraph, 0, 1);
         assertEqualIntSet(expectedEmptySet, commonVertices4);
     }
 
