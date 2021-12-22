@@ -8,8 +8,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * 
- * Concrete Decorator class to simulate removing of an edge to the ColouredGraph
- * object in the current iteration
+ * Concrete Decorator class to simulate the removal of an edge from the
+ * IColouredGraph object in the current iteration
  * 
  * @author Pranav
  *
@@ -17,16 +17,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 public class RemoveEdgeDecorator extends ColouredGraphDecorator {
 
     /**
-     * 
-     */
-    public RemoveEdgeDecorator() {
-        super();
-    }
-
-    /**
      * Class Constructor
      * 
-     * @param graph            - ColouredGraph object that is to be decorated
+     * @param graph            - IColouredGraph object that is to be decorated
      * @param isAddingEdgeFlag - represents if an edge is being added to the
      *                         ColouredGraph. flag is true if edge is being added
      *                         and false if the edge is being removed

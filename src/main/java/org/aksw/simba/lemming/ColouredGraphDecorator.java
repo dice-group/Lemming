@@ -18,29 +18,25 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public class ColouredGraphDecorator implements IColouredGraph {
 
-    protected IColouredGraph graph;
+    protected IColouredGraph decoratedGraph;
     protected boolean isAddingEdge;
     protected TripleBaseSingleID triple;
-
-    public ColouredGraphDecorator() {
-        this.graph = null;
-        this.isAddingEdge = false;
-        this.triple = null;
-    }
 
     /**
      * Class constructor
      * 
-     * @param isAddingEdge - represents the edge operation.Flag is true if edge is
+     * @param graph        - the IColouredGraph graph object representing the Graph
+     *                     in the current iteration
+     * @param isAddingEdge - represents the edge operation. Flag is true if edge is
      *                     being added. Flag is false If edge is being removed.
      */
     public ColouredGraphDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
         this.isAddingEdge = isAddingEdgeFlag;
     }
 
     public ColouredGraphDecorator(IColouredGraph graph) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
     }
 
     /**
@@ -49,7 +45,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      * @return ColouredGraphDecorator graph
      */
     public IColouredGraph getGraph() {
-        return this.graph;
+        return this.decoratedGraph;
     }
 
     /**
@@ -78,7 +74,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getEdgesIncidentTo(int verticeId) {
-        return this.graph.getEdgesIncidentTo(verticeId);
+        return this.decoratedGraph.getEdgesIncidentTo(verticeId);
     }
 
     /**
@@ -89,7 +85,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public int getInEdgeDegree(int vertexId) {
-        return this.graph.getInEdgeDegree(vertexId);
+        return this.decoratedGraph.getInEdgeDegree(vertexId);
     }
 
     /**
@@ -100,7 +96,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public int getOutEdgeDegree(int vertexId) {
-        return this.graph.getOutEdgeDegree(vertexId);
+        return this.decoratedGraph.getOutEdgeDegree(vertexId);
     }
 
     /**
@@ -110,7 +106,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public double getMaxInEdgeDegrees() {
-        return this.graph.getMaxInEdgeDegrees();
+        return this.decoratedGraph.getMaxInEdgeDegrees();
     }
 
     /**
@@ -120,7 +116,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public double getMaxOutEdgeDegrees() {
-        return this.graph.getMaxOutEdgeDegrees();
+        return this.decoratedGraph.getMaxOutEdgeDegrees();
     }
 
     /**
@@ -130,7 +126,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntArrayList getAllInEdgeDegrees() {
-        return this.graph.getAllInEdgeDegrees();
+        return this.decoratedGraph.getAllInEdgeDegrees();
     }
 
     /**
@@ -140,7 +136,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntArrayList getAllOutEdgeDegrees() {
-        return this.graph.getAllOutEdgeDegrees();
+        return this.decoratedGraph.getAllOutEdgeDegrees();
     }
 
     /**
@@ -150,7 +146,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public double getNumberOfEdges() {
-        return this.graph.getNumberOfEdges();
+        return this.decoratedGraph.getNumberOfEdges();
     }
 
     /**
@@ -160,11 +156,11 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public double getNumberOfVertices() {
-        return this.graph.getNumberOfVertices();
+        return this.decoratedGraph.getNumberOfVertices();
     }
 
     public void setGraph(IColouredGraph graph) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
 
     }
 
@@ -178,7 +174,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public int addEdge(int tailId, int headId, BitSet edgeColour) {
-        return this.graph.addEdge(tailId, headId, edgeColour);
+        return this.decoratedGraph.addEdge(tailId, headId, edgeColour);
     }
 
     /**
@@ -188,7 +184,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public void removeEdge(int edgeId) {
-        this.graph.removeEdge(edgeId);
+        this.decoratedGraph.removeEdge(edgeId);
     }
 
     /**
@@ -198,7 +194,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getEdges() {
-        return this.graph.getEdges();
+        return this.decoratedGraph.getEdges();
     }
 
     /**
@@ -209,7 +205,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public BitSet getEdgeColour(int edgeId) {
-        return this.graph.getEdgeColour(edgeId);
+        return this.decoratedGraph.getEdgeColour(edgeId);
     }
 
     /**
@@ -219,7 +215,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public Object getRDFTypePropertyColour() {
-        return this.graph.getRDFTypePropertyColour();
+        return this.decoratedGraph.getRDFTypePropertyColour();
     }
 
     /**
@@ -230,7 +226,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public int getTailOfTheEdge(int edgeId) {
-        return this.graph.getTailOfTheEdge(edgeId);
+        return this.decoratedGraph.getTailOfTheEdge(edgeId);
     }
 
     /**
@@ -241,7 +237,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public int getHeadOfTheEdge(int edgeId) {
-        return this.graph.getHeadOfTheEdge(edgeId);
+        return this.decoratedGraph.getHeadOfTheEdge(edgeId);
     }
 
     /**
@@ -252,7 +248,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getVerticesIncidentToEdge(int edgeId) {
-        return this.graph.getVerticesIncidentToEdge(edgeId);
+        return this.decoratedGraph.getVerticesIncidentToEdge(edgeId);
     }
 
     /**
@@ -263,7 +259,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getInNeighbors(int vertexId) {
-        return this.graph.getInNeighbors(vertexId);
+        return this.decoratedGraph.getInNeighbors(vertexId);
     }
 
     /**
@@ -274,7 +270,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getOutNeighbors(int vertexId) {
-        return this.graph.getOutNeighbors(vertexId);
+        return this.decoratedGraph.getOutNeighbors(vertexId);
     }
 
     /**
@@ -284,17 +280,24 @@ public class ColouredGraphDecorator implements IColouredGraph {
      */
     @Override
     public IntSet getVertices() {
-        return this.graph.getVertices();
+        return this.decoratedGraph.getVertices();
     }
 
     /**
-     * Get number of edges between two vertices
+     * Get number of edges between the two vertices where an edge will be added or
+     * removed.
      * 
-     * @return int - number of edges
+     * @return int - number of edges which will be used in triangle metrics
+     *         computation
      */
     public int getNumberOfEdgesBetweenVertices() {
-        return IntSetUtil.intersection(this.graph.getEdgesIncidentTo(this.triple.tailId),
-                this.graph.getEdgesIncidentTo(this.triple.headId)).size();
+        int counter = 0;
+        for (int edgeId : this.decoratedGraph.getEdgesIncidentTo(this.triple.tailId)) {
+            if (this.decoratedGraph.getEdgesIncidentTo(this.triple.headId).contains(edgeId)) {
+                counter++;
+            }
+        }
+        return counter;
     }
 
 }
