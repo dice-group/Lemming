@@ -2,7 +2,7 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.VertexDegrees;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import it.unimi.dsi.fastutil.ints.IntIterator;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -35,180 +35,54 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     /**
-     * The method checks if we need to compute in degree or out-degree and then
-     * calls the metricComputationMaxDegree with correct parameters.
+     * The method contains logic that computes the maximum vertex degree metric
+     * efficiently. It will check the previously stored maximum vertex degree and
+     * the vertex on which add or remove an edge graph operation is performed. If
+     * the vertex has the same degree as the maximum vertex degree then the metric
+     * value will be updated depending upon the graph operation.
      * 
-     * @param triple
-     *            - edge on which graph operation is performed.
-     * @param metric
-     *            - input metric which needs to be computed.
-     * @param graph
-     *            - input graph.
-     * @param graphOperation
-     *            - boolean value indicating graph operation. ("true" for adding an
-     *            edge and "false" for removing an edge)
-     * @param previousResult
-     *            - UpdatableMetricResult object containing the previous computed
-     *            results.
+     * @param triple         - edge on which graph operation is performed.
+     * @param graph          - input graph.
+     * @param graphOperation - Enum indicating graph operation. ("ADD" for adding an
+     *                       edge and "REMOVE" for removing an edge)
+     * @param previousResult - UpdatableMetricResult object containing the previous
+     *                       computed results.
      * @return
      */
     @Override
-    public UpdatableMetricResult update(TripleBaseSingleID triple, ColouredGraph graph, boolean graphOperation,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-        UpdatableMetricResult newMetricResult;
+    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
+        // Need to compute MaxVertexInDegree metric or MaxVertexOutDegree
 
+        int vertexID = direction == DIRECTION.in ? triple.headId : triple.tailId;
+        // For MaxVertexInDegree, need to use triple.headId else triple.tailId
+        int updateVertexDegree = graphOperation == Operation.ADD ? 1 : -1;
+        // variable to track remove an edge or add an edge operation.
+
+        double metVal = ((SingleValueMetricResult) previousResult).getResult();
+        int changedDegree = getChangedDegree(graph, vertexID, direction);
+        int degree = changedDegree - updateVertexDegree;
+        if (updateVertexDegree == -1) { // Remove an edge
+            if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then apply method is called.
+                metVal = apply(graph);
+            }
+        } else { // Add an edge
+            if (degree == metVal) {// If degree of a vertex is equal to maximum vertex then max vertex degree is
+                                   // changed.
+                metVal = changedDegree;
+            }
+        }
+
+        return new SingleValueMetricResult(getName(), metVal);
+
+    }
+
+    private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
         if (direction == DIRECTION.in) {
-
-            if (graphOperation) { // graphOperation is true then add an edge otherwise its remove an edge
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in,
-                        triple.headId, triple, 1, previousResult, mVertexDegrees);
-            } else {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.in,
-                        triple.headId, triple, -1, previousResult, mVertexDegrees);
-            }
-
+            return graph.getGraph().getInEdgeDegree(vertexID);
         } else {
-            if (graphOperation) {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out,
-                        triple.tailId, triple, 1, previousResult, mVertexDegrees);
-            } else {
-                newMetricResult = metricComputationMaxDegree(graph, DIRECTION.out,
-                        triple.tailId, triple, -1, previousResult, mVertexDegrees);
-            }
-
+            return graph.getGraph().getOutEdgeDegree(vertexID);
         }
-
-        return newMetricResult;
     }
-
-    /**
-     * The method contains logic that reduces the number of calls to apply method
-     * for the max vertex degree metric.
-     * 
-     * @param metric
-     *            - metric which should be calculated.
-     * @param graph
-     *            - input graph.
-     * @param metricName
-     *            - can be "RemoveAnEdge" or "AddAnEdge" indicating how the edge is
-     *            modified.
-     * @param direction
-     *            - this is in or out based on the operation.
-     * @param vertexID
-     *            - The vertex that is modified.
-     * @return
-     */
-    private UpdatableMetricResult metricComputationMaxDegree(ColouredGraph graph, 
-            DIRECTION direction, int vertexID, TripleBaseSingleID triple, int updateVertexDegree,
-            UpdatableMetricResult previousResult, VertexDegrees mVertexDegrees) {
-        double metVal;
-
-        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), 0.0);
-
-        if (previousResult instanceof MaxVertexDegreeMetricResult) {
-            // Set previously stored maps
-            metricResultTempObj
-                    .setCandidatesMetricSet(((MaxVertexDegreeMetricResult) previousResult).getmMapCandidatesMetric());
-            metricResultTempObj.setMaxVertexDegree(
-                    ((MaxVertexDegreeMetricResult) previousResult).getMaxVertexDegree());
-        }
-
-        IntSet intSetTemp = metricResultTempObj.getmMapCandidatesMetric();
-        // Get the current candidate set
-
-        if (intSetTemp.size() == 0) { // Initially the Candidate set will be empty, hence need to call the apply
-                                      // method and store the candidates
-
-            metVal = apply(graph); // apply the metric and get the value
-
-            IntSet maxDegreeVertices;
-            maxDegreeVertices = mVertexDegrees.getVerticesForDegree((int) metVal, direction);
-            // Get the vertex with the metric value
-            intSetTemp.addAll(maxDegreeVertices); // store the vertex with metric value in candidate set
-
-            // Store the metric value for later use
-            metricResultTempObj.setCandidatesMetricSet(intSetTemp);
-            metricResultTempObj.setMaxVertexDegree(metVal);
-
-        } else {
-
-            if (intSetTemp.contains(vertexID)) { // The Edge for vertex in candidate set is modified
-                metVal = metricResultTempObj.getMaxVertexDegree();
-
-                if (intSetTemp.size() == 1) {
-                    // If there is only single vertex in the candidate list then update the max
-                    // degree value
-
-                    if (updateVertexDegree > 0) {
-                        metVal = metVal + updateVertexDegree;
-                    } else {
-                        metVal = apply(graph); // apply the metric and get the value
-                        IntSet maxDegreeVertices;
-                        maxDegreeVertices = mVertexDegrees.getVerticesForDegree((int) metVal, direction);
-                        // Get the vertex with the metric value
-
-                        // store the vertex with metric value in candidate set
-                        metricResultTempObj.setCandidatesMetricSet(maxDegreeVertices);
-
-                    }
-                    metricResultTempObj.setMaxVertexDegree(metVal);
-                    // Store the metric value for later use
-
-                } else {
-
-                    if (updateVertexDegree > 0) {
-                        // The other vertices that exist in the candidate set can be removed since the
-                        // max degree will be increased
-
-                        //metricResultTempObj.setmMapCandidatesMetric(new IntOpenHashSet());
-
-                        IntSet candidate = new IntOpenHashSet();
-                        candidate.add(vertexID);
-                        metricResultTempObj.setCandidatesMetricSet(candidate);
-
-                        metVal = metVal + updateVertexDegree;
-                        metricResultTempObj.setMaxVertexDegree(metVal);
-                    } else {
-                        // The current vertex can be removed from the candidate set since
-                        // its degree is reduced
-                        // and the previous max degree value can be used.
-                        IntSet candidates = new IntOpenHashSet();
-                        IntIterator iterator = intSetTemp.iterator();
-                        while (iterator.hasNext()) {
-                            int tempTripleId = iterator.nextInt();
-                            if (vertexID != tempTripleId)
-                                candidates.add(iterator.nextInt());
-                        }
-                        metricResultTempObj.setCandidatesMetricSet( candidates);
-                    }
-                }
-
-            } else { // If Edge for vertex in candidate set is not modified then we can use the
-                     // previously stored values
-                metVal = metricResultTempObj.getMaxVertexDegree();
-                int inVertexDegreeTemp;
-                inVertexDegreeTemp = mVertexDegrees.getVertexDegree(vertexID, direction);
-
-                if (inVertexDegreeTemp == metVal) {
-                    // If vertex has a degree similar to metric value previously stored, add the
-                    // vertex in candidate set
-
-                    IntSet candidates = new IntOpenHashSet();
-                    candidates.add(inVertexDegreeTemp);
-                    IntIterator iterator = intSetTemp.iterator();
-                    while (iterator.hasNext()) {
-                        candidates.add(iterator.nextInt());
-                    }
-                    metricResultTempObj.setCandidatesMetricSet(candidates);
-
-                }
-
-            }
-        }
-        metricResultTempObj.setResult(metVal);// Set the new computed metric value as result
-
-        return metricResultTempObj;
-    }
-
 
 }
