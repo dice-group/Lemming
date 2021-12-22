@@ -549,5 +549,5 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 			}
 		}
 	}
-	
+
 }

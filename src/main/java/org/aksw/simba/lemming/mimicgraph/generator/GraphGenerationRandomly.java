@@ -332,5 +332,5 @@ public class GraphGenerationRandomly extends AbstractGraphGeneration implements 
 			maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		}
 	}
-	
+
 }
