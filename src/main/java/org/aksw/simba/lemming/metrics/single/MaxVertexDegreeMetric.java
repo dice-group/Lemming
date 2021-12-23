@@ -27,11 +27,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     @Override
     public double apply(ColouredGraph graph) {
-        if (direction == DIRECTION.in) {
-            return graph.getGraph().getMaxInEdgeDegrees();
-        } else {
-            return graph.getGraph().getMaxOutEdgeDegrees();
-        }
+        return applyUpdatable(graph).getResult();
     }
     
     /**
