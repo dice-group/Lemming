@@ -4,22 +4,33 @@
 package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.util.IntSetUtil;
-
 import com.carrotsearch.hppc.BitSet;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
- * Base Decorator for Coloured Graph Class
+ * Base Decorator for {@link ColouredGraph} Class
  * 
  * @author Pranav
  */
 public class ColouredGraphDecorator implements IColouredGraph {
 
+    /**
+     * Concrete object that will be decorated
+     */
     protected IColouredGraph decoratedGraph;
+
+    /**
+     * A flag to denote whether the current decorator is used for addition or
+     * removal of an edge
+     */
     protected boolean isAddingEdge;
+
+    /**
+     * Triple information that is supposed to be added/removed in the current
+     * iteration
+     */
     protected TripleBaseSingleID triple;
 
     /**

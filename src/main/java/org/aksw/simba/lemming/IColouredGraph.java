@@ -9,8 +9,11 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
- * This interface is used for the decorator pattern to simplify multithreading
- * in the graph amendment phase
+ * This interface describes the a Graph Object. Currently the methods defined in
+ * this interface are the ones used by the graph object in the graph amendment
+ * phase. These methods have to be overridden in the
+ * {@link ColouredGraphDecorator} class for them to support parallel execution
+ * of the graph amendment phase.
  * 
  * @author Pranav
  */
