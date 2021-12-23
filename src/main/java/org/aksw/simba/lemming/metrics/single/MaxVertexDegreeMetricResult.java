@@ -11,12 +11,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  *
  */
 public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
-
-    private IntSet candidatesMetricSet = new IntOpenHashSet();
-    // Set for storing candidate vertices for Max Degree metric computation
-
-    private double maxVertexDegree = 0.0;
-    // Variable for storing max degree
+    
+    /**
+     * Variable for storing number of vertices with maximum degree
+     */
+    private int numOfVerticesWithMaxDeg = 0;
 
     /**
      * Initialization calls super class with the name of metric and metric value.
@@ -30,42 +29,22 @@ public class MaxVertexDegreeMetricResult extends SimpleMetricResult {
         super(metricName, result);
     }
 
-    /**
-     * Update the temporary candidate Set.
-     * 
-     * @param candidatesMetricSetTemp
-     *            - Input set containing the candidates that needs to be updated.
+    /** 
+     * Returns the number of vertices that have the maximum degree.
+     * @return - Integer value
      */
-    public void setCandidatesMetricSet( IntSet candidatesMetricSetTemp) {
-        candidatesMetricSet = candidatesMetricSetTemp;
+    public int getNumOfVerticesWithMaxDeg() {
+        return numOfVerticesWithMaxDeg;
     }
 
     /**
-     * Returns the current max vertex degree.
-     * 
-     * @return - max vertex degree.
+     * Updates the number of vertices that have maximum degree.
+     * @param numOfVerticesWithMaxDeg
      */
-    public double getMaxVertexDegree() {
-        return maxVertexDegree;
+    public void setNumOfVerticesWithMaxDeg(int numOfVerticesWithMaxDeg) {
+        this.numOfVerticesWithMaxDeg = numOfVerticesWithMaxDeg;
     }
-
-    /**
-     * Update the  max vertex degree metric values.
-     * 
-     * @param maxVertexDegreeTemp
-     *            - - Input vertex degree metric value that needs to be updated.
-     */
-    public void setMaxVertexDegree( double maxVertexDegreeTemp) {
-        maxVertexDegree = maxVertexDegreeTemp;
-    }
-
-    /**
-     * Returns the Set containing the candiate set.
-     * 
-     * @return - Map.
-     */
-    public IntSet getmMapCandidatesMetric() {
-        return candidatesMetricSet;
-    }
+    
+    
 
 }
