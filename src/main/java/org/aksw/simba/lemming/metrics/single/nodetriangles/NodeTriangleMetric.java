@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NodeTriangleMetric extends AbstractMetric implements SingleValueMetric{
 
@@ -25,20 +26,33 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 
 	@Override
 	public double apply(ColouredGraph graph) {
-		
-		NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
-		SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
-		
-		return nodeTriangleMetric.apply(graph);
+		return applyUpdatable(graph).getResult();
 	}
 
 	/**
-	 * @param graph   the given graph is already modified!
+	 * The method is used to initialize the node triangle metric with the given graph.
+	 * @param graph the given graph
+	 * @return number of node triangles
+	 */
+	@Override
+	public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+		NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
+		SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
+
+		double triangleMetric = nodeTriangleMetric.apply(graph);
+		return new SingleValueMetricResult(getName(), triangleMetric);
+	}
+
+	/**
+	 * @param graph the given graph is already modified!
 	 */
 	@Override
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
-										@Nonnull UpdatableMetricResult previousResult) {
+										@Nullable UpdatableMetricResult previousResult) {
 
+		if(previousResult==null){
+			return applyUpdatable(graph);
+		}
 		int headId = triple.headId;
 		int tailId = triple.tailId;
 
