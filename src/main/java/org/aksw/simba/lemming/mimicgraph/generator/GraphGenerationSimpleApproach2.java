@@ -428,7 +428,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : outEdgeColours){
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
-			if(outEdgeDistPerVertColo != null){
+			if(outEdgeDistPerVertColo != null && !outEdgeDistPerVertColo.isEmpty()){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
 				seed = vertColoProposer.getSeed() + 1;
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
@@ -442,7 +442,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimp
 		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();
 		for(BitSet edgeColo : inEdgeColours){
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
-			if(inEdgeDistPerVertColo != null){
+			if(inEdgeDistPerVertColo != null && !inEdgeDistPerVertColo.isEmpty()){
 				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
 				seed = vertColoProposer.getSeed() + 1;
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
