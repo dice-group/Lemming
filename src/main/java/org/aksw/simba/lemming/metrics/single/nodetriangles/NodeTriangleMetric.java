@@ -12,6 +12,8 @@ import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -22,8 +24,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 import java.util.List;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NodeTriangleMetric extends AbstractMetric implements SingleValueMetric{
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(NodeTriangleMetric.class);
 	
 	public NodeTriangleMetric(){
 		super("#nodetriangles");
@@ -31,21 +36,33 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 
 	@Override
 	public double apply(ColouredGraph graph) {
-		
-		NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
-		SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
-		
-		return nodeTriangleMetric.apply(graph);
+		return applyUpdatable(graph).getResult();
 	}
 
+	/**
+	 * The method is used to initialize the node triangle metric with the given graph.
+	 * @param graph the given graph
+	 * @return number of node triangles
+	 */
+	@Override
+	public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+		NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
+		SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
+
+		double triangleMetric = nodeTriangleMetric.apply(graph);
+		return new SingleValueMetricResult(getName(), triangleMetric);
+	}
 
 	/**
-	 * @param graph   the given graph is already modified!
+	 * @param graph the given graph is already modified!
 	 */
 	@Override
 	public UpdatableMetricResult update(@Nonnull ColouredGraph graph, @Nonnull TripleBaseSingleID triple, @Nonnull Operation opt,
-										@Nonnull UpdatableMetricResult previousResult) {
+										@Nullable UpdatableMetricResult previousResult) {
 
+		if(previousResult==null){
+			return applyUpdatable(graph);
+		}
 		int headId = triple.headId;
 		int tailId = triple.tailId;
 
@@ -71,8 +88,10 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
 		}else if (numEdgesBetweenVertices==1 && opt == Operation.ADD){
 			newResult = newResult + numberOfCommon;
 		}
-
-		newResult = newResult>=0 ? newResult : 0;
+		if(newResult < 0){
+			LOGGER.error("The new result of node triangle metric is negative : " + newResult );
+			newResult = 0;
+		}
 
 		return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
 	}

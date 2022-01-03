@@ -10,9 +10,15 @@ package org.aksw.simba.lemming.metrics.single;
  */
 public class AvgVertexDegreeMetricResult extends SingleValueMetricResult {
 
-    private double sumVertexDeg = 0.0; // Variable for storing sum of vertex degrees
+    /**
+     * Variable for storing sum of vertex degrees
+     */
+    private double sumVertexDeg = 0.0; 
 
-    private double numberOfVertices = 0.0; // Variable for storing number of vertices.
+    /**
+     * Variable for storing number of vertices.
+     */
+    private double numberOfVertices = 0.0; 
 
     /**
      * Initialization calls super class with the name of metric and metric value.

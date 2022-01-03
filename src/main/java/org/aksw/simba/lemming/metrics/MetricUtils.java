@@ -57,25 +57,30 @@ public class MetricUtils {
         return vector;
     }
 
+    /**
+     * This method is used to calculate the common neighbour-vertices of two given vertices.
+     * The returned common neighbour-vertices set should exclude the both given vertices.
+     * @param graph a given coloured graph
+     * @param v1 one given vertex
+     * @param v2 another given vertex
+     * @return a set of common neighbour-vertices of the two given vertices.
+     */
     public static IntSet getVerticesInCommon(ColouredGraph graph, int v1, int v2) {
-        IntSet[] neighborsOfConnectedVertices = new IntSet[2];
+        IntSet v1Neighbours = graph.getInNeighbors(v1);
+        v1Neighbours.addAll(graph.getOutNeighbors(v1));
 
-        neighborsOfConnectedVertices[0] = graph.getInNeighbors(v1);
-        neighborsOfConnectedVertices[0].addAll(graph.getOutNeighbors(v1));
+        IntSet v2Neighbours = graph.getInNeighbors(v2);
+        v2Neighbours.addAll(graph.getOutNeighbors(v2));
 
-        if (neighborsOfConnectedVertices[0].contains(v1))
-            neighborsOfConnectedVertices[0].remove(v1);
-        if (neighborsOfConnectedVertices[0].contains(v2))
-            neighborsOfConnectedVertices[0].remove(v2);
+        IntSet intersection = IntSetUtil.intersection(v1Neighbours, v2Neighbours);
 
-        neighborsOfConnectedVertices[1] = graph.getInNeighbors(v2);
-        neighborsOfConnectedVertices[1].addAll(graph.getOutNeighbors(v2));
+        if(intersection.contains(v1)){
+            intersection.remove(v1);
+        }
 
-        if (neighborsOfConnectedVertices[1].contains(v1))
-            neighborsOfConnectedVertices[1].remove(v1);
-        if (neighborsOfConnectedVertices[1].contains(v2))
-            neighborsOfConnectedVertices[1].remove(v2);
-
-        return IntSetUtil.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
+        if(intersection.contains(v2)){
+            intersection.remove(v2);
+        }
+        return intersection;
     }
 }

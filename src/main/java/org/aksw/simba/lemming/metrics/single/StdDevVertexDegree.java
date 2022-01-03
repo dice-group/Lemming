@@ -1,8 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
@@ -26,23 +24,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     @Override
     public double apply(ColouredGraph graph) {
-        IntArrayList degrees = null;
-        if (direction == DIRECTION.in) {
-            degrees = graph.getGraph().getAllInEdgeDegrees();
-        } else {
-            degrees = graph.getGraph().getAllOutEdgeDegrees();
-        }
-        return calculateStdDev(degrees, calculateAvg(degrees));
-    }
-
-    protected double calculateStdDev(IntArrayList degrees, double avg) {
-        double temp, sum = 0;
-        for (int i = 0; i < degrees.size(); ++i) {
-            temp = avg - degrees.getInt(i);
-            temp *= temp;
-            sum += temp;
-        }
-        return Math.sqrt(sum / degrees.size());
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -98,6 +80,10 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
             UpdatableMetricResult previousResult) {
 
+        if (previousResult == null) {
+            return applyUpdatable(graph);
+        }
+
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
 
         double avg = ((StdDevVertexDegreeMetricResult) previousResult).getAvgVertexDegree();
@@ -105,10 +91,10 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         double numberOfVertices = ((StdDevVertexDegreeMetricResult) previousResult).getNumberOfVertices();
         double newDegree = (this.direction == DIRECTION.in) ? graph.getGraph().getInEdgeDegree(triple.headId)
                 : graph.getGraph().getOutEdgeDegree(triple.tailId);
-        List<Double> newAvgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance,
-                newDegree, graphOperation);
-        avg = newAvgAndVariance.get(0);
-        variance = newAvgAndVariance.get(1);
+        double[] newAvgAndVariance = computeAvgVarianceFromPreviousResult(numberOfVertices, avg, variance, newDegree,
+                graphOperation);
+        avg = newAvgAndVariance[0];
+        variance = newAvgAndVariance[1];
 
         metricResultObj.setAvgVertexDegree(avg);
         metricResultObj.setVarianceVertexDegree(variance);
@@ -130,18 +116,19 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @param oldDegree        - the degree which was updated after adding or
      *                         removing an edge
      * @param graphOperation   - denotes if an edge was added or removed
-     * @return List<Double> - a list containing average and variance in that order.
+     * @return double[] - double array containing average and variance in that
+     *         order.
      */
-    private List<Double> computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
+    private double[] computeAvgVarianceFromPreviousResult(double numberOfVertices, double avg, double variance,
             double newDegree, Operation graphOperation) {
-        List<Double> list = new ArrayList<Double>();
-        double flag = graphOperation == Operation.ADD ? 1 : -1;
-        double oldDegree = newDegree - flag;
-        double newAvg = avg + (flag / numberOfVertices);
+        double[] list = new double[2];
+        double changeInDegree = graphOperation == Operation.ADD ? 1 : -1;
+        double oldDegree = newDegree - changeInDegree;
+        double newAvg = avg + (changeInDegree / numberOfVertices);
         double newVariance = (variance + Math.pow(numberOfVertices, -2)
                 + (Math.pow((newDegree - newAvg), 2) - Math.pow((oldDegree - newAvg), 2)) / numberOfVertices);
-        list.add(newAvg);
-        list.add(newVariance);
+        list[0] = newAvg;
+        list[1] = newVariance;
         return list;
     }
     

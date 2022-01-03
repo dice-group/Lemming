@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import static org.junit.Assert.assertNotNull;
-
 import grph.Grph.DIRECTION;
 
 /**
@@ -13,6 +11,11 @@ import grph.Grph.DIRECTION;
  */
 public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
 
+    
+    /**
+     * Variable for storing number of vertices with maximum degree
+     */
+    private int numOfVerticesWithMaxDeg = 0;
 
     private int maxVertexID = -1;
     // Variable for storing vertex id having maximum degree
@@ -68,5 +71,22 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
     public void setDirection(DIRECTION direction) {
         this.direction = direction;
     }
+    /** 
+     * Returns the number of vertices that have the maximum degree.
+     * @return - Integer value
+     */
+    public int getNumOfVerticesWithMaxDeg() {
+        return numOfVerticesWithMaxDeg;
+    }
+
+    /**
+     * Updates the number of vertices that have maximum degree.
+     * @param numOfVerticesWithMaxDeg
+     */
+    public void setNumOfVerticesWithMaxDeg(int numOfVerticesWithMaxDeg) {
+        this.numOfVerticesWithMaxDeg = numOfVerticesWithMaxDeg;
+    }
+    
+    
 
 }

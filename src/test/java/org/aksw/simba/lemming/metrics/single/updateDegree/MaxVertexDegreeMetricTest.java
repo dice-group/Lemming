@@ -18,15 +18,16 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph1 = buildGraph1();
         
-        double result = metric.apply(buildGraph1);
-        Assert.assertEquals(3.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        Assert.assertEquals(3.0, maxMetricResultObj.getResult());
         
-        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph1);
+
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        UpdatableMetricResult newResult = metric.update(buildGraph1, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(buildGraph1, triple, Operation.REMOVE, maxMetricResultObj);
         Assert.assertEquals(3.0, newResult.getResult());
 
         //delete an edge 2 = (1, 2)
@@ -56,15 +57,16 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph1 = buildGraph1();
         
-        double result = metric.apply(buildGraph1);
-        Assert.assertEquals(2.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        Assert.assertEquals(2.0, maxMetricResultObj.getResult());
         
         UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph1);
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        UpdatableMetricResult newResult = metric.update(buildGraph1, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(buildGraph1, triple, Operation.REMOVE, maxMetricResultObj);
         Assert.assertEquals(2.0, newResult.getResult());
 
         //delete an edge 2 = (1, 2)
@@ -99,15 +101,17 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph2 = buildGraph2();
         
-        double result = metric.apply(buildGraph2);
-        Assert.assertEquals(2.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        Assert.assertEquals(2.0, maxMetricResultObj.getResult());
         
         UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph2);
+        
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
-        UpdatableMetricResult newResult = metric.update(buildGraph2, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(buildGraph2, triple, Operation.REMOVE, maxMetricResultObj);
         Assert.assertEquals(1.0, newResult.getResult());
 
       //add an edge 0 = (0, 1);
@@ -130,15 +134,14 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph2 = buildGraph2();
         
-        double result = metric.apply(buildGraph2);
-        Assert.assertEquals(3.0, result);
-        
-        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph2);
+
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
         //delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
-        UpdatableMetricResult newResult = metric.update(buildGraph2, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(buildGraph2, triple, Operation.REMOVE, maxMetricResultObj);
         Assert.assertEquals(2.0, newResult.getResult());
 
       //add an edge 0 = (0, 1);
