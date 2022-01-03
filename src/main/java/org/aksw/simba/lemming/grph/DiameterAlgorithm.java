@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.IColouredGraph;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 import grph.Grph;
 import grph.GrphAlgorithm;
@@ -143,10 +144,72 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         if (listener != null) {
             listener.searchCompleted();
         }
-
-        // System.out.println(path);
-        // return r.maxDistance();
         return path;
+    }
+
+    public ArrayListPath computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
+        IntQueue queue = new IntQueue();
+        SearchResult search = new SearchResult((int) graph.getNumberOfVertices());
+        ArrayListPath shorterPath = new ArrayListPath();
+        shorterPath.setSource(path.getSource());
+        boolean shorterPathFound = false;
+        if (path.getSource() != triple.tailId) {
+            queue.add(path.getSource());
+            search.distances[path.getSource()] = 0;
+            search.visitOrder.add(path.getSource());
+        }
+        int sourceToTailLength = 0;
+        while (queue.getSize() > 0 && sourceToTailLength < path.getLength()) {
+            int source = queue.extract(ACCESS_MODE.QUEUE);
+            boolean endNodeReached = false;
+            for (int node : graph.getOutNeighbors(source)) {
+                if (search.distances[node] == -1) {
+                    search.predecessors[node] = source;
+                    search.distances[node] = search.distances[source] + 1;
+                    queue.add(node);
+                    search.visitOrder.add(node);
+                }
+                if (node == triple.tailId) {
+                    endNodeReached = true;
+                    break;
+                }
+            }
+            sourceToTailLength++;
+            if (endNodeReached) {
+                queue = new IntQueue();
+                break;
+            }
+        }
+        // The new edge added is not incident to the destination of the diameter
+        if (triple.headId != path.getDestination()) {
+            queue.add(triple.headId);
+            search.distances[triple.headId] = search.distances[triple.tailId] + 1;
+            search.visitOrder.add(triple.headId);
+        }
+        int headToDestinationLength = 0;
+        while (queue.getSize() > 0 && headToDestinationLength < path.getLength() - search.distances[triple.headId]) {
+            int source = queue.extract(ACCESS_MODE.QUEUE);
+            boolean endNodeReached = false;
+            for (int node : graph.getOutNeighbors(source)) {
+                if (search.distances[node] == -1) {
+                    search.predecessors[node] = source;
+                    search.distances[node] = search.distances[source] + 1;
+                    queue.add(node);
+                    search.visitOrder.add(node);
+                }
+                if (node == path.getDestination()) { // shortest path has been found between the new edge
+                    // head and the existing diameter destination
+                    endNodeReached = true;
+                    break;
+                }
+            }
+            headToDestinationLength++;
+            if (endNodeReached) {
+                break;
+            }
+        }
+
+        return (shorterPathFound) ? shorterPath : path;
     }
 
     public ArrayListPath getDiameterPath() {
