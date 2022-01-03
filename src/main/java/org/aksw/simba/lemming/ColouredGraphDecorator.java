@@ -190,12 +190,12 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.graph.getDiameter();
     }
 
-    public ArrayListPath getDiameterFromVertex(int source) {
-        return this.graph.getDiameterFromVertex(source);
-    }
-
     public int[][] getNeighbors(DIRECTION direction) {
         return this.graph.getNeighbors(direction);
+    }
+
+    public ArrayListPath computeShorterDiameter(ArrayListPath path) {
+        return path;
     }
 
 }

@@ -170,12 +170,9 @@ public interface IColouredGraph {
      */
     IntSet getVertices();
 
-    
     ArrayListPath getNodesInDiameter();
 
     int getDiameter();
-
-    ArrayListPath getDiameterFromVertex(int source);
 
     int[][] getNeighbors(DIRECTION direction);
 

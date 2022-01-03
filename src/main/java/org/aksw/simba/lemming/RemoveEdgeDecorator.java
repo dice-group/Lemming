@@ -145,10 +145,9 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
         return neighbors;
     }
 
-    @Override
-    public ArrayListPath getDiameterFromVertex(int source) {
+    public ArrayListPath computeShorterDiameter(ArrayListPath diameter) {
         DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
-        return diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);
+        return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), diameter);
     }
 
 }

@@ -833,9 +833,4 @@ public class ColouredGraph implements IColouredGraph {
     public int[][] getNeighbors(DIRECTION direction) {
         return this.graph.getNeighbors(direction);
     }
-
-    @Override
-    public ArrayListPath getDiameterFromVertex(int source) {
-        return this.diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);
-    }
 }

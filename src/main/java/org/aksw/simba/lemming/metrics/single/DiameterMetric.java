@@ -40,11 +40,8 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
             Operation graphOperation, UpdatableMetricResult previousResult) {
         DiameterMetricResult metricResult = ((DiameterMetricResult) previousResult);
         ArrayListPath path = metricResult.getDiameterPath();
-        if (path.containsVertex(triple.tailId) && graphOperation == Operation.ADD) {
-            // TODO: Check various cases of Adding/Removing an edge from the
-            // diameter path
-            int startNode = path.getSource();
-            ArrayListPath newPath = graph.getDiameterFromVertex(startNode);
+        if (graphOperation == Operation.ADD) {
+            ArrayListPath newPath = graph.computeShorterDiameter(path);
             metricResult.setResult(newPath.getLength());
             metricResult.setDiameterPath(newPath);
         } else if (path.containsVertex(triple.headId) && path.containsVertex(triple.tailId)
