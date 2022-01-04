@@ -29,21 +29,23 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 
     @Override
     public double apply(ColouredGraph graph) {
-		return applyUpdatable(graph).getResult();
-	}
+        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
+    }
 
-	/**
-	 * The method is used to initialize the edge triangle metric with the given graph.
-	 * @param graph the given graph
-	 * @return number of edge triangles
-	 */
-	@Override
-	public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+    /**
+     * The method is used to initialize the edge triangle metric with the given
+     * graph.
+     * 
+     * @param graph the given graph
+     * @return number of edge triangles
+     */
+    @Override
+    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
         EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
         SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
 
-		double triangleMetric = edgeTriangleMetric.apply(graph);
-		return new SingleValueMetricResult(getName(), triangleMetric);
+        double triangleMetric = edgeTriangleMetric.apply((ColouredGraph) graph.getGraph());
+        return new SingleValueMetricResult(getName(), triangleMetric);
     }
 
     /**
@@ -53,9 +55,9 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nullable UpdatableMetricResult previousResult) {
 
-		if(previousResult==null){
-			return applyUpdatable(graph);
-		}
+        if (previousResult == null) {
+            return applyUpdatable(graph);
+        }
         int headId = triple.headId;
         int tailId = triple.tailId;
 

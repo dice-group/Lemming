@@ -23,16 +23,17 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph1 = buildGraph1();
 
-        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(new ColouredGraphDecorator(buildGraph1));
         Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
-        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        // UpdatableMetricResult prevResult = new
+        // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         ColouredGraphDecorator rDec = new RemoveEdgeDecorator(buildGraph1, false);
         rDec.setTriple(triple);
-        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
         Assert.assertEquals(3.0, newResult.getResult());
 
@@ -50,7 +51,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 2);
-        Assert.assertEquals(metric.apply(3.0, newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
 
         // add an edge 4 = (2, 2);
         aDec.setGraph(buildGraph1);
@@ -58,7 +59,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 2, 2);
-        Assert.assertEquals(metric.apply(4.0, newResult.getResult());
+        Assert.assertEquals(4.0, newResult.getResult());
 
     }
 
@@ -68,16 +69,17 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph1 = buildGraph1();
 
-        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(new ColouredGraphDecorator(buildGraph1));
         Assert.assertEquals(2.0, maxMetricResultObj.getResult());
 
-        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        // UpdatableMetricResult prevResult = new
+        // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
         ColouredGraphDecorator rDec = new RemoveEdgeDecorator(buildGraph1, false);
         rDec.setTriple(triple);
-        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
         Assert.assertEquals(2.0, newResult.getResult());
 
@@ -111,7 +113,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 1);
-        Assert.assertEquals(3,0, newResult.getResult());
+        Assert.assertEquals(3, 0, newResult.getResult());
     }
 
     @Test
@@ -120,17 +122,17 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph2 = buildGraph2();
 
-        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(new ColouredGraphDecorator(buildGraph2));
         Assert.assertEquals(2.0, maxMetricResultObj.getResult());
 
-        
-        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        // UpdatableMetricResult prevResult = new
+        // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         ColouredGraphDecorator rDec = new RemoveEdgeDecorator(buildGraph2, false);
         rDec.setTriple(triple);
-        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
         Assert.assertEquals(1.0, newResult.getResult());
 
@@ -158,14 +160,14 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph2 = buildGraph2();
 
-        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(new ColouredGraphDecorator(buildGraph2));
         Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         ColouredGraphDecorator rDec = new RemoveEdgeDecorator(buildGraph2, false);
         rDec.setTriple(triple);
-        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
+        UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
         Assert.assertEquals(2.0, newResult.getResult());
 

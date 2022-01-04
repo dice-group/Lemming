@@ -27,7 +27,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     @Override
     public double apply(ColouredGraph graph) {
-        return applyUpdatable(graph).getResult();
+        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
     }
 
     protected double calculateAvg(IntArrayList degrees) {
@@ -88,8 +88,8 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
     @Override
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
-        
-        if(previousResult == null) {
+
+        if (previousResult == null) {
             return applyUpdatable(graph);
         }
 

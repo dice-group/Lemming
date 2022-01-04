@@ -29,22 +29,21 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     @Override
     public double apply(ColouredGraph graph) {
-        return applyUpdatable(graph).getResult();
+        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
     }
-    
+
     /**
      * Returns metric results that can be reused for further computations. Here, the
      * metric result object is initialized. Storing the maximum vertex degree and
      * the number of vertices having the maximum degree.
      * 
-     * @param graph
-     *            - input graph.
+     * @param graph - input graph.
      * @return - metric result.
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
-        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);        
-        
+    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
+
         IntSet vertices = graph.getVertices();
 
         int numOfVerticesWithMaxDegree = 0;// Variable to track number of vertices with maximum degree.
@@ -83,13 +82,15 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     @Override
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
-        
-        if(previousResult == null) {
+
+        if (previousResult == null) {
             return applyUpdatable(graph);
         }
-        
-        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), ((MaxVertexDegreeMetricResult) previousResult).getResult());
-        metricResultTempObj.setNumOfVerticesWithMaxDeg(((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg());
+
+        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(),
+                ((MaxVertexDegreeMetricResult) previousResult).getResult());
+        metricResultTempObj.setNumOfVerticesWithMaxDeg(
+                ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg());
 
         // Need to compute MaxVertexInDegree metric or MaxVertexOutDegree
         int vertexID = direction == DIRECTION.in ? triple.headId : triple.tailId;
@@ -102,12 +103,15 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         if (updateVertexDegree == -1) { // Remove an edge
             if (degree == ((MaxVertexDegreeMetricResult) previousResult).getResult()
                     && ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg() - 1 == 0) {
-                // If degree of a vertex is equal to maximum vertex and there is only one vertex with maximum degree
+                // If degree of a vertex is equal to maximum vertex and there is only one vertex
+                // with maximum degree
                 // then recalculate
                 return applyUpdatable(graph);
             } else if (degree == ((MaxVertexDegreeMetricResult) previousResult).getResult()) {
-                // If degree of a vertex is equal to maximum vertex and there are mpre than one vertex with maximum degree
-                // then reuse previous result and update the number of vertices with maximum degree
+                // If degree of a vertex is equal to maximum vertex and there are mpre than one
+                // vertex with maximum degree
+                // then reuse previous result and update the number of vertices with maximum
+                // degree
                 metricResultTempObj.setNumOfVerticesWithMaxDeg(
                         ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg() - 1);
                 metricResultTempObj.setResult(((MaxVertexDegreeMetricResult) previousResult).getResult());

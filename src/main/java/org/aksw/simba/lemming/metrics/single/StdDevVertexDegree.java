@@ -19,7 +19,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     @Override
     public double apply(ColouredGraph graph) {
-        return applyUpdatable(graph).getResult();
+        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
     }
 
     /**
