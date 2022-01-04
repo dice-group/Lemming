@@ -3,11 +3,9 @@
  */
 package org.aksw.simba.lemming;
 
-import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.apache.commons.lang3.ArrayUtils;
 
 import grph.Grph.DIRECTION;
-import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -145,9 +143,4 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         return neighbors;
     }
 
-    
-    public ArrayListPath computeShorterDiameter(ArrayListPath diameter) {
-        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
-        return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), diameter);
-    }
 }

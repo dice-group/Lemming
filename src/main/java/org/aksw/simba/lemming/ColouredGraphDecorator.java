@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.lemming;
 
+import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -195,7 +196,8 @@ public class ColouredGraphDecorator implements IColouredGraph {
     }
 
     public ArrayListPath computeShorterDiameter(ArrayListPath path) {
-        return path;
+        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
+        return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), path);
     }
 
 }
