@@ -3,8 +3,13 @@
  */
 package org.aksw.simba.lemming.metrics.single.updateDegree;
 
+import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.metrics.single.DiameterMetric;
+import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.junit.Test;
 
 import grph.Grph;
@@ -89,7 +94,18 @@ public class DiameterMetricTest {
     public void testLinearGraph() {
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph graph = buildLinearGraph();
-        Assert.assertEquals(numberOfNodes - 1, (int) metric.apply(graph));
+        UpdatableMetricResult result = metric.applyUpdatable(new ColouredGraphDecorator(graph));
+        Assert.assertEquals(numberOfNodes - 1, (int) result.getResult());
+
+        // Add an Edge from middle node to the end node
+        int headId = 5;
+        int tailId = 0;
+        TripleBaseSingleID triple = new TripleBaseSingleID(tailId, null, headId, null, numberOfNodes - 1, null);
+        ColouredGraphDecorator graphDecorator = new AddEdgeDecorator(graph, true);
+        graphDecorator.setTriple(triple);
+        result = metric.update(graphDecorator, triple, Operation.ADD, result);
+        graph.addEdge(tailId, headId);
+        Assert.assertEquals(numberOfNodes - headId, (int) result.getResult());
     }
 
     @Test
@@ -105,7 +121,7 @@ public class DiameterMetricTest {
         ColouredGraph graph = buildTree();
         Assert.assertEquals(1, (int) metric.apply(graph));
     }
-    
+
     @Test
     public void testDisconnectedGraph() {
         DiameterMetric metric = new DiameterMetric();
