@@ -23,10 +23,10 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph1 = buildGraph1();
 
-        double result = metric.apply(buildGraph1);
-        Assert.assertEquals(3.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
@@ -34,7 +34,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
 
         // delete an edge 2 = (1, 2)
         triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
@@ -42,7 +42,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         newResult = metric.update(rDec, triple, Operation.REMOVE, newResult);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // add an edge 4 = (1, 2);
         ColouredGraphDecorator aDec = new AddEdgeDecorator(buildGraph1, true);
@@ -50,7 +50,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 2);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(metric.apply(3.0, newResult.getResult());
 
         // add an edge 4 = (2, 2);
         aDec.setGraph(buildGraph1);
@@ -58,7 +58,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 2, 2);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(metric.apply(4.0, newResult.getResult());
 
     }
 
@@ -68,10 +68,10 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph1 = buildGraph1();
 
-        double result = metric.apply(buildGraph1);
-        Assert.assertEquals(2.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph1);
+        Assert.assertEquals(2.0, maxMetricResultObj.getResult());
 
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
@@ -79,7 +79,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // delete an edge 2 = (1, 2)
         triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
@@ -87,7 +87,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         newResult = metric.update(rDec, triple, Operation.REMOVE, newResult);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(1.0, newResult.getResult());
 
         // add an edge 4 = (1, 2);
         triple = new TripleBaseSingleID(1, null, 2, null, 4, null);
@@ -95,7 +95,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 2);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // add an edge 4 = (2, 2);
         aDec.setGraph(buildGraph1);
@@ -103,7 +103,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 2, 2);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // add an edge 4 = (2, 2);
         aDec.setGraph(buildGraph1);
@@ -111,7 +111,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 1);
-        Assert.assertEquals(metric.apply(buildGraph1), newResult.getResult());
+        Assert.assertEquals(3,0, newResult.getResult());
     }
 
     @Test
@@ -120,10 +120,11 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         ColouredGraph buildGraph2 = buildGraph2();
 
-        double result = metric.apply(buildGraph2);
-        Assert.assertEquals(2.0, result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        Assert.assertEquals(2.0, maxMetricResultObj.getResult());
 
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        
+        //UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
@@ -131,7 +132,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(1.0, newResult.getResult());
 
         // add an edge 0 = (0, 1);
         ColouredGraphDecorator aDec = new AddEdgeDecorator(buildGraph2, true);
@@ -139,7 +140,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // add an edge 4 = (1, 1);
         aDec.setGraph(buildGraph2);
@@ -147,7 +148,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 1, 1);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
 
     }
 
@@ -157,10 +158,8 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.out);
         ColouredGraph buildGraph2 = buildGraph2();
 
-        double result = metric.apply(buildGraph2);
-        Assert.assertEquals(3.0, result);
-
-        UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
+        UpdatableMetricResult maxMetricResultObj = metric.applyUpdatable(buildGraph2);
+        Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
@@ -168,7 +167,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, prevResult);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(2.0, newResult.getResult());
 
         // add an edge 0 = (0, 1);
         ColouredGraphDecorator aDec = new AddEdgeDecorator(buildGraph2, true);
@@ -176,7 +175,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
 
         // add an edge 4 = (1, 1);
         aDec.setGraph(buildGraph2);
@@ -184,7 +183,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 1, 1);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
 
         // add an edge 5 = (0, 1);
         aDec.setGraph(buildGraph2);
@@ -192,7 +191,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
-        Assert.assertEquals(metric.apply(buildGraph2), newResult.getResult());
+        Assert.assertEquals(4.0, newResult.getResult());
     }
 
 }

@@ -1,13 +1,6 @@
 package org.aksw.simba.lemming;
 
-import grph.DefaultIntSet;
-import grph.Grph;
-import grph.GrphAlgorithmCache;
-import grph.algo.MultiThreadProcessing;
-import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +18,13 @@ import org.slf4j.LoggerFactory;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
+import grph.DefaultIntSet;
+import grph.Grph;
+import grph.GrphAlgorithmCache;
+import grph.algo.MultiThreadProcessing;
+import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 public class ColouredGraph implements IColouredGraph {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class);
@@ -36,13 +36,13 @@ public class ColouredGraph implements IColouredGraph {
     protected ColourPalette edgePalette;
     protected ColourPalette dtEdgePalette;
 
-    /*
+    /**
      * 1st key: vertex ID, 2nd key: data typed property and the values is the value
      * of the literal
      */
     protected Map<Integer, Map<BitSet, List<String>>> mapVertexIdAndLiterals;
 
-    /*
+    /**
      * map for storing type of literal accordingly to the data typed property edge
      */
     protected Map<BitSet, String> mapLiteralTypes;
@@ -324,25 +324,11 @@ public class ColouredGraph implements IColouredGraph {
     }
 
     public int getTailOfTheEdge(int edgeId) {
-        IntSet vertices = graph.getVerticesIncidentToEdge(edgeId);
-        if (vertices.size() > 0) {
-            int[] arrVertIDs = vertices.toIntArray();
-            return arrVertIDs[0];
-        }
-        return -1;
+        return graph.getDirectedSimpleEdgeTail(edgeId);
     }
 
     public int getHeadOfTheEdge(int edgeId) {
-        IntSet vertices = graph.getVerticesIncidentToEdge(edgeId);
-        if (vertices.size() > 0) {
-            int[] arrVertIDs = vertices.toIntArray();
-            if (arrVertIDs.length == 1) {
-                return arrVertIDs[0];
-            } else {
-                return arrVertIDs[1];
-            }
-        }
-        return -1;
+        return graph.getDirectedSimpleEdgeHead(edgeId);
     }
 
     /**

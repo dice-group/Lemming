@@ -6,6 +6,7 @@ import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.EdgeTriangleMetricSelection;
+import org.aksw.simba.lemming.metrics.metricselection.NodeTriangleMetricSelection;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMetric {
 
@@ -27,11 +29,21 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 
     @Override
     public double apply(ColouredGraph graph) {
+		return applyUpdatable(graph).getResult();
+	}
 
+	/**
+	 * The method is used to initialize the edge triangle metric with the given graph.
+	 * @param graph the given graph
+	 * @return number of edge triangles
+	 */
+	@Override
+	public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
         EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
         SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
 
-        return edgeTriangleMetric.apply(graph);
+		double triangleMetric = edgeTriangleMetric.apply(graph);
+		return new SingleValueMetricResult(getName(), triangleMetric);
     }
 
     /**
@@ -39,8 +51,11 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      */
     @Override
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
-            @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
+            @Nonnull Operation opt, @Nullable UpdatableMetricResult previousResult) {
 
+		if(previousResult==null){
+			return applyUpdatable(graph);
+		}
         int headId = triple.headId;
         int tailId = triple.tailId;
 

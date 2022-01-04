@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 
 import org.aksw.simba.lemming.util.ModelUtil;
@@ -33,7 +32,7 @@ import javax.annotation.Nullable;
  * @author Alexandra Silva
  *
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+
 public class Inferer {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Inferer.class);
@@ -48,9 +47,9 @@ public class Inferer {
 	 */
 	private OntModel ontModel;
 
-	private Map<String, Equivalent> classesEquiMap;
+	private Map<OntClass, OntClass> classEquiMap;
 
-	private Map<String, Equivalent> propertiesEquiMap;
+	private Map<OntProperty, OntProperty> propertyEquiMap;
 
 	private Set<OntProperty> ontProperties;
 
@@ -60,23 +59,36 @@ public class Inferer {
 
 		//collect the equivalent properties and classes information from the ontology
 		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
-		classesEquiMap = searchEquivalents(ontClasses);
+		Map<OntClass, Set<OntClass>> classesEquiSetMap = searchEquivalents(ontClasses);
+		classEquiMap = findRepresentation(classesEquiSetMap);
+
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
-		propertiesEquiMap = searchEquivalents(this.ontProperties);
+		Map<OntProperty, Set<OntProperty>> propertiesEquiSetMap = searchEquivalents(this.ontProperties);
+		propertyEquiMap = findRepresentationAndDR(propertiesEquiSetMap);
 	}
 
-	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String base, Map<String, String> rdfsFilesMap) {
+	public Inferer(boolean isMat, @Nonnull String filePath, @Nullable String fileType, Map<String, String> rdfsFilesMap) {
 		this.isMat = isMat;
-		OntModel ontModel = this.readOntology(filePath, base);
+		OntModel ontModel = this.readOntology(filePath, fileType);
 		for(String fileName : rdfsFilesMap.keySet()){
 			ontModel.read(fileName, rdfsFilesMap.get(fileName));
 		}
 		this.ontModel = ontModel;
 		// collect the equivalent properties and classes information from the ontology
 		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
-		classesEquiMap = searchEquivalents(ontClasses);
+		Map<OntClass, Set<OntClass>> classesEquiSetMap = searchEquivalents(ontClasses);
+		classEquiMap = findRepresentation(classesEquiSetMap);
+
 		this.ontProperties = ontModel.listAllOntProperties().toSet();
-		propertiesEquiMap = searchEquivalents(this.ontProperties);
+		Map<OntProperty, Set<OntProperty>> propertiesEquiSetMap = searchEquivalents(this.ontProperties);
+		propertyEquiMap = findRepresentationAndDR(propertiesEquiSetMap);
+	}
+
+	public Map<OntClass, OntClass> getClassEquiMap(){
+		return this.classEquiMap;
+	}
+	public Map<OntProperty, OntProperty> getPropertyEquiMap(){
+		return this.propertyEquiMap;
 	}
 
 	/**
@@ -113,18 +125,16 @@ public class Inferer {
 			}while(curSize != newSize);
 		}
 
-		// infer type statements, a single property name is also enforced here
-		iterateStmts(newModel, sourceModel, this.propertiesEquiMap);
-		checkEmptyTypes(set, newModel);
-
+		// uniform the names of properties and infer type statements
+		iterateStmts(newModel, sourceModel, this.propertyEquiMap);
 		// uniform the names of the classes
-		renameClasses(newModel, this.classesEquiMap);
+		renameClasses(newModel, this.classEquiMap);
+		checkEmptyTypes(set, newModel);
 
 		return newModel;
 	}
 
 	/**
-	 * 
 	 * This method gets all the unique subjects and objects of a model with the
 	 * exception of the objects that are not resources. It is mainly used to do a
 	 * before and after count of how many resources do not have a type.
@@ -172,16 +182,16 @@ public class Inferer {
 	 * 
 	 * @param newModel    model where we will add the new triples
 	 * @param sourceModel provided model where we iterate through the statements
-	 * @param uriNodeMap  map each resource uri to its equivalent resources
+	 * @param propertyEquiMap map each property to its representative property
 	 */
-	public void iterateStmts(Model newModel, Model sourceModel, Map<String, Equivalent> uriNodeMap) {
+	private void iterateStmts(Model newModel, Model sourceModel, Map<OntProperty, OntProperty> propertyEquiMap) {
 		List<Statement> stmts = sourceModel.listStatements().toList();
 		for (Statement curStatement : stmts) {
-			Set<Statement> newStmts = searchType(curStatement, newModel, uriNodeMap);
+			Set<Statement> newStmts = searchType(curStatement, newModel, propertyEquiMap);
 			// searchType(curStatement, ontModel, newModel);
 			newModel.add(newStmts.toArray(new Statement[newStmts.size()]));
 			
-			String pattern =  "^(http:\\/\\/www\\.w3\\.org\\/1999\\/02\\/22-rdf-syntax-ns#_)\\d+$";
+			String pattern =  "^(http://www\\.w3\\.org/1999/02/22-rdf-syntax-ns#_)\\d+$";
 					//"^(http:\\/\\/www.w3.org\\/1999\\/02\\/22-rdf-syntax-ns#_).*";
 		
 			if(curStatement.getPredicate().getURI().matches(pattern)) {
@@ -193,90 +203,40 @@ public class Inferer {
 	}
 
 	/**
-	 * For a given statement, this method searches for the predicate of a model
-	 * inside the Ontology. If found in the Ontology, it then extracts the domain
-	 * and range. Creating and adding a new triple with the inferred type to the
-	 * model.
-	 * 
-	 * @param statement statement in which we want to check the predicate in the
-	 *                  ontology
-	 * @param model  where we add the new triples and therefore, where we check
-	 *                  if the statement is already existing in the model or not
-	 * @param ontModel  the ontology model
-	 * @return a set of statements inferred from one property
-	 */
-	private Set<Statement> searchType(Statement statement, Model model, OntModel ontModel) {
-		Set<Statement> newStmts = new HashSet<>();
-		Resource subject = statement.getSubject();
-		Property predicate = statement.getPredicate();
-		RDFNode object = statement.getObject();
-
-		// search for the predicate of the model in the ontology
-		OntProperty property = ontModel.getOntProperty(predicate.toString());
-		if (property != null) {
-			List<? extends OntResource> domain = property.listDomain().toList();
-			for (OntResource curResource : domain) {
-				Statement subjType = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				newStmts.add(subjType);
-
-			}
-			if (object.isResource()) {
-				List<? extends OntResource> range = property.listRange().toList();
-				for (OntResource curResource : range) {
-					Statement objType = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
-					newStmts.add(objType);
-				}
-			}
-		}
-		return newStmts;
-	}
-
-	/**
-	 * Same as searchType(Statement statement, Model model, OntModel ontModel),
-	 * but in our custom objects: For a given statement, this method searches for
-	 * the predicate of a model inside the Ontology. If found in the Ontology, it
-	 * then extracts the domain and range. Creating and adding a new triple with the
+	 * For a given statement, this method searches for the predicate of a model inside the Ontology. If found in the
+	 * Ontology, it then extracts the domain and range. Creating and adding a new triple with the
 	 * inferred type to the model.
 	 * 
 	 * @param statement  statement in which we want to check the predicate in the
 	 *                   ontology
 	 * @param model   where we add the new triples and therefore, where we check
 	 *                   if the statement is already existing in the model or not
-	 * @param uriNodeMap map each resource uri to its equivalent resources
+	 * @param propertyEquiMap map each property to its representative property
 	 * @return a set of statements inferred from a property
 	 */
-	private Set<Statement> searchType(Statement statement, Model model, Map<String, Equivalent> uriNodeMap) {
+	private Set<Statement> searchType(Statement statement, Model model, Map<OntProperty, OntProperty> propertyEquiMap) {
 		Set<Statement> newStmts = new HashSet<>();
 		Resource subject = statement.getSubject();
 		Property predicate = statement.getPredicate();
 		RDFNode object = statement.getObject();
 
-		Equivalent<OntProperty> node = uriNodeMap.get(predicate.toString());
-		OntProperty property = null;
-
-		if (node != null) {
-			property = node.getAttribute();
-			Property newPredicate = ResourceFactory.createProperty(node.getName());
-
-			if (!newPredicate.getURI().equals(predicate.getURI()))
+		OntProperty representation = propertyEquiMap.get(predicate);
+		if(representation != null){
+			if (!representation.getURI().equals(predicate.getURI())) {
+				Property newPredicate = ResourceFactory.createProperty(representation.getURI());
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
-		}
-
-		if (property != null) {
-			List<? extends OntResource> domain = property.listDomain().toList();
-			for (OntResource curResource : domain) {
-				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, curResource);
-				if (!curResource.isAnon()) {
+			}
+			for (OntResource domain : representation.listDomain().toList()) {
+				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, domain);
+				if (!domain.isAnon()) {
 					newStmts.add(subjNewStmt);
 				}
 			}
 			if (object.isResource()) {
-				List<? extends OntResource> range = property.listRange().toList();
-				for (OntResource curResource : range) {
-					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, curResource);
+				for (OntResource range : representation.listRange().toList()) {
+					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, range);
 					newStmts.add(objNewStmt);
-
 				}
 			}
 		}
@@ -287,15 +247,16 @@ public class Inferer {
 	 * This method reads the ontology file with an InputStream
 	 * 
 	 * @param filePath path to the ontology file
+	 * @param fileType type of ontology file
 	 * @return OntModel Object
 	 */
-	public OntModel readOntology(String filePath, String base) {
-		if (base == null)
-			base = "RDF/XML";
+	private OntModel readOntology(String filePath, String fileType) {
+		if (fileType == null)
+			fileType = "RDF/XML";
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		try (InputStream inputStream = FileManager.get().open(filePath)) {
 			if (inputStream != null) {
-				ontModel.read(inputStream, base);
+				ontModel.read(inputStream, fileType);
 			}
 		} catch (IOException e) {
 			LOGGER.error("Couldn't read ontology file. Returning empty ontology model.", e);
@@ -305,93 +266,143 @@ public class Inferer {
 	}
 
 	/**
-	 * Searches for the equivalents in an ontology and maps them to our Equivalent<T
-	 * extends OntResource> class, producing a map of the Equivalent objects with
-	 * the URIs as keys.
-	 * 
-	 * @see Equivalent<T extends OntResource>
-	 * @param <T>
+	 * Searches for the equivalents in an ontology and maps each IRI to a set of equivalent IRIs
 	 * @param ontElements the ontology classes or properties
-	 * @return
 	 */
-	public <T extends OntResource> Map<String, Equivalent> searchEquivalents(Set<T> ontElements) {
+	private <T extends OntResource> Map<T, Set<T>> searchEquivalents(Set<T> ontElements) {
 
-		Map<String, Equivalent> uriNodeMap = new HashMap<>();
+		Map<T, Set<T>> iriEquiMap = new HashMap<>();
 
 		for (T currentResource : ontElements) {
 
-			String curURI = currentResource.getURI();
+			if (currentResource.getURI()!=null) {
 
-			if (curURI!=null) {
-
-				//find equivalent classes if possible
+				//find equivalent resources if possible
 				List<T> eqsList = null;
 				try {
 					if (currentResource.isProperty())
 						eqsList = (List<T>) currentResource.asProperty().listEquivalentProperties().toList();
-					if (currentResource.isClass())
+					else if (currentResource.isClass())
 						eqsList = (List<T>) currentResource.asClass().listEquivalentClasses().toList();
 				} catch (ConversionException e) {
 					LOGGER.warn(
 							"Cannot convert the equivalents. The ontology does not have any further info on the equivalents of {}.",
-							currentResource.toString());
+							currentResource);
 				}
 
-				//node to where we want to add the info to
-				Equivalent curNode = null;
+				Set<T> equiSet = new HashSet<>();
+				equiSet.add(currentResource);
 				if(eqsList == null || eqsList.isEmpty()){
-					if(!uriNodeMap.containsKey(curURI)){
-						curNode = new Equivalent(currentResource);
-						uriNodeMap.put(curURI, curNode);
+					if(!iriEquiMap.containsKey(currentResource)){
+						iriEquiMap.put(currentResource, equiSet);
 					}
 				}else{
-
-					if(uriNodeMap.containsKey(curURI)){
-						curNode = uriNodeMap.get(curURI);
+					if(iriEquiMap.containsKey(currentResource)){
+						equiSet = iriEquiMap.get(currentResource);
 					}
-					Map<T, Equivalent> localMap = new HashMap<>();
 					for(T re : eqsList){
-						if(re.getURI()!=null && uriNodeMap.containsKey(re.getURI())){
-							localMap.put(re, uriNodeMap.get(re.getURI()));
-						}
-					}
-					if(!localMap.isEmpty()){
-						for(T re : localMap.keySet()){
-							if(curNode == null){
-								curNode = localMap.get(re);
-							}else if (curNode != localMap.get(re)){
-								curNode.addEquivalentGroup(localMap.get(re).getEquiResources());
+						if(re.getURI() != null){
+							if(iriEquiMap.containsKey(re)){
+								equiSet.addAll(iriEquiMap.get(re));
+							}else{
+								equiSet.add(re);
 							}
 						}
 					}
-					if(curNode==null){
-						curNode = new Equivalent(currentResource);
-					}
-					curNode.addEquivalent(currentResource);
-					curNode.addEquivalentGroup(eqsList.stream().collect(Collectors.toSet()));
-					for(Object s : curNode.getEquivalents()){
-						uriNodeMap.put((String) s, curNode);
+					for(T s : equiSet){
+						iriEquiMap.put(s, equiSet);
 					}
 				}
 			}
 		}
-		return uriNodeMap;
+		return iriEquiMap;
 	}
 	/**
 	 * Renames all the equivalent resources to one uniform URI
 	 * 
 	 * @param model   the RDF Model
-	 * @param classes the map between the different URIs and the class object
+	 * @param classes the map between the different IRIs and a uri name representing their equivalent classes
 	 */
-	public void renameClasses(Model model, Map<String, Equivalent> classes) {
-		Iterator<Entry<String, Equivalent>> it = classes.entrySet().iterator();
+	private void renameClasses(Model model, Map<OntClass, OntClass> classes) {
+		Iterator<Entry<OntClass, OntClass>> it = classes.entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry<String, Equivalent> pair = it.next();
-			String newName = pair.getValue().getName();
-			Resource mResource = model.getResource(pair.getKey());
-			if (mResource != null && !mResource.getURI().equals(newName)) {
-				ResourceUtils.renameResource(mResource, newName);
+			Map.Entry<OntClass, OntClass> pair = it.next();
+			OntClass clazz = pair.getKey();
+			OntClass replacement = pair.getValue();
+			Resource mResource = model.getResource(clazz.getURI());
+			if (!clazz.getURI().equals(replacement.getURI())) {
+				ResourceUtils.renameResource(mResource, replacement.getURI());
 			}
 		}
+	}
+
+	/**
+	 * Find a proper representation to represent each equivalent ontClasses set from the given map.
+	 * @param classEquiSetMap a map that maps an ontClass to its equivalent ontClasses set.
+	 * @return a map that maps an ontClass to its representative ontClass.
+	 */
+	private Map<OntClass, OntClass> findRepresentation(Map<OntClass, Set<OntClass>> classEquiSetMap){
+		Map<OntClass, OntClass> iriToRepresentation = new HashMap<>();
+		for(Map.Entry<OntClass, Set<OntClass>> entry : classEquiSetMap.entrySet()){
+			OntClass clazz = entry.getKey();
+			if(!iriToRepresentation.containsKey(clazz)){
+				OntClass representation = clazz;
+				Set<OntClass> equis = entry.getValue();
+				for(OntClass eq : equis){
+					if(representation.getURI().compareTo(eq.getURI())<0){
+						representation = eq;
+					}
+				}
+				for(OntClass eq : equis){
+					iriToRepresentation.put(eq, representation);
+				}
+			}
+		}
+		return  iriToRepresentation;
+	}
+
+	/**
+	 * Find a proper representation to represent each equivalent ontProperty set from the given map.
+	 * And add domains and ranges of all equivalent ontProperties to the representative ontProperty.
+	 * @param propertyEquiSetMap map each ontProperty to a set of properties which contains its equivalent ontProperties.
+	 * @return a map that maps each ontProperty from the given map to its representative ontProperty
+	 * which carries all domains and ranges.
+	 */
+	private Map<OntProperty, OntProperty> findRepresentationAndDR(Map<OntProperty, Set<OntProperty>> propertyEquiSetMap) {
+		Map<OntProperty, OntProperty> propertyEquiMap = new HashMap<>();
+		for(Map.Entry<OntProperty, Set<OntProperty>> entry : propertyEquiSetMap.entrySet()){
+			OntProperty property = entry.getKey();
+			if(!propertyEquiMap.containsKey(property)){
+				OntProperty representation = property;
+				Set<OntProperty> equis = entry.getValue();
+				//determine the representation
+				for(OntProperty eq : equis){
+					if(representation.getURI().compareTo(eq.getURI())<0){
+						representation = eq;
+					}
+				}
+				//collect the domain and range and add into the representation
+				for(OntProperty eq : equis){
+					List<? extends OntResource> domainList = eq.listDomain().toList();
+					for (OntResource domain : domainList) {
+						if (!representation.hasDomain(domain)) {
+							representation.addDomain(domain);
+						}
+					}
+
+					List<? extends OntResource> rangeList = eq.listRange().toList();
+					for (OntResource range : rangeList) {
+						if (!representation.hasRange(range)) {
+							representation.addRange(range);
+						}
+					}
+				}
+				//put each equivalent property and its representative property into the map
+				for(OntProperty eq: equis){
+					propertyEquiMap.put(eq, representation);
+				}
+			}
+		}
+		return propertyEquiMap;
 	}
 }

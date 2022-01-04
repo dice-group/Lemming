@@ -19,23 +19,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     @Override
     public double apply(ColouredGraph graph) {
-        IntArrayList degrees = null;
-        if (direction == DIRECTION.in) {
-            degrees = graph.getAllInEdgeDegrees();
-        } else {
-            degrees = graph.getAllOutEdgeDegrees();
-        }
-        return calculateStdDev(degrees, calculateAvg(degrees));
-    }
-
-    protected double calculateStdDev(IntArrayList degrees, double avg) {
-        double temp, sum = 0;
-        for (int i = 0; i < degrees.size(); ++i) {
-            temp = avg - degrees.getInt(i);
-            temp *= temp;
-            sum += temp;
-        }
-        return Math.sqrt(sum / degrees.size());
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -90,6 +74,10 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     @Override
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
+
+        if (previousResult == null) {
+            return applyUpdatable(graph);
+        }
 
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
 
