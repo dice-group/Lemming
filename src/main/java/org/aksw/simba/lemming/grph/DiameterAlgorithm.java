@@ -147,69 +147,51 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return path;
     }
 
-    public ArrayListPath computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
+    private SearchResult searchForShortestPathBetween(int source, int destination, int limit, SearchResult search,
+            IColouredGraph graph) {
         IntQueue queue = new IntQueue();
-        SearchResult search = new SearchResult((int) graph.getNumberOfVertices());
-        ArrayListPath shorterPath = new ArrayListPath();
-        shorterPath.setSource(path.getSource());
-        boolean shorterPathFound = false;
-        if (path.getSource() != triple.tailId) {
-            queue.add(path.getSource());
-            search.distances[path.getSource()] = 0;
-            search.visitOrder.add(path.getSource());
+        int subPathLength = 0;
+        boolean endNodeReached = false;
+        if (source != destination) {
+            queue.add(source);
         }
-        int sourceToTailLength = 0;
-        while (queue.getSize() > 0 && sourceToTailLength < path.getLength()) {
-            int source = queue.extract(ACCESS_MODE.QUEUE);
-            boolean endNodeReached = false;
-            for (int node : graph.getOutNeighbors(source)) {
+        while (queue.getSize() > 0 && subPathLength < limit) {
+            int startNode = queue.extract(ACCESS_MODE.QUEUE);
+            for (int node : graph.getOutNeighbors(startNode)) {
                 if (search.distances[node] == -1) {
-                    search.predecessors[node] = source;
-                    search.distances[node] = search.distances[source] + 1;
+                    search.predecessors[node] = startNode;
+                    search.distances[node] = search.distances[startNode] + 1;
                     queue.add(node);
                     search.visitOrder.add(node);
                 }
-                if (node == triple.tailId) {
+                if (node == destination) {
                     endNodeReached = true;
                     break;
                 }
             }
-            sourceToTailLength++;
-            if (endNodeReached) {
-                queue = new IntQueue();
-                break;
-            }
-        }
-        // The new edge added is not incident to the destination of the diameter
-        if (triple.headId != path.getDestination()) {
-            queue.add(triple.headId);
-            search.distances[triple.headId] = search.distances[triple.tailId] + 1;
-            search.visitOrder.add(triple.headId);
-        }
-        int headToDestinationLength = 0;
-        while (queue.getSize() > 0 && headToDestinationLength < path.getLength() - search.distances[triple.headId]) {
-            int source = queue.extract(ACCESS_MODE.QUEUE);
-            boolean endNodeReached = false;
-            for (int node : graph.getOutNeighbors(source)) {
-                if (search.distances[node] == -1) {
-                    search.predecessors[node] = source;
-                    search.distances[node] = search.distances[source] + 1;
-                    queue.add(node);
-                    search.visitOrder.add(node);
-                }
-                if (node == path.getDestination()) { // shortest path has been found between the new edge
-                    // head and the existing diameter destination
-                    endNodeReached = true;
-                    break;
-                }
-            }
-            headToDestinationLength++;
+            subPathLength++;
             if (endNodeReached) {
                 break;
             }
         }
+        return search;
+    }
 
-        return (shorterPathFound) ? shorterPath : path;
+    public ArrayListPath computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
+        SearchResult search = new SearchResult((int) graph.getNumberOfVertices());
+        search.distances[path.getDestination()] = 0;
+        search.visitOrder.add(path.getDestination());
+        search = searchForShortestPathBetween(path.getDestination(), triple.tailId, path.getLength(), search, graph);
+        int sourceToTailLength = search.maxDistance();
+        search.distances[triple.headId] = search.distances[triple.tailId] + 1;
+        search.predecessors[triple.headId] = triple.tailId;
+        search.visitOrder.add(triple.headId);
+        search = searchForShortestPathBetween(triple.headId, path.getSource(),
+                path.getLength() - search.distances[triple.headId], search, graph);
+        int headToDestinationLength = search.maxDistance();
+        return (sourceToTailLength + headToDestinationLength < path.getLength())
+                ? search.computePathTo(path.getSource())
+                : path;
     }
 
     public ArrayListPath getDiameterPath() {
