@@ -75,12 +75,7 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
                 paths[source] = performSearchInThread(g, source, d, null);
                 try {
                     lengths[source] = paths[source].getLength();
-                    // System.out
-                    // .println("Source: " + source + "\nLength: " + lengths[source] + "\nPath: " +
-                    // paths[source]);
                 } catch (NullPointerException e) {
-//                    System.out.println("No outgoing edges from this node " + source);
-//                    System.out.println(g.getOutEdgeDegree(source));
                     return;
                 }
             }
@@ -147,18 +142,39 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return path;
     }
 
-    private SearchResult searchForShortestPathBetween(int source, int destination, int limit, SearchResult search,
-            IColouredGraph graph) {
+    /**
+     * Compute the shortest path between given two nodes in the graph. This method
+     * is used twice: 1. To compute the shortest path from an endpoint of the
+     * diameter to the tail of the newly added edge 2. To compute the shortest path
+     * from the head of the newly added to the other endpoint of the diameter
+     * 
+     * @param graph          - {@link IColouredGraph} object in which the path is
+     *                       searched
+     * @param search         - {@link SearchResult} object containing basic
+     *                       information as the start of the search or the distances
+     *                       computed is previous search
+     * @param source         - Starting node
+     * @param destination    - Ending node
+     * @param maxLengthLimit - The length of the previous path, upper limit to the
+     *                       length of the new path
+     * @return search - {@link SearchResult} object containing the new path
+     *         information
+     */
+    private SearchResult searchShortestPath(IColouredGraph graph, SearchResult search, int source, int destination,
+            int maxLengthLimit) {
+        // Queue to access neighbors in breadth-first manner
         IntQueue queue = new IntQueue();
         int subPathLength = 0;
         boolean endNodeReached = false;
-        if (source != destination) {
+        if (source != destination) { // If source and destination are the same node then there is no need to start
+                                     // the search
             queue.add(source);
         }
-        while (queue.getSize() > 0 && subPathLength < limit) {
+        while (queue.getSize() > 0 && subPathLength < maxLengthLimit && !endNodeReached) {
             int startNode = queue.extract(ACCESS_MODE.QUEUE);
             for (int node : graph.getOutNeighbors(startNode)) {
                 if (search.distances[node] == -1) {
+                    // update search results
                     search.predecessors[node] = startNode;
                     search.distances[node] = search.distances[startNode] + 1;
                     queue.add(node);
@@ -169,27 +185,39 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
                     break;
                 }
             }
-            subPathLength++;
-            if (endNodeReached) {
-                break;
-            }
+            subPathLength++; // Length from the source node
         }
         return search;
     }
 
+    /**
+     * Method to check if the addition of a triple to the graph reduces the length
+     * of the diameter. If yes, the method computes the shorter diameter path using
+     * {@code searchShortestPath()} method. Else return the previous diameter.
+     * 
+     * @param graph  - {@link IColouredGraph} object containing a diameter
+     * @param triple - New triple added to the graph object
+     * @param path   - Previously computed diameter path
+     * @return ArrayListPath path - If a shorter diameter exists return its path or
+     *         else the previous diameter
+     */
     public ArrayListPath computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
         SearchResult search = new SearchResult((int) graph.getNumberOfVertices());
+        // initialize the search object with the starting node of the diameter path.
+        // The path is stored in reverse in ArrayListPath object, hence the source and
+        // destination of the path are swapped.
         search.distances[path.getDestination()] = 0;
         search.visitOrder.add(path.getDestination());
-        search = searchForShortestPathBetween(path.getDestination(), triple.tailId, path.getLength(), search, graph);
-        int sourceToTailLength = search.maxDistance();
+        // Compute shortest path between start node and tail of the new edge
+        search = searchShortestPath(graph, search, path.getDestination(), triple.tailId, path.getLength());
+        // enter the new edge information in the search object
         search.distances[triple.headId] = search.distances[triple.tailId] + 1;
         search.predecessors[triple.headId] = triple.tailId;
         search.visitOrder.add(triple.headId);
-        search = searchForShortestPathBetween(triple.headId, path.getSource(),
-                path.getLength() - search.distances[triple.headId], search, graph);
-        int headToDestinationLength = search.maxDistance();
-        return (sourceToTailLength + headToDestinationLength < path.getLength())
+        // Compute shortest path between head of the new edge and end node
+        search = searchShortestPath(graph, search, triple.headId, path.getSource(),
+                path.getLength() - search.distances[triple.headId]);
+        return (search.maxDistance() < path.getLength() && search.distances[path.getSource()] > 0)
                 ? search.computePathTo(path.getSource())
                 : path;
     }
