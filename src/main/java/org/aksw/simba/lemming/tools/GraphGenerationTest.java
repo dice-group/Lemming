@@ -98,13 +98,13 @@ public class GraphGenerationTest {
         metrics.add(new EdgeTriangleMetric());
        
         //these are optional metrics
-//        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
-//        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
-//        metrics.add(new AvgVertexDegreeMetric());
-//        metrics.add(new StdDevVertexDegree(DIRECTION.in));
-//        metrics.add(new StdDevVertexDegree(DIRECTION.out));
-//        metrics.add(new NumberOfEdgesMetric());
-//        metrics.add(new NumberOfVerticesMetric());
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.in));
+        metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
+        metrics.add(new AvgVertexDegreeMetric());
+        metrics.add(new StdDevVertexDegree(DIRECTION.in));
+        metrics.add(new StdDevVertexDegree(DIRECTION.out));
+        metrics.add(new NumberOfEdgesMetric());
+        metrics.add(new NumberOfVerticesMetric());
         metrics.add(new DiameterMetric());
         
         /*---------------------------------------------------
@@ -144,7 +144,7 @@ public class GraphGenerationTest {
         Loading metrics values and constant expressions 
         ----------------------------------------------------*/
         ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
-        //metrics = valuesCarrier.getMetrics(metrics);
+        metrics = valuesCarrier.getMetrics(metrics);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
         	LOGGER.warn("Please generate the file [value_store.val] again!");
