@@ -1,5 +1,7 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -146,7 +148,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
-     * @return
+     * @return - triple to remove.
      */
     @Override
     public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResultList, long seed, boolean changeMetricValue) {
@@ -267,7 +269,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
-     * @return
+     * @return - triple to add.
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator,
@@ -334,6 +336,21 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             //System.out.println("Degree 2 : " + graph.getGraph().getOutEdgeDegree(tripleAdd.tailId));
         }
         return tripleAdd;
+    }
+    
+    /**
+     * The method returns a list of metrics on which standard deviation metric
+     * depends
+     * 
+     * @return - List of metrics.
+     */
+    @Override
+    public List<SingleValueMetric> getDependentMetricsList(){
+        if(direction == DIRECTION.in) {
+            return Arrays.asList(new MaxVertexDegreeMetric(DIRECTION.in), new AvgVertexDegreeMetric());
+        }else {
+            return Arrays.asList(new MaxVertexDegreeMetric(DIRECTION.out), new AvgVertexDegreeMetric());
+        }
     }
 
 }
