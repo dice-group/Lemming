@@ -89,7 +89,7 @@ public class GraphOptimization {
 		mEdgeModifier = new EdgeModifier(clonedGrph, metrics);
 		
 		//Expression checker initialization
-		expressionChecker = new ExpressionChecker(mErrScoreCalculator, valueCarriers);
+		expressionChecker = new ExpressionChecker(mErrScoreCalculator.getmMapOfMeanValues(), valueCarriers.getMapConstantValues());
 	}
 	
 	
@@ -126,7 +126,8 @@ public class GraphOptimization {
             }else {
                 // As per the metric to be optimized, get a specific edge to remove
                 SingleValueMetric metricToOptimizeObject = getMetricObject(metricNameToOptimize);
-                lTriple = metricToOptimizeObject.getTripleRemove(mEdgeModifier.getGraph(), mEdgeModifier.getListPrevMetricsResult(), seed, metricValueToDecrease);
+                lTriple = metricToOptimizeObject.getTripleRemove(mEdgeModifier.getGraph(),
+                        mEdgeModifier.getListPrevMetricsResult(), seed, metricValueToDecrease);
             }
             
 			ObjectDoubleOpenHashMap<String> metricValuesOfLeft = mEdgeModifier.tryToRemoveAnEdge(lTriple);
@@ -152,6 +153,13 @@ public class GraphOptimization {
                 rTriple = metricToOptimizeObject.getTripleAdd(mEdgeModifier.getGraph(), mGraphGenerator,
                         mProcessRandomly, mEdgeModifier.getListPrevMetricsResult(), metricValueToDecrease);
             }			
+            
+            if(!metricNameToOptimize.isEmpty()) {
+                metricNameToOptimize = ""; // Re-initialize the metric name to empty string after triples are computed
+                                           // for it.
+                expressionChecker.setMaxDifferenceDecreaseMetric(Double.MIN_VALUE);
+                expressionChecker.setMaxDifferenceIncreaseMetric(Double.MIN_VALUE);
+            }
 			
 			ObjectDoubleOpenHashMap<String> metricValuesOfRight =  mEdgeModifier.tryToAddAnEdge(rTriple);
 			//System.out.println("[R]Aft -Number of edges: "+ mEdgeModifier.getGraph().getEdges().size());
@@ -181,7 +189,7 @@ public class GraphOptimization {
 		        if(expressionChecker.getMaxDifferenceIncreaseMetric() > expressionChecker.getMaxDifferenceDecreaseMetric()) {
 		            metricNameToOptimize = expressionChecker.getMetricToIncrease();
 		            metricValueToDecrease = false;
-		        }else {
+		        }else if(expressionChecker.getMaxDifferenceIncreaseMetric() < expressionChecker.getMaxDifferenceDecreaseMetric()) {
 		            metricNameToOptimize = expressionChecker.getMetricToDecrease();
 		            metricValueToDecrease = true;
 		        }
@@ -202,7 +210,7 @@ public class GraphOptimization {
                 if(expressionChecker.getMaxDifferenceIncreaseMetric() > expressionChecker.getMaxDifferenceDecreaseMetric()) {
                     metricNameToOptimize = expressionChecker.getMetricToIncrease();
                     metricValueToDecrease = false;
-                }else {
+                }else if(expressionChecker.getMaxDifferenceIncreaseMetric() < expressionChecker.getMaxDifferenceDecreaseMetric()) {
                     metricNameToOptimize = expressionChecker.getMetricToDecrease();
                     metricValueToDecrease = true;
                 }
