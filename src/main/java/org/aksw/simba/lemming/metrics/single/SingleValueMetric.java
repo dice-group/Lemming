@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -135,7 +136,7 @@ public interface SingleValueMetric extends Metric {
      * 
      * Note:- The implementation of this method in particular metric class could use
      * the previous UpdatableMetricResult to generate a different triple.
-     * @param graph TODO
+     * @param graph 
      * @param mGrphGenerator
      *            - Graph Generator used during execution
      * @param mProcessRandomly
@@ -154,6 +155,16 @@ public interface SingleValueMetric extends Metric {
      */
     default TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
         return getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+    }
+    
+    /**
+     * If a metric depends on some other metrics then this method will return those
+     * metrics. This is the default implementation which returns an empty List.
+     * 
+     * @return - List of metrics on which the specific metric depends.
+     */
+    default List<SingleValueMetric> getDependentMetricsList(){
+        return new ArrayList<>();
     }
 
 }
