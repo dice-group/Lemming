@@ -120,12 +120,15 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
-     * @return
+     * @return - triple to remove.
      */
     @Override
     public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResult, long seed,
             boolean changeMetricValue) {
         TripleBaseSingleID tripleRemove = null;
+        
+        //Initializing edge id 
+        int edgeId = -1;
 
         for (Integer edge : graph.getEdges()) {// Iterating edges
 
@@ -139,22 +142,23 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
                     && changeMetricValue) {
                 // if vertices in common then edge triangle exists
                 // Need to reduce the metric
-                tripleRemove = new TripleBaseSingleID();
-                tripleRemove.tailId = graph.getTailOfTheEdge(edge);
-                tripleRemove.headId = graph.getHeadOfTheEdge(edge);
-                tripleRemove.edgeId = edge;
-                tripleRemove.edgeColour = graph.getEdgeColour(edge);
+                edgeId = edge;
                 break;
             } else if (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size() == 0
                     && !changeMetricValue) {
                 // if vertices not in common then edge triangle doesn't exist
-                tripleRemove = new TripleBaseSingleID();
-                tripleRemove.tailId = graph.getTailOfTheEdge(edge);
-                tripleRemove.headId = graph.getHeadOfTheEdge(edge);
-                tripleRemove.edgeId = edge;
-                tripleRemove.edgeColour = graph.getEdgeColour(edge);
+                edgeId = edge;
                 break;
             }
+        }
+        
+        if(edgeId != -1) {
+            //If edge is found
+            tripleRemove = new TripleBaseSingleID();
+            tripleRemove.tailId = graph.getTailOfTheEdge(edgeId);
+            tripleRemove.headId = graph.getHeadOfTheEdge(edgeId);
+            tripleRemove.edgeId = edgeId;
+            tripleRemove.edgeColour = graph.getEdgeColour(edgeId);
         }
 
         if (tripleRemove == null) { // If triple couldn't be found such that the node triangle metric can be
