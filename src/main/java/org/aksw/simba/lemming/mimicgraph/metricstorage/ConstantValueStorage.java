@@ -239,36 +239,35 @@ public class ConstantValueStorage implements Serializable	{
 	 * @param lstMetrics - The list which contains all the input metrics.
 	 * @return List of metrics
 	 */
-	public List<SingleValueMetric> getMetrics(List<SingleValueMetric> lstMetrics, Map<SingleValueMetric, List<SingleValueMetric>> dependencyMap){
-	    
-	    
-	    
-	    List<SingleValueMetric> metrics = new ArrayList<>();// List which will contain metrics present in Expressions
-	    Set<Expression> constantExpressions = getConstantExpressions();
-	    Set<String> expressionsSet = new HashSet<>(); // Set to store atomic expression
-	    
-	    //Iterate over all expressions and add atomic expression in set.
-	    for(Expression expression:constantExpressions) {
-	        ExpressionIterator iterator = new ExpressionIterator(expression);
-	        while(iterator.hasNext()) {
-	            Expression subExpression = iterator.next();
-	            if(subExpression.isAtomic()) {
-	                expressionsSet.add(subExpression.toString());
-	            }
-	        }
-	    }
-	    
-	    //Iterate over input list of metrics and check which metrics are present in expressions
-	    for(SingleValueMetric metric: lstMetrics){
-	            if(expressionsSet.contains(metric.getName())) {
-	                metrics.add(metric);
-	                List<SingleValueMetric> listOfDependMetrics = dependencyMap.get(metric);
-	                if(listOfDependMetrics != null) {
-	                    metrics.addAll(listOfDependMetrics);
-	                }
-	           }
-	    }
-	    
-	    return metrics;
+	public List<SingleValueMetric> getMetrics(List<SingleValueMetric> lstMetrics){
+
+        Set<SingleValueMetric> metrics = new HashSet<>();// List which will contain metrics present in Expressions
+        Set<Expression> constantExpressions = getConstantExpressions();
+        Set<String> expressionsSet = new HashSet<>(); // Set to store atomic expression
+
+        // Iterate over all expressions and add atomic expression in set.
+        for (Expression expression : constantExpressions) {
+            ExpressionIterator iterator = new ExpressionIterator(expression);
+            while (iterator.hasNext()) {
+                Expression subExpression = iterator.next();
+                if (subExpression.isAtomic()) {
+                    expressionsSet.add(subExpression.toString());
+                }
+            }
+        }
+
+        // Iterate over input list of metrics and check which metrics are present in
+        // expressions
+        for (SingleValueMetric metric : lstMetrics) {
+            if (expressionsSet.contains(metric.getName())) {
+                metrics.add(metric);
+                List<SingleValueMetric> listOfDependMetrics = metric.getDependentMetricsList();
+                if (!listOfDependMetrics.isEmpty()) {
+                    metrics.addAll(listOfDependMetrics);
+                }
+            }
+        }
+
+        return new ArrayList<>(metrics);
 	}
 }
