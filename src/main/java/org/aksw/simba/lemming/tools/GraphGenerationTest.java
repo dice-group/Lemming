@@ -108,15 +108,6 @@ public class GraphGenerationTest {
         //metrics.add(new DiameterMetric());
         
         /*---------------------------------------------------
-        Definition of dependency map for defining metrics that have dependency
-        ----------------------------------------------------*/
-        
-        Map<SingleValueMetric, List<SingleValueMetric>> dependencyMap = new HashMap<>();
-        dependencyMap.put(new StdDevVertexDegree(DIRECTION.in), Arrays.asList(new MaxVertexDegreeMetric(DIRECTION.in), new AvgVertexDegreeMetric()));
-        dependencyMap.put(new StdDevVertexDegree(DIRECTION.out), Arrays.asList(new MaxVertexDegreeMetric(DIRECTION.out), new AvgVertexDegreeMetric()));
-        
-        
-        /*---------------------------------------------------
         Loading RDF graphs into ColouredGraph models
         ----------------------------------------------------*/
         ColouredGraph graphs[] = new ColouredGraph[20];
@@ -153,7 +144,7 @@ public class GraphGenerationTest {
         Loading metrics values and constant expressions 
         ----------------------------------------------------*/
         ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
-        metrics = valuesCarrier.getMetrics(metrics, dependencyMap);
+        metrics = valuesCarrier.getMetrics(metrics);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
         	LOGGER.warn("Please generate the file [value_store.val] again!");
