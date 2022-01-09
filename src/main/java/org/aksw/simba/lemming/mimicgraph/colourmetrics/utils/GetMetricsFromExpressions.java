@@ -110,7 +110,7 @@ public class GetMetricsFromExpressions {
 		directProportionalMetricsSet = new HashSet<>(); 
 		inverseProportionalMetricsSet = new HashSet<>();
 
-		System.out.println("Expession : " + exp);
+		//System.out.println("Expession : " + exp);
 		if (exp.getOperator() == Operator.DIV) { // If operator is division then we have numerator and denominator. 
 		    // Sample Expression: (Numerator/Denominator)
 			checkDirectProportionalMetric(exp.getLeft()); // Numerator
@@ -121,9 +121,9 @@ public class GetMetricsFromExpressions {
 			checkDirectProportionalMetric(exp.getRight()); // Metric2
 		}
 
-		System.out.println("Direct Proportional metrics or constants : " + directProportionalMetricsSet);
-		System.out.println("Inverse Proportional metrics or constants : " + inverseProportionalMetricsSet);
-		System.out.println();
+		//System.out.println("Direct Proportional metrics or constants : " + directProportionalMetricsSet);
+		//System.out.println("Inverse Proportional metrics or constants : " + inverseProportionalMetricsSet);
+		//System.out.println();
 
 	}
 
