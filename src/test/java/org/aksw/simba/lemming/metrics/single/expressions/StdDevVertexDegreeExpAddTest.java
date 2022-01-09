@@ -140,8 +140,6 @@ public class StdDevVertexDegreeExpAddTest {
         
         ColouredGraph clonedGraph = map.get(mGrphGenerator);
 
-        
-
         MaxVertexDegreeMetric metric = new MaxVertexDegreeMetric(DIRECTION.in);
         UpdatableMetricResult prevResult = metric.applyUpdatable(clonedGraph);
 

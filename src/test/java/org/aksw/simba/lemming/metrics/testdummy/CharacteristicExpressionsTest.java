@@ -23,11 +23,12 @@ import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator_new;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ExpressionChecker;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.GetMetricsFromExpressions;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
@@ -55,7 +56,7 @@ public class CharacteristicExpressionsTest {
 	private static final String LINKED_GEO_DATASET_FOLDER_PATH = "LinkedGeoGraphs/";
 
 	// Change below as per data set
-	//private String dataset = "geology";
+	private String dataset = "geology";
 	//private String dataset = "swdf";
 	
 	 Map<String, String> mapArgs = new HashMap<>();
@@ -66,7 +67,7 @@ public class CharacteristicExpressionsTest {
 	 //Creating a set of Expressions for manually creating expressions.
 	 Set<Expression> setOfExpressions = new HashSet<>();
 	 
-	/*// @Test
+	@Test
 	public void testToEvaluateCharacteristicExpressions() {
 
 		// Initialize dataset path
@@ -87,7 +88,8 @@ public class CharacteristicExpressionsTest {
 
 	}
 
-	//@Test
+	
+	@Test
 	public void checkMetricsFromExpressions() {
 
 		List<SingleValueMetric> metrics = new ArrayList<>();
@@ -127,10 +129,10 @@ public class CharacteristicExpressionsTest {
 		Set<Expression> constantExpressions = valuesCarrier.getConstantExpressions();
 
 		// Initialize Error Score Calculator
-		ErrorScoreCalculator_new mErrScoreCalculator = new ErrorScoreCalculator_new(graphs, valuesCarrier);
+		ErrorScoreCalculator mErrScoreCalculator = new ErrorScoreCalculator(graphs, valuesCarrier);
 
 		// Initialize Expression Checker
-		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator, mEdgeModifier, valuesCarrier);
+		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator.getmMapOfMeanValues(), valuesCarrier.getMapConstantValues());
 
 		ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<>();
 		mapMetricValues.put("#vertices", 1281.0);
@@ -154,7 +156,7 @@ public class CharacteristicExpressionsTest {
 		System.out.println("Metric to Decrease : " + expressionChecker.getMetricToDecrease()
 				+ ", Difference of Expression with mean : " + expressionChecker.getMaxDifferenceDecreaseMetric());
 
-	}*/
+	}
 	 
 	 private void initializeInput() {
 	     
@@ -263,7 +265,7 @@ public class CharacteristicExpressionsTest {
          
 	 }
 	
-	@Test
+	//@Test
 	public void checkMetricsFromExpressionsSWDF() {
 
 	    int mNumberOfDesiredVertices = 10000;
@@ -450,7 +452,7 @@ public class CharacteristicExpressionsTest {
         ErrorScoreCalculator mErrScoreCalculator = new ErrorScoreCalculator(graphs, valuesCarrier);
         
 		// Initialize Expression Checker
-		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator, valuesCarrier);
+		ExpressionChecker expressionChecker = new ExpressionChecker(mErrScoreCalculator.getmMapOfMeanValues(), valuesCarrier.getMapConstantValues());
 		expressionChecker.setManualExpressionsSet(setOfExpressions);
 		expressionChecker.setmMapOfMeanValues(mapMetricValues);
 
@@ -467,7 +469,7 @@ public class CharacteristicExpressionsTest {
 
 	}
 
-	/*private ColouredGraph[] getInputGraphs() {
+	private ColouredGraph[] getInputGraphs() {
 
 		IDatasetManager mDatasetManager = null;
 
@@ -499,6 +501,6 @@ public class CharacteristicExpressionsTest {
 
 		graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
 		return graphs;
-	}*/
+	}
 
 }
