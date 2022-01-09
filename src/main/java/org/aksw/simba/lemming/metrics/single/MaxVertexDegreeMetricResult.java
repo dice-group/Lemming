@@ -17,14 +17,20 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
      */
     private int numOfVerticesWithMaxDeg = 0;
 
+    /**
+     * Variable for storing vertex id having maximum degree
+     */
     private int maxVertexID = -1;
-    // Variable for storing vertex id having maximum degree
     
+    /**
+     * Variable for storing vertex id having minimum degree
+     */
     private int minVertexID = -1;
-    // Variable for storing vertex id having minimum degree
 
+    /**
+     * Variable for storing direction of metric
+     */
     private DIRECTION direction = null;
-    // Variable for storing direction of metric
     
     /**
      * Initialization calls super class with the name of metric and metric value.
@@ -56,18 +62,34 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
         this.maxVertexID = vertexID;
     }
 
+    /**
+     * Returns the id of the vertex having minimum degree.
+     * @return - Integer value
+     */
     public int getMinVertexID() {
         return minVertexID;
     }
 
+    /**
+     * Updates the id of the vertex having minimum degree.
+     * @param minVertexID - vertex id
+     */
     public void setMinVertexID(int minVertexID) {
         this.minVertexID = minVertexID;
     }
 
+    /**
+     * Returns the direction of metric result.
+     * @return - direction enum
+     */
     public DIRECTION getDirection() {
         return direction;
     }
 
+    /**
+     * Updates the direction of metric result.
+     * @param direction - direction enum
+     */
     public void setDirection(DIRECTION direction) {
         this.direction = direction;
     }
@@ -87,6 +109,4 @@ public class MaxVertexDegreeMetricResult extends SingleValueMetricResult {
         this.numOfVerticesWithMaxDeg = numOfVerticesWithMaxDeg;
     }
     
-    
-
 }

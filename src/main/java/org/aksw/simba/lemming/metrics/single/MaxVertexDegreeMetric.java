@@ -48,6 +48,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     @Override
     public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
         MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);        
+        metricResultTempObj.setDirection(direction);//set direction
         
         IntSet vertices = graph.getGraph().getVertices();
 
@@ -135,6 +136,9 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             }
         }
 
+        metricResultTempObj.setDirection(direction);
+        metricResultTempObj.setMaxVertexID(((MaxVertexDegreeMetricResult) previousResult).getMaxVertexID());
+        metricResultTempObj.setMinVertexID(((MaxVertexDegreeMetricResult) previousResult).getMinVertexID());
         return metricResultTempObj;
 
     }
@@ -146,7 +150,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             return graph.getGraph().getOutEdgeDegree(vertexID);
         }
     }
-
+    
     /**
      * The method returns the triple to remove by using the previous metric result object.
      *      * 
@@ -161,7 +165,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
-     * @return
+     * @return - triple to remove.
      */
     @Override
     public TripleBaseSingleID getTripleRemove(ColouredGraph graph, List<UpdatableMetricResult> previousResultList, long seed,
@@ -246,7 +250,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      *            - boolean variable to indicate if the metric value should be decreased
      *            or not. If the variable is true, then the method will return a
      *            triple that reduces the metric value.
-     * @return
+     * @return - triple to add.
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResultList, boolean changeMetricValue) {
