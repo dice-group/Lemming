@@ -15,7 +15,6 @@ import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator_new;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ExpressionChecker;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
