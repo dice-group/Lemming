@@ -239,7 +239,7 @@ public class ConstantValueStorage implements Serializable	{
 	 * @param lstMetrics - The list which contains all the input metrics.
 	 * @return List of metrics
 	 */
-	public List<SingleValueMetric> getMetrics(List<SingleValueMetric> lstMetrics){
+	public List<SingleValueMetric> getMetricsOfExpressions(List<SingleValueMetric> lstMetrics){
 	    List<SingleValueMetric> metrics = new ArrayList<>();// List which will contain metrics present in Expressions
 	    Set<Expression> constantExpressions = getConstantExpressions();
 	    Set<String> expressionsSet = new HashSet<>(); // Set to store atomic expression
