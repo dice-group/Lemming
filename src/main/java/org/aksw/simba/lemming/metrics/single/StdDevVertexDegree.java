@@ -256,7 +256,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     }
     
     /**
-     * The method returns the triple to remove by using the previous metric result object.
+     * The method returns the triple to add by using the previous metric result object.
      *      * 
      * @param mGrphGenerator
      *            - Graph Generator used during execution
