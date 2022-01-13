@@ -987,8 +987,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						}
 						
 						Set<Integer> setTmpTails = new HashSet<Integer>(offeredGrpTriple.tailIDs);
-						int tId = tailIdsProposer.getPotentialItem(setTmpTails);
-						
+                        int tId;
+                        try {
+                            tId = tailIdsProposer.getPotentialItem(setTmpTails);
+                        } catch (Exception e) {
+                            continue;
+                        }
+
 						int[] arrConnectedHeads = getConnectedHeads(tId, offeredGrpTriple.edgeColour).toIntArray();
 						
 						IntSet setAvailableHeads = new DefaultIntSet(offeredGrpTriple.headIDs.size());
@@ -1005,8 +1010,13 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 						}
 						
 						Set<Integer> setTmpHeads = new HashSet<Integer>(setAvailableHeads);
-						int hId = headIdsProposer.getPotentialItem(setTmpHeads);
-						
+                        int hId;
+                        try {
+                            hId = headIdsProposer.getPotentialItem(setTmpHeads);
+                        } catch (Exception e) {
+                            LOGGER.error(e.getMessage());
+                            continue;
+                        }
 						
 						TripleBaseSingleID singleTriple = new TripleBaseSingleID();
 						singleTriple.edgeColour = offeredGrpTriple.edgeColour;
