@@ -14,6 +14,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,5 +168,62 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
         }
 
         return tripleRemove;
+    }
+    
+    /**
+     * The method returns the triple to add by using the previous metric result object.
+     *      * 
+     * @param mGrphGenerator
+     *            - Graph Generator used during execution
+     * @param mProcessRandomly
+     *            - boolean value If the variable is false, then it will generate a
+     *            triple as per the implementation defined in the Generator class,
+     *            else the triple is generated as per the default implementation.
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be increased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
+     * @return - triple to add.
+     */
+    @Override
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
+        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+
+        // Initializing edge id
+        int edgeId = -1;
+
+        for (Integer edge : graph.getEdges()) {// Iterating edges
+            // Get vertices incident to edge
+            IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edge);
+            int firstIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
+            int secondIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
+
+            int numberOfVerticesInCommon = MetricUtils
+                    .getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size();
+
+            if (!changeMetricValue && numberOfVerticesInCommon > 0) {
+                // Need to increase the metric
+                // Vertices in common, thus edge triangle exist
+                edgeId = edge;
+                break;
+            } else if (changeMetricValue && numberOfVerticesInCommon == 0) {
+                // Need to decrease the metric or the metric should not be increased
+                // No vertices in common, thus edge triangle does not exist
+                edgeId = edge;
+                break;
+            }
+
+        }
+
+        if (edgeId != -1) {
+            // If edge is found
+            tripleAdd.tailId = graph.getTailOfTheEdge(edgeId);
+            tripleAdd.headId = graph.getHeadOfTheEdge(edgeId);
+        }
+
+        return tripleAdd;
     }
 }

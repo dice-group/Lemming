@@ -156,4 +156,60 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
         return tripleRemove;
     }
     
+    /**
+     * The method returns the triple to add by using the previous metric result object.
+     *      * 
+     * @param mGrphGenerator
+     *            - Graph Generator used during execution
+     * @param mProcessRandomly
+     *            - boolean value If the variable is false, then it will generate a
+     *            triple as per the implementation defined in the Generator class,
+     *            else the triple is generated as per the default implementation.
+     * @param previousResult
+     *            - UpdatableMetricResult object containing the previous computed
+     *            results.
+     * @param changeMetricValue
+     *            - boolean variable to indicate if the metric value should be increased
+     *            or not. If the variable is true, then the method will return a
+     *            triple that reduces the metric value.
+     * @return - triple to add.
+     */
+    @Override
+    public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
+        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+
+        for (Integer edge : graph.getEdges()) {// Iterating edges
+            // Get vertices incident to edge
+            IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edge);
+            int firstIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
+            int secondIncidentVertex = verticesIncidentToEdge.iterator().nextInt();
+
+            if (!changeMetricValue) {// Need to increase the metric
+
+                IntSet difference = IntSetUtil.difference(graph.getEdgesIncidentTo(firstIncidentVertex),
+                        graph.getEdgesIncidentTo(secondIncidentVertex));
+                // Get the vertices to which second vertex is not connected.
+                if (difference.size() > 0) {
+                    // Create a triple with headId - vertex which is connected to first vertex but
+                    // not to second vertex and tailId - second vertex, This will create a node
+                    // triangle
+                    tripleAdd.tailId = secondIncidentVertex;
+                    tripleAdd.headId = difference.iterator().nextInt();
+                    break;
+                }
+            } else {
+                // Need to decrease the metric or the metric should not be increased
+                if (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size() > 0) {
+                    // Found triple can be used, since for the found edge node triangle already
+                    // exists
+                    tripleAdd.tailId = graph.getTailOfTheEdge(edge);
+                    tripleAdd.headId = graph.getHeadOfTheEdge(edge);
+                    break;
+                }
+            }
+        }
+
+        return tripleAdd;
+    }
+
 }
