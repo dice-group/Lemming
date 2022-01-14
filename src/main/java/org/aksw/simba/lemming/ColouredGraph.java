@@ -820,6 +820,11 @@ public class ColouredGraph implements IColouredGraph {
     public ArrayListPath getNodesInDiameter() {
         return diameterAlgorithm.getDiameterPath();
     }
+    
+    @Override
+    public int getCountOfDiameterPaths() {
+        return diameterAlgorithm.getCountOfDiameters();
+    }
 
     /**
      * Get all neighbors of all nodes in the graph. Used to compute the diameter of

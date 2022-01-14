@@ -200,4 +200,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), path);
     }
 
+    public int getCountOfDiameterPaths() {
+        return this.graph.getCountOfDiameterPaths();
+    }
 }

@@ -11,7 +11,14 @@ import grph.path.ArrayListPath;
  */
 public class DiameterMetricResult extends SingleValueMetricResult {
 
+    /**
+     * The path between the end nodes of the diameter
+     */
     private ArrayListPath diameterPath;
+    /**
+     * Number of paths in the graph that have the same length as the diameter
+     */
+    private int numberOfDiameterPaths;
 
     /**
      * @param metricName
@@ -27,5 +34,13 @@ public class DiameterMetricResult extends SingleValueMetricResult {
 
     public ArrayListPath getDiameterPath() {
         return this.diameterPath;
+    }
+
+    public void setCountOfDiameters(int n) {
+        this.numberOfDiameterPaths = n;
+    }
+
+    public int getCountOfDiameters() {
+        return this.numberOfDiameterPaths;
     }
 }

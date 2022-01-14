@@ -30,7 +30,15 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
 
     private static final long serialVersionUID = 1L;
 
-    private ArrayListPath diameter = null;
+    /**
+     * The path between the end nodes of the diameter
+     */
+    private ArrayListPath diameterPath = null;
+
+    /**
+     * Number of paths in the graph that have the same length as the diameter
+     */
+    private int count;
 
     @Override
     public Integer compute(Grph graph) {
@@ -82,10 +90,20 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         };
 
         int max = 0;
-        for (int i = 0; i < lengths.length; ++i) {
-            if (lengths[i] > max) {
-                max = lengths[i];
-                this.diameter = paths[i];
+        this.count = 0;
+        for (int i = 0; i < paths.length; ++i) {
+            try {
+                if (paths[i].getLength() > max) {
+                    max = paths[i].getLength();
+                    this.diameterPath = paths[i];
+                    this.count = 1;
+                } else if (paths[i].getLength() == max) {
+                    this.count++;
+                }
+            } catch (NullPointerException e) {
+                // The nodes with no in-degree will not have any path terminating in them. Their
+                // path will be null and will raise this exception
+                continue;
             }
         }
 
@@ -223,6 +241,10 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
     }
 
     public ArrayListPath getDiameterPath() {
-        return this.diameter;
+        return this.diameterPath;
+    }
+    
+    public int getCountOfDiameters() {
+        return this.count;
     }
 }

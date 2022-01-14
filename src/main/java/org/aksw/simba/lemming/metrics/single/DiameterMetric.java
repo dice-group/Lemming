@@ -33,18 +33,28 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
         DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
         metricResult.setResult(graph.getDiameter());
         metricResult.setDiameterPath(graph.getNodesInDiameter());
+        metricResult.setCountOfDiameters(graph.getCountOfDiameterPaths());
         return metricResult;
     }
 
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
         DiameterMetricResult metricResult = ((DiameterMetricResult) previousResult);
-        ArrayListPath path = metricResult.getDiameterPath();
+        ArrayListPath oldPath = metricResult.getDiameterPath();
+        int count = metricResult.getCountOfDiameters();
         if (graphOperation == Operation.ADD) {
-            ArrayListPath newPath = graph.computeShorterDiameter(path);
-            metricResult.setResult(newPath.getLength());
-            metricResult.setDiameterPath(newPath);
-        } else if (path.containsVertex(triple.headId) && path.containsVertex(triple.tailId)
+            ArrayListPath newPath = graph.computeShorterDiameter(oldPath);
+            if (count == 1) {
+                // There was only one diameter and now it's length has been reduced
+                metricResult.setResult(newPath.getLength());
+                metricResult.setDiameterPath(newPath);
+            } else if (newPath.getLength() < oldPath.getLength() && count > 1) {
+                // There are other diameters of the same length so the result doesn't change but
+                // now the path is different
+                metricResult.setCountOfDiameters(count - 1);
+                metricResult.setDiameterPath(graph.computeAlternateDiameter(oldPath.getDestination()));
+            }
+        } else if (oldPath.containsVertex(triple.headId) && oldPath.containsVertex(triple.tailId)
                 && graphOperation == Operation.REMOVE) {
             metricResult = (DiameterMetricResult) applyUpdatable(graph);
         }
