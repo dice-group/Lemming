@@ -319,23 +319,40 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.decoratedGraph.getNodesInDiameter();
     }
 
+    @Override
     public int getDiameter() {
         return this.decoratedGraph.getDiameter();
     }
 
+    @Override
     public int[][] getNeighbors(DIRECTION direction) {
         return this.decoratedGraph.getNeighbors(direction);
     }
 
+    @Override
+    public int getCountOfDiameterPaths() {
+        return this.decoratedGraph.getCountOfDiameterPaths();
+    }
+
+    /**
+     * Method to compute the shorter path in case addition of selected edge shortens
+     * the diameter.
+     * 
+     * @param path - existing diameter path
+     * @return ArrayListPath - new diameter path
+     */
     public ArrayListPath computeShorterDiameter(ArrayListPath path) {
         DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
         return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), path);
     }
 
-    public int getCountOfDiameterPaths() {
-        return this.decoratedGraph.getCountOfDiameterPaths();
-    }
-
+    /**
+     * Method to generate another diameter path in case there are more than 1
+     * diameters
+     * 
+     * @param source - Starting node of the diameter
+     * @return ArrayListPath - new diameter path
+     */
     public ArrayListPath computeAlternateDiameter(int source) {
         DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
         return diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);

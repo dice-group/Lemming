@@ -112,7 +112,7 @@ public interface IColouredGraph {
     IntSet getEdges();
 
     /**
-     * Get edge colour
+     * Get edge color
      * 
      * @param edgeId
      * @return BitSet
@@ -120,7 +120,7 @@ public interface IColouredGraph {
     BitSet getEdgeColour(int edgeId);
 
     /**
-     * Get property colour
+     * Get property color
      * 
      * @return Object
      */
@@ -173,8 +173,18 @@ public interface IColouredGraph {
      */
     IntSet getVertices();
 
+    /**
+     * Get the diameter path.
+     * 
+     * @return ArrayListPath - node and edge information of the diameter path.
+     */
     ArrayListPath getNodesInDiameter();
 
+    /**
+     * Get the length of the diameter of the graph.
+     * 
+     * @return int - length
+     */
     int getDiameter();
 
     /**
@@ -189,7 +199,8 @@ public interface IColouredGraph {
 
     /**
      * Get number of Diameter Paths in the graph.
-     * @return int - number of diameters 
+     * 
+     * @return int - number of diameters
      */
     int getCountOfDiameterPaths();
 

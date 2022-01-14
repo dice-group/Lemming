@@ -188,6 +188,7 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
      * 
      * @return int - number of edges
      */
+    @Override
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() + 1;
     }
@@ -201,6 +202,7 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
      * @return int[][] - Two dimension integer array containing all neighbors of all
      *         nodes in the given direction.
      */
+    @Override
     public int[][] getNeighbors(DIRECTION direction) {
         int[][] neighbors = super.getNeighbors(direction);
         neighbors[triple.tailId] = ArrayUtils.add(neighbors[triple.tailId], triple.headId);
