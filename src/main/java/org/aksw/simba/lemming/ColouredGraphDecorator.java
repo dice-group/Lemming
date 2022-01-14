@@ -203,4 +203,10 @@ public class ColouredGraphDecorator implements IColouredGraph {
     public int getCountOfDiameterPaths() {
         return this.graph.getCountOfDiameterPaths();
     }
+
+    public ArrayListPath computeAlternateDiameter(int source) {
+        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
+        return diameterAlgorithm.performSearchInThread(this, source, DIRECTION.out, null);
+    }
+
 }

@@ -69,23 +69,17 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         return performSearch(g, g.getVertices());
     }
 
-    protected int performSearch(final ColouredGraph g, IntSet sources) {
+    public int performSearch(final IColouredGraph g, IntSet sources) {
         return performSearch(g, Grph.DIRECTION.out, sources);
     }
 
-    protected int performSearch(final ColouredGraph g, final Grph.DIRECTION d, IntSet sources) {
-        final int[] lengths = new int[Collections.max(sources) + 1];
+    protected int performSearch(final IColouredGraph g, final Grph.DIRECTION d, IntSet sources) {
         final ArrayListPath[] paths = new ArrayListPath[Collections.max(sources) + 1];
         new MultiThreadProcessing(g.getVertices()) {
 
             @Override
             protected void run(int threadID, int source) {
                 paths[source] = performSearchInThread(g, source, d, null);
-                try {
-                    lengths[source] = paths[source].getLength();
-                } catch (NullPointerException e) {
-                    return;
-                }
             }
         };
 

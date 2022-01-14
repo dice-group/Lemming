@@ -174,6 +174,20 @@ public interface IColouredGraph {
 
     int getDiameter();
 
+    /**
+     * Get all neighbors of all the nodes in the given direction.
+     * 
+     * @param direction - Direction of edge to consider for neighbors. In-neighbors
+     *                  or Out-neighbors depending on the direction.
+     * @return int[][] - Two dimension integer array containing all neighbors of all
+     *         nodes in the given direction.
+     */
     int[][] getNeighbors(DIRECTION direction);
+
+    /**
+     * Get number of Diameter Paths in the graph.
+     * @return int - number of diameters 
+     */
+    int getCountOfDiameterPaths();
 
 }

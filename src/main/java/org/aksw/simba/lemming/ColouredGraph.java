@@ -835,7 +835,9 @@ public class ColouredGraph implements IColouredGraph {
      * @return int[][] - Two dimension integer array containing all neighbors of all
      *         nodes in the given direction.
      */
+    @Override
     public int[][] getNeighbors(DIRECTION direction) {
         return this.graph.getNeighbors(direction);
     }
+
 }

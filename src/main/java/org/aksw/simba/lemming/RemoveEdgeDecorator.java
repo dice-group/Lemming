@@ -3,6 +3,7 @@
  */
 package org.aksw.simba.lemming;
 
+import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.apache.commons.lang3.ArrayUtils;
 
 import grph.Grph.DIRECTION;
@@ -125,7 +126,6 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
     public int getNumberOfEdgesBetweenVertices() {
         return super.getNumberOfEdgesBetweenVertices() - 1;
     }
-
     
     /**
      * Get all neighbors of all nodes in given direction after a pre-selected edge
@@ -141,6 +141,13 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
         int[][] neighbors = super.getNeighbors(direction);
         neighbors[triple.tailId] = ArrayUtils.removeElements(neighbors[triple.tailId], triple.headId);
         return neighbors;
+    }
+    
+    
+    @Override
+    public int getDiameter() {
+        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
+        return diameterAlgorithm.performSearch(this, this.getVertices());
     }
 
 }
