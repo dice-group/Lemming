@@ -47,15 +47,26 @@ public class InfererTest {
 		OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		ontModel.read("src/test/resources/test_tran_ontology", "TTL");
 		Inferer inferer = new Inferer(false, ontModel);
-		//test A equi to B, but B not equi to A --> {a -> {a,b}, b ->{a,b}}
+		//Test case: In ontology file (turtle file), there's Class A equivalent to Class B, but there's no B equivalent to A.
+		//result of EquiMap: {A -> {A,B}, B -> {A,B}}
 		Map<OntClass, OntClass> classEquiMap = inferer.getClassEquiMap();
 		Assert.assertEquals(3, classEquiMap.size());
-		Assert.assertEquals(2, new HashSet(classEquiMap.values()).size());
-
+		Assert.assertEquals(2, new HashSet<>(classEquiMap.values()).size());
+		for(OntClass clazz : classEquiMap.keySet()){
+			if(clazz.getURI().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#C")){
+				Assert.assertEquals("http://www.w3.org/1999/02/22-rdf-syntax-ns#C", classEquiMap.get(clazz).getURI());
+			}else{
+				Assert.assertEquals("http://www.w3.org/1999/02/22-rdf-syntax-ns#B", classEquiMap.get(clazz).getURI());
+			}
+		}
+		//Test case: In ontology file (turtle file), there's Property PA equivalent to Property PB and PB equivalent to Property PC.
+		//result of EquiMap: {PA -> {PA,PB,PC}, PB -> {PA,PB,PC}, PC -> {PA,PB,PC}}
 		Map<OntProperty, OntProperty>  propertyEquiMap= inferer.getPropertyEquiMap();
 		Assert.assertEquals(3, propertyEquiMap.size());
-		Assert.assertEquals(1, new HashSet(propertyEquiMap.values()).size());
-
+		Assert.assertEquals(1, new HashSet<>(propertyEquiMap.values()).size());
+		for(OntProperty property : propertyEquiMap.keySet()){
+			Assert.assertEquals("http://www.w3.org/1999/02/22-rdf-syntax-ns#PC", propertyEquiMap.get(property).getURI());
+		}
 
 		Model model = ModelFactory.createDefaultModel();
 		model.read("test_tran_literal.ttl", "TTL");
@@ -81,7 +92,6 @@ public class InfererTest {
 
 		Inferer inferer = new Inferer(false, ontModel);
 
-		//test a equi to b, but b not equi to a --> {a -> {a,b}, b ->{a,b}}
 		Map<OntClass, OntClass> classEquiMap = inferer.getClassEquiMap();
 		Assert.assertEquals(3, classEquiMap.size());
 
@@ -110,7 +120,7 @@ public class InfererTest {
 
 		Map<OntProperty, OntProperty>  propertyStringMap = inferer.getPropertyEquiMap();
 		Assert.assertEquals(12, propertyStringMap.size());
-		Assert.assertEquals(7, new HashSet(propertyStringMap.values()).size());
+		Assert.assertEquals(7, new HashSet<>(propertyStringMap.values()).size());
 
 		Model actualModel = inferer.process(confModel);
 

@@ -20,15 +20,14 @@ import org.aksw.simba.lemming.util.IntSetUtil;
 public class MetricUtils {
 
     /**
-     * For every graph, the values of the metrics are calculated, added to a map
-     * and stored in an array. The i-th map of the result array contains the
-     * values for the i-th graph.
+     * For every graph, the values of the metrics are calculated, added to a map and
+     * stored in an array. The i-th map of the result array contains the values for
+     * the i-th graph.
      * 
-     * @param graphs
-     *            {@link ColouredGraph} for which the values should be
-     *            calculated.
-     * @return array containing the mappings from metric name to metric value
-     *         for the single graphs
+     * @param graphs {@link ColouredGraph} for which the values should be
+     *               calculated.
+     * @return array containing the mappings from metric name to metric value for
+     *         the single graphs
      */
     public static ObjectDoubleOpenHashMap<String>[] calculateGraphMetrics(ColouredGraph[] graphs,
             List<SingleValueMetric> metrics) {
@@ -41,12 +40,10 @@ public class MetricUtils {
     }
 
     /**
-     * The values of the metrics are calculated for the given graph and put into
-     * a map.
+     * The values of the metrics are calculated for the given graph and put into a
+     * map.
      * 
-     * @param graph
-     *            {@link ColouredGraph} for which the values should be
-     *            calculated.
+     * @param graph {@link ColouredGraph} for which the values should be calculated.
      * @return a mapping from metric name to metric value for the given graph
      */
     public static ObjectDoubleOpenHashMap<String> calculateGraphMetrics(ColouredGraph graph,
@@ -58,25 +55,32 @@ public class MetricUtils {
         return vector;
     }
 
+    /**
+     * This method is used to calculate the common neighbour-vertices of two given
+     * vertices. The returned common neighbour-vertices set should exclude the both
+     * given vertices.
+     * 
+     * @param graph a decorated graph object
+     * @param v1    one given vertex
+     * @param v2    another given vertex
+     * @return a set of common neighbour-vertices of the two given vertices.
+     */
     public static IntSet getVerticesInCommon(ColouredGraphDecorator graph, int v1, int v2) {
-        IntSet[] neighborsOfConnectedVertices = new IntSet[2];
+        IntSet v1Neighbours = graph.getInNeighbors(v1);
+        v1Neighbours.addAll(graph.getOutNeighbors(v1));
 
-        neighborsOfConnectedVertices[0] = graph.getInNeighbors(v1);
-        neighborsOfConnectedVertices[0].addAll(graph.getOutNeighbors(v1));
+        IntSet v2Neighbours = graph.getInNeighbors(v2);
+        v2Neighbours.addAll(graph.getOutNeighbors(v2));
 
-        if (neighborsOfConnectedVertices[0].contains(v1))
-            neighborsOfConnectedVertices[0].remove(v1);
-        if (neighborsOfConnectedVertices[0].contains(v2))
-            neighborsOfConnectedVertices[0].remove(v2);
+        IntSet intersection = IntSetUtil.intersection(v1Neighbours, v2Neighbours);
 
-        neighborsOfConnectedVertices[1] = graph.getInNeighbors(v2);
-        neighborsOfConnectedVertices[1].addAll(graph.getOutNeighbors(v2));
+        if (intersection.contains(v1)) {
+            intersection.remove(v1);
+        }
 
-        if (neighborsOfConnectedVertices[1].contains(v1))
-            neighborsOfConnectedVertices[1].remove(v1);
-        if (neighborsOfConnectedVertices[1].contains(v2))
-            neighborsOfConnectedVertices[1].remove(v2);
-
-        return IntSetUtil.intersection(neighborsOfConnectedVertices[0], neighborsOfConnectedVertices[1]);
+        if (intersection.contains(v2)) {
+            intersection.remove(v2);
+        }
+        return intersection;
     }
 }

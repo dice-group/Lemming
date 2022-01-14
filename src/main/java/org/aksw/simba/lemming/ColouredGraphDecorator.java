@@ -5,8 +5,6 @@ package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.util.IntSetUtil;
-
 import com.carrotsearch.hppc.BitSet;
 
 import grph.Grph.DIRECTION;
@@ -15,34 +13,44 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
- * Base Decorator for Coloured Graph Class
+ * Base Decorator for {@link ColouredGraph} Class
  * 
  * @author Pranav
  */
 public class ColouredGraphDecorator implements IColouredGraph {
 
-    protected IColouredGraph graph;
-    protected boolean isAddingEdge;
-    protected TripleBaseSingleID triple;
+    /**
+     * Concrete object that will be decorated
+     */
+    protected IColouredGraph decoratedGraph;
 
-    public ColouredGraphDecorator() {
-        this.graph = null;
-        this.isAddingEdge = false;
-        this.triple = null;
-    }
+    /**
+     * A flag to denote whether the current decorator is used for addition or
+     * removal of an edge
+     */
+    protected boolean isAddingEdge;
+
+    /**
+     * Triple information that is supposed to be added/removed in the current
+     * iteration
+     */
+    protected TripleBaseSingleID triple;
 
     /**
      * Class constructor
      * 
-     * @param isAddingEdge
+     * @param graph        - the IColouredGraph graph object representing the Graph
+     *                     in the current iteration
+     * @param isAddingEdge - represents the edge operation. Flag is true if edge is
+     *                     being added. Flag is false If edge is being removed.
      */
     public ColouredGraphDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
         this.isAddingEdge = isAddingEdgeFlag;
     }
 
     public ColouredGraphDecorator(IColouredGraph graph) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
     }
 
     /**
@@ -51,7 +59,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
      * @return ColouredGraphDecorator graph
      */
     public IColouredGraph getGraph() {
-        return this.graph;
+        return this.decoratedGraph;
     }
 
     /**
@@ -72,127 +80,251 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.triple;
     }
 
+    /**
+     * Get list of all Edge IDs connecting to vertex
+     *
+     * @param verticeId - verticeId the id of an vertex
+     * @return IntSet - set of edge IDs
+     */
     @Override
     public IntSet getEdgesIncidentTo(int verticeId) {
-        return this.graph.getEdgesIncidentTo(verticeId);
+        return this.decoratedGraph.getEdgesIncidentTo(verticeId);
     }
 
+    /**
+     * Get in edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - in edge degree value
+     */
     @Override
     public int getInEdgeDegree(int vertexId) {
-        return this.graph.getInEdgeDegree(vertexId);
+        return this.decoratedGraph.getInEdgeDegree(vertexId);
     }
 
+    /**
+     * Get out edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - out edge degree value
+     */
     @Override
     public int getOutEdgeDegree(int vertexId) {
-        return this.graph.getOutEdgeDegree(vertexId);
+        return this.decoratedGraph.getOutEdgeDegree(vertexId);
     }
 
+    /**
+     * Get max in edge degree of the graph
+     * 
+     * @return double
+     */
     @Override
     public double getMaxInEdgeDegrees() {
-        return this.graph.getMaxInEdgeDegrees();
+        return this.decoratedGraph.getMaxInEdgeDegrees();
     }
 
+    /**
+     * Get max in edge degree of the graph
+     * 
+     * @return double
+     */
     @Override
     public double getMaxOutEdgeDegrees() {
-        return this.graph.getMaxOutEdgeDegrees();
+        return this.decoratedGraph.getMaxOutEdgeDegrees();
     }
 
+    /**
+     * Get in degrees of all the vertices in the graph
+     * 
+     * @return IntArrayList
+     */
     @Override
     public IntArrayList getAllInEdgeDegrees() {
-        return this.graph.getAllInEdgeDegrees();
+        return this.decoratedGraph.getAllInEdgeDegrees();
     }
 
+    /**
+     * Get out degrees of all the vertices in the graph
+     * 
+     * @return IntArrayList
+     */
     @Override
     public IntArrayList getAllOutEdgeDegrees() {
-        return this.graph.getAllOutEdgeDegrees();
+        return this.decoratedGraph.getAllOutEdgeDegrees();
     }
 
+    /**
+     * Get number of edges in the graph
+     * 
+     * @return double
+     */
     @Override
     public double getNumberOfEdges() {
-        return this.graph.getNumberOfEdges();
+        return this.decoratedGraph.getNumberOfEdges();
     }
 
+    /**
+     * Get number of nodes in the graph
+     * 
+     * @return double
+     */
     @Override
     public double getNumberOfVertices() {
-        return this.graph.getNumberOfVertices();
+        return this.decoratedGraph.getNumberOfVertices();
     }
 
     public void setGraph(IColouredGraph graph) {
-        this.graph = graph;
+        this.decoratedGraph = graph;
 
     }
 
+    /**
+     * Add given edge to the graph
+     * 
+     * @param tailId
+     * @param headId
+     * @param edgeColour
+     * @return int - the edgeId of newly added edge
+     */
     @Override
     public int addEdge(int tailId, int headId, BitSet edgeColour) {
-        return this.graph.addEdge(tailId, headId, edgeColour);
+        return this.decoratedGraph.addEdge(tailId, headId, edgeColour);
     }
 
+    /**
+     * Remove edge from the graph
+     * 
+     * @param edgeId
+     */
     @Override
     public void removeEdge(int edgeId) {
-        this.graph.removeEdge(edgeId);
+        this.decoratedGraph.removeEdge(edgeId);
     }
 
+    /**
+     * Get Set of all edges in the graph
+     * 
+     * @return IntSet
+     */
     @Override
     public IntSet getEdges() {
-        return this.graph.getEdges();
+        return this.decoratedGraph.getEdges();
     }
 
+    /**
+     * Get edge color
+     * 
+     * @param edgeId
+     * @return BitSet
+     */
     @Override
     public BitSet getEdgeColour(int edgeId) {
-        return this.graph.getEdgeColour(edgeId);
+        return this.decoratedGraph.getEdgeColour(edgeId);
     }
 
+    /**
+     * Get property color
+     * 
+     * @return Object
+     */
     @Override
     public Object getRDFTypePropertyColour() {
-        return this.graph.getRDFTypePropertyColour();
+        return this.decoratedGraph.getRDFTypePropertyColour();
     }
 
+    /**
+     * Get the vertex id of the tail if the edge
+     * 
+     * @param edgeId
+     * @return int
+     */
     @Override
     public int getTailOfTheEdge(int edgeId) {
-        return this.graph.getTailOfTheEdge(edgeId);
+        return this.decoratedGraph.getTailOfTheEdge(edgeId);
     }
 
+    /**
+     * Get the vertex id of the head if the edge
+     * 
+     * @param edgeId
+     * @return int
+     */
     @Override
     public int getHeadOfTheEdge(int edgeId) {
-        return this.graph.getHeadOfTheEdge(edgeId);
+        return this.decoratedGraph.getHeadOfTheEdge(edgeId);
     }
 
+    /**
+     * Get list of all vertex IDs connecting to the the edgeId
+     *
+     * @param edgeId - the id of an edge connecting the vertices together
+     * @return set of vertex ID's
+     */
     @Override
     public IntSet getVerticesIncidentToEdge(int edgeId) {
-        return this.graph.getVerticesIncidentToEdge(edgeId);
+        return this.decoratedGraph.getVerticesIncidentToEdge(edgeId);
     }
 
+    /**
+     * Get set of all in neighbors to a vertex
+     * 
+     * @param vertexId
+     * @return set of all in neighbors
+     */
     @Override
     public IntSet getInNeighbors(int vertexId) {
-        return this.graph.getInNeighbors(vertexId);
+        return this.decoratedGraph.getInNeighbors(vertexId);
     }
 
+    /**
+     * Get set of all out neighbors to a vertex
+     * 
+     * @param vertexId
+     * @return set of all out neighbors
+     */
     @Override
     public IntSet getOutNeighbors(int vertexId) {
-        return this.graph.getOutNeighbors(vertexId);
+        return this.decoratedGraph.getOutNeighbors(vertexId);
     }
 
+    /**
+     * Get set of all vertices
+     * 
+     * @return set of all vertices
+     */
     @Override
     public IntSet getVertices() {
-        return this.graph.getVertices();
+        return this.decoratedGraph.getVertices();
     }
 
+    /**
+     * Get number of edges between the two vertices where an edge will be added or
+     * removed.
+     * 
+     * @return int - number of edges which will be used in triangle metrics
+     *         computation
+     */
     public int getNumberOfEdgesBetweenVertices() {
-        return IntSetUtil.intersection(graph.getEdgesIncidentTo(this.triple.tailId),
-                graph.getEdgesIncidentTo(this.triple.headId)).size();
+        int counter = 0;
+        for (int edgeId : this.decoratedGraph.getEdgesIncidentTo(this.triple.tailId)) {
+            if (this.decoratedGraph.getEdgesIncidentTo(this.triple.headId).contains(edgeId)) {
+                counter++;
+            }
+        }
+        return counter;
     }
 
     @Override
     public ArrayListPath getNodesInDiameter() {
-        return this.graph.getNodesInDiameter();
+        return this.decoratedGraph.getNodesInDiameter();
     }
 
     public int getDiameter() {
-        return this.graph.getDiameter();
+        return this.decoratedGraph.getDiameter();
     }
 
     public int[][] getNeighbors(DIRECTION direction) {
-        return this.graph.getNeighbors(direction);
+        return this.decoratedGraph.getNeighbors(direction);
     }
 
     public ArrayListPath computeShorterDiameter(ArrayListPath path) {
@@ -201,7 +333,7 @@ public class ColouredGraphDecorator implements IColouredGraph {
     }
 
     public int getCountOfDiameterPaths() {
-        return this.graph.getCountOfDiameterPaths();
+        return this.decoratedGraph.getCountOfDiameterPaths();
     }
 
     public ArrayListPath computeAlternateDiameter(int source) {

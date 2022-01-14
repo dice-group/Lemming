@@ -6,16 +6,22 @@ import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.EdgeTriangleMetricSelection;
+import org.aksw.simba.lemming.metrics.metricselection.NodeTriangleMetricSelection;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMetric {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EdgeTriangleMetric.class);
 
     public EdgeTriangleMetric() {
         super("#edgetriangles");
@@ -23,20 +29,35 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 
     @Override
     public double apply(ColouredGraph graph) {
-
-        EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
-        SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
-
-        return edgeTriangleMetric.apply(graph);
+        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
     }
 
     /**
-     * @param graph the given graph is not modified!
+     * The method is used to initialize the edge triangle metric with the given
+     * graph.
+     * 
+     * @param graph the given graph
+     * @return number of edge triangles
+     */
+    @Override
+    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+        EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
+        SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
+
+        double triangleMetric = edgeTriangleMetric.apply((ColouredGraph) graph.getGraph());
+        return new SingleValueMetricResult(getName(), triangleMetric);
+    }
+
+    /**
+     * @param graph the given graph is already modified!
      */
     @Override
     public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
-            @Nonnull Operation opt, @Nonnull UpdatableMetricResult previousResult) {
+            @Nonnull Operation opt, @Nullable UpdatableMetricResult previousResult) {
 
+        if (previousResult == null) {
+            return applyUpdatable(graph);
+        }
         int headId = triple.headId;
         int tailId = triple.tailId;
 
@@ -51,7 +72,11 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
         int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices,
                 change);
         double newResult = previousResult.getResult() + change * differenceOfSubGraph;
-        newResult = newResult >= 0 ? newResult : 0;
+
+        if (newResult < 0) {
+            LOGGER.error("The new result of edge triangle metric is negative : " + newResult);
+            newResult = 0;
+        }
 
         return new SingleValueMetricResult(previousResult.getMetricName(), newResult);
     }
