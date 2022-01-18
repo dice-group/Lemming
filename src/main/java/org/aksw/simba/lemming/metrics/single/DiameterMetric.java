@@ -29,7 +29,7 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
     }
 
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
         metricResult.setResult(graph.getDiameter());
         metricResult.setDiameterPath(graph.getNodesInDiameter());
@@ -37,19 +37,18 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
     }
 
     @Override
-    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
-            Operation graphOperation, UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
         if (previousResult == null) {
             return applyUpdatable(graph);
         }
         DiameterMetricResult metricResult = ((DiameterMetricResult) previousResult);
         ArrayListPath oldPath = metricResult.getDiameterPath();
         if (graphOperation == Operation.ADD) {
-            ArrayListPath newPath = graph.computeShorterDiameter(oldPath);
-            if (newPath.getLength() < oldPath.getLength()) {
+            int newPathLength = graph.computeShorterDiameter(triple, oldPath);
+            if (newPathLength < oldPath.getLength()) {
                 // The diameter length has been reduced
                 metricResult = (DiameterMetricResult) applyUpdatable(graph);
-
             }
         } else if (oldPath.containsVertex(triple.headId) && oldPath.containsVertex(triple.tailId)
                 && graphOperation == Operation.REMOVE) {
