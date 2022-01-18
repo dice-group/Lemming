@@ -1014,7 +1014,6 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
                         try {
                             hId = headIdsProposer.getPotentialItem(setTmpHeads);
                         } catch (Exception e) {
-                            LOGGER.error(e.getMessage());
                             continue;
                         }
 						

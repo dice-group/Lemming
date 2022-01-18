@@ -29,30 +29,28 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
         }
     }
 
+    @Override
     public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
         DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
         metricResult.setResult(graph.getDiameter());
         metricResult.setDiameterPath(graph.getNodesInDiameter());
-        metricResult.setCountOfDiameters(graph.getCountOfDiameterPaths());
         return metricResult;
     }
 
+    @Override
     public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
+        if (previousResult == null) {
+            return applyUpdatable(graph);
+        }
         DiameterMetricResult metricResult = ((DiameterMetricResult) previousResult);
         ArrayListPath oldPath = metricResult.getDiameterPath();
-        int count = metricResult.getCountOfDiameters();
         if (graphOperation == Operation.ADD) {
             ArrayListPath newPath = graph.computeShorterDiameter(oldPath);
-            if (count == 1) {
-                // There was only one diameter and now it's length has been reduced
-                metricResult.setResult(newPath.getLength());
-                metricResult.setDiameterPath(newPath);
-            } else if (newPath.getLength() < oldPath.getLength() && count > 1) {
-                // There are other diameters of the same length so the result doesn't change but
-                // now the path is different
-                metricResult.setCountOfDiameters(count - 1);
-                metricResult.setDiameterPath(graph.computeAlternateDiameter(oldPath.getDestination()));
+            if (newPath.getLength() < oldPath.getLength()) {
+                // The diameter length has been reduced
+                metricResult = (DiameterMetricResult) applyUpdatable(graph);
+
             }
         } else if (oldPath.containsVertex(triple.headId) && oldPath.containsVertex(triple.tailId)
                 && graphOperation == Operation.REMOVE) {

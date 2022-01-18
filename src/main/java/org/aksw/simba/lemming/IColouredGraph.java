@@ -197,11 +197,4 @@ public interface IColouredGraph {
      */
     int[][] getNeighbors(DIRECTION direction);
 
-    /**
-     * Get number of Diameter Paths in the graph.
-     * 
-     * @return int - number of diameters
-     */
-    int getCountOfDiameterPaths();
-
 }
