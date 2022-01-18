@@ -7,6 +7,7 @@ import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.apache.commons.lang3.ArrayUtils;
 
 import grph.Grph.DIRECTION;
+import grph.path.ArrayListPath;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -19,6 +20,12 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  *
  */
 public class RemoveEdgeDecorator extends ColouredGraphDecorator {
+
+    /**
+     * Instance of Diameter algorithm that will run on the decorator handling edge
+     * removal
+     */
+    protected DiameterAlgorithm diameterAlgorithm;
 
     /**
      * Class Constructor
@@ -192,7 +199,7 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
     public int getNumberOfEdgesBetweenVertices(int tailId, int headId) {
         return super.getNumberOfEdgesBetweenVertices(tailId, headId) - 1;
     }
-    
+
     /**
      * Get all neighbors of all nodes in given direction after a pre-selected edge
      * is removed from the graph. Used to compute the diameter of given graph
@@ -208,12 +215,16 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
         neighbors[triple.tailId] = ArrayUtils.removeElements(neighbors[triple.tailId], triple.headId);
         return neighbors;
     }
-    
-    
+
     @Override
-    public int getDiameter() {
-        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
-        return diameterAlgorithm.performSearch(this, this.getVertices());
+    public double getDiameter() {
+        this.diameterAlgorithm = new DiameterAlgorithm();
+        return this.diameterAlgorithm.performSearch(this, this.getVertices());
+    }
+
+    @Override
+    public ArrayListPath getDiameterPath() {
+        return this.diameterAlgorithm.getDiameterPath();
     }
 
 }

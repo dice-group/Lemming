@@ -4,6 +4,7 @@
 package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.apache.commons.lang3.ArrayUtils;
 import grph.Grph.DIRECTION;
 import grph.path.ArrayListPath;
@@ -19,6 +20,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  *
  */
 public class AddEdgeDecorator extends ColouredGraphDecorator {
+    /**
+     * Instance of Diameter algorithm that will run on the decorator handling edge
+     * addition
+     */
+    protected DiameterAlgorithm diameterAlgorithm;
 
     /**
      * Class Constructor
@@ -207,6 +213,22 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
         int[][] neighbors = super.getNeighbors(direction);
         neighbors[triple.tailId] = ArrayUtils.add(neighbors[triple.tailId], triple.headId);
         return neighbors;
+    }
+
+    @Override
+    public int computeShorterDiameter(TripleBaseSingleID triple, ArrayListPath path) {
+        this.diameterAlgorithm = new DiameterAlgorithm();
+        return diameterAlgorithm.computeShorterDiameter(this, triple, path);
+    }
+
+    @Override
+    public double getDiameter() {
+        return this.diameterAlgorithm.performSearch(this, this.getVertices());
+    }
+
+    @Override
+    public ArrayListPath getDiameterPath() {
+        return this.diameterAlgorithm.getDiameterPath();
     }
 
 }
