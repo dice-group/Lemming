@@ -62,7 +62,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
             return previousResult;
         }
 
-        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices();
+        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices(tailId, headId);
 
         int numberOfCommon = MetricUtils.getVerticesInCommon(graph, headId, tailId).size();
 

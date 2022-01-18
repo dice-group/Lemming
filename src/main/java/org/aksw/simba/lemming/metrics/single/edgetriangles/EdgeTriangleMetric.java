@@ -1,6 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -27,7 +26,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
 
     @Override
     public double apply(IColouredGraph graph) {
-        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -65,7 +64,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
         }
 
         int change = opt == Operation.REMOVE ? -1 : 1;
-        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices() - change;
+        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices(headId, tailId) - change;
 
         int differenceOfSubGraph = calculateDifferenceOfSubGraphEdge(graph, headId, tailId, numEdgesBetweenVertices,
                 change);

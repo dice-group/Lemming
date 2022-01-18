@@ -184,8 +184,9 @@ public class RemoveEdgeDecorator extends ColouredGraphDecorator {
      * 
      * @return int - number of edges
      */
-    public int getNumberOfEdgesBetweenVertices() {
-        return super.getNumberOfEdgesBetweenVertices() - 1;
+    @Override
+    public int getNumberOfEdgesBetweenVertices(int tailId, int headId) {
+        return super.getNumberOfEdgesBetweenVertices(tailId, headId) - 1;
     }
 
 }
