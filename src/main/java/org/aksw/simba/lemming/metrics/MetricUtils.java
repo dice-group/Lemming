@@ -2,10 +2,9 @@ package org.aksw.simba.lemming.metrics;
 
 import java.util.List;
 
-import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -65,7 +64,7 @@ public class MetricUtils {
      * @param v2    another given vertex
      * @return a set of common neighbour-vertices of the two given vertices.
      */
-    public static IntSet getVerticesInCommon(ColouredGraphDecorator graph, int v1, int v2) {
+    public static IntSet getVerticesInCommon(IColouredGraph graph, int v1, int v2) {
         IntSet v1Neighbours = graph.getInNeighbors(v1);
         v1Neighbours.addAll(graph.getOutNeighbors(v1));
 
