@@ -1,12 +1,10 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.metricselection.EdgeTriangleMetricSelection;
-import org.aksw.simba.lemming.metrics.metricselection.NodeTriangleMetricSelection;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
@@ -28,7 +26,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
     }
 
@@ -40,11 +38,11 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return number of edge triangles
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         EdgeTriangleMetricSelection selector = new EdgeTriangleMetricSelection();
         SingleValueMetric edgeTriangleMetric = selector.getMinComplexityMetric(graph);
 
-        double triangleMetric = edgeTriangleMetric.apply((ColouredGraph) graph.getGraph());
+        double triangleMetric = edgeTriangleMetric.apply(graph);
         return new SingleValueMetricResult(getName(), triangleMetric);
     }
 
@@ -52,7 +50,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @param graph the given graph is already modified!
      */
     @Override
-    public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
+    public UpdatableMetricResult update(@Nonnull IColouredGraph graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nullable UpdatableMetricResult previousResult) {
 
         if (previousResult == null) {
@@ -93,7 +91,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return the difference of edge triangles in subgraph after removing or adding
      *         an edge
      */
-    private int calculateDifferenceOfSubGraphEdge(ColouredGraphDecorator graph, int headId, int tailId,
+    private int calculateDifferenceOfSubGraphEdge(IColouredGraph graph, int headId, int tailId,
             int numEdgesBetweenVertices, int change) {
         int oldSubGraphEdgeTriangles = 0;
         int newSubGraphTriangles = 0;
