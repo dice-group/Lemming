@@ -142,10 +142,10 @@ public class DiameterMetricTest {
         // Diameters: 0-2-3, 0-2-4, 1-2-3, 1-2-4
 
         DiameterMetric metric = new DiameterMetric();
-
-        ColouredGraphDecorator graphDec = new ColouredGraphDecorator(new ColouredGraph(graph, null, null));
-        AddEdgeDecorator addDec = new AddEdgeDecorator(new ColouredGraph(graph, null, null), true);
-        RemoveEdgeDecorator remDec = new RemoveEdgeDecorator(new ColouredGraph(graph, null, null), false);
+        ColouredGraph colouredGraph = new ColouredGraph(graph, null, null);
+        ColouredGraphDecorator graphDec = new ColouredGraphDecorator(colouredGraph);
+        AddEdgeDecorator addDec = new AddEdgeDecorator(colouredGraph, true);
+        RemoveEdgeDecorator remDec = new RemoveEdgeDecorator(colouredGraph, false);
 
         DiameterMetricResult resultObj = (DiameterMetricResult) metric.applyUpdatable(graphDec);
         Assert.assertEquals(2.0, resultObj.getResult());
