@@ -31,6 +31,35 @@ public class OrdinatesLiteralGenerator extends AbstractLiteralGenerator implemen
         computeDataRange();
     }
 
+    /**
+     * Get the range of ordinates for a given data typed edge colour and a tail vertex colour.
+     * @return a double array of size 4: first two members form the range of the first part of ordinate, and the last
+     * two members form the range of the second part.
+     *
+     */
+    public double[] getOrdinatesRange(BitSet dteColo, BitSet tColo){
+        double[] ranges = new double[4];
+        Map<BitSet, double[]> mTColo2Mins = mapOfMinValues.get(dteColo);
+        Map<BitSet, double[]> mTColo2Maxes = mapOfMaxValues.get(dteColo);
+        if(mTColo2Mins != null && !mTColo2Mins.isEmpty() && mTColo2Maxes != null && !mTColo2Maxes.isEmpty()){
+            double[] mins = mTColo2Mins.get(tColo);
+            double[] maxes = mTColo2Maxes.get(tColo);
+            if(mins != null && mins.length>0 && maxes != null && maxes.length>0){
+                ranges[0] = mins[0];
+                ranges[1] = maxes[0];
+                ranges[2] = mins[1];
+                ranges[3] = maxes[1];
+            }else{
+                LOGGER.error("There's no valid ordinate's range!!");
+                ranges = new double[]{0.0, 0.0, 0.0, 0.0};
+            }
+        }else {
+            LOGGER.error("There's no valid ordinate's range!!");
+            ranges = new double[]{0.0, 0.0, 0.0, 0.0};
+        }
+        return ranges;
+    }
+
     private void computeDataRange(){
         LOGGER.info("Start - computation of range for literals with type ordinates");
         Set<BitSet> dteColours = mBaseData.keySet();
@@ -93,7 +122,7 @@ public class OrdinatesLiteralGenerator extends AbstractLiteralGenerator implemen
      */
     @Override
     public String getValue(BitSet tColo, BitSet dteColo, int numberOfValues){
-        String literal = "";
+        String literal;
         if(tColo != null && dteColo != null){
             Map<BitSet, double[]> mapTColour2Mins = mapOfMinValues.get(dteColo);
             Map<BitSet, double[]> mapTColour2Maxes = mapOfMaxValues.get(dteColo);
@@ -107,6 +136,9 @@ public class OrdinatesLiteralGenerator extends AbstractLiteralGenerator implemen
                     String string1 = String.format("%.4f", ordinate1);
                     String string2 = String.format("%.4f", ordinate2);
                     literal = string1 + " " + string2;
+                }else {
+                    LOGGER.error("Cannot generate valid ordinates literal!");
+                    return "0.0 0.0";
                 }
             }else{
                 LOGGER.error("Cannot generate valid ordinates literal!");
