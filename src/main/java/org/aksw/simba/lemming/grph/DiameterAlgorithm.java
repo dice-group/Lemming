@@ -35,11 +35,6 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
      */
     private ArrayListPath diameterPath = null;
 
-    /**
-     * Number of paths in the graph that have the same length as the diameter
-     */
-    private int count;
-
     @Override
     public Integer compute(Grph graph) {
         if (graph.isNull()) {
@@ -84,27 +79,24 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         };
 
         int max = 0;
-        this.count = 0;
         for (int i = 0; i < paths.length; ++i) {
+            int len = 0;
             try {
-                if (paths[i].getLength() > max) {
-                    max = paths[i].getLength();
-                    this.diameterPath = paths[i];
-                    this.count = 1;
-                } else if (paths[i].getLength() == max) {
-                    this.count++;
-                }
+                len = paths[i].getLength();
             } catch (NullPointerException e) {
                 // The nodes with no in-degree will not have any path terminating in them. Their
                 // path will be null and will raise this exception
-                continue;
+            }
+            if (len > max) {
+                max = len;
+                this.diameterPath = paths[i];
             }
         }
 
         return max;
     }
 
-    public ArrayListPath performSearchInThread(IColouredGraph graph, int source, Grph.DIRECTION direction,
+    protected ArrayListPath performSearchInThread(IColouredGraph graph, int source, Grph.DIRECTION direction,
             GraphSearchListener listener) {
         assert graph != null;
         assert graph.getVertices().contains(source);
@@ -210,10 +202,10 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
      * @param graph  - {@link IColouredGraph} object containing a diameter
      * @param triple - New triple added to the graph object
      * @param path   - Previously computed diameter path
-     * @return ArrayListPath path - If a shorter diameter exists return its path or
-     *         else the previous diameter
+     * @return int - If a shorter diameter exists return its length or else the
+     *         previous diameter length
      */
-    public ArrayListPath computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
+    public int computeShorterDiameter(IColouredGraph graph, TripleBaseSingleID triple, ArrayListPath path) {
         SearchResult search = new SearchResult((int) graph.getNumberOfVertices());
         // initialize the search object with the starting node of the diameter path.
         // The path is stored in reverse in ArrayListPath object, hence the source and
@@ -230,15 +222,12 @@ public class DiameterAlgorithm extends GrphAlgorithm<Integer> {
         search = searchShortestPath(graph, search, triple.headId, path.getSource(),
                 path.getLength() - search.distances[triple.headId]);
         return (search.maxDistance() < path.getLength() && search.distances[path.getSource()] > 0)
-                ? search.computePathTo(path.getSource())
-                : path;
+                ? search.maxDistance()
+                : path.getLength();
     }
 
     public ArrayListPath getDiameterPath() {
         return this.diameterPath;
     }
     
-    public int getCountOfDiameters() {
-        return this.count;
-    }
 }
