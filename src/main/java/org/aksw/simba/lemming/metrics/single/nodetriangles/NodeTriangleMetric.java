@@ -1,7 +1,6 @@
 package org.aksw.simba.lemming.metrics.single.nodetriangles;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.MetricUtils;
@@ -10,7 +9,6 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +24,8 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
+    public double apply(IColouredGraph graph) {
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -38,11 +36,11 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @return number of node triangles
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         NodeTriangleMetricSelection selector = new NodeTriangleMetricSelection();
         SingleValueMetric nodeTriangleMetric = selector.getMinComplexityMetric(graph);
 
-        double triangleMetric = nodeTriangleMetric.apply((ColouredGraph) graph.getGraph());
+        double triangleMetric = nodeTriangleMetric.apply(graph);
         return new SingleValueMetricResult(getName(), triangleMetric);
     }
 
@@ -50,7 +48,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
      * @param graph the given graph is already modified!
      */
     @Override
-    public UpdatableMetricResult update(@Nonnull ColouredGraphDecorator graph, @Nonnull TripleBaseSingleID triple,
+    public UpdatableMetricResult update(@Nonnull IColouredGraph graph, @Nonnull TripleBaseSingleID triple,
             @Nonnull Operation opt, @Nullable UpdatableMetricResult previousResult) {
 
         if (previousResult == null) {
@@ -64,7 +62,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
             return previousResult;
         }
 
-        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices();
+        int numEdgesBetweenVertices = graph.getNumberOfEdgesBetweenVertices(tailId, headId);
 
         int numberOfCommon = MetricUtils.getVerticesInCommon(graph, headId, tailId).size();
 

@@ -4,11 +4,12 @@ import grph.Grph;
 import grph.algo.MultiThreadProcessing;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.util.IntSetUtil;
+
 /**
  * This metric is the number of triangles of the graph.
  * 
@@ -22,7 +23,7 @@ public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric 
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         MultiThreadedTriangleCountingProcess process = new MultiThreadedTriangleCountingProcess(graph);
         return process.calculate();
     }
@@ -34,11 +35,11 @@ public class MultiThreadedNodeNeighborsCommonEdgesMetric extends AbstractMetric 
 
     private static class MultiThreadedTriangleCountingProcess {
 
-        private ColouredGraph graph;
+        private IColouredGraph graph;
         private int trianglesSum = 0;
         private IntSet edgesOfVertex[];
 
-        public MultiThreadedTriangleCountingProcess(ColouredGraph graph) {
+        public MultiThreadedTriangleCountingProcess(IColouredGraph graph) {
             this.graph = graph;
             edgesOfVertex = new IntSet[graph.getGraph().getNumberOfVertices()];
         }

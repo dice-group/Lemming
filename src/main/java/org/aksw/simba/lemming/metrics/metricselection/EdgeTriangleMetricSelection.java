@@ -3,7 +3,7 @@ package org.aksw.simba.lemming.metrics.metricselection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.simba.lemming.ColouredGraphDecorator;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
@@ -17,7 +17,7 @@ import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardEdgeTr
  */
 public class EdgeTriangleMetricSelection {
 
-    public SingleValueMetric getMinComplexityMetric(ColouredGraphDecorator graph) {
+    public SingleValueMetric getMinComplexityMetric(IColouredGraph graph) {
         int edges = (int) graph.getNumberOfEdges();
         int vertices = (int) graph.getNumberOfVertices();
 

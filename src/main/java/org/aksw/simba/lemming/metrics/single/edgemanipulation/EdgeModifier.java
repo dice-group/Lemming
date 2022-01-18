@@ -16,8 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import javax.annotation.Nonnull;
-
 public class EdgeModifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModifier.class);
@@ -95,6 +93,10 @@ public class EdgeModifier {
         return (ColouredGraph) this.graph;
     }
 
+    /**
+     * Update the {@link IColouredGraph} object and reset the triple stored in each
+     * decorator object after an iteration has completed
+     */
     public void updateDecorators() {
 
         this.mAddEdgeDecorator.setGraph(this.graph);

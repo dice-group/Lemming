@@ -217,7 +217,7 @@ public class ColouredGraph implements IColouredGraph {
     	return graph.getVerticesAccessibleThrough(vertexId, edgeId);
     }
 
-    public int getDiameter() {
+    public double getDiameter() {
         return diameterAlgorithm.compute(graph);
     }
 
@@ -800,6 +800,17 @@ public class ColouredGraph implements IColouredGraph {
     @Override
     public double getNumberOfVertices() {
         return graph.getNumberOfVertices();
+    }
+
+    @Override
+    public int getNumberOfEdgesBetweenVertices(int headId, int tailId) {
+        int counter = 0;
+        for (int edgeId : getEdgesIncidentTo(tailId)) {
+            if (getEdgesIncidentTo(headId).contains(edgeId)) {
+                counter++;
+            }
+        }
+        return counter;
     }
 
     @Override

@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -18,8 +16,8 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
+    public double apply(IColouredGraph graph) {
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -31,7 +29,7 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult - metric result object
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         StdDevVertexDegreeMetricResult metricResultObj = new StdDevVertexDegreeMetricResult(getName(), Double.NaN);
         IntArrayList vertexDegrees = (this.direction == DIRECTION.in) ? graph.getAllInEdgeDegrees()
                 : graph.getAllOutEdgeDegrees();
@@ -71,8 +69,8 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
      * @return UpdatableMetricResult object.
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
-            Operation graphOperation, UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
 
         if (previousResult == null) {
             return applyUpdatable(graph);

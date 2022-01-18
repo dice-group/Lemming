@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
@@ -20,18 +18,18 @@ public class NumberOfVerticesMetric extends AbstractMetric implements SingleValu
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return graph.getNumberOfVertices();
+    public double apply(IColouredGraph graph) {
+        return applyUpdatable(graph).getResult();
     }
 
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator iColouredGraph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph iColouredGraph) {
         SingleValueMetricResult result = new SingleValueMetricResult(getName(), iColouredGraph.getNumberOfVertices());
         return result;
     }
 
     @Override
-    public UpdatableMetricResult update(ColouredGraphDecorator iColouredGraph, TripleBaseSingleID triple,
+    public UpdatableMetricResult update(IColouredGraph iColouredGraph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
         ((SingleValueMetricResult) previousResult).setResult(iColouredGraph.getNumberOfVertices());
         return previousResult;
