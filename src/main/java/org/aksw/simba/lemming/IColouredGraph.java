@@ -4,6 +4,7 @@
 package org.aksw.simba.lemming;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -230,18 +231,11 @@ public interface IColouredGraph {
     ColourPalette getEdgePalette();
 
     /**
-     * Get the diameter path.
+     * Get the nodes and edges forming the diameter.
      * 
      * @return ArrayListPath - node and edge information of the diameter path.
      */
-    ArrayListPath getNodesInDiameter();
-
-    /**
-     * Get the length of the diameter of the graph.
-     * 
-     * @return int - length
-     */
-    int getDiameter();
+    ArrayListPath getDiameterPath();
 
     /**
      * Get all neighbors of all the nodes in the given direction.
@@ -252,4 +246,13 @@ public interface IColouredGraph {
      *         nodes in the given direction.
      */
     int[][] getNeighbors(DIRECTION direction);
+
+    /**
+     * Method to check if addition of selected edge shortens the diameter.
+     * 
+     * @param triple - triple that is to be added
+     * @param path   - existing diameter path
+     * @return int - new diameter length
+     */
+    int computeShorterDiameter(TripleBaseSingleID triple, ArrayListPath oldPath);
 }

@@ -3,7 +3,6 @@
  */
 package org.aksw.simba.lemming;
 
-import org.aksw.simba.lemming.grph.DiameterAlgorithm;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import com.carrotsearch.hppc.BitSet;
@@ -329,16 +328,20 @@ public class ColouredGraphDecorator implements IColouredGraph {
     public ColourPalette getEdgePalette() {
         return this.decoratedGraph.getEdgePalette();
     }
-    /**
-     * Method to compute the shorter path in case addition of selected edge shortens
-     * the diameter.
-     * 
-     * @param path - existing diameter path
-     * @return ArrayListPath - new diameter path
-     */
-    public ArrayListPath computeShorterDiameter(ArrayListPath path) {
-        DiameterAlgorithm diameterAlgorithm = new DiameterAlgorithm();
-        return diameterAlgorithm.computeShorterDiameter(this, this.getTriple(), path);
+
+    @Override
+    public int computeShorterDiameter(TripleBaseSingleID triple, ArrayListPath path) {
+        return this.decoratedGraph.computeShorterDiameter(triple, path);
+    }
+
+    @Override
+    public ArrayListPath getDiameterPath() {
+        return this.decoratedGraph.getDiameterPath();
+    }
+
+    @Override
+    public int[][] getNeighbors(DIRECTION direction) {
+        return this.decoratedGraph.getNeighbors(direction);
     }
 
 }

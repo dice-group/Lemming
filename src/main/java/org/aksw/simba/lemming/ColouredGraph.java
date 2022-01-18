@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
-import org.aksw.simba.lemming.util.IntSetUtil;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,6 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.DefaultIntSet;
 import grph.Grph;
-import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -814,7 +813,7 @@ public class ColouredGraph implements IColouredGraph {
     }
 
     @Override
-    public ArrayListPath getNodesInDiameter() {
+    public ArrayListPath getDiameterPath() {
         return diameterAlgorithm.getDiameterPath();
     }
 
@@ -830,6 +829,11 @@ public class ColouredGraph implements IColouredGraph {
     @Override
     public int[][] getNeighbors(DIRECTION direction) {
         return this.graph.getNeighbors(direction);
+    }
+
+    @Override
+    public int computeShorterDiameter(TripleBaseSingleID triple, ArrayListPath oldPath) {
+        return diameterAlgorithm.computeShorterDiameter(this, triple, oldPath);
     }
 
 }
