@@ -3,13 +3,16 @@
  */
 package org.aksw.simba.lemming;
 
+import org.aksw.simba.lemming.colour.ColourPalette;
+
 import com.carrotsearch.hppc.BitSet;
 
+import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
- * This interface describes the a Graph Object. Currently the methods defined in
+ * This interface describes the Graph Object. Currently the methods defined in
  * this interface are the ones used by the graph object in the graph amendment
  * phase. These methods have to be overridden in the
  * {@link ColouredGraphDecorator} class for them to support parallel execution
@@ -170,5 +173,58 @@ public interface IColouredGraph {
      * @return set of all vertices
      */
     IntSet getVertices();
+
+    /**
+     * Get underlying {@link Grph} object
+     * 
+     * @return Grph - graph object
+     */
+    Grph getGraph();
+
+    /**
+     * Get diameter length
+     * 
+     * @return length of diameter
+     */
+    double getDiameter();
+
+    /**
+     * Get Vertex Color
+     * 
+     * @param vId - vertex Id
+     * @return BitSet - color of vertex
+     */
+    BitSet getVertexColour(int vId);
+
+    /**
+     * Get number of edges between the given two vertices
+     * 
+     * @param headId
+     * @param tailId
+     * @return int - number of edges which will be used in triangle metrics
+     *         computation
+     */
+    int getNumberOfEdgesBetweenVertices(int headId, int tailId);
+
+    /**
+     * Copy {@link ColouredGraph} object
+     * 
+     * @return - copy of {@link ColouredGraph}
+     */
+    ColouredGraph copy();
+
+    /**
+     * Get vertex color palette
+     * 
+     * @return {@link ColourPalette}
+     */
+    ColourPalette getVertexPalette();
+
+    /**
+     * Get edge color palette
+     * 
+     * @return {@link ColourPalette}
+     */
+    ColourPalette getEdgePalette();
 
 }

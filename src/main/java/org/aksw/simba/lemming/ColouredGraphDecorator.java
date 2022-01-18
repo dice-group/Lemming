@@ -3,9 +3,11 @@
  */
 package org.aksw.simba.lemming;
 
+import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import com.carrotsearch.hppc.BitSet;
 
+import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
@@ -51,12 +53,13 @@ public class ColouredGraphDecorator implements IColouredGraph {
     }
 
     /**
-     * Returns ColouredGraphDecorator object
+     * Returns {@link Grph} object
      * 
-     * @return ColouredGraphDecorator graph
+     * @return {@link Grph} graph object
      */
-    public IColouredGraph getGraph() {
-        return this.decoratedGraph;
+    @Override
+    public Grph getGraph() {
+        return this.decoratedGraph.getGraph();
     }
 
     /**
@@ -294,21 +297,34 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.decoratedGraph.getVertices();
     }
 
-    /**
-     * Get number of edges between the two vertices where an edge will be added or
-     * removed.
-     * 
-     * @return int - number of edges which will be used in triangle metrics
-     *         computation
-     */
-    public int getNumberOfEdgesBetweenVertices() {
-        int counter = 0;
-        for (int edgeId : this.decoratedGraph.getEdgesIncidentTo(this.triple.tailId)) {
-            if (this.decoratedGraph.getEdgesIncidentTo(this.triple.headId).contains(edgeId)) {
-                counter++;
-            }
-        }
-        return counter;
+    @Override
+    public int getNumberOfEdgesBetweenVertices(int headId, int tailId) {
+        return this.decoratedGraph.getNumberOfEdgesBetweenVertices(headId, tailId);
+    }
+
+    @Override
+    public double getDiameter() {
+        return this.decoratedGraph.getDiameter();
+    }
+
+    @Override
+    public BitSet getVertexColour(int vId) {
+        return this.decoratedGraph.getVertexColour(vId);
+    }
+
+    @Override
+    public ColouredGraph copy() {
+        return this.decoratedGraph.copy();
+    }
+
+    @Override
+    public ColourPalette getVertexPalette() {
+        return this.decoratedGraph.getVertexPalette();
+    }
+
+    @Override
+    public ColourPalette getEdgePalette() {
+        return this.decoratedGraph.getEdgePalette();
     }
 
 }
