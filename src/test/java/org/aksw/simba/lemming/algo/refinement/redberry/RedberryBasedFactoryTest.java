@@ -19,7 +19,7 @@ package org.aksw.simba.lemming.algo.refinement.redberry;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Constant;
 import org.aksw.simba.lemming.algo.expression.Expression;
@@ -41,7 +41,7 @@ public class RedberryBasedFactoryTest {
         AtomicVariable x = new AtomicVariable(new TestMetric("x"));
         AtomicVariable y = new AtomicVariable(new TestMetric("y"));
         List<Object[]> tests = new ArrayList<Object[]>();
-        
+
         // x+1 == x+1
         tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
                 new Operation(x, new Constant(1), Operator.PLUS), true });
@@ -128,7 +128,7 @@ public class RedberryBasedFactoryTest {
         }
 
         @Override
-        public double apply(ColouredGraph graph) {
+        public double apply(IColouredGraph graph) {
             return 0;
         }
 
