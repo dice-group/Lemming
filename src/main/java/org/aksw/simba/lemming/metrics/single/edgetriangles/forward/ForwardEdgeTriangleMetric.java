@@ -2,7 +2,7 @@ package org.aksw.simba.lemming.metrics.single.edgetriangles.forward;
 
 import com.google.common.collect.Sets;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.util.IntSetUtil;
@@ -33,7 +33,7 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
     }
 
     @Override
-    public double apply(ColouredGraph coloredGraph) {
+    public double apply(IColouredGraph coloredGraph) {
         List<HashSet<Integer>> adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
         DegreeBasedDecreasingNodeOrdering nodeOrdering;
         int amountOfTriangles = 0;
@@ -55,13 +55,13 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
     /**
      * Processes the given neighbors of the given node.
      *
-     * @param nodeId
-     *            The id of the node whose neighbors should be processed.
+     * @param nodeId The id of the node whose neighbors should be processed.
      */
-    private int processNeighborsOf(int nodeId, ColouredGraph coloredGraph,
+    private int processNeighborsOf(int nodeId, IColouredGraph coloredGraph,
             List<HashSet<Integer>> adjacencyDatastructure, DegreeBasedDecreasingNodeOrdering nodeOrdering) {
         int triangles = 0;
-        for(int adjacentNodeId:IntSetUtil.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId))) {
+        for (int adjacentNodeId : IntSetUtil.union(coloredGraph.getOutNeighbors(nodeId),
+                coloredGraph.getInNeighbors(nodeId))) {
             if (nodeOrdering.isFirstSmallerWithRespectToOrder(nodeId, adjacentNodeId)) {
                 Sets.SetView<Integer> intersection = Sets.intersection(adjacencyDatastructure.get(nodeId),
                         adjacencyDatastructure.get(adjacentNodeId));
@@ -72,7 +72,8 @@ public class ForwardEdgeTriangleMetric extends AbstractMetric implements Triangl
                                 .size()
                                 * IntSetUtil.intersection(nodeOrdering.getEdges(adjacentNodeId),
                                         nodeOrdering.getEdges(intersect)).size()
-                                * IntSetUtil.intersection(nodeOrdering.getEdges(intersect), nodeOrdering.getEdges(nodeId))
+                                * IntSetUtil
+                                        .intersection(nodeOrdering.getEdges(intersect), nodeOrdering.getEdges(nodeId))
                                         .size();
                     }
                 }
