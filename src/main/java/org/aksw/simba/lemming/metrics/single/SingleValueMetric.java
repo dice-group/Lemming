@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
@@ -21,7 +19,7 @@ public interface SingleValueMetric extends Metric {
      * @param graph the graph for which the metric should be calculated.
      * @return the value of the metric.
      */
-    double apply(ColouredGraph graph);
+    double apply(IColouredGraph graph);
 
     /**
      * Returns metric results that can be reused for further computations.
@@ -29,8 +27,8 @@ public interface SingleValueMetric extends Metric {
      * @param iColouredGraph - input graph.
      * @return - metric result.
      */
-    default UpdatableMetricResult applyUpdatable(ColouredGraphDecorator iColouredGraph) {
-        return new SingleValueMetricResult(getName(), apply((ColouredGraph) iColouredGraph.getGraph()));
+    default UpdatableMetricResult applyUpdatable(IColouredGraph iColouredGraph) {
+        return new SingleValueMetricResult(getName(), apply(iColouredGraph));
     }
 
     /**
@@ -44,7 +42,7 @@ public interface SingleValueMetric extends Metric {
      *                       computed results.
      * @return - metric result.
      */
-    default UpdatableMetricResult update(ColouredGraphDecorator iColouredGraph, TripleBaseSingleID triple,
+    default UpdatableMetricResult update(IColouredGraph iColouredGraph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
         return applyUpdatable(iColouredGraph);
     }

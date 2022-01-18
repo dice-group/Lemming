@@ -1,13 +1,9 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import grph.Grph.DIRECTION;
@@ -28,8 +24,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
-        return applyUpdatable(new ColouredGraphDecorator(graph)).getResult();
+    public double apply(IColouredGraph graph) {
+        return applyUpdatable(graph).getResult();
     }
 
     /**
@@ -41,7 +37,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return - metric result.
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraphDecorator graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
 
         IntSet vertices = graph.getVertices();
@@ -80,8 +76,8 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraphDecorator graph, TripleBaseSingleID triple,
-            Operation graphOperation, UpdatableMetricResult previousResult) {
+    public UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+            UpdatableMetricResult previousResult) {
 
         if (previousResult == null) {
             return applyUpdatable(graph);
@@ -129,7 +125,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
 
     }
 
-    private int getChangedDegree(ColouredGraphDecorator graph, int vertexID, DIRECTION direction) {
+    private int getChangedDegree(IColouredGraph graph, int vertexID, DIRECTION direction) {
         if (direction == DIRECTION.in) {
             return graph.getInEdgeDegree(vertexID);
         } else {

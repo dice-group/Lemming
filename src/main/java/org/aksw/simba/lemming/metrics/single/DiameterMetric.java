@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
@@ -11,17 +11,17 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
  */
 public class DiameterMetric extends AbstractMetric implements SingleValueMetric {
 
-	public DiameterMetric() {
-		super("diameter");
-	}
+    public DiameterMetric() {
+        super("diameter");
+    }
 
-	@Override
-	public double apply(ColouredGraph graph) {
-		try {
-			return graph.getDiameter();
-		} catch (Exception e) {
-			return Double.NaN;
-		}
-	}
+    @Override
+    public double apply(IColouredGraph graph) {
+        try {
+            return graph.getDiameter();
+        } catch (Exception e) {
+            return Double.NaN;
+        }
+    }
 
 }

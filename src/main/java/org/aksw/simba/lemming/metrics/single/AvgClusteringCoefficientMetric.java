@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
@@ -16,7 +16,7 @@ public class AvgClusteringCoefficientMetric extends AbstractMetric implements Si
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return graph.getGraph().getAverageClusteringCoefficient();
     }
 
