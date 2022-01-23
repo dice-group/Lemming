@@ -6,6 +6,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 
 import com.carrotsearch.hppc.BitSet;
@@ -254,7 +255,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResultList, boolean changeMetricValue) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+        TripleBaseSingleID tripleAdd = null;
         
         if (!changeMetricValue) {
             
@@ -269,10 +270,18 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
             }
             
             if (direction == DIRECTION.in) {
-                tripleAdd.headId = maxResultObject.getMaxVertexID();
+                //if( ((AbstractGraphGeneration)mGrphGenerator).connectableVertices(tripleAdd.tailId, maxResultObject.getMaxVertexID(), tripleAdd.edgeColour))
+                    //tripleAdd.headId = maxResultObject.getMaxVertexID();
+                tripleAdd = ((AbstractGraphGeneration)mGrphGenerator).getProposedTripleForHeadId(maxResultObject.getMaxVertexID());
             } else if (direction == DIRECTION.out) {
-                tripleAdd.tailId = maxResultObject.getMaxVertexID();
+                //if( ((AbstractGraphGeneration)mGrphGenerator).connectableVertices(maxResultObject.getMaxVertexID(), tripleAdd.headId, tripleAdd.edgeColour))
+                    //tripleAdd.tailId = maxResultObject.getMaxVertexID();
+                tripleAdd = ((AbstractGraphGeneration)mGrphGenerator).getProposedTripleForTailId(maxResultObject.getMaxVertexID());
             }
+        }
+        
+        if(tripleAdd == null) {
+            tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         }
         return tripleAdd;
     }
