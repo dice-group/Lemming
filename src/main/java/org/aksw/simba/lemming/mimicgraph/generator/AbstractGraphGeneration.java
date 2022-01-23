@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.BitSetIterator;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -1045,5 +1047,94 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 //			e.printStackTrace();
 //		}
 //	}
+	
+	/**
+     * get a proposed triple of tail, head and their connection via edge
+     */
+    public TripleBaseSingleID getProposedTripleForHeadId(int headId) {
+
+        Set<BitSet> setVertexColoursForHead = new HashSet<>();
+        // Get possible colors for the headId
+
+        for (BitSet setKey : mMapColourToVertexIDs.keySet()) {
+            if (mMapColourToVertexIDs.get(setKey).contains(headId)) {
+                setVertexColoursForHead.add(setKey);
+            }
+        }
+
+        if (setVertexColoursForHead.size() == 0) {
+            return null;
+        }
+
+        for (BitSet headColor : setVertexColoursForHead) {
+
+            Set<BitSet> possibleInEdgeColours = mColourMapper.getPossibleInEdgeColours(headColor);
+            for (BitSet edgeColor : possibleInEdgeColours) {
+                BitSet tailColour = getProposedTailColour(headColor, edgeColor);
+                IntSet intSet = mMapColourToVertexIDs.get(tailColour);
+                if (intSet != null) {
+                    for (Integer tailId : intSet) {
+
+                        if (connectableVertices(tailId, headId, edgeColor)) {
+                            TripleBaseSingleID triple = new TripleBaseSingleID();
+                            triple.tailId = tailId;
+                            triple.tailColour = tailColour;
+                            triple.headId = headId;
+                            triple.headColour = headColor;
+                            triple.edgeColour = edgeColor;
+
+                            return triple;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+    
+    /**
+     * get a proposed triple of tail, head and their connection via edge
+     */
+    public TripleBaseSingleID getProposedTripleForTailId(int tailId) {
+        
+        Set<BitSet> setVertexColoursForTail = new HashSet<>();
+        // Get possible colors for the tailId
+
+        for (BitSet setKey : mMapColourToVertexIDs.keySet()) {
+            if (mMapColourToVertexIDs.get(setKey).contains(tailId)) {
+                setVertexColoursForTail.add(setKey);
+            }
+        }
+
+        if (setVertexColoursForTail.size() == 0) {
+            return null;
+        }
+
+        for (BitSet tailColor : setVertexColoursForTail) {
+
+            Set<BitSet> possibleOutEdgeColours = mColourMapper.getPossibleOutEdgeColours(tailColor);
+            for (BitSet edgeColor : possibleOutEdgeColours) {
+                BitSet headColor = getProposedHeadColour(edgeColor, tailColor);
+                IntSet intSet = mMapColourToVertexIDs.get(headColor);
+
+                for (Integer headId : intSet) {
+
+                    if (connectableVertices(tailId, headId, edgeColor)) {
+                        TripleBaseSingleID triple = new TripleBaseSingleID();
+                        triple.tailId = tailId;
+                        triple.tailColour = tailColor;
+                        triple.headId = headId;
+                        triple.headColour = headColor;
+                        triple.edgeColour = edgeColor;
+
+                        return triple;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
 	
 }
