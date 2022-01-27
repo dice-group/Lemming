@@ -1048,10 +1048,16 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 //		}
 //	}
 	
-	/**
-     * get a proposed triple of tail, head and their connection via edge
+
+    /**
+     * The method proposes a triple for the input headId.
+     * @param headId - head id of the triple
+     * @return triple with a specific headId or null
      */
     public TripleBaseSingleID getProposedTripleForHeadId(int headId) {
+        
+        int counterOfEdges = 5; // Number of edges to check
+        int trackerOfEdges = 0;
 
         Set<BitSet> setVertexColoursForHead = new HashSet<>();
         // Get possible colors for the headId
@@ -1074,7 +1080,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
                 IntSet intSet = mMapColourToVertexIDs.get(tailColour);
                 if (intSet != null) {
                     for (Integer tailId : intSet) {
-
+                        trackerOfEdges++;
                         if (connectableVertices(tailId, headId, edgeColor)) {
                             TripleBaseSingleID triple = new TripleBaseSingleID();
                             triple.tailId = tailId;
@@ -1084,6 +1090,8 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
                             triple.edgeColour = edgeColor;
 
                             return triple;
+                        } else if (trackerOfEdges == counterOfEdges) {
+                            return null;
                         }
                     }
                 }
@@ -1094,10 +1102,15 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
     }
     
     /**
-     * get a proposed triple of tail, head and their connection via edge
+     * The method proposes a triple for the input tail id.
+     * @param tailId - tail id of the triple
+     * @return triple with a specific tailId or null
      */
     public TripleBaseSingleID getProposedTripleForTailId(int tailId) {
         
+        int counterOfEdges = 5; // Number of edges to check
+        int trackerOfEdges = 0;
+
         Set<BitSet> setVertexColoursForTail = new HashSet<>();
         // Get possible colors for the tailId
 
@@ -1117,9 +1130,61 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
             for (BitSet edgeColor : possibleOutEdgeColours) {
                 BitSet headColor = getProposedHeadColour(edgeColor, tailColor);
                 IntSet intSet = mMapColourToVertexIDs.get(headColor);
+                if (intSet != null) {
+                    for (Integer headId : intSet) {
+                        trackerOfEdges++;
+                        if (connectableVertices(tailId, headId, edgeColor)) {
+                            TripleBaseSingleID triple = new TripleBaseSingleID();
+                            triple.tailId = tailId;
+                            triple.tailColour = tailColor;
+                            triple.headId = headId;
+                            triple.headColour = headColor;
+                            triple.edgeColour = edgeColor;
 
-                for (Integer headId : intSet) {
+                            return triple;
+                        } else if (trackerOfEdges == counterOfEdges) {
+                            return null;
+                        }
+                    }
+                }
+            }
+        }
 
+        return null;
+    }
+
+    /**
+     * The method proposes a triple for the input tail id.
+     * @param tailId - tail id of the triple
+     * @return triple with a specific tailId or null
+     */
+    public TripleBaseSingleID getProposedTripleForHeadIdAndTailId(int tailId, int headId) {
+        
+        int counterOfEdges = 5; // Number of edges to check
+        int trackerOfEdges = 0;
+
+        Set<BitSet> setVertexColoursForHead = new HashSet<>();
+        Set<BitSet> setVertexColoursForTail = new HashSet<>();
+        // Get possible colors for the tailId
+        for (BitSet setKey : mMapColourToVertexIDs.keySet()) {
+            if (mMapColourToVertexIDs.get(setKey).contains(tailId)) {
+                setVertexColoursForTail.add(setKey);
+            }
+            if (mMapColourToVertexIDs.get(setKey).contains(headId)) {
+                setVertexColoursForHead.add(setKey);
+            }
+        }
+
+        if (setVertexColoursForTail.size() == 0 || setVertexColoursForHead.size() == 0) {
+            return null;
+        }
+
+        for (BitSet tailColor : setVertexColoursForTail) {
+            for (BitSet headColor : setVertexColoursForHead) {
+                Set<BitSet> possibleLinkingEdgeColours = mColourMapper.getPossibleLinkingEdgeColours(tailColor,
+                        headColor);
+                for (BitSet edgeColor : possibleLinkingEdgeColours) {
+                    trackerOfEdges++;
                     if (connectableVertices(tailId, headId, edgeColor)) {
                         TripleBaseSingleID triple = new TripleBaseSingleID();
                         triple.tailId = tailId;
@@ -1129,12 +1194,15 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
                         triple.edgeColour = edgeColor;
 
                         return triple;
+                    } else if (trackerOfEdges == counterOfEdges) {
+                        return null;
                     }
+
                 }
             }
         }
 
         return null;
     }
-	
+
 }
