@@ -14,6 +14,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
@@ -190,7 +191,7 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+        TripleBaseSingleID tripleAdd = null;
 
         // Initializing edge id
         int edgeId = -1;
@@ -208,20 +209,24 @@ public class EdgeTriangleMetric extends AbstractMetric implements SingleValueMet
                 // Need to increase the metric
                 // Vertices in common, thus edge triangle exist
                 edgeId = edge;
-                break;
             } else if (changeMetricValue && numberOfVerticesInCommon == 0) {
                 // Need to decrease the metric or the metric should not be increased
                 // No vertices in common, thus edge triangle does not exist
                 edgeId = edge;
-                break;
+            }
+            
+            if (edgeId != -1) {
+                // If edge is found
+                tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graph.getTailOfTheEdge(edgeId), graph.getHeadOfTheEdge(edgeId));
             }
 
+            if(tripleAdd != null) {
+                break;
+            }
         }
 
-        if (edgeId != -1) {
-            // If edge is found
-            tripleAdd.tailId = graph.getTailOfTheEdge(edgeId);
-            tripleAdd.headId = graph.getHeadOfTheEdge(edgeId);
+        if (tripleAdd == null) {
+            tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         }
 
         return tripleAdd;

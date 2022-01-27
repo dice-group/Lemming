@@ -14,6 +14,7 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
@@ -176,7 +177,7 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
      */
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator, boolean mProcessRandomly, List<UpdatableMetricResult> previousResult, boolean changeMetricValue) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+        TripleBaseSingleID tripleAdd = null;
 
         for (Integer edge : graph.getEdges()) {// Iterating edges
             // Get vertices incident to edge
@@ -193,20 +194,23 @@ public class NodeTriangleMetric extends AbstractMetric implements SingleValueMet
                     // Create a triple with headId - vertex which is connected to first vertex but
                     // not to second vertex and tailId - second vertex, This will create a node
                     // triangle
-                    tripleAdd.tailId = secondIncidentVertex;
-                    tripleAdd.headId = difference.iterator().nextInt();
-                    break;
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(secondIncidentVertex, difference.iterator().nextInt());
                 }
             } else {
                 // Need to decrease the metric or the metric should not be increased
                 if (MetricUtils.getVerticesInCommon(graph, firstIncidentVertex, secondIncidentVertex).size() > 0) {
                     // Found triple can be used, since for the found edge node triangle already
                     // exists
-                    tripleAdd.tailId = graph.getTailOfTheEdge(edge);
-                    tripleAdd.headId = graph.getHeadOfTheEdge(edge);
-                    break;
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graph.getTailOfTheEdge(edge), graph.getHeadOfTheEdge(edge));
                 }
             }
+            
+            if(tripleAdd != null) {
+                break;
+            }
+        }
+        if (tripleAdd == null) {
+            tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
         }
 
         return tripleAdd;
