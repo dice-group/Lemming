@@ -7,6 +7,7 @@ import java.util.List;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 
 import com.carrotsearch.hppc.BitSet;
@@ -189,14 +190,6 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
         for (int edge : edges) {
             edgeColour = graph.getEdgeColour(edge);
 
-            /*if (direction == DIRECTION.in) { //Displaying the degrees to track the flow.
-                System.out.println("Degree 1 : " + graph.getGraph().getInEdgeDegree(graph.getTailOfTheEdge(edge)));
-                System.out.println("Degree 2 : " + graph.getGraph().getInEdgeDegree(graph.getHeadOfTheEdge(edge)));
-            } else {
-                System.out.println("Degree 1 : " + graph.getGraph().getOutEdgeDegree(graph.getTailOfTheEdge(edge)));
-                System.out.println("Degree 2 : " + graph.getGraph().getOutEdgeDegree(graph.getHeadOfTheEdge(edge)));
-            }*/
-
             // Logic to compare vertex degrees with average vertex degree.
             boolean compareDegrees = false;
             IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edge);
@@ -274,16 +267,16 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
     @Override
     public TripleBaseSingleID getTripleAdd(ColouredGraph graph, IGraphGeneration mGrphGenerator,
             boolean mProcessRandomly, List<UpdatableMetricResult> previousResultList, boolean indicator) {
-        TripleBaseSingleID tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
-        
+        TripleBaseSingleID tripleAdd = null;
+
         MaxVertexDegreeMetricResult maxResultObject = null;
         AvgVertexDegreeMetricResult avgResultObject = null;
-        //Logic to iterate over metric result object list and get the required object
+        // Logic to iterate over metric result object list and get the required object
         for (UpdatableMetricResult resultObject : previousResultList) {
             if (resultObject instanceof MaxVertexDegreeMetricResult) {
-                if(((MaxVertexDegreeMetricResult) resultObject).getDirection() == direction)
-                       maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
-            }else if(resultObject instanceof AvgVertexDegreeMetricResult) {
+                if (((MaxVertexDegreeMetricResult) resultObject).getDirection() == direction)
+                    maxResultObject = (MaxVertexDegreeMetricResult) resultObject;
+            } else if (resultObject instanceof AvgVertexDegreeMetricResult) {
                 avgResultObject = (AvgVertexDegreeMetricResult) resultObject;
             }
         }
@@ -295,46 +288,33 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             vertexID = maxResultObject.getMinVertexID();
         }
 
-        if (direction == DIRECTION.in) {
-            tripleAdd.headId = vertexID;
-            for (Integer graphVertex : graph.getVertices()) {
-                if (!indicator) {
-                    if (graph.getGraph().getInEdgeDegree(graphVertex) > avgResultObject.getResult()) {
-                        tripleAdd.tailId = graphVertex;
-                        break;
-                    }
+        for (Integer graphVertex : graph.getVertices()) {
+            if (!indicator && (graph.getGraph().getInEdgeDegree(graphVertex) > avgResultObject.getResult())) {
+                //Need to increase the metric both the vertices degree greater than average degree
+                if (direction == DIRECTION.in) {
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graphVertex, vertexID);
                 } else {
-                    if (graph.getGraph().getInEdgeDegree(graphVertex) < avgResultObject.getResult()) {
-                        tripleAdd.tailId = graphVertex;
-                        break;
-                    }
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(vertexID, graphVertex);
                 }
-
+            } else if (indicator && (graph.getGraph().getInEdgeDegree(graphVertex) < avgResultObject.getResult())) {
+                //Need to decrease the metric both the vertices degree less than average degree
+                if (direction == DIRECTION.in) {
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graphVertex, vertexID);
+                } else {
+                    tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(vertexID, graphVertex);
+                }
             }
-            //System.out.println("Degree 1 : " + graph.getGraph().getInEdgeDegree(tripleAdd.headId));
-            //System.out.println("Degree 2 : " + graph.getGraph().getInEdgeDegree(tripleAdd.tailId));
-
-        } else if (direction == DIRECTION.out) {
-            tripleAdd.tailId = vertexID;
-
-            for (Integer graphVertex : graph.getVertices()) {
-                if (!indicator) {
-                    if (graph.getGraph().getOutEdgeDegree(graphVertex) > avgResultObject.getResult()) {
-                        tripleAdd.headId = graphVertex;
-                        break;
-                    }
-                } else {
-                    if (graph.getGraph().getOutEdgeDegree(graphVertex) < avgResultObject.getResult()) {
-                        tripleAdd.headId = graphVertex;
-                        break;
-                    }
-                }
-
+            
+            if(tripleAdd != null) {
+                break;
             }
 
-            //System.out.println("Degree 1 : " + graph.getGraph().getOutEdgeDegree(tripleAdd.headId));
-            //System.out.println("Degree 2 : " + graph.getGraph().getOutEdgeDegree(tripleAdd.tailId));
         }
+
+        if (tripleAdd == null) {
+            tripleAdd = getTripleAdd(graph, mGrphGenerator, mProcessRandomly);
+        }
+
         return tripleAdd;
     }
     
