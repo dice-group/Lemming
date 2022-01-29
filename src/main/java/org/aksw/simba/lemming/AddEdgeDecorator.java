@@ -186,6 +186,13 @@ public class AddEdgeDecorator extends ColouredGraphDecorator {
      */
     @Override
     public int getNumberOfEdgesBetweenVertices(int tailId, int headId) {
-        return super.getNumberOfEdgesBetweenVertices(tailId, headId) + 1;
+        // Check if the Ids passed as arguments contain the added edge
+        if (tailId == this.triple.tailId || tailId == this.triple.headId && headId == this.triple.tailId
+                || headId == this.triple.headId) {
+            return super.getNumberOfEdgesBetweenVertices(tailId, headId) + 1;
+        } else {
+            System.out.println("Somethings Wrong! Input node Ids not part of selected edge");
+            return -1;
+        }
     }
 }
