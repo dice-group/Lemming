@@ -364,4 +364,8 @@ public class ErrorScoreCalculator {
 	public double getAverageErrorScore(){
 		return mAvgErrorScore;
 	}
+
+	public ObjectDoubleOpenHashMap<String> getmMapOfMeanValues() {
+		return mMapOfMeanValues;
+	}
 }

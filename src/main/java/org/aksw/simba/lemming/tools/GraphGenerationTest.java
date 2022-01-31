@@ -5,6 +5,7 @@ import grph.Grph.DIRECTION;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +144,7 @@ public class GraphGenerationTest {
         Loading metrics values and constant expressions 
         ----------------------------------------------------*/
         ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+        metrics = valuesCarrier.getMetrics(metrics);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
         	LOGGER.warn("Please generate the file [value_store.val] again!");

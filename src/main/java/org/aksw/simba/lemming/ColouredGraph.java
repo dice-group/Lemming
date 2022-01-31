@@ -704,7 +704,8 @@ public class ColouredGraph {
 		return true;
 	}
 
-	
-    
-    
+
+    public IntSet getEdgesIncidentTo(int verticeId) {
+	    return graph.getEdgesIncidentTo(verticeId);
+    }
 }
