@@ -186,6 +186,9 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             edges = graph.getOutEdges(vertexID);
         }
 
+        int counter = 5; // number of edges to check
+        int tracker = 0;
+        
         // Iterating over edges
         for (int edge : edges) {
             edgeColour = graph.getEdgeColour(edge);
@@ -239,6 +242,11 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
                 break;
             }
             
+            tracker++;
+            if(tracker == counter) {
+                break;
+            }
+            
         }
 
         if (tripleRemove == null) { // If triple couldn't be found 
@@ -288,24 +296,30 @@ public class StdDevVertexDegree extends AvgVertexDegreeMetric {
             vertexID = maxResultObject.getMinVertexID();
         }
 
+        int counter = 5; // number of edges to check
+        int tracker = 0;
         for (Integer graphVertex : graph.getVertices()) {
             if (!indicator && (graph.getGraph().getInEdgeDegree(graphVertex) > avgResultObject.getResult())) {
                 //Need to increase the metric both the vertices degree greater than average degree
                 if (direction == DIRECTION.in) {
+                    tracker++;
                     tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graphVertex, vertexID);
                 } else {
+                    tracker++;
                     tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(vertexID, graphVertex);
                 }
             } else if (indicator && (graph.getGraph().getInEdgeDegree(graphVertex) < avgResultObject.getResult())) {
                 //Need to decrease the metric both the vertices degree less than average degree
                 if (direction == DIRECTION.in) {
+                    tracker++;
                     tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(graphVertex, vertexID);
                 } else {
+                    tracker++;
                     tripleAdd = ((AbstractGraphGeneration) mGrphGenerator).getProposedTripleForHeadIdAndTailId(vertexID, graphVertex);
                 }
             }
             
-            if(tripleAdd != null) {
+            if(tripleAdd != null || tracker == counter) {
                 break;
             }
 
