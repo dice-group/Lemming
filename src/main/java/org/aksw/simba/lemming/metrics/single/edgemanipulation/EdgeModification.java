@@ -10,7 +10,6 @@ import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * @author DANISH AHMED on 8/10/2018
  */
@@ -26,6 +25,8 @@ public class EdgeModification {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EdgeModification.class);
 
+    private VertexDegrees mVertexDegrees;
+
     public EdgeModification(ColouredGraph graph, SingleValueMetric nodeMetric, SingleValueMetric edgeMetric) {
         this.graph = graph;
         this.nodeMetric = nodeMetric;
@@ -33,6 +34,7 @@ public class EdgeModification {
 
         this.oldNodeTriangles = (int) getNumberOfNodeTriangles();
         this.oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        mVertexDegrees = new VertexDegrees(graph);
     }
 
     public EdgeModification(ColouredGraph graph, int numberOfNodeTriangles, int numberOfEdgeTriangles) {
@@ -40,6 +42,7 @@ public class EdgeModification {
 
         this.oldNodeTriangles = numberOfNodeTriangles;
         this.oldEdgeTriangles = numberOfEdgeTriangles;
+        mVertexDegrees = new VertexDegrees(graph);
     }
 
     public ColouredGraph getGraph() {
@@ -60,6 +63,10 @@ public class EdgeModification {
 
     public int getNewEdgeTriangles() {
         return newEdgeTriangles;
+    }
+
+    public VertexDegrees getmVertexDegrees() {
+        return mVertexDegrees;
     }
 
     public void setNodeMetric(SingleValueMetric nodeMetric) {
@@ -88,60 +95,65 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-//        if (oldNodeTriangles == 0)
-//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-//        if (oldEdgeTriangles == 0)
-//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
-//        newNodeTriangles = 0;
-//        newEdgeTriangles = 0;
+        // if (oldNodeTriangles == 0)
+        // oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        // if (oldEdgeTriangles == 0)
+        // oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        // newNodeTriangles = 0;
+        // newEdgeTriangles = 0;
 
         Grph grph = graph.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
-        
-        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1] 
-        		: verticesConnectedToRemovingEdge.toIntArray()[0];
-        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
-        
-        int numEdgesBetweenConnectedVertices = IntSetUtil.intersection(grph.getEdgesIncidentTo(tailId), 
-        		grph.getEdgesIncidentTo(headId)).size();
 
-        //LOGGER.info(String.format("Removed edge id:\t%s", edgeId));
+        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+                : verticesConnectedToRemovingEdge.toIntArray()[0];
+        int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
+
+        int numEdgesBetweenConnectedVertices = IntSetUtil
+                .intersection(grph.getEdgesIncidentTo(tailId), grph.getEdgesIncidentTo(headId)).size();
+
+        // LOGGER.info(String.format("Removed edge id:\t%s", edgeId));
         if (numEdgesBetweenConnectedVertices > 1) {
             /* Same number of node triangles */
             newNodeTriangles = oldNodeTriangles;
         } else {
             /* edge size = 1 */
-            /* remove number of triangles formed by subgraph*/
+            /* remove number of triangles formed by subgraph */
             int oldSubGraphNodeTriangles = calculateSubGraphNodeTriangles(edgeId);
             newNodeTriangles = oldNodeTriangles - oldSubGraphNodeTriangles;
-            newNodeTriangles = newNodeTriangles >= 0 ? newNodeTriangles: 0;
+            newNodeTriangles = newNodeTriangles >= 0 ? newNodeTriangles : 0;
         }
 
         int oldSubGraphEdgeTriangles = calculateSubGraphEdgeTriangles(edgeId);
-        if (subGraphTrianglesAfterRemovingEdge == 0){
+        if (subGraphTrianglesAfterRemovingEdge == 0) {
             newEdgeTriangles = oldEdgeTriangles - oldSubGraphEdgeTriangles;
-        	newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles: 0;
-        }
-        else {
+            newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles : 0;
+        } else {
             int difference = oldSubGraphEdgeTriangles - subGraphTrianglesAfterRemovingEdge;
             newEdgeTriangles = oldEdgeTriangles - difference;
-            newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles: 0;
+            newEdgeTriangles = newEdgeTriangles >= 0 ? newEdgeTriangles : 0;
         }
         subGraphTrianglesAfterRemovingEdge = 0;
 
         this.graph.removeEdge(edgeId);
+
+        // For removing an edge from a graph, update the vertex in and out degrees.
+        mVertexDegrees.updateVertexInDegree(headId, -1);
+        mVertexDegrees.updateVertexOutDegree(tailId, -1);
     }
 
-    /* Get number of triangles that were formed by utilizing this edge
-     * you need a sub graph of the vertices that are in common with edge's vertices */
+    /*
+     * Get number of triangles that were formed by utilizing this edge you need a
+     * sub graph of the vertices that are in common with edge's vertices
+     */
     private int calculateSubGraphNodeTriangles(int edgeId) {
         Grph grph = graph.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
 
-        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1] 
-        		: verticesConnectedToRemovingEdge.toIntArray()[0];
+        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+                : verticesConnectedToRemovingEdge.toIntArray()[0];
         int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
-        
+
         return getVerticesInCommon(tailId, headId).size();
     }
 
@@ -173,19 +185,19 @@ public class EdgeModification {
 
         Grph grph = graph.getGraph();
         IntSet verticesConnectedToRemovingEdge = grph.getVerticesIncidentToEdge(edgeId);
-        
-        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1] 
-        		: verticesConnectedToRemovingEdge.toIntArray()[0];
+
+        int headId = verticesConnectedToRemovingEdge.size() > 1 ? verticesConnectedToRemovingEdge.toIntArray()[1]
+                : verticesConnectedToRemovingEdge.toIntArray()[0];
         int tailId = verticesConnectedToRemovingEdge.toIntArray()[0];
-        
-        int numEdgesBetweenConnectedVertices = IntSetUtil.intersection(grph.getEdgesIncidentTo(tailId),
-                grph.getEdgesIncidentTo(headId)).size();
-        
+
+        int numEdgesBetweenConnectedVertices = IntSetUtil
+                .intersection(grph.getEdgesIncidentTo(tailId), grph.getEdgesIncidentTo(headId)).size();
+
         for (int vertex : getVerticesInCommon(tailId, headId)) {
-            int numEdgesV1ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(tailId),
-            		grph.getEdgesIncidentTo(vertex)).size();
-            int numEdgesV2ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(headId),
-                    grph.getEdgesIncidentTo(vertex)).size();
+            int numEdgesV1ToTriangleVertex = IntSetUtil
+                    .intersection(grph.getEdgesIncidentTo(tailId), grph.getEdgesIncidentTo(vertex)).size();
+            int numEdgesV2ToTriangleVertex = IntSetUtil
+                    .intersection(grph.getEdgesIncidentTo(headId), grph.getEdgesIncidentTo(vertex)).size();
             int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
             oldSubGraphEdgeTriangles += (mul * numEdgesBetweenConnectedVertices);
             subGraphTrianglesAfterRemovingEdge += (mul * (numEdgesBetweenConnectedVertices - 1));
@@ -200,14 +212,14 @@ public class EdgeModification {
             oldEdgeTriangles = newEdgeTriangles;
         }
 
-//        if (oldNodeTriangles == 0)
-//            oldNodeTriangles = (int) getNumberOfNodeTriangles();
-//        if (oldEdgeTriangles == 0)
-//            oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
+        // if (oldNodeTriangles == 0)
+        // oldNodeTriangles = (int) getNumberOfNodeTriangles();
+        // if (oldEdgeTriangles == 0)
+        // oldEdgeTriangles = (int) getNumberOfEdgeTriangles();
 
         Grph grph = graph.getGraph();
-        int numEdgesBetweenVertices = IntSetUtil.intersection(grph.getEdgesIncidentTo(tail),
-                grph.getEdgesIncidentTo(head)).size();
+        int numEdgesBetweenVertices = IntSetUtil
+                .intersection(grph.getEdgesIncidentTo(tail), grph.getEdgesIncidentTo(head)).size();
 
         IntSet verticesInCommon = getVerticesInCommon(tail, head);
         int edgeId = 0;
@@ -218,11 +230,11 @@ public class EdgeModification {
 
             int oldSubGraphEdgeTriangles = 0;
             int newSubGraphEdgeTriangles = 0;
-            for (int vertex: verticesInCommon) {
-                int numEdgesV1ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(tail),
-                        grph.getEdgesIncidentTo(vertex)).size();
-                int numEdgesV2ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(head),
-                        grph.getEdgesIncidentTo(vertex)).size();
+            for (int vertex : verticesInCommon) {
+                int numEdgesV1ToTriangleVertex = IntSetUtil
+                        .intersection(grph.getEdgesIncidentTo(tail), grph.getEdgesIncidentTo(vertex)).size();
+                int numEdgesV2ToTriangleVertex = IntSetUtil
+                        .intersection(grph.getEdgesIncidentTo(head), grph.getEdgesIncidentTo(vertex)).size();
                 int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
 
                 oldSubGraphEdgeTriangles += (mul * numEdgesBetweenVertices);
@@ -236,20 +248,25 @@ public class EdgeModification {
             edgeId = graph.addEdge(tail, head, color);
             numEdgesBetweenVertices += 1;
             int subGraphEdgeTriangles = 0;
-            for (int vertex: verticesInCommon) {
-                int numEdgesV1ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(tail),
-                        grph.getEdgesIncidentTo(vertex)).size();
-                int numEdgesV2ToTriangleVertex = IntSetUtil.intersection(grph.getEdgesIncidentTo(head),
-                        grph.getEdgesIncidentTo(vertex)).size();
+            for (int vertex : verticesInCommon) {
+                int numEdgesV1ToTriangleVertex = IntSetUtil
+                        .intersection(grph.getEdgesIncidentTo(tail), grph.getEdgesIncidentTo(vertex)).size();
+                int numEdgesV2ToTriangleVertex = IntSetUtil
+                        .intersection(grph.getEdgesIncidentTo(head), grph.getEdgesIncidentTo(vertex)).size();
                 int mul = numEdgesV1ToTriangleVertex * numEdgesV2ToTriangleVertex;
 
                 subGraphEdgeTriangles += (mul * numEdgesBetweenVertices);
             }
             this.newEdgeTriangles = oldEdgeTriangles + subGraphEdgeTriangles;
         }
+
+        // For adding an edge in a graph, update the vertex in and out degrees.
+        mVertexDegrees.updateVertexInDegree(head, 1);
+        mVertexDegrees.updateVertexOutDegree(tail, 1);
+
         return edgeId;
     }
-    
+
     public void removeEdgeFromGraph(int edgeId, int newNodeTriangles, int newEdgeTriangles) {
         if (this.newNodeTriangles != 0 && this.newEdgeTriangles != 0) {
             oldNodeTriangles = this.newNodeTriangles;
@@ -258,16 +275,27 @@ public class EdgeModification {
         this.newNodeTriangles = newNodeTriangles;
         this.newEdgeTriangles = newEdgeTriangles;
         this.graph.removeEdge(edgeId);
+
+        // For removing an edge from a graph, update the vertex in and out degrees.
+        int headId = graph.getGraph().getDirectedSimpleEdgeHead(edgeId);
+        int tailId = graph.getGraph().getDirectedSimpleEdgeTail(edgeId);
+        mVertexDegrees.updateVertexInDegree(headId, -1);
+        mVertexDegrees.updateVertexOutDegree(tailId, -1);
+
     }
 
-   public int addEdgeToGraph(int tail, int head, BitSet color, int newNodeTriangles, int newEdgeTriangles) {
+    public int addEdgeToGraph(int tail, int head, BitSet color, int newNodeTriangles, int newEdgeTriangles) {
         if (this.newNodeTriangles != 0 && this.newEdgeTriangles != 0) {
             oldNodeTriangles = this.newNodeTriangles;
             oldEdgeTriangles = this.newEdgeTriangles;
         }
         this.newNodeTriangles = newNodeTriangles;
         this.newEdgeTriangles = newEdgeTriangles;
+
+        // For adding an edge in a graph, update the vertex in and out degrees.
+        mVertexDegrees.updateVertexInDegree(head, 1);
+        mVertexDegrees.updateVertexOutDegree(tail, 1);
+
         return graph.addEdge(tail, head, color);
     }
 }
-
