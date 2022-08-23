@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
+import org.aksw.simba.lemming.algo.expression.ExpressionIterator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.tools.RefinementTest;
 import org.slf4j.Logger;
@@ -231,5 +233,35 @@ public class ConstantValueStorage implements Serializable	{
 	
 	public static String generateGraphKey(ColouredGraph graph) {
 	    return graph.getGraph().getNumberOfVertices() + "-" + graph.getGraph().getNumberOfEdges();
+	}
+	
+	/** The method returns the list of metrics which are present in characteristics expressions.
+	 * @param lstMetrics - The list which contains all the input metrics.
+	 * @return List of metrics
+	 */
+	public List<SingleValueMetric> getMetricsOfExpressions(List<SingleValueMetric> lstMetrics){
+	    List<SingleValueMetric> metrics = new ArrayList<>();// List which will contain metrics present in Expressions
+	    Set<Expression> constantExpressions = getConstantExpressions();
+	    Set<String> expressionsSet = new HashSet<>(); // Set to store atomic expression
+	    
+	    //Iterate over all expressions and add atomic expression in set.
+	    for(Expression expression:constantExpressions) {
+	        ExpressionIterator iterator = new ExpressionIterator(expression);
+	        while(iterator.hasNext()) {
+	            Expression subExpression = iterator.next();
+	            if(subExpression.isAtomic()) {
+	                expressionsSet.add(subExpression.toString());
+	            }
+	        }
+	    }
+	    
+	    //Iterate over input list of metrics and check which metrics are present in expressions
+	    for(SingleValueMetric metric: lstMetrics){
+	            if(expressionsSet.contains(metric.getName())) {
+	                metrics.add(metric);
+	           }
+	    }
+	    
+	    return metrics;
 	}
 }
