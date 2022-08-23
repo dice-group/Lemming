@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 /**
@@ -16,7 +16,7 @@ public class MinVertexOutDegreeMetric extends AbstractMetric implements SingleVa
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return graph.getGraph().getMinOutVertexDegrees();
     }
 

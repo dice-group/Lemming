@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 
 /**
  * This metric determines the average degree of outgoing edges in the graph.
- * 
+ *
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
@@ -24,7 +24,7 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return applyUpdatable(graph).getResult();
     }
 
@@ -47,14 +47,14 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return - metric result.
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
 
         AvgVertexDegreeMetricResult metricResultTempObj = new AvgVertexDegreeMetricResult(getName(), Double.NaN);
 
         double sum = 0;
 
         // Computing the Avg Vertex Degree Metric for the first time
-        IntArrayList getmMapVerticesinDegree = graph.getGraph().getAllInEdgeDegrees();
+        IntArrayList getmMapVerticesinDegree = graph.getAllInEdgeDegrees();
         for (Integer vertexDegree : getmMapVerticesinDegree) { // Compute sum in iteration
             sum += vertexDegree;
         }
@@ -74,7 +74,11 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      * The method contains logic that computes the average vertex degree metric
      * efficiently. It will update the previously stored sum value to compute the
      * new value for the metric.
+<<<<<<< HEAD
      * 
+=======
+     *
+>>>>>>> c029c4eb058dac81eb046b341267bb3724ea738d
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
      * @param graphOperation - Enum indicating graph operation. ("ADD" for adding an
@@ -85,10 +89,10 @@ public class AvgVertexDegreeMetric extends AbstractMetric implements SingleValue
      *         further computations
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+    public UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
             UpdatableMetricResult previousResult) {
-        
-        if(previousResult == null) {
+
+        if (previousResult == null) {
             return applyUpdatable(graph);
         }
 

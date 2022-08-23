@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Constant;
 import org.aksw.simba.lemming.algo.expression.Expression;
@@ -268,7 +268,7 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         }
 
         @Override
-        public double apply(ColouredGraph graph) {
+        public double apply(IColouredGraph graph) {
             return 0;
         }
 

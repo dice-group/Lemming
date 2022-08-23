@@ -1,5 +1,8 @@
 package org.aksw.simba.lemming;
 
+import grph.Grph.DIRECTION;
+import grph.path.ArrayListPath;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +12,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.grph.DiameterAlgorithm;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -19,12 +23,11 @@ import com.carrotsearch.hppc.ObjectArrayList;
 
 import grph.DefaultIntSet;
 import grph.Grph;
-import grph.GrphAlgorithmCache;
 import grph.algo.MultiThreadProcessing;
 import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class ColouredGraph {
+public class ColouredGraph implements IColouredGraph {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ColouredGraph.class);
 
@@ -46,7 +49,7 @@ public class ColouredGraph {
      */
     protected Map<BitSet, String> mapLiteralTypes;
 
-    protected GrphAlgorithmCache<Integer> diameterAlgorithm;
+    protected DiameterAlgorithm diameterAlgorithm;
 
     public ColouredGraph() {
         this(null, null);
@@ -86,7 +89,8 @@ public class ColouredGraph {
 
     protected void setGraph(Grph graph) {
         this.graph = graph;
-        diameterAlgorithm = new DiameterAlgorithm().cacheResultForGraph(graph);
+        diameterAlgorithm = new DiameterAlgorithm();
+        diameterAlgorithm.cacheResultForGraph(graph);
     }
 
     public ObjectArrayList<BitSet> getVertexColours() {
@@ -212,7 +216,7 @@ public class ColouredGraph {
     	return graph.getVerticesAccessibleThrough(vertexId, edgeId);
     }
 
-    public int getDiameter() {
+    public double getDiameter() {
         return diameterAlgorithm.compute(graph);
     }
 
@@ -704,7 +708,132 @@ public class ColouredGraph {
 		return true;
 	}
 
-	
-    
-    
+
+    /**
+     * Get list of all Edge IDs connecting to vertex
+     *
+     * @param verticeId - verticeId the id of an vertex
+     * @return IntSet - set of edge IDs
+     */
+    public IntSet getEdgesIncidentTo(int verticeId) {
+        return graph.getEdgesIncidentTo(verticeId);
+    }
+
+    /**
+     * Get in edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - in edge degree value
+     */
+    @Override
+    public int getInEdgeDegree(int vertexId) {
+        return graph.getInEdgeDegree(vertexId);
+    }
+
+    /**
+     * Get out edge degree of a vertex
+     *
+     * @param verticeId - the id of an vertex
+     * @return int - out edge degree value
+     */
+    @Override
+    public int getOutEdgeDegree(int vertexId) {
+        return graph.getOutEdgeDegree(vertexId);
+    }
+
+    /**
+     * Get max in edge degree of the graph
+     * 
+     * @return double
+     */
+    @Override
+    public double getMaxInEdgeDegrees() {
+        return graph.getMaxInEdgeDegrees();
+    }
+
+    /**
+     * Get max out edge degree of the graph
+     * 
+     * @return double
+     */
+    @Override
+    public double getMaxOutEdgeDegrees() {
+        return graph.getMaxOutEdgeDegrees();
+    }
+
+    /**
+     * Get in edge degrees of all the vertices
+     * 
+     * @return IntArrayList
+     */
+    @Override
+    public IntArrayList getAllInEdgeDegrees() {
+        return graph.getAllInEdgeDegrees();
+    }
+
+    /**
+     * Get out edge degrees of all the vertices
+     * 
+     * @return IntArrayList
+     */
+    @Override
+    public IntArrayList getAllOutEdgeDegrees() {
+        return graph.getAllOutEdgeDegrees();
+    }
+
+    /**
+     * Get number of edges in the graph
+     * 
+     * @return double
+     */
+    @Override
+    public double getNumberOfEdges() {
+        return graph.getNumberOfEdges();
+    }
+
+    /**
+     * Get number of nodes in the graph
+     * 
+     * @return double
+     */
+    @Override
+    public double getNumberOfVertices() {
+        return graph.getNumberOfVertices();
+    }
+
+    @Override
+    public int getNumberOfEdgesBetweenVertices(int headId, int tailId) {
+        int counter = 0;
+        for (int edgeId : getEdgesIncidentTo(tailId)) {
+            if (getEdgesIncidentTo(headId).contains(edgeId)) {
+                counter++;
+            }
+        }
+        return counter;
+    }
+
+    @Override
+    public ArrayListPath getDiameterPath() {
+        return diameterAlgorithm.getDiameterPath();
+    }
+
+    /**
+     * Get all neighbors of all nodes in the graph. Used to compute the diameter of
+     * given graph
+     * 
+     * @param direction - Direction of edge to consider for neighbors. In-neighbors
+     *                  or Out-neighbors depending on the direction we consider.
+     * @return int[][] - Two dimension integer array containing all neighbors of all
+     *         nodes in the given direction.
+     */
+    @Override
+    public int[][] getNeighbors(DIRECTION direction) {
+        return this.graph.getNeighbors(direction);
+    }
+
+    @Override
+    public int computeShorterDiameter(TripleBaseSingleID triple, ArrayListPath oldPath) {
+        return diameterAlgorithm.computeShorterDiameter(this, triple, oldPath);
+    }
+
 }

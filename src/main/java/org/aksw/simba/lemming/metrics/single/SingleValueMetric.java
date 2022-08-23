@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.Metric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
@@ -19,7 +19,7 @@ public interface SingleValueMetric extends Metric {
      * @param graph the graph for which the metric should be calculated.
      * @return the value of the metric.
      */
-    double apply(ColouredGraph graph);
+    double apply(IColouredGraph graph);
 
     /**
      * Returns metric results that can be reused for further computations.
@@ -27,8 +27,8 @@ public interface SingleValueMetric extends Metric {
      * @param graph - input graph.
      * @return - metric result.
      */
-    default UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
-        return new SimpleMetricResult(getName(), apply(graph));
+    default UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
+        return new SingleValueMetricResult(getName(), apply(graph));
     }
 
     /**
@@ -42,7 +42,7 @@ public interface SingleValueMetric extends Metric {
      *                       computed results.
      * @return - metric result.
      */
-    default UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple,
+    default UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple,
             Operation graphOperation, UpdatableMetricResult previousResult) {
         return applyUpdatable(graph);
     }

@@ -18,6 +18,7 @@ import org.aksw.simba.lemming.creation.LinkedGeoDataset;
 import org.aksw.simba.lemming.creation.PersonGraphDataset;
 import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.DiameterMetric;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
@@ -104,7 +105,7 @@ public class GraphGenerationTest {
         metrics.add(new StdDevVertexDegree(DIRECTION.out));
         metrics.add(new NumberOfEdgesMetric());
         metrics.add(new NumberOfVerticesMetric());
-        //metrics.add(new DiameterMetric());
+        metrics.add(new DiameterMetric());
         
         /*---------------------------------------------------
         Loading RDF graphs into ColouredGraph models

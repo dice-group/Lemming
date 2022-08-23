@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 
 import com.google.common.collect.Sets;
@@ -36,7 +36,7 @@ public class ForwardNodeTriangleMetric extends AbstractMetric implements Triangl
     }
 
     @Override
-    public double apply(ColouredGraph coloredGraph) {
+    public double apply(IColouredGraph coloredGraph) {
         List<HashSet<Integer>> adjacencyDatastructure = new ArrayList<>(coloredGraph.getVertices().size());
         DegreeBasedDecreasingNodeOrdering nodeOrdering;
         int amountOfTriangles = 0;
@@ -61,7 +61,7 @@ public class ForwardNodeTriangleMetric extends AbstractMetric implements Triangl
      * @param nodeId
      *            The id of the node whose neighbors should be processed.
      */
-    private int processNeighborsOf(int nodeId, ColouredGraph coloredGraph,
+    private int processNeighborsOf(int nodeId, IColouredGraph coloredGraph,
             List<HashSet<Integer>> adjacencyDatastructure, DegreeBasedDecreasingNodeOrdering nodeOrdering) {
         int triangles = 0;
         IntSet neighborSet = IntSetUtil.union(coloredGraph.getOutNeighbors(nodeId), coloredGraph.getInNeighbors(nodeId));

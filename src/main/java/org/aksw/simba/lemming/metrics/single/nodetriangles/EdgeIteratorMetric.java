@@ -4,6 +4,7 @@ import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.util.IntSetUtil;
@@ -19,11 +20,11 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return countTriangles(graph);
     }
 
-    protected double countTriangles(ColouredGraph graph) {
+    protected double countTriangles(IColouredGraph graph) {
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfEdges()];
         IntSet[] vertexNeighbors = new IntSet[graph.getGraph().getNumberOfVertices()];
         HashSet<Triangle> visitedV = new HashSet<>();
@@ -47,12 +48,10 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
             // An edge will always have only two vertices
             // In case of loop edge, it will have only 1 vertex
             if (verticesConnectedToEdge.length == 2) {
-                
-                for (int vertex: IntSetUtil.intersection(
-                        vertexNeighbors[verticesConnectedToEdge[0]],
+
+                for (int vertex : IntSetUtil.intersection(vertexNeighbors[verticesConnectedToEdge[0]],
                         vertexNeighbors[verticesConnectedToEdge[1]])) {
-                    if (vertex == verticesConnectedToEdge[0]
-                            || vertex == verticesConnectedToEdge[1])
+                    if (vertex == verticesConnectedToEdge[0] || vertex == verticesConnectedToEdge[1])
                         continue;
                     temp.set(vertex, verticesConnectedToEdge[0], verticesConnectedToEdge[1]);
                     if (visitedV.contains(temp))
@@ -76,23 +75,23 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     public static class Triangle {
-        private int a,b,c;
+        private int a, b, c;
 
         public Triangle(int a, int b, int c) {
             set(a, b, c);
         }
-        
+
         Triangle(Triangle t) {
             this.a = t.a;
             this.b = t.b;
             this.c = t.c;
         }
-        
+
         public void set(int a, int b, int c) {
-            if(a < b) {
-                if(a < c) {
+            if (a < b) {
+                if (a < c) {
                     this.a = a;
-                    if(b < c) {
+                    if (b < c) {
                         this.b = b;
                         this.c = c;
                     } else {
@@ -105,13 +104,13 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
                     this.c = b;
                 }
             } else {
-                if(a < c) {
+                if (a < c) {
                     this.a = b;
                     this.b = a;
                     this.c = c;
                 } else {
                     this.c = a;
-                    if(b < c) {
+                    if (b < c) {
                         this.a = b;
                         this.b = c;
                     } else {
@@ -122,7 +121,9 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
             }
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -135,7 +136,9 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
             return result;
         }
 
-        /* (non-Javadoc)
+        /*
+         * (non-Javadoc)
+         * 
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -153,7 +156,7 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
                 return false;
             return c == other.c;
         }
-        
+
         @Override
         public Object clone() throws CloneNotSupportedException {
             return new Triangle(this);

@@ -1,18 +1,16 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import it.unimi.dsi.fastutil.ints.IntIterator;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import grph.Grph.DIRECTION;
 
 /**
  * This metric is the highest degree of in or outgoing edges in the graph.
- * 
+ *
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
@@ -26,7 +24,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return applyUpdatable(graph).getResult();
     }
     
@@ -35,15 +33,14 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * metric result object is initialized. Storing the maximum vertex degree and
      * the number of vertices having the maximum degree.
      * 
-     * @param graph
-     *            - input graph.
+     * @param graph - input graph.
      * @return - metric result.
      */
     @Override
-    public UpdatableMetricResult applyUpdatable(ColouredGraph graph) {
-        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);        
-        
-        IntSet vertices = graph.getGraph().getVertices();
+    public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
+        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), Double.MIN_VALUE);
+
+        IntSet vertices = graph.getVertices();
 
         int numOfVerticesWithMaxDegree = 0;// Variable to track number of vertices with maximum degree.
 
@@ -69,7 +66,7 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * the vertex on which add or remove an edge graph operation is performed. If
      * the vertex has the same degree as the maximum vertex degree then the metric
      * value will be updated depending upon the graph operation.
-     * 
+     *
      * @param triple         - edge on which graph operation is performed.
      * @param graph          - input graph.
      * @param graphOperation - Enum indicating graph operation. ("ADD" for adding an
@@ -79,15 +76,17 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
      * @return
      */
     @Override
-    public UpdatableMetricResult update(ColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
+    public UpdatableMetricResult update(IColouredGraph graph, TripleBaseSingleID triple, Operation graphOperation,
             UpdatableMetricResult previousResult) {
-        
-        if(previousResult == null) {
+
+        if (previousResult == null) {
             return applyUpdatable(graph);
         }
-        
-        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(), ((MaxVertexDegreeMetricResult) previousResult).getResult());
-        metricResultTempObj.setNumOfVerticesWithMaxDeg(((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg());
+
+        MaxVertexDegreeMetricResult metricResultTempObj = new MaxVertexDegreeMetricResult(getName(),
+                ((MaxVertexDegreeMetricResult) previousResult).getResult());
+        metricResultTempObj.setNumOfVerticesWithMaxDeg(
+                ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg());
 
         // Need to compute MaxVertexInDegree metric or MaxVertexOutDegree
         int vertexID = direction == DIRECTION.in ? triple.headId : triple.tailId;
@@ -100,12 +99,15 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         if (updateVertexDegree == -1) { // Remove an edge
             if (degree == ((MaxVertexDegreeMetricResult) previousResult).getResult()
                     && ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg() - 1 == 0) {
-                // If degree of a vertex is equal to maximum vertex and there is only one vertex with maximum degree
+                // If degree of a vertex is equal to maximum vertex and there is only one vertex
+                // with maximum degree
                 // then recalculate
                 return applyUpdatable(graph);
             } else if (degree == ((MaxVertexDegreeMetricResult) previousResult).getResult()) {
-                // If degree of a vertex is equal to maximum vertex and there are mpre than one vertex with maximum degree
-                // then reuse previous result and update the number of vertices with maximum degree
+                // If degree of a vertex is equal to maximum vertex and there are mpre than one
+                // vertex with maximum degree
+                // then reuse previous result and update the number of vertices with maximum
+                // degree
                 metricResultTempObj.setNumOfVerticesWithMaxDeg(
                         ((MaxVertexDegreeMetricResult) previousResult).getNumOfVerticesWithMaxDeg() - 1);
                 metricResultTempObj.setResult(((MaxVertexDegreeMetricResult) previousResult).getResult());
@@ -120,14 +122,13 @@ public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValue
         }
 
         return metricResultTempObj;
-
     }
 
-    private int getChangedDegree(ColouredGraph graph, int vertexID, DIRECTION direction) {
+    private int getChangedDegree(IColouredGraph graph, int vertexID, DIRECTION direction) {
         if (direction == DIRECTION.in) {
-            return graph.getGraph().getInEdgeDegree(vertexID);
+            return graph.getInEdgeDegree(vertexID);
         } else {
-            return graph.getGraph().getOutEdgeDegree(vertexID);
+            return graph.getOutEdgeDegree(vertexID);
         }
     }
 
