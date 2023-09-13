@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single.updateDegree;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.RemoveEdgeDecorator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetricResult;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
@@ -24,33 +23,33 @@ public class NodeTriangleMetricTest extends UpdateMetricTest {
         UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
         // try to remove an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
-        ColouredGraphDecorator removeDecorator = new RemoveEdgeDecorator(graph, false);
+        RemoveEdgeDecorator removeDecorator = new RemoveEdgeDecorator(graph);
         removeDecorator.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(removeDecorator, triple, Operation.REMOVE, prevResult);
         graph = removeEdge(graph, 0);
         Assert.assertEquals(0.0, newResult.getResult());
         prevResult = newResult;
 
-        ColouredGraphDecorator addDecorator = new AddEdgeDecorator(graph, true);
+        AddEdgeDecorator addDecorator = new AddEdgeDecorator(graph);
         // try to add an edge 0 = (0, 1)
         addDecorator.setTriple(triple);
         newResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);
         Assert.assertEquals(1.0, newResult.getResult());
         graph = addEdge(graph, 0, 1);
         prevResult = newResult;
-        removeDecorator.setGraph(graph);
 
         // delete an edge 2 = (1, 2)
+        removeDecorator = new RemoveEdgeDecorator(graph);
         triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
         removeDecorator.setTriple(triple);
         newResult = metric.update(removeDecorator, triple, Operation.REMOVE, prevResult);
         graph = removeEdge(graph, 2);
         Assert.assertEquals(1.0, newResult.getResult());
         prevResult = newResult;
-        addDecorator.setGraph(graph);
-        addDecorator.setTriple(triple);
 
         // add an edge 2 = (1, 2);
+        addDecorator = new AddEdgeDecorator(graph);
+        addDecorator.setTriple(triple);
         newResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);
         Assert.assertEquals(1.0, newResult.getResult());
 
@@ -67,7 +66,7 @@ public class NodeTriangleMetricTest extends UpdateMetricTest {
         UpdatableMetricResult prevResult = new SingleValueMetricResult(metric.getName(), result);
 
         // try to remove an edge 1 = (0, 1)
-        ColouredGraphDecorator removeDecorator = new RemoveEdgeDecorator(graph, false);
+        RemoveEdgeDecorator removeDecorator = new RemoveEdgeDecorator(graph);
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         removeDecorator.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(removeDecorator, triple, Operation.REMOVE, prevResult);
@@ -76,7 +75,7 @@ public class NodeTriangleMetricTest extends UpdateMetricTest {
         prevResult = newResult;
 
         // add an edge 4 = (1, 1);
-        ColouredGraphDecorator addDecorator = new AddEdgeDecorator(graph, true);
+        AddEdgeDecorator addDecorator = new AddEdgeDecorator(graph);
         addDecorator.setTriple(triple);
         triple = new TripleBaseSingleID(1, null, 1, null, 1, null);
         newResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);

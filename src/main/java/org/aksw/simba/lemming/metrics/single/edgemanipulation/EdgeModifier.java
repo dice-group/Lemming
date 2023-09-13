@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.metrics.single.edgemanipulation;
 import java.util.HashMap;
 import java.util.List;
 
+import org.aksw.simba.lemming.AbstractSingleEdgeManipulatingDecorator;
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
@@ -31,8 +32,8 @@ public class EdgeModifier {
                                                                                 // an edge
     private HashMap<String, UpdatableMetricResult> mMapMetricsResultAddEdge; // Map to store results for add an edge
 
-    private ColouredGraphDecorator mRemoveEdgeDecorator;
-    private ColouredGraphDecorator mAddEdgeDecorator;
+    private AbstractSingleEdgeManipulatingDecorator mRemoveEdgeDecorator;
+    private AbstractSingleEdgeManipulatingDecorator mAddEdgeDecorator;
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
         graph = clonedGraph;
@@ -44,8 +45,8 @@ public class EdgeModifier {
         mMapMetricsResultRemoveEdge = new HashMap<>();
         mMapMetricsResultAddEdge = new HashMap<>();
 
-        mAddEdgeDecorator = new AddEdgeDecorator(graph, true);
-        mRemoveEdgeDecorator = new RemoveEdgeDecorator(graph, false);
+        mAddEdgeDecorator = new AddEdgeDecorator(graph);
+        mRemoveEdgeDecorator = new RemoveEdgeDecorator(graph);
 
         // compute metric values
         computeMetricValues(graph, lstMetrics);
@@ -57,10 +58,10 @@ public class EdgeModifier {
 
         mMapMetricValues = new ObjectDoubleOpenHashMap<>();
         if (lstMetrics.size() > 0) {
-            ColouredGraphDecorator mGraphDecorator = new ColouredGraphDecorator(graph);
+//            ColouredGraphDecorator mGraphDecorator = new ColouredGraphDecorator(graph);
             for (SingleValueMetric metric : lstMetrics) {
                 // Calling applyUpdatable
-                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(mGraphDecorator);
+                UpdatableMetricResult metricResultTemp = metric.applyUpdatable(graph);
 
                 double metVal = metricResultTemp.getResult();
 
@@ -98,12 +99,8 @@ public class EdgeModifier {
      * decorator object after an iteration has completed
      */
     public void updateDecorators() {
-
-        this.mAddEdgeDecorator.setGraph(this.graph);
-        this.mAddEdgeDecorator.setTriple(null);
-
-        this.mRemoveEdgeDecorator.setGraph(this.graph);
-        this.mAddEdgeDecorator.setTriple(null);
+        mAddEdgeDecorator = new AddEdgeDecorator(graph);
+        mRemoveEdgeDecorator = new RemoveEdgeDecorator(graph);
     }
 
     public ObjectDoubleOpenHashMap<String> tryToRemoveAnEdge(TripleBaseSingleID triple) {
@@ -120,7 +117,7 @@ public class EdgeModifier {
                 mMapMetricsResultRemoveEdge.put(metric.getName(), result);
                 mapMetricValues.put(metric.getName(), result.getResult());
             }
-            //reverse the graph, note: the edgeId could be changed after reversion
+            // reverse the graph, note: the edgeId could be changed after reversion
             triple.edgeId = graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
             return mapMetricValues;

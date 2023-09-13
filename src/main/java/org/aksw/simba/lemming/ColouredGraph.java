@@ -741,25 +741,25 @@ public class ColouredGraph implements IColouredGraph {
         return graph.getOutEdgeDegree(vertexId);
     }
 
-    /**
-     * Get max in edge degree of the graph
-     * 
-     * @return double
-     */
-    @Override
-    public double getMaxInEdgeDegrees() {
-        return graph.getMaxInEdgeDegrees();
-    }
-
-    /**
-     * Get max out edge degree of the graph
-     * 
-     * @return double
-     */
-    @Override
-    public double getMaxOutEdgeDegrees() {
-        return graph.getMaxOutEdgeDegrees();
-    }
+//    /**
+//     * Get max in edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    @Override
+//    public double getMaxInEdgeDegrees() {
+//        return graph.getMaxInEdgeDegrees();
+//    }
+//
+//    /**
+//     * Get max out edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    @Override
+//    public double getMaxOutEdgeDegrees() {
+//        return graph.getMaxOutEdgeDegrees();
+//    }
 
     /**
      * Get in edge degrees of all the vertices
@@ -814,6 +814,9 @@ public class ColouredGraph implements IColouredGraph {
 
     @Override
     public ArrayListPath getDiameterPath() {
+        if(diameterAlgorithm.getDiameterPath() == null) {
+            diameterAlgorithm.compute(getGraph());
+        }
         return diameterAlgorithm.getDiameterPath();
     }
 

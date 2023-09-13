@@ -18,7 +18,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * 
  * @author Pranav
  */
-public class ColouredGraphDecorator implements IColouredGraph {
+public abstract class ColouredGraphDecorator implements IColouredGraphDecorator {
 
     /**
      * Concrete object that will be decorated
@@ -26,32 +26,18 @@ public class ColouredGraphDecorator implements IColouredGraph {
     protected IColouredGraph decoratedGraph;
 
     /**
-     * A flag to denote whether the current decorator is used for addition or
-     * removal of an edge
-     */
-    protected boolean isAddingEdge;
-
-    /**
-     * Triple information that is supposed to be added/removed in the current
-     * iteration
-     */
-    protected TripleBaseSingleID triple;
-
-    /**
-     * Class constructor
+     * Class constructor.
      * 
-     * @param graph        - the IColouredGraph graph object representing the Graph
-     *                     in the current iteration
-     * @param isAddingEdge - represents the edge operation. Flag is true if edge is
-     *                     being added. Flag is false If edge is being removed.
+     * @param graph - the IColouredGraph graph object representing the Graph in the
+     *              current iteration
      */
-    public ColouredGraphDecorator(IColouredGraph graph, boolean isAddingEdgeFlag) {
-        this.decoratedGraph = graph;
-        this.isAddingEdge = isAddingEdgeFlag;
-    }
-
     public ColouredGraphDecorator(IColouredGraph graph) {
         this.decoratedGraph = graph;
+    }
+
+    @Override
+    public IColouredGraph getDecorated() {
+        return decoratedGraph;
     }
 
     /**
@@ -62,24 +48,6 @@ public class ColouredGraphDecorator implements IColouredGraph {
     @Override
     public Grph getGraph() {
         return this.decoratedGraph.getGraph();
-    }
-
-    /**
-     * Store current triple data
-     * 
-     * @param edge - Triple data
-     */
-    public void setTriple(TripleBaseSingleID edge) {
-        this.triple = edge;
-    }
-
-    /**
-     * Get current triple offered for adding or removing to the ColouredGraph
-     * 
-     * @return TripleBaseSingleID
-     */
-    public TripleBaseSingleID getTriple() {
-        return this.triple;
     }
 
     /**
@@ -115,25 +83,25 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.decoratedGraph.getOutEdgeDegree(vertexId);
     }
 
-    /**
-     * Get max in edge degree of the graph
-     * 
-     * @return double
-     */
-    @Override
-    public double getMaxInEdgeDegrees() {
-        return this.decoratedGraph.getMaxInEdgeDegrees();
-    }
+//    /**
+//     * Get max in edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    @Override
+//    public double getMaxInEdgeDegrees() {
+//        return this.decoratedGraph.getMaxInEdgeDegrees();
+//    }
 
-    /**
-     * Get max in edge degree of the graph
-     * 
-     * @return double
-     */
-    @Override
-    public double getMaxOutEdgeDegrees() {
-        return this.decoratedGraph.getMaxOutEdgeDegrees();
-    }
+//    /**
+//     * Get max in edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    @Override
+//    public double getMaxOutEdgeDegrees() {
+//        return this.decoratedGraph.getMaxOutEdgeDegrees();
+//    }
 
     /**
      * Get in degrees of all the vertices in the graph
@@ -175,10 +143,9 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.decoratedGraph.getNumberOfVertices();
     }
 
-    public void setGraph(IColouredGraph graph) {
-        this.decoratedGraph = graph;
-
-    }
+//    public void setGraph(IColouredGraph graph) {
+//        this.decoratedGraph = graph;
+//    }
 
     /**
      * Add given edge to the graph
@@ -304,10 +271,10 @@ public class ColouredGraphDecorator implements IColouredGraph {
         return this.decoratedGraph.getNumberOfEdgesBetweenVertices(headId, tailId);
     }
 
-    @Override
-    public double getDiameter() {
-        return this.decoratedGraph.getDiameter();
-    }
+//    @Override
+//    public double getDiameter() {
+//        return this.decoratedGraph.getDiameter();
+//    }
 
     @Override
     public BitSet getVertexColour(int vId) {

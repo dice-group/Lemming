@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single.updateDegree;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.RemoveEdgeDecorator;
 import org.aksw.simba.lemming.metrics.single.AvgVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
@@ -23,12 +22,11 @@ public class AvgVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph1);
         Assert.assertEquals(4.0 / 3.0, result);
 
-        ColouredGraphDecorator decorator = new ColouredGraphDecorator(buildGraph1);
-        UpdatableMetricResult prevResult = metric.applyUpdatable(decorator);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph1);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
-        ColouredGraphDecorator remDecorator = new RemoveEdgeDecorator(buildGraph1, false);
+        RemoveEdgeDecorator remDecorator = new RemoveEdgeDecorator(buildGraph1);
         remDecorator.setTriple(triple);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(remDecorator, triple, Operation.REMOVE, prevResult);
@@ -36,14 +34,14 @@ public class AvgVertexDegreeMetricTest extends UpdateMetricTest {
 
         // delete an edge 2 = (1, 2)
         triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
-        remDecorator.setGraph(buildGraph1);
+        remDecorator = new RemoveEdgeDecorator(buildGraph1);
         remDecorator.setTriple(triple);
         buildGraph1 = removeEdge(buildGraph1, triple.edgeId);
         newResult = metric.update(remDecorator, triple, Operation.REMOVE, newResult);
         Assert.assertEquals((4.0 - 1.0 - 1.0) / 3.0, newResult.getResult());
 
         // add an edge 4 = (1, 2);
-        ColouredGraphDecorator addDecorator = new AddEdgeDecorator(buildGraph1, false);
+        AddEdgeDecorator addDecorator = new AddEdgeDecorator(buildGraph1);
         buildGraph1 = addEdge(buildGraph1, 1, 2);
         triple = new TripleBaseSingleID(1, null, 2, null, 4, null);
         addDecorator.setTriple(triple);
@@ -51,7 +49,7 @@ public class AvgVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals((4.0 - 1.0 - 1.0 + 1.0) / 3.0, newResult.getResult());
 
         // add an edge 4 = (2, 2);
-        addDecorator.setGraph(buildGraph1);
+        addDecorator = new AddEdgeDecorator(buildGraph1);
         buildGraph1 = addEdge(buildGraph1, 2, 2);
         triple = new TripleBaseSingleID(2, null, 2, null, 4, null);
         addDecorator.setTriple(triple);
@@ -69,19 +67,18 @@ public class AvgVertexDegreeMetricTest extends UpdateMetricTest {
         double result = metric.apply(buildGraph2);
         Assert.assertEquals(3.0 / 2.0, result);
 
-        ColouredGraphDecorator decorator = new ColouredGraphDecorator(buildGraph2);
-        UpdatableMetricResult prevResult = metric.applyUpdatable(decorator);
+        UpdatableMetricResult prevResult = metric.applyUpdatable(buildGraph2);
 
         // delete an edge 0 = (0, 1)
         TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
-        ColouredGraphDecorator remDecorator = new RemoveEdgeDecorator(buildGraph2, false);
+        RemoveEdgeDecorator remDecorator = new RemoveEdgeDecorator(buildGraph2);
         remDecorator.setTriple(triple);
         buildGraph2 = removeEdge(buildGraph2, triple.edgeId);
         UpdatableMetricResult newResult = metric.update(remDecorator, triple, Operation.REMOVE, prevResult);
         Assert.assertEquals((3.0 - 1.0) / 2.0, newResult.getResult());
 
         // add an edge 0 = (0, 1);
-        ColouredGraphDecorator addDecorator = new AddEdgeDecorator(buildGraph2, false);
+        AddEdgeDecorator addDecorator = new AddEdgeDecorator(buildGraph2);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
         triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
         addDecorator.setTriple(triple);
@@ -89,7 +86,7 @@ public class AvgVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals((3.0 - 1.0 + 1.0) / 2.0, newResult.getResult());
 
         // add an edge 4 = (1, 1);
-        addDecorator.setGraph(buildGraph2);
+        addDecorator = new AddEdgeDecorator(buildGraph2);
         buildGraph2 = addEdge(buildGraph2, 1, 1);
         triple = new TripleBaseSingleID(1, null, 1, null, 4, null);
         addDecorator.setTriple(triple);

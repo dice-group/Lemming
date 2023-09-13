@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.metrics.single.updateDegree;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.RemoveEdgeDecorator;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
@@ -67,24 +66,26 @@ public class StdDevVertexDegreeTest extends UpdateMetricTest {
     void addRemoveSameEdge(StdDevVertexDegree metric, ColouredGraph graph, int tailId, int headId, int edgeId,
             DIRECTION dir) {
         // check applyUpdatable method
-        ColouredGraphDecorator iColouredGraph = new ColouredGraphDecorator(graph);
-        UpdatableMetricResult prevResult = metric.applyUpdatable(iColouredGraph);
-        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)), fixTo8DecimalPlaces(prevResult.getResult()));
+        UpdatableMetricResult prevResult = metric.applyUpdatable(graph);
+        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)),
+                fixTo8DecimalPlaces(prevResult.getResult()));
 
         // delete an edge
-        ColouredGraphDecorator removeDecorator = new RemoveEdgeDecorator(graph, true);
+        RemoveEdgeDecorator removeDecorator = new RemoveEdgeDecorator(graph);
         TripleBaseSingleID triple = new TripleBaseSingleID(tailId, null, headId, null, edgeId, null);
         removeDecorator.setTriple(triple);
         prevResult = metric.update(removeDecorator, triple, Operation.REMOVE, prevResult);
         graph = removeEdge(graph, triple.edgeId);
-        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)), fixTo8DecimalPlaces(prevResult.getResult()));
+        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)),
+                fixTo8DecimalPlaces(prevResult.getResult()));
 
         // compute metric before adding the same edge
-        ColouredGraphDecorator addDecorator = new AddEdgeDecorator(graph, true);
+        AddEdgeDecorator addDecorator = new AddEdgeDecorator(graph);
         addDecorator.setTriple(triple);
         prevResult = metric.update(addDecorator, triple, Operation.ADD, prevResult);
         graph = addEdge(graph, tailId, headId);
-        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)), fixTo8DecimalPlaces(prevResult.getResult()));
+        Assert.assertEquals(fixTo8DecimalPlaces(calculateStdDev(graph, dir)),
+                fixTo8DecimalPlaces(prevResult.getResult()));
 
     }
 

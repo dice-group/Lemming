@@ -30,6 +30,7 @@ public class DiameterMetricResult extends SingleValueMetricResult {
      * @param nodesInDiameter - list of nodes and edges
      */
     public void setDiameterPath(ArrayListPath d) {
+        setResult(d.getLength());
         this.diameterPath = d;
     }
 

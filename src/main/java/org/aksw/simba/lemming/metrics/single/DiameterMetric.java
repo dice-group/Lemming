@@ -31,7 +31,7 @@ public class DiameterMetric extends AbstractMetric implements SingleValueMetric 
     @Override
     public UpdatableMetricResult applyUpdatable(IColouredGraph graph) {
         DiameterMetricResult metricResult = new DiameterMetricResult(getName(), Double.NaN);
-        metricResult.setResult(graph.getDiameter());
+//        metricResult.setResult(graph.getDiameter());
         metricResult.setDiameterPath(graph.getDiameterPath());
         return metricResult;
     }

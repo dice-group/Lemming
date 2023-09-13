@@ -1,20 +1,20 @@
 package org.aksw.simba.lemming.metrics.single;
 
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.metrics.MetricUtils;
+import org.junit.Test;
+
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import junit.framework.Assert;
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
-import org.aksw.simba.lemming.metrics.MetricUtils;
-import org.junit.Test;
 
 public class MetricUtilsTest {
 
     @Test
     public void testGetVerticesCommon() {
-        ColouredGraphDecorator decoratedGraph = new ColouredGraphDecorator(buildGraph());
+        ColouredGraph decoratedGraph = buildGraph();
         IntSet commonVertices1 = MetricUtils.getVerticesInCommon(decoratedGraph, 0, 2);
         IntSet expectedSet1 = createExpectedIntSet(1, 3);
         assertEqualIntSet(expectedSet1, commonVertices1);

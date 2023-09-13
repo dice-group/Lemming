@@ -49,19 +49,19 @@ public interface IColouredGraph {
      */
     int getOutEdgeDegree(int vertexId);
 
-    /**
-     * Get max in edge degree of the graph
-     * 
-     * @return double
-     */
-    double getMaxInEdgeDegrees();
+//    /**
+//     * Get max in edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    double getMaxInEdgeDegrees();
 
-    /**
-     * Get max out edge degree of the graph
-     * 
-     * @return double
-     */
-    double getMaxOutEdgeDegrees();
+//    /**
+//     * Get max out edge degree of the graph
+//     * 
+//     * @return double
+//     */
+//    double getMaxOutEdgeDegrees();
 
     /**
      * Get in edge degrees of all the vertices
@@ -184,12 +184,12 @@ public interface IColouredGraph {
      */
     Grph getGraph();
 
-    /**
-     * Get diameter length
-     * 
-     * @return length of diameter
-     */
-    double getDiameter();
+//    /**
+//     * Get diameter length
+//     * 
+//     * @return length of diameter
+//     */
+//    double getDiameter();
 
     /**
      * Get Vertex Color

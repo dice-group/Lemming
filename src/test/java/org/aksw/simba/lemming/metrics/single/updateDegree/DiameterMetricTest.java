@@ -5,7 +5,6 @@ package org.aksw.simba.lemming.metrics.single.updateDegree;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.ColouredGraphDecorator;
 import org.aksw.simba.lemming.RemoveEdgeDecorator;
 import org.aksw.simba.lemming.metrics.single.DiameterMetric;
 import org.aksw.simba.lemming.metrics.single.DiameterMetricResult;
@@ -98,7 +97,7 @@ public class DiameterMetricTest {
     public void testLinearGraph() {
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph graph = buildLinearGraph();
-        UpdatableMetricResult result = metric.applyUpdatable(new ColouredGraphDecorator(graph));
+        UpdatableMetricResult result = metric.applyUpdatable(graph);
         Assert.assertEquals(numberOfNodes - 1, (int) result.getResult());
     }
 
@@ -143,11 +142,10 @@ public class DiameterMetricTest {
 
         DiameterMetric metric = new DiameterMetric();
         ColouredGraph colouredGraph = new ColouredGraph(graph, null, null);
-        ColouredGraphDecorator graphDec = new ColouredGraphDecorator(colouredGraph);
-        AddEdgeDecorator addDec = new AddEdgeDecorator(colouredGraph, true);
-        RemoveEdgeDecorator remDec = new RemoveEdgeDecorator(colouredGraph, false);
+        AddEdgeDecorator addDec = new AddEdgeDecorator(colouredGraph);
+        RemoveEdgeDecorator remDec = new RemoveEdgeDecorator(colouredGraph);
 
-        DiameterMetricResult resultObj = (DiameterMetricResult) metric.applyUpdatable(graphDec);
+        DiameterMetricResult resultObj = (DiameterMetricResult) metric.applyUpdatable(colouredGraph);
         Assert.assertEquals(2.0, resultObj.getResult());
 
         // Addition of an edge that does not affect the diameter
@@ -164,7 +162,7 @@ public class DiameterMetricTest {
         Assert.assertEquals(2.0, resultObj.getResult());
 
         // Reset the result object back to the initial state
-        resultObj = (DiameterMetricResult) metric.applyUpdatable(graphDec);
+        resultObj = (DiameterMetricResult) metric.applyUpdatable(colouredGraph);
 
         // Removal of an edge that does not affect the diameter
         triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
