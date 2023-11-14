@@ -100,7 +100,7 @@ public class PrecomputingValues {
         metrics.add(new MaxVertexDegreeMetric(DIRECTION.out));
         metrics.add(new NumberOfEdgesMetric());
         metrics.add(new NumberOfVerticesMetric());
-        metrics.add(new DiameterMetric());
+        //metrics.add(new DiameterMetric());
 
         ColouredGraph graphs[] = new ColouredGraph[20];
         IDatasetManager mDatasetManager = null;

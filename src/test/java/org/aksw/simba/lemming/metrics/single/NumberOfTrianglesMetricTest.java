@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.metrics.single;
 import org.aksw.simba.lemming.ColouredGraph;
 
 import org.aksw.simba.lemming.util.ColouredGraphConverter;
+import org.aksw.simba.lemming.util.IOHelper;
 import org.junit.Assert;
 
 public abstract class NumberOfTrianglesMetricTest {
@@ -14,7 +15,7 @@ public abstract class NumberOfTrianglesMetricTest {
     protected int expectedNumOfTriangles;
 
     public NumberOfTrianglesMetricTest(String graphFile, int expectedNumOfTriangles) {
-        this.graph = ColouredGraphConverter.convertFileToGraph(graphFile);
+        this.graph = IOHelper.readGraphFromResource(graphFile, "N3");//ColouredGraphConverter.convertFileToGraph(graphFile);
         this.expectedNumOfTriangles = expectedNumOfTriangles;
     }
 

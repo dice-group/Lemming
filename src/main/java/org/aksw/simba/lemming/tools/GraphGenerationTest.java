@@ -32,10 +32,12 @@ import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach2;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimplexApproach2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproach1;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -195,7 +197,10 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
         	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
-        } else{
+        }else if(typeGenerator.equalsIgnoreCase("S")){
+        	mGrphGenerator = new GraphGenerationSimplexApproach1(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        }
+        else{
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 
