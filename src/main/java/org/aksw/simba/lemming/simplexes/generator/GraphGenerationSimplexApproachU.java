@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.simplexes.generator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,366 +11,151 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric2;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
-import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRulesSimplexes;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.simplexes.Simplex0Analysis;
-import org.aksw.simba.lemming.simplexes.SelfLoopInSimplexAnalysis;
-import org.aksw.simba.lemming.simplexes.SelfLoopsInGraphs;
-import org.aksw.simba.lemming.simplexes.Simplex0Distribution;
-import org.aksw.simba.lemming.simplexes.Simplex1Analysis;
-import org.aksw.simba.lemming.simplexes.Simplex1Distribution;
-import org.aksw.simba.lemming.simplexes.Simplex2Analysis;
-import org.aksw.simba.lemming.simplexes.Simplex2Distribution;
+import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
+import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColos;
-import org.aksw.simba.lemming.simplexes.TriangleDistribution;
-import org.aksw.simba.lemming.simplexes.TriangleDistribution2;
+import org.aksw.simba.lemming.simplexes.analysis.S1ConnToS2C;
+import org.aksw.simba.lemming.simplexes.analysis.S1ConnectingS2C;
+import org.aksw.simba.lemming.simplexes.analysis.ConnS2;
+import org.aksw.simba.lemming.simplexes.analysis.FindSelfLoops;
+import org.aksw.simba.lemming.simplexes.analysis.FindTri;
+import org.aksw.simba.lemming.simplexes.analysis.ConnS1C;
+import org.aksw.simba.lemming.simplexes.analysis.IsoS2;
+import org.aksw.simba.lemming.simplexes.analysis.IsoS1C;
+import org.aksw.simba.lemming.simplexes.analysis.IsolatedSelfLoops;
+import org.aksw.simba.lemming.simplexes.analysis.S0C;
+import org.aksw.simba.lemming.simplexes.distribution.ConnS1DistI;
+import org.aksw.simba.lemming.simplexes.distribution.ConnS1DistU;
+import org.aksw.simba.lemming.simplexes.distribution.EdgeDistIS;
+import org.aksw.simba.lemming.simplexes.distribution.EdgeDistUS;
+import org.aksw.simba.lemming.simplexes.distribution.EdgeDistI;
+import org.aksw.simba.lemming.simplexes.distribution.EdgeDistU;
+import org.aksw.simba.lemming.simplexes.distribution.TriDistI;
+import org.aksw.simba.lemming.simplexes.distribution.TriDistU;
+import org.aksw.simba.lemming.simplexes.distribution.VertDistI;
+import org.aksw.simba.lemming.simplexes.distribution.VertDistU;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.aksw.simba.lemming.util.MapUtil;
-import org.apache.commons.collections.SetUtils;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.ext.com.google.common.collect.Sets.SetView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration implements IGraphGeneration {
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimplexApproach2.class);
+/**
+ * Description of different cases for simplexes (Complete Random approach)
+ * Connected 2-simplexes: Random Triangle, Approach for adding new triangle: Edge selection random, and vertex is added randomly. Adding edges to triangle: Random
+ * Isolated 2-simplexes: Selected Randomly.
+ * Connected 1-Simplexes: Random Edge, Approach for adding new edge to it: Select a head node randomly and tail node at random. Adding more edge : randomly.
+ * Isolated 1-simplexes: Selected Randomly.
+ * 0-simplexes: Selected Randomly.
+ * 1-Simplexes connecting 2-simplexes: Selected Randomly.
+ * 1-Simplexes connected to 2-simplexes: Selected Randomly.
+ * 
+ */
+public class GraphGenerationSimplexApproachU extends AbstractGraphGeneration implements IGraphGeneration {
+	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationSimplexApproachS.class);
 	private static int maximumIteration;
 	
-	/**
-	 * NodeIterator metric object used in this class to collect information about triangles present in different input graphs. 
-	 */
-	private NodeIteratorMetric2 metric;
+	//******************** Variables for storing estimation of edges and nodes for different type of simplexes**************************//
+	private int estimatedEdgesTriangle;//Estimated number of edges for connected 2-simplexes.
+	private int estimatedVerticesTriangle; // Estimated number of Vertices for connected 2-simplexes
+	private int estEdgesSelfLoopConnTri;
+	private int estimatedEdgesCommon; // Estimated number of edges linked to connected 2-simplexes
+	private int estVerts1SimplexesConntoTri; // Estimated number of Vertices forming 1-simplexes that are connected to triangles.
+	private int estEdgesSelfLoop1SimplexConnToTri;
+	private int estimatedEdges1SimplexesConnect2Simplexes; // Estimated number of 1-simplexes connecting 2-simplexes
+	private int estimatedEdgesIsolatedTriangle; // Estimated number of edges for isolated triangles.
+	private int estimatedVerticesIsolatedTriangle; // Estimated number of Vertices forming triangles
+	private int estEdgesSelfLoopIsoTri;
+	private int estimatedEdges1Simplexes; // Estimated number of edges forming 1-simplexes
+	private int estimatedVertices1Simplexes; // Estimated number of Vertices forming 1-simplexes
+	private int estimatedEdgesIsoSelfLoop; // Estimated number of edges forming isolated self loop (1-simplexes with same head and tail).
+	private int estimatedVerticesIsoSelfLoop; // Estimated number of Vertices forming 1-simplexes
+	private int estimatedEdgesSelfLoopIn1Simplex; // Estimated number of edges forming self loop in isolated 1-simplexes
+	private int estEdgesSelfLoopConn1Simplexes; // self loops in connected 1-simplexes
+	private int estimatedVertices0Simplexes; // Estimated number of Vertices forming 0-simplexes
+	private int estimatedEdgesConnS1; //Estimated number of edges for connected 1-simplexes
+	private int estimatedVertsConnS1; //Estimated number of vertices for connected 1-simplexes
 	
-	/**
-	 * Estimated number of edges for connected triangles.
-	 */
-	private int estimatedEdgesTriangle;
+	//********************** Color mappers for different simplexes **********************************************//
+	private IColourMappingRules mColourMapperTriangles; // ColourMappingRules define the possible combination of colours between vertices and edges. This variable is specifically for Triangles
+	private IColourMappingRules mColourMapperCommonEdges; // This Colour Mapper variable is specifically for common edges connecting triangles in input graphs with vertices that are not part of triangles.
+	private IColourMappingRules mColourMapperIsolatedTriangles; // ColourMappingRules define the possible combination of colours between vertices and edges. This variable is specifically for Triangles
+	private IColourMappingRules mColourMapperConnected1Simplexes; // This Colour Mapper variable is specifically for connected 1-simplexes
+	private IColourMappingRules mColourMapper1SimplexesConnTri; // This Colour Mapper variable is specifically for 1-simplexes that link triangles.
+	private IColourMappingRules mColourMapper1Simplexes; // This Colour Mapper variable is specifically for isolated 1-simplexes.
+	private IColourMappingRules mColourMapperIsoSelfLoop; // This Colour Mapper variable is specifically for isolated self loop (1-simplexes with same head and tail).
+	private IColourMappingRules mColourMapperSelfLoopIn1Simplex; // This Colour Mapper variable is specifically for self loop in isolated 1-simplexes
+	private IColourMappingRules mColourMapperSelfLoopIsoTri; // This Colour Mapper variable is specifically for self loops for isolated triangles.
+	private IColourMappingRules mColourMapperSelfLoopConnTri; // This Colour Mapper variable is specifically for self loops for connected triangles.
+	private IColourMappingRules mColourMapperSelfLoop1SimplexConnToTri; // This Colour Mapper variable is specifically for self loops for 1-simplexes linked to connected triangles.
+	private IColourMappingRules mColourMapperSelfLoopConn1Simplexes; // This Colour Mapper variable is specifically for self loops for connected 1-simplexes.
 	
-	/**
-	 * Estimated number of edges connecting vertices present in triangles and vertices not in triangles.
-	 */
-	private int estimatedEdgesCommon;
-	
-	
-	/**
-	 * Estimated number of type edges not in triangle.
-	 */
-	private int estimatedTypeEdgesNotTriangle;
-	
-	/**
-	 * Estimated number of Vertices forming triangles
-	 */
-	private int estimatedVerticesTriangle;
-	
-	/**
-	 * Estimated number of vertices present in triangles and connected to 1-simplex.
-	 */
-	private int estimatedVerticesCommon;
-	
-	/**
-	 * Estimated number of edges connecting two simplexes
-	 */
-	private int estimatedEdges1SimplexesConnect2Simplexes;
-	
-	/**
-	 * Map for storing graphs along with their total count of edges. This count includes rdf type edges, which is required for estimating edges in the output graph.  
-	 */
-	private Map<Integer, Integer> mGraphEdges;
-	
-	/**
-	 * Variable to store number of input graphs.
-	 */
-	private int iNoOfVersions;
-	
-	/**
-	 * Map for storing vertex colors of triangles as keys and array of triangle and edge counts as value.
-	 */
-	private ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCounts;
-	
-	private Set<TriColos> setAllTriangleColours;
-	
-	/**
-	 * This class object stores information related triangles.
-	 */
-	private TriangleDistribution2 triangledistributionObject;
-	
-	/**
-	 * Map for tracking triangle colors and vertex IDs forming triangles using those colors
-	 */
-	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriangleColorsVertexIds; 
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToEdgeIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for tracking vertices denoting classes
-	 */
+	// Map for tracking vertices denoting classes
 	private Map<BitSet, Integer> mMapClassColourToVertexIDSimplexes = new ConcurrentHashMap<BitSet, Integer>();
 	
-	/**
-	 * ColourMappingRules define the possible combination of colours between vertices and edges. This variable is specifically for Triangles
-	 */
-	private IColourMappingRules mColourMapperTriangles;
-	
-	/**
-	 * This Colour Mapper variable is specifically for common edges connecting triangles in input graphs with vertices that are not part of triangles.
-	 */
-	private IColourMappingRules mColourMapperCommonEdges;
-	
-	/**
-	 * This Colour Mapper variable is specifically for edges that are not part of triangles.
-	 */
-	//private IColourMappingRules mColourMapperNotTriangles;
-	
-	/**
-	 * This class object is used to create 1-simplexes that connect with triangles (2-simplexes).
-	 */
-	private Simplex2Distribution simplex2distObj;
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDsConnectedTo2Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	//**************** Objects for isolated 2-simplexes ************************************//
-	/**
-	 * ColourMappingRules define the possible combination of colours between vertices and edges. This variable is specifically for Triangles
-	 */
-	private IColourMappingRules mColourMapperIsolatedTriangles;
-	
-	/**
-	 * Estimated number of edges for isolated triangles.
-	 */
-	private int estimatedEdgesIsolatedTriangle;
-	
-	/**
-	 * Estimated number of Vertices forming triangles
-	 */
-	private int estimatedVerticesIsolatedTriangle;
-	
-	//TODO: Below variables for isolated use case are not absolutely necessary. For now, added to create a generic function could be removed later.
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToEdgeIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for tracking triangle colors and vertex IDs forming isolated triangles using those colors
-	 */
-	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mIsolatedTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>();
+	//******************** Additional Simplex Analysis variables for connected 2-simplexes **********************************************//
+	private ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCounts; // Map for storing vertex colors of triangles as keys and array of triangle and edge counts as value.
+	private Set<TriColos> setAllTriangleColours; // Set for storing all triangles
+	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriangleColorsVertexIds; // Map for tracking triangle colors and vertex IDs forming triangles using those colors 
+	private Map<BitSet, IntSet> mMapColourToVertexIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
+	private Map<BitSet, IntSet> mMapColourToEdgeIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>(); //Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes 
+	//TODO: Remove Maps for Edge Ids, since they are not used. Could probably be used when working with probabilities for properties?
+	private Map<BitSet, IntSet> mMapColourToVertexIDsConnectedTo2Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
+	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb; // Map for storing triangles along with their statistics
 	
 	
-	//**************** Objects for 1-simplexes connecting triangles ************************//
-	private Simplex1Distribution simplex1ConnTriDist;
+	//**************** Additional Simplex Analysis variables for isolated 2-simplexes ************************************//
+	private Map<BitSet, IntSet> mMapColourToVertexIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
+	private Map<BitSet, IntSet> mMapColourToEdgeIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
+	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mIsolatedTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>(); // Map for tracking triangle colors and vertex IDs forming isolated triangles using those colors
 	
-	/**
-	 * This Colour Mapper variable is specifically for 1-simplexes that link triangles.
-	 */
-	private IColourMappingRules mColourMapper1SimplexesConnTri;
+	//*********************Additional Simplex Analysis variables for connected 1-simplexes ********************************//
+	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>> mEdgeColosv1v2Dist; // Map of vertices of EdgeColors and their statistics
+	private ObjectObjectOpenHashMap<EdgeColos, double[]> mEdgesColorsCountDistAvg; // Map of EdgeColors and their statistics
+	private Set<EdgeColos> setAllEdgeColours; // Set for storing all edges
+	private ObjectObjectOpenHashMap<EdgeColos, List<IntSet>> mEdgeColorsVertexIds;
 	
-	//**************** Objects for 1-simplex ******************************//
-	/**
-	 * Map for storing number of 1-simplex edges for different input graphs. Note: It considers 1-simplexes that are not connected to any other 1-simplexes.
-	 */
-	private Map<Integer, Integer> mGraphIdNumberOf1SimplexEdges;
 	
-	/**
-	 * Map for storing number of vertices forming 1-simplexes for different input graphs. Note: Similar to above, this map also considers 1-simplexes that are not connected to any other 1-simplexes.
-	 */
-	private Map<Integer, Integer> mGraphIdNumberOf1SimplexVertices;
+	//*************** Distribution objects ***************************************//
+	private TriDistU triangleDistribution; // store distributions of isolated and connected 2-simplexes
+	private ConnS1DistU s1connToTriDist; // 1-simplexes connected to triangles
+	private VertDistU s1connToTriVertDist; // Distribution of vertices connected to triangles
+	private ConnS1DistU s1connTriDist; // 1-simplexes connecting triangles
+	//private EdgeDist s1IsoDist; // isolated 1-simplexes. for this approach isolated and connected 1-simplexes distributions are computed by the same class
+	private EdgeDistU s1ConnDist; // connected 1-simplexes
+	private EdgeDistUS s1ConnheadTailDist; // connected 1-simplexes
+	private VertDistU s0Dist; // 0-simplexes
 	
-	/**
-	 * This Colour Mapper variable is specifically for isolated 1-simplexes.
-	 */
-	private IColourMappingRules mColourMapper1Simplexes;
+	//************* Distribution objects self loop *******************************//
+	private VertDistU selfLoopIsoTritDist; // Distribution of self loops for isolated triangles
+	private VertDistU selfLoopConnTriDist; // Distribution of self loops for connected triangles
+	private VertDistU selfLoops1ConnToTriDist; // Distribution of self loops for vertices connected to triangles
+	private VertDistU selfLoops1IsoS1; // Distribution of isolated self loops
+	private VertDistU selfLoopsInS1Dist; // Distribution of self loops for vertices in isolated 1-simplexes
+	private VertDistU selfLoopsInConnS1Dist; // Distribution of self loops for vertices in connected 1-simplexes
 	
-	/**
-	 * Estimated number of edges forming 1-simplexes
-	 */
-	private int estimatedEdges1Simplexes;
-	
-	/**
-	 * Estimated number of Vertices forming 1-simplexes
-	 */
-	private int estimatedVertices1Simplexes;
-	
-	/**
-	 * This class object is used to create 1-simplexes in mimic graph.
-	 */
-	private Simplex1Distribution simplex1distObj;
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for 1-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDs1Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for isolated self loop 1-simplexes (1-simplexes with same head and tail color)
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDsIsoSelfLoop = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value
-	 */
-	private Map<BitSet, IntSet> mMapColourToEdgeIDs1Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * This Colour Mapper variable is specifically for connected 1-simplexes
-	 */
-	private IColourMappingRules mColourMapperConnected1Simplexes;
-	
-	/**
-	 * This class object is used to create 1-simplexes in mimic graph.
-	 */
-	private Simplex1Distribution connectedSimplex1distObj;
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for connected 1-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDs1SimplexConnected = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	/**
-	 * Map for storing number of vertices for 1-simplexes only connected to triangles. Note: Similar to above, this map also considers 1-simplexes that are not connected to any other 1-simplexes.
-	 */
-	private Map<Integer, Integer> mGraphId1SimplexVertsConnToTri;
-	
-	/**
-	 * Estimated number of Vertices forming 1-simplexes that are connected to triangles.
-	 */
-	private int estVerts1SimplexesConntoTri;
-	
-	//**************** Objects for Isolated Self Loops ******************************//
-	/**
-	* Map for storing number of Isolated self loop edges (1-simplexes with same head and tail) for different input graphs.
-	*/
-	private Map<Integer, Integer> mGraphIdNumIsoSelfLoopEdges;
-		
-	/**
-	* Map for storing number of vertices forming Isolated self loop (1-simplexes with same head and tail) for different input graphs.
-	*/
-	private Map<Integer, Integer> mGraphIdNumIsoSelfLoopVertices;
-		
-	/**
-	* This Colour Mapper variable is specifically for isolated self loop (1-simplexes with same head and tail).
-	*/
-	private IColourMappingRules mColourMapperIsoSelfLoop;
-		
-	/**
-	* Estimated number of edges forming isolated self loop (1-simplexes with same head and tail).
-	*/
-	private int estimatedEdgesIsoSelfLoop;
-		
-	/**
-	* Estimated number of Vertices forming 1-simplexes
-	*/
-	private int estimatedVerticesIsoSelfLoop;
-	
-	//**************** Objects for Self Loops in Isolated 1-simplexes ******************************//
-	/**
-	* Map for storing number of self loop edges in isolated 1-simplexes found for different input graphs.
-	*/
-	private Map<Integer, Integer> mGraphIdNumSelfLoopIn1SimplexEdges;
-			
-	/**
-	* This Colour Mapper variable is specifically for self loop in isolated 1-simplexes
-	*/
-	private IColourMappingRules mColourMapperSelfLoopIn1Simplex;
-			
-	/**
-	* Estimated number of edges forming self loop in isolated 1-simplexes
-	*/
-	private int estimatedEdgesSelfLoopIn1Simplex;
-	
-	//**************** Variables storing estimation of Self Loops ******************//
-	private int estEdgesSelfLoopIsoTri;
-	
-	private int estEdgesSelfLoopConnTri;
-	
-	private int estEdgesSelfLoop1SimplexConnToTri;
-	
-	private int estEdgesSelfLoopConn1Simplexes;
-	
-	//*************** Color mapper for self loops ***********************//
-	/**
-	 * This Colour Mapper variable is specifically for self loops for isolated triangles.
-	 */
-	private IColourMappingRules mColourMapperSelfLoopIsoTri;
-	
-	/**
-	 * This Colour Mapper variable is specifically for self loops for connected triangles.
-	 */
-	private IColourMappingRules mColourMapperSelfLoopConnTri;
-	
-	/**
-	 * This Colour Mapper variable is specifically for self loops for 1-simplexes linked to connected triangles.
-	 */
-	private IColourMappingRules mColourMapperSelfLoop1SimplexConnToTri;
-	
-	/**
-	 * This Colour Mapper variable is specifically for self loops for connected 1-simplexes.
-	 */
-	private IColourMappingRules mColourMapperSelfLoopConn1Simplexes;
-	
-	//**************** Probability distribution for Self loops *************************//
-	private OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopIsoTri;
-	
-	private OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopConnTri;
-	
-	private OfferedItemByRandomProb<BitSet> distColoProposerSelfLoop1SimplexConnToTri;
-	
-	private OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopConn1Simplexes;
+	//**************** Additional Simplex Analysis variables for isolated 1-simplexes ******************************//
+	private Map<BitSet, IntSet> mMapColourToVertexIDs1Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for 1-simplexes
+	private Map<BitSet, IntSet> mMapColourToVertexIDsIsoSelfLoop = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for isolated self loop 1-simplexes (1-simplexes with same head and tail color)
+	private Map<BitSet, IntSet> mMapColourToEdgeIDs1Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value
+	private Map<BitSet, IntSet> mMapColourToVertexIDs1SimplexConnected = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for connected 1-simplexes
 	
 	//******************* Objects for 0-simplexes ************************//
-	/**
-	 * Map for storing number of vertices forming 0-simplexes for different input graphs.
-	 */
-	private Map<Integer, Integer> mGraphIdNumberOf0SimplexVertices;
-	
-	/**
-	 * Estimated number of Vertices forming 0-simplexes
-	 */
-	private int estimatedVertices0Simplexes;
-	
-	/**
-	 * This class is used to create 0-simplexes in mimic graph
-	 */
-	private Simplex0Distribution simplex0distObj;
-	
-	/**
-	 * Map for storing vertex colours as Keys and Vertex IDs as Value for 0-simplexes
-	 */
-	private Map<BitSet, IntSet> mMapColourToVertexIDs0Simplex = new ConcurrentHashMap<BitSet, IntSet>();
-	
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb;
+	private Map<BitSet, IntSet> mMapColourToVertexIDs0Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for 0-simplexes
 	
 	
-	public GraphGenerationSimplexApproach2(int iNumberOfVertices,
+	public GraphGenerationSimplexApproachU(int iNumberOfVertices,
 			ColouredGraph[] inputGrphs, int iNumberOfThreads, long seed, int maximumIterationInput) {
 		super();
 		
@@ -378,6 +163,8 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		mRandom = new Random(this.seed);
 		
 		maximumIteration = maximumIterationInput;
+		
+		int iNoOfVersions; // Variable to store number of input graphs.
 		
 		// Logic to check number of input graphs
 		iNoOfVersions = 0;
@@ -387,6 +174,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			}
 		}
 		
+		//creating clone since original graphs are needed for later steps.
 		ColouredGraph[] origGrphs = new ColouredGraph[iNoOfVersions];
 		int i = 0;
 		for (ColouredGraph inputGraph: inputGrphs) {
@@ -415,223 +203,172 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		// color mapper analyzing all the graphs (required refine process)
 		mColourMapper = new ColourMappingRules();
 		mColourMapper.analyzeRules(origGrphs);
-		
-		mGraphEdges = new HashMap<>();
-		computeTotalEdgesInGraphs(origGrphs);
-		
-		// removing rdf type edges. Note: For above method call, total number of edges are computed including rdf type edges. Thus, removing them after the above method invocation.
 	
-		// TODO: Move the metric call into Simplex2Analysis class and get the maps from that class
-		callMetricToGetTriangleInformation(origGrphs);
+		// Compute triangles for input graphs
+		FindTri computedTriangles = callMetricToGetTriangleInformation(origGrphs);
 		
 		// Get all triangles found in input graphs. Note:- metric is invoked by above function call, thus set of colors for different triangle vertices are already computed.
-		mTriangleColoursTriangleEdgeCounts = metric.getmTriangleColoursTriangleCountsEdgeCountsResourceNodes();
-		
+		mTriangleColoursTriangleEdgeCounts = computedTriangles.getmTriColoEdgesTriCountDistAvg();
 		
 		// Create HashSet of Triangle Colours. This set is used to randomly select an object of TriangleColours while generating mimic graph.
 		createSetForTriangleColours();
 		
-		// Map object storing edge Ids found in triangles for every input graph.
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphsEdgesIdsTriangle;
-		//Map object storing common edge Ids connected to vertices in triangles and other vertices that are not in triangles for every input graph.
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphsCommonEdgesIds;
+		//******************* Simplex Analysis connected triangles ********************//
+		ConnS2 connTriAnalysis = new ConnS2(origGrphs, mIDesiredNoOfVertices, iNoOfVersions, computedTriangles);
+		mColourMapperTriangles = connTriAnalysis.getmColourMapperSimplexes();
+		estimatedEdgesTriangle = connTriAnalysis.getEstEdges();
+		estimatedVerticesTriangle = connTriAnalysis.getEstVertices();
 		
-		//******************* Get stats for isolated triangles ********************//
-		// Map object storing edge Ids found in isolated triangles for every input graph.
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphsEdgesIdsIsolatedTriangle;
-		mGraphsEdgesIdsIsolatedTriangle = metric.getmGraphsEdgesIdsIsolatedTri();
-		mColourMapperIsolatedTriangles = new ColourMappingRulesSimplexes(mGraphsEdgesIdsIsolatedTriangle); // initialize color mapper for isolated triangles
-		mColourMapperIsolatedTriangles.analyzeRules(origGrphs);
+		//******************* Simplex Analysis isolated triangles ********************//
+		IsoS2 isoTriAnalysis = new IsoS2(origGrphs, mIDesiredNoOfVertices, iNoOfVersions, computedTriangles);
+		mColourMapperIsolatedTriangles = isoTriAnalysis.getmColourMapperSimplexes();
+		estimatedEdgesIsolatedTriangle = isoTriAnalysis.getEstEdges();
+		estimatedVerticesIsolatedTriangle = isoTriAnalysis.getEstVertices();
 		
+		//****************** Compute Triangle distributions *********************//
+		triangleDistribution = new TriDistU(connTriAnalysis.getmTriColoEdgesTriCountDistAvg(), isoTriAnalysis.getmIsolatedTriColoEdgesTriCountDistAvg(), iNoOfVersions, mIDesiredNoOfVertices, mRandom);
+		mTriColosCountsAvgProb = triangleDistribution.getmTriangleColorsv1v2v3(); // get hash map for triangle vertex colors storing count of triangle distribution
 		
-		// Get edge maps from the metric object
-		mGraphsEdgesIdsTriangle = metric.getmGraphsEdgesIdsTriangle();
-		mGraphsCommonEdgesIds = metric.getmGraphsCommonEdgesIds();
-	
-		//TODO: Need to check for alternative instead of iterating over map and getting size of integer set.
-		mGraphId1SimplexVertsConnToTri = new HashMap<Integer, Integer>(); // map storing number of vertices
-		ObjectObjectOpenHashMap<Integer,IntSet> getmGraphsVertId1SimplexesConnToTri = metric.getmGraphsVertId1SimplexesConnToTri(); // get map storing vertex ids from metric object
-		for (int graphId = 1; graphId <= iNoOfVersions; graphId++) {
-			mGraphId1SimplexVertsConnToTri.put(graphId, getmGraphsVertId1SimplexesConnToTri.get(graphId).size()); //store number of 1-simplexes just connecting to triangles in the map
-		}
-		
-		
-		triangledistributionObject = new TriangleDistribution2(mTriangleColoursTriangleEdgeCounts, metric.getmIsolatedTriColoEdgesTriCountDistAvg(), iNoOfVersions, mIDesiredNoOfVertices, mRandom); // Note: iNoOfVersions : number of input graphs is computed when function estimateNoEdges is called.
-		
-		mTriColosCountsAvgProb = triangledistributionObject.getmTriangleColorsv1v2v3(); // get hash map for triangle vertex colors storing count of triangle distribution
-		
-		// color mapper analyzes colors of head, tail and edge and stores their mapping. The object of this class is planned to be used during graph generation.
-		//mColourMapper = new ColourMappingRules();
-		//mColourMapper.analyzeRules(origGrphs);
-		//colour mapper for triangles
-		mColourMapperTriangles = new ColourMappingRulesSimplexes(mGraphsEdgesIdsTriangle);
-		mColourMapperTriangles.analyzeRules(origGrphs);
-		//colour mapper for common edges
-		mColourMapperCommonEdges = new ColourMappingRulesSimplexes(mGraphsCommonEdgesIds);
-		mColourMapperCommonEdges.analyzeRules(origGrphs);
+		//****************** Simplex Analysis 1-Simplexes connected to 2-simplexes **********************//
+		S1ConnToS2C s1ConnToTri = new S1ConnToS2C(origGrphs, mIDesiredNoOfVertices, iNoOfVersions, computedTriangles);
+		mColourMapperCommonEdges = s1ConnToTri.getmColourMapperSimplexes();
+		estimatedEdgesCommon = s1ConnToTri.getEstEdges();
+		estVerts1SimplexesConntoTri = s1ConnToTri.getEstVertices();
 		
 		// Initializing hash map used for storing triangle colors and list of vertices for them
 		mTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>();
 		
-		// initialize simplex2Analysis class and compute statistics for head color and tail color
-		Simplex2Analysis simplex2Obj = new Simplex2Analysis();
-		simplex2Obj.analyze(origGrphs, mGraphsCommonEdgesIds);
-		
-		simplex2distObj = new Simplex2Distribution(metric.getmColoCountVertConnectedToTriangle(), simplex2Obj.getmHeadColoCount(), simplex2Obj.getmHeadColoTailColoCount(), iNoOfVersions, mRandom);
-		
-		//ColouredGraph[] origGrphsCloned = origGrphs.clone();
-		
-		//***************** Calculations for 1-Simplexes connecting Triangles *************************//
-		//Analysis, Distribution & mapper objects for 1-simplexes connecting triangles
-		ObjectObjectOpenHashMap<Integer,IntSet> mGraphsEdgesIdsConnectTriangles = metric.getmGraphsEdgesIdsConnectTriangles(); // get map storing edge ids for 1-simplexes that link triangles
-		
-		// analyze edge ids found for this case and create distributions found for head and head-tail colors found across different input graphs
-		Simplex2Analysis simplex1ConnTriObj = new Simplex2Analysis();
-		simplex1ConnTriObj.analyze(origGrphs, mGraphsEdgesIdsConnectTriangles);
-		
-		// create a distributions for found head and head-tail colors, and average over it
-		simplex1ConnTriDist = new Simplex1Distribution(simplex1ConnTriObj.getmHeadColoCount(), simplex1ConnTriObj.getmHeadColoTailColoCount(), iNoOfVersions, mRandom);
-		
-		// color mapper for collecting triples
-		mColourMapper1SimplexesConnTri = new ColourMappingRulesSimplexes(mGraphsEdgesIdsConnectTriangles);
-		mColourMapper1SimplexesConnTri.analyzeRules(origGrphs);
-		
-		//**************** Calculations for Self Loops ******************************//
-		
-		// Isolated triangles
-		SelfLoopInSimplexAnalysis selfIsoTriAnalysis = new SelfLoopInSimplexAnalysis();
-		selfIsoTriAnalysis.analyze(origGrphs, metric.getmGraphsVertIdsIsolatedTri()); // analyze graph to find self loops
-		selfIsoTriAnalysis.computeEstimatedEdges(origGrphs, mIDesiredNoOfVertices, iNoOfVersions); // compute estimated number of edges for output graph
-		estEdgesSelfLoopIsoTri = selfIsoTriAnalysis.getEstimatedNoEdges();
-		
-		mColourMapperSelfLoopIsoTri = new ColourMappingRulesSimplexes(selfIsoTriAnalysis.getmGraphIdEdgeIdsForSelfLoop()); // Define mapping of colors for triples
-		mColourMapperSelfLoopIsoTri.analyzeRules(origGrphs);
-		
-		distColoProposerSelfLoopIsoTri = selfIsoTriAnalysis.createVertColoProposer(iNoOfVersions, mRandom); // create probability distribution for the vertex color
-		
-		// Connected triangles
-		SelfLoopInSimplexAnalysis selfConnTriAnalysis = new SelfLoopInSimplexAnalysis();
-		selfConnTriAnalysis.analyze(origGrphs, metric.getmGraphsVertIdsConnectTriangles());
-		selfConnTriAnalysis.computeEstimatedEdges(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
-		estEdgesSelfLoopConnTri = selfConnTriAnalysis.getEstimatedNoEdges();
-		
-		mColourMapperSelfLoopConnTri = new ColourMappingRulesSimplexes(selfConnTriAnalysis.getmGraphIdEdgeIdsForSelfLoop());
-		mColourMapperSelfLoopConnTri.analyzeRules(origGrphs);
-		
-		distColoProposerSelfLoopConnTri = selfConnTriAnalysis.createVertColoProposer(iNoOfVersions, mRandom);
-		
-		// 1-simplexes only connected triangles
-		SelfLoopInSimplexAnalysis self1SimplexesConnToTriAnalysis = new SelfLoopInSimplexAnalysis();
-		self1SimplexesConnToTriAnalysis.analyze(origGrphs, metric.getmGraphsVertId1SimplexesConnToTri());
-		self1SimplexesConnToTriAnalysis.computeEstimatedEdges(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
-		estEdgesSelfLoop1SimplexConnToTri = self1SimplexesConnToTriAnalysis.getEstimatedNoEdges();
-		
-		mColourMapperSelfLoop1SimplexConnToTri = new ColourMappingRulesSimplexes(self1SimplexesConnToTriAnalysis.getmGraphIdEdgeIdsForSelfLoop());
-		mColourMapperSelfLoop1SimplexConnToTri.analyzeRules(origGrphs);
-		
-		distColoProposerSelfLoop1SimplexConnToTri = self1SimplexesConnToTriAnalysis.createVertColoProposer(iNoOfVersions, mRandom);
+		//******************* Compute Distribution of 1-simplexes connected to triangles ****************************//
+		s1connToTriDist = new ConnS1DistU(s1ConnToTri.getmColoEdgesCountDistAvg() , iNoOfVersions, mRandom);
+		s1connToTriVertDist = new VertDistU(s1ConnToTri.getmColoCountVertConnectedToTriangle(), iNoOfVersions, mRandom);
 		
 		
-		//************* Calculations for isolated 1-Simplexes and self loops ********************************//
+		//***************** Simplex Analysis 1-Simplexes connecting Triangles *************************//
+		S1ConnectingS2C s1ConnectingTri = new S1ConnectingS2C(origGrphs, mIDesiredNoOfVertices, iNoOfVersions, computedTriangles);
+		estimatedEdges1SimplexesConnect2Simplexes = s1ConnectingTri.getEstEdges();
+		mColourMapper1SimplexesConnTri = s1ConnectingTri.getmColourMapperSimplexes();
+		
+		//**************** Compute Distribution of 1-simplexes connecting Triangles ****************************//
+		s1connTriDist = new ConnS1DistU(s1ConnectingTri.getmColoEdgesCountDistAvg(), iNoOfVersions, mRandom);
 		
 		removeTypeEdgesFromGraphs(origGrphs); // commenting removal of edges since node iterator creates a new graph to compute triangles and the computed edge Ids don't match with the original graph
 		// Initially, tried not to remove the RDF type edges and instead use RDF type edges to identify class nodes. 
 		//Seems to be some issue with this approach. Thus, removing type edges and then computing 1- and 0-Simplexes
 		
-		// Initialization of analysis object
-		Simplex1Analysis simplex1Obj = new Simplex1Analysis();
-		simplex1Obj.analyze(origGrphs);
+		//**************** Self Loop Analysis ******************************//
+		// Isolated triangles
+		FindSelfLoops selfLoopIsoTri = new FindSelfLoops( origGrphs, mIDesiredNoOfVertices, iNoOfVersions, isoTriAnalysis.getmGraphsVertIds());
+		estEdgesSelfLoopIsoTri = selfLoopIsoTri.getEstEdges();
+		mColourMapperSelfLoopIsoTri = selfLoopIsoTri.getmColourMapperSimplexes();
+		selfLoopIsoTritDist = new VertDistU(selfLoopIsoTri.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
 		
-		// Get maps storing different statistics related to 1-simplexes
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphIdEdgeIdsFor1Simplex = simplex1Obj.getmGraphIdEdgeIdsFor1Simplex();
-		mGraphIdNumberOf1SimplexEdges = simplex1Obj.getmGraphIdNumberOf1SimplexEdges();
-		mGraphIdNumberOf1SimplexVertices = simplex1Obj.getmGraphIdNumberOf1SimplexVertices();
+		// Connected triangles
+		FindSelfLoops selfLoopConnTri = new FindSelfLoops( origGrphs, mIDesiredNoOfVertices, iNoOfVersions, connTriAnalysis.getmGraphsVertIds());
+		estEdgesSelfLoopConnTri = selfLoopConnTri.getEstEdges();
+		mColourMapperSelfLoopConnTri = selfLoopConnTri.getmColourMapperSimplexes();
+		selfLoopConnTriDist = new VertDistU(selfLoopConnTri.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
 		
-		// Define colour mapper for 1-simplexes
-		mColourMapper1Simplexes = new ColourMappingRulesSimplexes(mGraphIdEdgeIdsFor1Simplex);
-		mColourMapper1Simplexes.analyzeRules(origGrphs);
+		// 1-simplexes only connected triangles
+		FindSelfLoops selfLoops1ConnToTri = new FindSelfLoops( origGrphs, mIDesiredNoOfVertices, iNoOfVersions, s1ConnToTri.getmGraphsVertIds());
+		estEdgesSelfLoop1SimplexConnToTri = selfLoops1ConnToTri.getEstEdges();
+		mColourMapperSelfLoop1SimplexConnToTri = selfLoops1ConnToTri.getmColourMapperSimplexes();
+		selfLoops1ConnToTriDist = new VertDistU(selfLoops1ConnToTri.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
+
 		
-		// initialize simplex distribution object
-		simplex1distObj = new Simplex1Distribution(simplex1Obj.getmHeadColoCount1Simplex(), simplex1Obj.getmHeadColoTailColoCount(), iNoOfVersions, mRandom);
+		//************* Simplex Analysis for isolated 1-Simplexes ********************************//
+		IsoS1C isoS1Analysis = new IsoS1C(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
+		mColourMapper1Simplexes = isoS1Analysis.getmColourMapperSimplexes();
+		estimatedEdges1Simplexes = isoS1Analysis.getEstEdges();
+		estimatedVertices1Simplexes = isoS1Analysis.getEstVertices();
+		//s1IsoDist = new EdgeDist(isoS1Analysis.getmHeadColoCount1Simplex(), isoS1Analysis.getmHeadColoTailColoCount(), iNoOfVersions, mRandom); // Distribution for isolated 1-simplexes
 		
-		// ******* Computations related to isolated self loops (1-simplexes with same head and tail)
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphIdEdgeIdsIsoSelfLoops = simplex1Obj.getmGraphIdEdgeIdsForSelfLoop();
-		mGraphIdNumIsoSelfLoopEdges = simplex1Obj.getmGraphIdNumIsolatedSelfLoopEdges();
-		mGraphIdNumIsoSelfLoopVertices = simplex1Obj.getmGraphIdNumIsolatedSelfLoopVertices();
+		// ******* Computations related to isolated self loops (1-simplexes with same head and tail) ***************//
+		IsolatedSelfLoops isoS1SelfLoopAnalysis = new IsolatedSelfLoops(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
+		mColourMapperIsoSelfLoop = isoS1SelfLoopAnalysis.getmColourMapperSimplexes();
+		estimatedEdgesIsoSelfLoop = isoS1SelfLoopAnalysis.getEstEdges();
+		estimatedVerticesIsoSelfLoop = isoS1SelfLoopAnalysis.getEstVertices();
+		selfLoops1IsoS1 = new VertDistU(isoS1SelfLoopAnalysis.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
 		
-		mColourMapperIsoSelfLoop = new ColourMappingRulesSimplexes(mGraphIdEdgeIdsIsoSelfLoops);
-		mColourMapperIsoSelfLoop.analyzeRules(origGrphs);
+		// ****************** Self loops in 1-simplexes **********************//
+		FindSelfLoops selfLoopsInIsoS1 = new FindSelfLoops( origGrphs, mIDesiredNoOfVertices, iNoOfVersions, isoS1Analysis.getmGraphsVertIds());
+		estimatedEdgesSelfLoopIn1Simplex = selfLoopsInIsoS1.getEstEdges();
+		mColourMapperSelfLoopIn1Simplex = selfLoopsInIsoS1.getmColourMapperSimplexes();
+		selfLoopsInS1Dist = new VertDistU(selfLoopsInIsoS1.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
 		
-		simplex1distObj.createIsoSelfLoopColoProposer(simplex1Obj.getmColoCountSelfLoop());
-		//*************************************************************************************************************//
-		
-		// ******* Computations related to isolated self loops (1-simplexes with same head and tail)
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphIdEdgeIdsSelfLoopsIn1Simplex = simplex1Obj.getmGraphIdEdgeIdsForSelfLoopIn1Simplex();
-		mGraphIdNumSelfLoopIn1SimplexEdges = simplex1Obj.getmGraphIdNumSelfLoopIn1SimplexEdges();
-		
-		mColourMapperSelfLoopIn1Simplex = new ColourMappingRulesSimplexes(mGraphIdEdgeIdsSelfLoopsIn1Simplex);
-		mColourMapperSelfLoopIn1Simplex.analyzeRules(origGrphs);
-				
-		simplex1distObj.createSelfLoopIn1SimplexColoProposer(simplex1Obj.getmColoCountSelfLoopIn1Simplex());
-		//*************************************************************************************************************//
-		
-		
-		//************ Calculations for 0-Simplexes *********************************//
-		Simplex0Analysis simplex0Obj = new Simplex0Analysis();
-		simplex0Obj.analyze(origGrphs);
-		
-		mGraphIdNumberOf0SimplexVertices = simplex0Obj.getmGraphIdNumberOf0SimplexVertices();
-		
-		simplex0distObj = new Simplex0Distribution(simplex0Obj.getmColoCount0Simplex(), iNoOfVersions, mRandom);
-		
-		//super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
-		//LOGGER.info("Graph Initialization completed");
-		
-		//************* Calculations for connected 1-Simplexes ****************************//
-		//Collecting triples for them using edge ids of different input graphs
-		
-		// initialize selfLoopsInGraphs class and find all edges for self loops to determine edge Ids of connected 1-simplexes
-		SelfLoopsInGraphs selfloopsObj = new SelfLoopsInGraphs();
-		selfloopsObj.analyze(origGrphs);
+		//************ 0-Simplexes Analysis *********************************//
+		S0C s0Analysis = new S0C(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
+		estimatedVertices0Simplexes = s0Analysis.getEstVertices();
+		s0Dist = new VertDistU(s0Analysis.getmColoCount0Simplex(), iNoOfVersions, mRandom);
 		
 		
-		// map to store edge ids for different input graphs
-		ObjectObjectOpenHashMap<Integer, IntSet> mGraphIdEdgeIdsConnected1Simplex = simplex1Obj.findEdgeIdsForConnected1Simplexes(origGrphs, mGraphsEdgesIdsTriangle, mGraphsCommonEdgesIds, mGraphIdEdgeIdsFor1Simplex, selfloopsObj.getmGraphIdEdgeIdsForSelfLoop());
-		mColourMapperConnected1Simplexes = new ColourMappingRulesSimplexes(mGraphIdEdgeIdsConnected1Simplex);
-		mColourMapperConnected1Simplexes.analyzeRules(origGrphs);
+		//************* Connected 1-Simplexes Analysis ****************************//
+		ObjectObjectOpenHashMap<Integer, IntSet> edgeIdsUnionMap = addEdgeIdsForDifferentSimplexes(connTriAnalysis.getmGraphsEdgesIds(), isoTriAnalysis.getmGraphsEdgesIds(), s1ConnToTri.getmGraphsEdgesIds(), s1ConnectingTri.getmGraphsEdgesIds(), selfLoopIsoTri.getmGraphsEdgesIds(),
+				selfLoopConnTri.getmGraphsEdgesIds(), selfLoops1ConnToTri.getmGraphsEdgesIds(), isoS1Analysis.getmGraphsEdgesIds(), isoS1SelfLoopAnalysis.getmGraphsEdgesIds(), selfLoopsInIsoS1.getmGraphsEdgesIds(), iNoOfVersions);
 		
-		connectedSimplex1distObj = new Simplex1Distribution(simplex1Obj.getmVertColoCountConnected1Simplex(), simplex1Obj.getmHeadColoTailColoCountConnected(), iNoOfVersions, mRandom);
+		ConnS1C connS1Analysis = new ConnS1C(origGrphs, mIDesiredNoOfVertices, iNoOfVersions, edgeIdsUnionMap);
+		mColourMapperConnected1Simplexes = connS1Analysis.getmColourMapperSimplexes();
+		estimatedEdgesConnS1 = connS1Analysis.getEstEdges();
+		estimatedVertsConnS1 = connS1Analysis.getEstVertices();
+		s1ConnDist = new EdgeDistU(connS1Analysis.getmColoEdgesCountDistAvg(), isoS1Analysis.getmColoEdgesCountDistAvg(), iNoOfVersions, mIDesiredNoOfVertices, mRandom);
+		s1ConnheadTailDist = new EdgeDistUS(connS1Analysis.getmHeadColoCountConnected1Simplex(), connS1Analysis.getmHeadColoTailColoCountConnected(), iNoOfVersions, mRandom);
+		
+		//Get statistics for computed edge colors
+		mEdgeColosv1v2Dist = s1ConnDist.getmEdgeColorsv1v2();
+		mEdgesColorsCountDistAvg = connS1Analysis.getmColoEdgesCountDistAvg();
+		
+		//compute distinct edge colors for random pick
+		createSetForEdgeColours();
+		
+		// Initializing hash map used for storing triangle colors and list of vertices for them
+		mEdgeColorsVertexIds = new ObjectObjectOpenHashMap<EdgeColos, List<IntSet>>();
 		
 		// Self loop analysis for connected 1-Simplexes
-		SelfLoopInSimplexAnalysis self1SimplexesConn1Simplexes = new SelfLoopInSimplexAnalysis();
-		self1SimplexesConn1Simplexes.analyze(origGrphs, simplex1Obj.getmGraphsVertIdConn1Simplexes());
-		self1SimplexesConn1Simplexes.computeEstimatedEdges(origGrphs, mIDesiredNoOfVertices, iNoOfVersions);
-		estEdgesSelfLoopConn1Simplexes = self1SimplexesConn1Simplexes.getEstimatedNoEdges();
-		
-		mColourMapperSelfLoopConn1Simplexes = new ColourMappingRulesSimplexes(self1SimplexesConn1Simplexes.getmGraphIdEdgeIdsForSelfLoop());
-		mColourMapperSelfLoopConn1Simplexes.analyzeRules(origGrphs);
-		
-		distColoProposerSelfLoopConn1Simplexes = self1SimplexesConn1Simplexes.createVertColoProposer(iNoOfVersions, mRandom);
+		FindSelfLoops selfLoopsInConnS1 = new FindSelfLoops( origGrphs, mIDesiredNoOfVertices, iNoOfVersions, connS1Analysis.getmGraphsVertIds());
+		estEdgesSelfLoopConn1Simplexes = selfLoopsInConnS1.getEstEdges();
+		mColourMapperSelfLoopConn1Simplexes = selfLoopsInConnS1.getmColourMapperSimplexes();
+		selfLoopsInConnS1Dist = new VertDistU(selfLoopsInConnS1.getmColoCountSelfLoop(), iNoOfVersions, mRandom);
 		
 		// compute estimated edges
-		mIDesiredNoOfEdges = estimateNoEdgesSimplexes(origGrphs, mIDesiredNoOfVertices);
+		mIDesiredNoOfEdges = estimateNoEdges(inputGrphs, mIDesiredNoOfVertices);
 		
 		
 	}
 	
-	private void callMetricToGetTriangleInformation(ColouredGraph[] origGrphs) {
-		// Initialize metric, which will collect triangles found in Input graphs.
-		metric = new NodeIteratorMetric2();
+	/**
+	 * The function computes the union of edge ids found in different input graphs for vairous simplexes. The edge ids are provided as input maps.
+	 */
+	private ObjectObjectOpenHashMap<Integer, IntSet> addEdgeIdsForDifferentSimplexes(ObjectObjectOpenHashMap<Integer, IntSet> m1,
+			ObjectObjectOpenHashMap<Integer, IntSet> m2, ObjectObjectOpenHashMap<Integer, IntSet> m3,
+			ObjectObjectOpenHashMap<Integer, IntSet> m4, ObjectObjectOpenHashMap<Integer, IntSet> m5,
+			ObjectObjectOpenHashMap<Integer, IntSet> m6, ObjectObjectOpenHashMap<Integer, IntSet> m7,
+			ObjectObjectOpenHashMap<Integer, IntSet> m8, ObjectObjectOpenHashMap<Integer, IntSet> m9,
+			ObjectObjectOpenHashMap<Integer, IntSet> m10, int iNoOfVersions) {
+		
+		ObjectObjectOpenHashMap<Integer, IntSet> outputMap = new ObjectObjectOpenHashMap<Integer, IntSet>();
+		for (int graphId = 1; graphId <= iNoOfVersions; graphId++) {
+			IntSet result1 = IntSetUtil.union(IntSetUtil.union(IntSetUtil.union(IntSetUtil.union(m1.get(graphId), m2.get(graphId)), m3.get(graphId)), m4.get(graphId)), m5.get(graphId));
+			IntSet result2 = IntSetUtil.union(IntSetUtil.union(IntSetUtil.union(IntSetUtil.union(m6.get(graphId), m7.get(graphId)), m8.get(graphId)), m9.get(graphId)), m10.get(graphId));
+			IntSet finalResult = IntSetUtil.union(result1, result2);
+			outputMap.put(graphId, finalResult);
+		}
+		
+		return outputMap;
+		
+	}
+	
+	private FindTri callMetricToGetTriangleInformation(ColouredGraph[] origGrphs) {
+		// Initialize FindTriangleObject, which will collect triangles found in Input graphs.
+		FindTri findTriObj = new FindTri();
 		for (ColouredGraph graph : origGrphs) {
 			if (graph!= null) {
 				// compute triangles information for input graph
-				metric.computeTriangles(graph);
+				findTriObj.computeTriangles(graph);
 			}
 		}
+		return findTriObj;
 	}
 	
 	private void createSetForTriangleColours() {
-		//TODO: Move this method to Triangle Distribution class and Triangle should be proposed from that class
 		// Initialize set variable
 		setAllTriangleColours = new HashSet<TriColos>();
 		
@@ -644,265 +381,17 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		}
 	}
 	
-
-	protected int estimateNoEdgesSimplexes(ColouredGraph[] origGrphs, int noVertices) {
-		LOGGER.info("Estimate the number of edges in the new graph.");
+	private void createSetForEdgeColours() {
+		// Initialize set variable
+		setAllEdgeColours = new HashSet<EdgeColos>();
 		
-		
-		
-		int estimatedEdges = 0;
-		
-		// initialize estimated edges for different cases
-		estimatedEdgesTriangle = 0;
-		estimatedEdgesCommon = 0;
-		
-		estimatedEdges1Simplexes = 0; // 1-simplex
-		estimatedEdges1SimplexesConnect2Simplexes = 0;
-		estimatedEdgesIsolatedTriangle = 0;
-		
-		estimatedEdgesIsoSelfLoop = 0; // isolated self loop (1-simplex with same head and tail)
-		
-		estimatedEdgesSelfLoopIn1Simplex = 0; //self loop in isolated 1-simplexes
-		
-		// initialize estimated vertices for different cases
-		estimatedVerticesTriangle = 0;
-		estimatedVerticesCommon = 0;
-		estimatedVertices1Simplexes = 0;
-		estimatedVertices0Simplexes = 0;
-		estimatedVerticesIsolatedTriangle = 0;
-		
-		estimatedVerticesIsoSelfLoop = 0; // isolated self loop
-		
-		estVerts1SimplexesConntoTri = 0; // number of vertices for 1-simplexes only connected to triangles
-		
-		if (origGrphs != null && origGrphs.length > 0) {
-		
-			double noEdges = 0;
-			
-			// temporary variable to track graph number
-			int graphId = 1;
-			
-			// variables to track edge density for different cases
-			double noEdgesTriangles = 0;
-			double noEdgesCommon = 0;
-			
-			//double noTypeEdgesNotTriangle = 0;
-			double noEdges1Simplexes = 0;
-			double noEdges1SimplexConn2Simplex = 0;
-			double noEdgesIsoTriangles = 0;
-			
-			double noEdgesIsoSelfLoop = 0; // isolated self loop
-			
-			double noEdgesSelfLoopIso1Simplex = 0; // self loop in isolated 1-simplex
-			
-			// variables to track vertices information
-			double noVerticesTriangles = 0;
-			double noVerticesCommon = 0;
-			double noVertices1Simplexes = 0;
-			double noVertices0Simplexes = 0;
-			double noVerticesIsolatedTriangles = 0;
-			
-			double noVerticesIsoSelfLoop = 0; // isolated self loop
-			
-			double noVerts1SimplexesConnToTri = 0;
-			
-			
-			for (ColouredGraph graph : origGrphs) {
-				
-				if (graph!= null) {
-				
-					// compute triangles information for input graph
-					//metric.computeTriangles(graph); // commenting this call, metric is invoked by separate method
-					//LOGGER.info("Edge stats computed for graph " + graphId);
-					
-					//*******************Computation for edges**************************//
-					
-					// computation for total number of edges
-					int iNoEdges = mGraphEdges.get(graphId); // get total number of edges including the rdf type edges//graph.getEdges().size();
-					int iNoVertices = graph.getVertices().size();
-					noEdges += iNoEdges / (iNoVertices * 1.0);
-					
-					// get hashmap consisting of computed statistics
-					Map<Integer, List<Integer>> mstatsVertEdges = metric.getMstatsVertEdges();
-					List<Integer> statsList = mstatsVertEdges.get(graphId);
-					
-					int iNoEdgesTriangles = statsList.get(1); // get number of edges for triangle
-					noEdgesTriangles += iNoEdgesTriangles / (iNoVertices * 1.0);
-					//LOGGER.info("Number of edges in triangle: " + iNoEdgesTriangles);
-					//LOGGER.info("Edge density [Number of edges in triangle]: " + noEdgesTriangles);
-					
-					int iNoEdgesCommon = statsList.get(3); // get number of edges connecting vertices present in triangle and vertices not in triangle
-					noEdgesCommon += iNoEdgesCommon / (iNoVertices * 1.0);
-					//LOGGER.info("Number of common edges: " + iNoEdgesCommon);
-					//LOGGER.info("Edge density [Number of common edges]: " + noEdgesCommon);
-
-					int iNoEdges1Simplexes = mGraphIdNumberOf1SimplexEdges.get(graphId); 
-					noEdges1Simplexes +=iNoEdges1Simplexes / (iNoVertices * 1.0);
-					//LOGGER.info("Number of edges for 1-simplexes: " + iNoEdges1Simplexes);
-					//LOGGER.info("Edge density [1-simplexes]: " + noEdges1Simplexes);
-					
-					int iNoEdges1SimplexConn2Simplex = statsList.get(4);
-					noEdges1SimplexConn2Simplex += iNoEdges1SimplexConn2Simplex/ (iNoVertices * 1.0);
-					//LOGGER.info("Number of edges connecting triangles: " + iNoEdges1SimplexConn2Simplex);
-					//LOGGER.info("Edge density [Number of edges connecting triangles]: " + noEdges1SimplexConn2Simplex);
-					
-					int iNoEdgesIsolatedTriangles = statsList.get(6); // get number of edges for isolated triangles
-					noEdgesIsoTriangles += iNoEdgesIsolatedTriangles / (iNoVertices * 1.0);
-					//LOGGER.info("Number of edges in isolated triangles: " + iNoEdgesIsolatedTriangles);
-					//LOGGER.info("Edge density [Number of edges in Isolated triangle]: " + noEdgesIsoTriangles);
-					
-					/*
-					 * Not computing type information. Thus, commenting below statements.
-					int iNoTypeEdgesNotTriangle = statsList.get(6); // get number of type edges not part of triangle
-					noTypeEdgesNotTriangle += iNoTypeEdgesNotTriangle / (iNoVertices * 1.0);
-					LOGGER.debug("Number of type edges not in triangle: " + iNoTypeEdgesNotTriangle);
-					LOGGER.debug("Edge density [Number of type edges not in triangle]: " + noTypeEdgesNotTriangle);
-					*/
-					
-					//isolated selfloop edges
-					int iNoEdgesIsoSelfLoop = mGraphIdNumIsoSelfLoopEdges.get(graphId); 
-					noEdgesIsoSelfLoop +=iNoEdgesIsoSelfLoop / (iNoVertices * 1.0);
-					
-					//self loop edges in isolated 1-simplexes
-					int iNoEdgesSelfLoopInIso1Simplex = mGraphIdNumSelfLoopIn1SimplexEdges.get(graphId);
-					noEdgesSelfLoopIso1Simplex += iNoEdgesSelfLoopInIso1Simplex / (iNoVertices * 1.0);
-					
-					//********************Computation for vertices**************************//
-					
-					int iNoVerticesTriangles = statsList.get(0); // get number of vertices for triangle
-					noVerticesTriangles += iNoVerticesTriangles / (iNoVertices * 1.0);
-					//LOGGER.info("Percentage of vertices in triangle: " + noVerticesTriangles);
-					
-					int iNoVerticesCommon = statsList.get(2);
-					noVerticesCommon += iNoVerticesCommon / (iNoVertices * 1.0);
-					//LOGGER.info("Percentage of common vertices: " + noVerticesCommon);
-					
-					int iNoVertices1Simplexes = mGraphIdNumberOf1SimplexVertices.get(graphId);
-					noVertices1Simplexes += iNoVertices1Simplexes / (iNoVertices * 1.0);
-					//LOGGER.info("Percentage of vertices for 1-simplexes: " + noVertices1Simplexes);
-					
-					int iNoVertices0Simplexes = mGraphIdNumberOf0SimplexVertices.get(graphId);
-					noVertices0Simplexes += iNoVertices0Simplexes / (iNoVertices * 1.0);
-					//LOGGER.info("Percentage of vertices for 0-simplexes: " + noVertices0Simplexes);
-					
-					int iNoVerticesIsolatedTriangles = statsList.get(5); // get number of vertices for isolated triangles
-					noVerticesIsolatedTriangles += iNoVerticesIsolatedTriangles / (iNoVertices * 1.0);
-					//LOGGER.info("Percentage of vertices for isolated triangles: " + noVerticesIsolatedTriangles);
-					
-					//isolated self loop vertices
-					int iNoVerticesIsoSelfLoop = mGraphIdNumIsoSelfLoopVertices.get(graphId);
-					noVerticesIsoSelfLoop += iNoVerticesIsoSelfLoop / (iNoVertices * 1.0);
-					
-					//number of vertices connected to triangles
-					int iNoVerts1SimplexesConnToTri = mGraphId1SimplexVertsConnToTri.get(graphId);
-					noVerts1SimplexesConnToTri += iNoVerts1SimplexesConnToTri / (iNoVertices * 1.0); 
-					
-					graphId++;
-				}
+		Object[] keysEdgeColors = mEdgesColorsCountDistAvg.keys;
+		for(int i = 0; i < keysEdgeColors.length ; i++) {
+			if(mEdgesColorsCountDistAvg.allocated[i]) {
+				EdgeColos edgeColorObj = (EdgeColos) keysEdgeColors[i];
+				setAllEdgeColours.add(edgeColorObj);
 			}
-			
-			//*******************Estimating edges**************************//
-			
-			// computation for total number of edges
-			noEdges *= noVertices;
-			noEdges /= iNoOfVersions;
-			estimatedEdges = (int) Math.round(noEdges);
-			LOGGER.info("Total number of estimated edges: " + estimatedEdges);
-			
-			//computation of edges for different cases
-			noEdgesTriangles *= noVertices;
-			noEdgesTriangles /= iNoOfVersions;
-			estimatedEdgesTriangle = (int) Math.round(noEdgesTriangles);
-			LOGGER.info("Estimated number of edges in triangle: " + estimatedEdgesTriangle);
-			
-			noEdgesIsoTriangles *= noVertices;
-			noEdgesIsoTriangles /= iNoOfVersions;
-			estimatedEdgesIsolatedTriangle = (int) Math.round(noEdgesIsoTriangles);
-			LOGGER.info("Estimated number of edges in isolated triangle: " + estimatedEdgesIsolatedTriangle);
-			
-			noEdgesCommon *= noVertices;
-			noEdgesCommon /= iNoOfVersions;
-			estimatedEdgesCommon = (int) Math.round(noEdgesCommon);
-			LOGGER.info("Estimated number of common edges: " + estimatedEdgesCommon);
-			
-			noEdges1Simplexes *= noVertices;
-			noEdges1Simplexes /= iNoOfVersions;
-			estimatedEdges1Simplexes = (int) Math.round(noEdges1Simplexes);
-			LOGGER.info("Estimated number of edges [1-simplexes]: " + estimatedEdges1Simplexes);
-			
-			noEdges1SimplexConn2Simplex *= noVertices;
-			noEdges1SimplexConn2Simplex /= iNoOfVersions;
-			estimatedEdges1SimplexesConnect2Simplexes = (int) Math.round(noEdges1SimplexConn2Simplex);
-			LOGGER.info("Estimated number of edges connecting triangles: " + estimatedEdges1SimplexesConnect2Simplexes);
-			
-			/*
-			 * Not computing type information. Thus, commenting below statements.
-			noTypeEdgesNotTriangle *= noVertices;
-			noTypeEdgesNotTriangle /= iNoOfVersions;
-			estimatedTypeEdgesNotTriangle = (int) Math.round(noTypeEdgesNotTriangle);
-			LOGGER.debug("Estimated number of type edges not in triangle: " + estimatedTypeEdgesNotTriangle);
-			*/
-			
-			//isolated self loop edges
-			noEdgesIsoSelfLoop *= noVertices;
-			noEdgesIsoSelfLoop /= iNoOfVersions;
-			estimatedEdgesIsoSelfLoop = (int) Math.round(noEdgesIsoSelfLoop);
-			LOGGER.info("Estimated number of edges for isolated self loop: " + estimatedEdgesIsoSelfLoop);
-			
-			//self loop in isolated 1-simplexes
-			noEdgesSelfLoopIso1Simplex *= noVertices;
-			noEdgesSelfLoopIso1Simplex /= iNoOfVersions;
-			estimatedEdgesSelfLoopIn1Simplex = (int) Math.round(noEdgesSelfLoopIso1Simplex);
-			LOGGER.info("Estimated number of edges for self loop in isolated 1-simplexes: " + estimatedEdgesSelfLoopIn1Simplex);
-			
-			LOGGER.warn("Estimated the number of edges in the new graph is " + estimatedEdges);
-			
-			
-			//*******************Estimating vertices**************************//
-			
-			// computation of vertices for different cases
-			noVerticesTriangles *= noVertices;
-			noVerticesTriangles /= iNoOfVersions;
-			estimatedVerticesTriangle = (int) Math.round(noVerticesTriangles);
-			LOGGER.info("Estimated number of vertices forming triangle: " + estimatedVerticesTriangle);
-			
-			noVerticesIsolatedTriangles *= noVertices;
-			noVerticesIsolatedTriangles /= iNoOfVersions;
-			estimatedVerticesIsolatedTriangle = (int) Math.round(noVerticesIsolatedTriangles);
-			LOGGER.info("Estimated number of vertices forming isolated triangle: " + estimatedVerticesIsolatedTriangle);
-			
-			noVerticesCommon *= noVertices;
-			noVerticesCommon /= iNoOfVersions;
-			estimatedVerticesCommon = (int) Math.round(noVerticesCommon);
-			LOGGER.info("Estimated number of common vertices: " + estimatedVerticesCommon);
-			
-			noVertices1Simplexes *= noVertices;
-			noVertices1Simplexes /= iNoOfVersions;
-			estimatedVertices1Simplexes = (int) Math.round(noVertices1Simplexes);
-			LOGGER.info("Estimated number of vertices [1-simplexes]: " + estimatedVertices1Simplexes);
-			
-			noVertices0Simplexes *= noVertices;
-			noVertices0Simplexes /= iNoOfVersions;
-			estimatedVertices0Simplexes = (int) Math.round(noVertices0Simplexes);
-			LOGGER.info("Estimated number of vertices [0-simplexes]: " + estimatedVertices0Simplexes);
-			
-			//isolated self loop vertices
-			noVerticesIsoSelfLoop *= noVertices;
-			noVerticesIsoSelfLoop /= iNoOfVersions;
-			estimatedVerticesIsoSelfLoop = (int) Math.round(noVerticesIsoSelfLoop);
-			LOGGER.info("Estimated number of vertices for isolated self loop: " + estimatedVerticesIsoSelfLoop);
-			
-			// number of vertices for 1-simplexes only connected to triangles
-			noVerts1SimplexesConnToTri *= noVertices;
-			noVerts1SimplexesConnToTri /= iNoOfVersions;
-			estVerts1SimplexesConntoTri = (int) Math.round(noVerts1SimplexesConnToTri);
-			LOGGER.info("Estimated number of vertices for 1-simplexes only connected to triangles: " + estVerts1SimplexesConntoTri);
-			
-			
-		} else {
-			LOGGER.warn("The array of original graphs is empty!");
 		}
-		return estimatedEdges;
 	}
 	
 	@Override
@@ -917,11 +406,9 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		
 		// Variable to track number of edges added to mimic graph in previous iteration.
 		// Note: This variable is used to stop the iteration if no new edges could be added to the mimic graph after trying for predefined number of iterations
-		int oldEdgesCountGraph = mMimicGraph.getEdges().size();
 		int numOfIterationAddingEdgesToGraph = 0;
 		
-		if (initialRandomTriangle!=null) { // TODO: Add condition for estimatedEdgesTriangle should be >= 3 and estimatedVerticesTriangle >= 3
-			//TODO: Consider estimated no. of edges and vertices
+		if ((initialRandomTriangle!=null) && (estimatedEdgesTriangle >= 3) && (estimatedVerticesTriangle >=3)) { 
 			
 			// Update the count of triangles in the map
 			double[] arrTriProbCount = mTriColosCountsAvgProb.get(initialRandomTriangle.getA()).get(initialRandomTriangle.getB()).get(initialRandomTriangle.getC());
@@ -957,13 +444,12 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 					//If we can add more triangles when we are allowed to include additional vertices otherwise edges need to be added to existing triangles
 				
 					// get all edges of the mimic graph
-					IntSet edgesMimicGraph = mMimicGraph.getEdges(); //TODO: Instead of getting all edges from the mimic graph. All the added edges can be stored in an array and selected randomly?
+					IntSet edgesMimicGraph = mMimicGraph.getEdges();
 					edgesMimicGraph = IntSetUtil.difference(edgesMimicGraph, edgesNotFormingTriangle);
 					
 					if (edgesMimicGraph.size() != 0) {
 						// Continue to randomly select an edge and grow the graph by adding triangle only if candidate edges are found. These candidate edges will be evaluated to check if triangles can be created for them.
 			
-						//TODO: The randomly selected edge should not be a self loop.
 						// select an edge at random from the mimic graph
 						int randomEdgeID = edgesMimicGraph.toArray(new Integer[edgesMimicGraph.size()])[mRandom.nextInt(edgesMimicGraph.size())];
 						IntSet verticesIncidentToEdge = mMimicGraph.getVerticesIncidentToEdge(randomEdgeID);
@@ -981,7 +467,6 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						}
 				
 						// Get colors for the selected vertices
-						//TODO: Instead of getting the color of vertex ID from the graph. A Map can be used to store with the vertex ID as the key and color as the value? Note: We already have map for storing colors (key) and set of vertex IDs (value).
 						if ((selectedVertex1 == -1) || (selectedVertex2 == -1)) {
 							throw new RuntimeException("Vertices not selected correctly for adding triangles. Vertex ID 1: " + selectedVertex1 + ", Vertex ID 2: " + selectedVertex2 + ". Edge ID: " + randomEdgeID);
 						}
@@ -990,10 +475,9 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						BitSet selectedVertex2Colo = mMimicGraph.getVertexColour(selectedVertex2);
 				
 						//Get the color for the third vertex
-						BitSet proposedVertex3Colo = triangledistributionObject.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
+						BitSet proposedVertex3Colo = triangleDistribution.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
 				
 						// Add new Triangle for the selected vertices
-						// TODO: Third vertex color might not be exist for the selected vertex colors. Create a logic to handle such a scenario. Or if the triangle is already present[Done]
 						
 						// boolean variable to track if new edge are added
 						boolean newEdgesNotAddedToTriangle = true;
@@ -1014,8 +498,8 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 							int numOfLoopsTri = 0;
 							
 							// try to propose a color for third vertex multiple times if it is not possible to create a triangle
-							while ( (arrNewPossTriProbCount[3] < 1)  && (numOfLoopsTri < 100)) { // trying to create a new triangle 100 times
-								proposedVertex3Colo = triangledistributionObject.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
+							while ( (arrNewPossTriProbCount[3] < 1)  && (numOfLoopsTri < 500)) { // trying to create a new triangle 100 times
+								proposedVertex3Colo = triangleDistribution.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
 								newPossibleTriangle = new TriColos( selectedVertex1Colo, selectedVertex2Colo, proposedVertex3Colo);
 								arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA()).get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());// get count of triangle for the proposed new triangle
 								numOfLoopsTri++;
@@ -1075,9 +559,9 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 							numOfIterationRandomTri++;
 						}
 						
-						if (arrNewTriProbCount[1] > 1) {
+						if (arrNewTriProbCount[3] > 1) {
 							// Update the triangle count
-							arrNewTriProbCount[1] = arrNewTriProbCount[1] - 1;
+							arrNewTriProbCount[3] = arrNewTriProbCount[3] - 1;
 							
 							// Add the triangle to mimic graph
 							addTriangleToMimicGraph(randomTriangle, mColourMapperTriangles, mMapColourToVertexIDs2Simplex, mMapColourToEdgeIDs2Simplex, mTriangleColorsVertexIds);
@@ -1105,33 +589,19 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			
 			LOGGER.info("Adding additional Edges to created 2-simplexes");
 			
-			
-			while (actualEdgesInTriangles< estimatedEdgesTriangle) { // Case: Triangles cannot be added to the mimic graph but edges can be added to existing triangles
-					//System.out.println("Number of edges in the mimic graph: " + mMimicGraph.getEdges().size());
-					//System.out.println("Number of vertices in the mimic graph: " + mMimicGraph.getVertices().size());
-					
-					if (oldEdgesCountGraph == actualEdgesInTriangles) {
-						numOfIterationAddingEdgesToGraph++;
-						//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-					} else {
-						oldEdgesCountGraph = actualEdgesInTriangles;
-						numOfIterationAddingEdgesToGraph = 0;
-					}
-					
+			numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
+			while ((actualEdgesInTriangles< estimatedEdgesTriangle) && (numOfIterationAddingEdgesToGraph < maximumIteration)) { // Case: Triangles cannot be added to the mimic graph but edges can be added to existing triangles
 					
 					if (setTriangleColorsMimicGraph.size() != 0) {
 					
 					// Logic for adding edges to existing triangles
-					TriColos proposeTriangleToAddEdge = triangledistributionObject.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
+					TriColos proposeTriangleToAddEdge = triangleDistribution.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
 					
 					// Best case: A triangle is returned
 					List<IntSet> selectedTrianglesList = mTriangleColorsVertexIds.get(proposeTriangleToAddEdge);
 					
 					// randomly selecting one of these triangles
 					IntSet selectedVertices = selectedTrianglesList.toArray(new IntSet[selectedTrianglesList.size()])[mRandom.nextInt(selectedTrianglesList.size())];
-					
-					// temporary variable to track if edge was added to existing triangle
-					boolean edgeNotAddedToExistingTriangle = true;
 					
 					// Considering different vertex pairs to add an edge
 					
@@ -1155,32 +625,17 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						if (edgeAdded) {
 							//increment no. of edges in triangle
 							actualEdgesInTriangles = actualEdgesInTriangles + 1;
-							
-							//update boolean tracker variable
-							edgeNotAddedToExistingTriangle = false;
-							
+							numOfIterationAddingEdgesToGraph = 0;// update count to 0 since edge was added successfully
 							// break iterating over pair of vertices, since an edge is found
 							break;
+						}else {
+							numOfIterationAddingEdgesToGraph++;
 						}
 						
 					}//end iterating over vertex pairs
 					
-					// commenting below condition as the mimic graph could have multiple triangles with same vertex colors and below condition could lead to ignoring such triangles
-					//if (edgeNotAddedToExistingTriangle) {
-						// edge could not be added to the selected triangle
-						// removing the triangle from consideration
-						//proposeTriangleToAddEdge
-						//setTriangleColorsMimicGraph.remove(proposeTriangleToAddEdge); // commenting to check if the approach adds enough edges for triangles
-					//}
-					
-					if (numOfIterationAddingEdgesToGraph == 5000) {
-						// terminating while condition
-						LOGGER.warn("Maximum iteration reached!! Not able to add edges to existing triangles and add new triangles to the mimic graph.");
-						break;
-					}
-					
 				} // end if condition - check if candidate triangles exists for adding edges to them
-				else { // TODO: this if-else condition can be removed? after confirmation with supervisor
+				else { 
 					
 						// No edges can be added to existing triangles
 						// Give warning and break while loop
@@ -1188,10 +643,8 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 					break; // terminate out of while condition
 					
 				}
-				
-
-				} // end else condition adding edges to existing triangles
 			
+			} // end else condition adding edges to existing triangles
 			
 		}// end if condition - initial random triangle is not null
 		LOGGER.info("Case 1 completed!");
@@ -1199,35 +652,34 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Added Vertices: " + mMimicGraph.getVertices().size());
 		
 		//************************ Logic for isolated 1-simplexes ***********************************//
-		//TODO: pending testing (Note: first two input graphs for SWDF have no isolated 1-simplexes)
 		
 		//temporary variables to track addition of vertices and edges for 1-simplexes
 		int actualVerticesSimplexes = 0;
 		int actualEdgesSimplexes = 0;
 		
 		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = 0;
 		numOfIterationAddingEdgesToGraph = 0;
 		
 		// get head proposer defined for 1-simplex distribution
-		OfferedItemByRandomProb<BitSet> potentialHeadColoProposer = simplex1distObj.getPotentialHeadColoProposer();
+		Set<EdgeColos> potentialEdgeColoProposer = s1ConnDist.getPotentialIsolatedEdgeColoProposer();
 		
 		LOGGER.info("Case 2a: Isolated 1-simplexes (with different source and target node)");
 		LOGGER.info("Estimated Edges: " + estimatedEdges1Simplexes);
 		LOGGER.info("Estimated Vertices: " + estimatedVertices1Simplexes);
 		
-		while((estimatedEdges1Simplexes > actualEdgesSimplexes) && (potentialHeadColoProposer != null) && (numOfIterationAddingEdgesToGraph < 5000)) { // additional condition that color proposer should not be null
-			//TODO: Move Color proposer condition in if-statement?
+		while((estimatedEdges1Simplexes > actualEdgesSimplexes) && (potentialEdgeColoProposer != null) && (numOfIterationAddingEdgesToGraph < maximumIteration)) { // additional condition that color proposer should not be null
 			// check until it is possible to add more edges for 1-simplexes
 			
 			//variable to track if new vertex is not added
-			boolean newVertexNotAdded = true;
+			//boolean newVertexNotAdded = true;
+			
+			EdgeColos proposedEdgeColor = potentialEdgeColoProposer.toArray(new EdgeColos[potentialEdgeColoProposer.size()])[mRandom.nextInt(potentialEdgeColoProposer.size())];
 			
 			// get potential head for it and create vertex
-			BitSet potentialheadColo = potentialHeadColoProposer.getPotentialItem();
+			BitSet potentialheadColo = proposedEdgeColor.getA();
 			
 			// Get potential tail color and add edge for it
-			BitSet potentialTailColo = simplex1distObj.proposeVertColo(potentialheadColo).getPotentialItem();
+			BitSet potentialTailColo = proposedEdgeColor.getB();
 			
 			// temporary assignment for head vertex id
 			int vertexIDHead = -1;
@@ -1243,7 +695,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				vertexIDTail = addVertexToMimicGraph(potentialTailColo, mMapColourToVertexIDs1Simplex);
 				actualVerticesSimplexes = actualVerticesSimplexes + 2;
 				
-				newVertexNotAdded = false;//set the variable to false, since new variable is added
+				//newVertexNotAdded = false;//set the variable to false, since new variable is added
 
 			}else {
 				// New vertex cannot be created, select an existing vertex of the potential head color at random
@@ -1282,7 +734,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				
 			}
 			
-			boolean edgeAdded = addEdgeWithTriangleCheck(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, newVertexNotAdded); // TODO: last parameter should always be false since we are selecting isolated 1-simplexes
+			boolean edgeAdded = addEdgeWithTriangleCheck(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes, false); // last parameter should always be false since we are selecting isolated 1-simplexes
 			//boolean addedEdge = addEdgeInAnyDirectionWithDuplicateCheck(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes);
 			//addEdgeToMimicGraph(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes); // commenting: using new method with duplicate check
 			if (edgeAdded) {
@@ -1298,99 +750,29 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Added Edges: " + actualEdgesSimplexes);
 		LOGGER.info("Added Vertices: " + actualVerticesSimplexes);
 		
-		//******************************* Logic for adding self loops in isolated 1-simplexes ***************************************//
-		actualEdgesSimplexes = 0;
-		
-		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = 0;
-		numOfIterationAddingEdgesToGraph = 0;
-		
-		// get head proposer defined for 1-simplex distribution
-		potentialHeadColoProposer = simplex1distObj.getPotentialSelfLoopIn1SimplexColoProposer();
-		LOGGER.info("Case 2b: Isolated self loop");
-		LOGGER.info("Estimated Edges: " + estimatedEdgesSelfLoopIn1Simplex);
-		
-		while((estimatedEdgesSelfLoopIn1Simplex > actualEdgesSimplexes) && (potentialHeadColoProposer != null)) { // additional condition that color proposer should not be null
-			//TODO: Move Color proposer condition in if-statement?
-			// check until it is possible to add more edges for 1-simplexes
-			
-			// Maximum iteration check
-			if (oldEdgesCountGraph == actualEdgesSimplexes) {
-				numOfIterationAddingEdgesToGraph++;
-				//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-			} else {
-				oldEdgesCountGraph = actualEdgesSimplexes;
-				numOfIterationAddingEdgesToGraph = 0;
-			}
-			
-			// terminate while loop if maximum iteration reached
-			if (numOfIterationAddingEdgesToGraph == 5000)
-				break;
-			
-			// get potential head for it and create vertex
-			BitSet potentialColoSelfLoop = potentialHeadColoProposer.getPotentialItem();
-			
-			// temporary assignment for head vertex id
-			int vertexIDHead;
-			
-			// New vertex cannot be created, select an existing vertex of the potential head color at random
-			IntSet vertexIDshead = mMapColourToVertexIDs1Simplex.get(potentialColoSelfLoop);
-			if (vertexIDshead == null)
-				continue; // it is possible there is no vertex exist for the proposed head color, continue to check with new head color in that case
-			vertexIDHead = vertexIDshead.toArray(new Integer[vertexIDshead.size()])[mRandom.nextInt(vertexIDshead.size())];
-			
-			int vertexIDTail = vertexIDHead;
-			
-			boolean edgeAdded = addEdgeWithTriangleCheck(potentialColoSelfLoop, potentialColoSelfLoop, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperSelfLoopIn1Simplex, false);
-			//boolean addedEdge = addEdgeInAnyDirectionWithDuplicateCheck(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes);
-			//addEdgeToMimicGraph(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes); // commenting: using new method with duplicate check
-			if (edgeAdded)
-				actualEdgesSimplexes++; // increment count if edge was added
-			
-		}
-		
-		LOGGER.info("Case 2b completed!");
-		LOGGER.info("Added Edges: " + actualEdgesSimplexes);
-		LOGGER.info("Added Vertices: " + actualVerticesSimplexes);
-		
-		
 		//****************************** Logic for isolated self loop (i.e. 1-simplexes with same source and target node) *******************************************//
+		
 		actualVerticesSimplexes = 0;
 		actualEdgesSimplexes = 0;
 		
 		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = 0;
 		numOfIterationAddingEdgesToGraph = 0;
 		
 		// get head proposer defined for 1-simplex distribution
-		potentialHeadColoProposer = simplex1distObj.getPotentialIsoSelfLoopColoProposer();
+		Set<BitSet> potentialHeadColoProposer = selfLoops1IsoS1.getPotentialColoProposer();
 		
-		LOGGER.info("Case 2c: Isolated self loop");
+		LOGGER.info("Case 2b: Isolated self loop");
 		LOGGER.info("Estimated Edges: " + estimatedEdgesIsoSelfLoop);
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesIsoSelfLoop);
 		
-		while((estimatedEdgesIsoSelfLoop > actualEdgesSimplexes) && (potentialHeadColoProposer != null)) { // additional condition that color proposer should not be null
-			//TODO: Move Color proposer condition in if-statement?
-			// check until it is possible to add more edges for 1-simplexes
-			
-			// Maximum iteration check
-			if (oldEdgesCountGraph == actualEdgesSimplexes) {
-				numOfIterationAddingEdgesToGraph++;
-							//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-			} else {
-				oldEdgesCountGraph = actualEdgesSimplexes;
-				numOfIterationAddingEdgesToGraph = 0;
-			}
-						
-			// terminate while loop if maximum iteration reached
-			if (numOfIterationAddingEdgesToGraph == 5000)
-				break;
+		numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
+		while((estimatedEdgesIsoSelfLoop > actualEdgesSimplexes) && (potentialHeadColoProposer != null) && (numOfIterationAddingEdgesToGraph < maximumIteration)) { // additional condition that color proposer should not be null
 			
 			//variable to track if new vertex is not added
 			boolean newVertexNotAdded = true;
 			
 			// get potential head for it and create vertex
-			BitSet potentialColoSelfLoop = potentialHeadColoProposer.getPotentialItem();
+			BitSet potentialColoSelfLoop = potentialHeadColoProposer.toArray(new BitSet[potentialHeadColoProposer.size()])[mRandom.nextInt(potentialHeadColoProposer.size())];
 			
 			// temporary assignment for head vertex id
 			int vertexIDHead;
@@ -1406,8 +788,10 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			}else {
 				// New vertex cannot be created, select an existing vertex of the potential head color at random
 				IntSet vertexIDshead = mMapColourToVertexIDsIsoSelfLoop.get(potentialColoSelfLoop);
-				if (vertexIDshead == null)
+				if (vertexIDshead == null) {
+					numOfIterationAddingEdgesToGraph++;
 					continue; // it is possible there is no vertex exist for the proposed head color, continue to check with new head color in that case
+				}
 				vertexIDHead = vertexIDshead.toArray(new Integer[vertexIDshead.size()])[mRandom.nextInt(vertexIDshead.size())];
 			}
 			
@@ -1417,12 +801,16 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			boolean edgeAdded = addEdgeWithTriangleCheck(potentialColoSelfLoop, potentialColoSelfLoop, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperIsoSelfLoop, newVertexNotAdded);
 			//boolean addedEdge = addEdgeInAnyDirectionWithDuplicateCheck(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes);
 			//addEdgeToMimicGraph(potentialheadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapper1Simplexes); // commenting: using new method with duplicate check
-			if (edgeAdded)
+			if (edgeAdded) {
 				actualEdgesSimplexes++; // increment count if edge was added
+				numOfIterationAddingEdgesToGraph = 0;
+			}else {
+				numOfIterationAddingEdgesToGraph++;
+			}
 			
 		}
 		
-		LOGGER.info("Case 2c completed!");
+		LOGGER.info("Case 2b completed!");
 		LOGGER.info("Added Edges: " + actualEdgesSimplexes);
 		LOGGER.info("Added Vertices: " + actualVerticesSimplexes);
 		
@@ -1430,14 +818,14 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Case 3: Isolated 0-simplexes");
 		LOGGER.info("Estimated Vertices: " + estimatedVertices0Simplexes);
 		//define proposer for 0-simplexes 
-		OfferedItemByRandomProb<BitSet> potentialColoProposer0Simplex = simplex0distObj.getPotentialColoProposer();
+		Set<BitSet> potentialColoProposer0Simplex = s0Dist.getPotentialColoProposer();
 		
 		//initialize tracking variable
 		actualVerticesSimplexes = 0;
 		
 		while((actualVerticesSimplexes < estimatedVertices0Simplexes) && (potentialColoProposer0Simplex != null)) {
 			// get possible color
-			BitSet potentialColo0Simplex = potentialColoProposer0Simplex.getPotentialItem();
+			BitSet potentialColo0Simplex = potentialColoProposer0Simplex.toArray(new BitSet[potentialColoProposer0Simplex.size()])[mRandom.nextInt(potentialColoProposer0Simplex.size())];
 			
 			// Add 0-simplex to mimic graph
 			addVertexToMimicGraph(potentialColo0Simplex, mMapColourToVertexIDs0Simplex);
@@ -1517,40 +905,26 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			//initialize variable to track number of edges added in the mimic graph 
 			actualEdgesSimplexes = 0;
 			
-			//initialize variable tracking iteration count for this case //TODO: Create a function for evaluating maximum number of iteration
-			oldEdgesCountGraph = 0;
+			//initialize variable tracking iteration count for this case
 			numOfIterationAddingEdgesToGraph = 0;
 			
-			while(actualEdgesSimplexes < estimatedEdges1SimplexesConnect2Simplexes) {
-				
-				// Maximum iteration check
-				if (oldEdgesCountGraph == actualEdgesSimplexes) {
-					numOfIterationAddingEdgesToGraph++;
-					System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-				} else {
-					oldEdgesCountGraph = actualEdgesSimplexes;
-					numOfIterationAddingEdgesToGraph = 0;
-				}
-							
-				// terminate while loop if maximum iteration reached
-				if (numOfIterationAddingEdgesToGraph == 5000)
-					break;
+			Set<EdgeColos> headColoProposerIsolatedTri = s1connTriDist.getPotentialConnEdgeProposer();
+			
+			while((actualEdgesSimplexes < estimatedEdges1SimplexesConnect2Simplexes) && (numOfIterationAddingEdgesToGraph < maximumIteration) && (headColoProposerIsolatedTri != null)) {
 			
 				// get head color from the colors available in the triangle
 				BitSet potentialHeadColoIsolatedTri = null; // initialize head color
 				
-				OfferedItemByRandomProb<BitSet> headColoProposerIsolatedTri = simplex1ConnTriDist.getPotentialHeadColoProposer();
-				if (headColoProposerIsolatedTri != null)//check if head color proposer is not null
-					potentialHeadColoIsolatedTri = headColoProposerIsolatedTri.getPotentialItem(allColoIsolatedTri);
+				EdgeColos potentialItem = headColoProposerIsolatedTri.toArray(new EdgeColos[headColoProposerIsolatedTri.size()])[mRandom.nextInt(headColoProposerIsolatedTri.size())];
+				
+				
+				if (potentialItem != null)//check if head color proposer is not null
+					potentialHeadColoIsolatedTri = potentialItem.getA();
 				
 				if (potentialHeadColoIsolatedTri != null) { //check for tail color only if head color is not null
 				
 					// get tail colors based on head color and available colors in the triangle
-					BitSet potentialTailColoIsolatedTri = null; // initialize tail color
-					
-					OfferedItemByRandomProb<BitSet> tailColoProposer = simplex1ConnTriDist.proposeVertColo(potentialHeadColoIsolatedTri);
-					if (tailColoProposer != null) // propose a color if proposer is not null
-						potentialTailColoIsolatedTri = tailColoProposer.getPotentialItem(allColoIsolatedTri);
+					BitSet potentialTailColoIsolatedTri = potentialItem.getB(); // initialize tail color
 					
 					if (potentialTailColoIsolatedTri != null) { // try to connect triangles using 1-simplexes if tail color is also not null
 						
@@ -1566,13 +940,16 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 							if (mTriangleColorsVertexIdsIsolated.allocated[i]) {
 								TriColos triColoIsolated = (TriColos) triColoIsolatedkeys[i];
 								
+								// variable to track same triangles are not selected for head and tail colors
+								boolean triangleFoundForHead = false;
+								
 								//check triangle for head color
-								if (triColoIsolated.getA().equals(potentialHeadColoIsolatedTri) || triColoIsolated.getB().equals(potentialHeadColoIsolatedTri) || triColoIsolated.getC().equals(potentialHeadColoIsolatedTri)) {
+								if (triColoIsolated.getA().equals(potentialHeadColoIsolatedTri) || triColoIsolated.getB().equals(potentialHeadColoIsolatedTri) || triColoIsolated.getC().equals(potentialHeadColoIsolatedTri) && (potentialTriangleHead == null)) {
 									potentialTriangleHead = triColoIsolated;
 								}
 								
 								//check triangle for tail color
-								if (triColoIsolated.getA().equals(potentialTailColoIsolatedTri) || triColoIsolated.getB().equals(potentialTailColoIsolatedTri) || triColoIsolated.getC().equals(potentialTailColoIsolatedTri)) {
+								if (triColoIsolated.getA().equals(potentialTailColoIsolatedTri) || triColoIsolated.getB().equals(potentialTailColoIsolatedTri) || triColoIsolated.getC().equals(potentialTailColoIsolatedTri) && !triangleFoundForHead && (potentialTriangleTail == null)) {
 									potentialTriangleTail = triColoIsolated;
 								}
 								
@@ -1582,35 +959,22 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 							}
 						}
 						
-						if ((potentialTriangleHead == null) || (potentialTriangleTail == null))
+						if ((potentialTriangleHead == null) || (potentialTriangleTail == null)) {
+							numOfIterationAddingEdgesToGraph++;
 							continue;// retry to propose a different head or tail and find triangle for it
+						}
 						
 						// variables storing head and tail IDs for Triangles to connect
 						int possHeadIDIsolatedTri = 0;
 						int possTailIDIsolatedTri = 0;
 						
-						// Variables storing vertices for isolated triangles found for head and tail colors
-						IntSet verticesTriIsolatedhead;
-						IntSet verticesTriIsolatedtail;
-						
-						// get unique set of vertices for the found triangle colors
-						if (potentialTriangleHead.equals(potentialTriangleTail)) {
-							// Check if both the triangle colors are same. Note: It is possible that we have same triangle colors for head and tail
-							List<IntSet> listTriangleToConn = mTriangleColorsVertexIdsIsolated.get(potentialTriangleHead);
-							
-							if (listTriangleToConn.size() == 1)
-								continue;//Just have single triangle keep looking for new triangles to connect
-							
-							// store the possible vertices for head and tail
-							verticesTriIsolatedhead = listTriangleToConn.get(0);
-							verticesTriIsolatedtail = listTriangleToConn.get(1);
-							
-						}else {
-							// store the possible vertices for head and tail
-							verticesTriIsolatedhead = mTriangleColorsVertexIdsIsolated.get(potentialTriangleHead).get(0); //TODO: Any triangle could be selected randomly
-							verticesTriIsolatedtail = mTriangleColorsVertexIdsIsolated.get(potentialTriangleTail).get(0); //TODO: Any triangle could be selected randomly
-							
-						}
+						//get vertices for head color
+						List<IntSet> possVerticesListhead = mTriangleColorsVertexIdsIsolated.get(potentialTriangleHead);
+						IntSet verticesTriIsolatedhead = possVerticesListhead.get(mRandom.nextInt(possVerticesListhead.size()));
+
+						//get vertices for tail color
+						List<IntSet> possVerticesListtail = mTriangleColorsVertexIdsIsolated.get(potentialTriangleTail);
+						IntSet verticesTriIsolatedtail = possVerticesListtail.get(mRandom.nextInt(possVerticesListtail.size()));
 						
 						// compute concrete vertex id for head color and tail color
 						for (int vertexIDheadIsoTri: verticesTriIsolatedhead) {
@@ -1634,6 +998,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						// add edge to the graph
 						mMimicGraph.addEdge(possTailIDIsolatedTri, possHeadIDIsolatedTri, possEdgeColo);
 						actualEdgesSimplexes++;
+						numOfIterationAddingEdgesToGraph = 0;
 						
 						// update the mapping of edge color and tail-head IDs
 						updateMappingOfEdgeColoHeadTailColo(possEdgeColo, possHeadIDIsolatedTri, possTailIDIsolatedTri);
@@ -1647,8 +1012,12 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						List<IntSet> listTailVerticesIsoTri = mTriangleColorsVertexIdsIsolated.get(potentialTriangleTail);
 						listTailVerticesIsoTri.remove(verticesTriIsolatedtail);
 						LOGGER.info("Two isolated triangles connected with 1-simplex");
+					} else {
+						numOfIterationAddingEdgesToGraph++;
 					}
 					
+				} else {
+					numOfIterationAddingEdgesToGraph++;
 				}
 			}
 			
@@ -1659,37 +1028,23 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Trying to connect set of connected triangles using 1-simplex (Case 4b)");
 		
 		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = actualEdgesSimplexes;
 		numOfIterationAddingEdgesToGraph = 0;
+		Set<EdgeColos> headColoProposercase4b = s1connTriDist.getPotentialConnEdgeProposer();
 		
-		while(actualEdgesSimplexes < estimatedEdges1SimplexesConnect2Simplexes) { // check if we can add more edge
-			
-			// Maximum iteration check
-			if (oldEdgesCountGraph == actualEdgesSimplexes) {
-				numOfIterationAddingEdgesToGraph++;
-				//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-			} else {
-				oldEdgesCountGraph = actualEdgesSimplexes;
-				numOfIterationAddingEdgesToGraph = 0;
-			}
-						
-			// terminate while loop if maximum iteration reached
-			if (numOfIterationAddingEdgesToGraph == 5000)
-				break;
+		while((actualEdgesSimplexes < estimatedEdges1SimplexesConnect2Simplexes) && (numOfIterationAddingEdgesToGraph < maximumIteration) && (headColoProposercase4b!=null)) { // check if we can add more edge
 			
 			// Propose a possible colors for head
-			OfferedItemByRandomProb<BitSet> headColoProposercase4b = simplex1ConnTriDist.getPotentialHeadColoProposer();
+			EdgeColos potentialItem = headColoProposercase4b.toArray(new EdgeColos[headColoProposercase4b.size()])[mRandom.nextInt(headColoProposercase4b.size())];
+			
 			BitSet potentialHeadColocase4b = null; // initialize head color
 			
-			if (headColoProposercase4b != null) {
-				potentialHeadColocase4b = headColoProposercase4b.getPotentialItem();
+			if (potentialItem != null) {
+				potentialHeadColocase4b = potentialItem.getA();
 				
 				// get tail colors based on head color
-				OfferedItemByRandomProb<BitSet> tailColoProposercase4b = simplex1ConnTriDist.proposeVertColo(potentialHeadColocase4b);
-				BitSet potentialTailColocase4b = null;
-				if (tailColoProposercase4b != null) {
-					potentialTailColocase4b = tailColoProposercase4b.getPotentialItem();
-				}
+				
+				BitSet potentialTailColocase4b = potentialItem.getB();
+				
 				
 				// search for triangles when potential head and tail colors are not null
 				if ( (potentialHeadColocase4b!= null) && (potentialTailColocase4b!=null)) {
@@ -1731,8 +1086,10 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 					
 					
 					//If triangles are not found retry by proposing a head and a tail color
-					if ((potentialTriangleHeadCase4b == null) || (potentialTriangleTailCase4b == null))
+					if ((potentialTriangleHeadCase4b == null) || (potentialTriangleTailCase4b == null)) {
+						numOfIterationAddingEdgesToGraph++;
 						continue;
+					}
 					
 					
 					//***************** Potential head and tail colors found for triangles to connect ***********//
@@ -1780,15 +1137,23 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 						if (edgeAdded) {
 							actualEdgesSimplexes++;
 							LOGGER.info("Successfully connected triangles using 1-simplex (Case 4b)");
+							numOfIterationAddingEdgesToGraph = 0;
 							
 							break;//terminate while loop trying to add edge for the found head and tail color
+						} else {
+							numOfIterationAddingEdgesToGraph++;
 						}
 						
 						
 					}
 					
 					
-				}// end if condition: null check for head and tail color
+				}// end if condition: null check for head and tail color 
+				else {
+					numOfIterationAddingEdgesToGraph++;
+				}
+			} else {
+				numOfIterationAddingEdgesToGraph++;
 			}
 		}
 		
@@ -1800,7 +1165,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Case 5: Isolated 2-simplexes");
 		LOGGER.info("Estimated Edges: " + estimatedEdgesIsolatedTriangle);
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesIsolatedTriangle);
-		OfferedItemByRandomProb<TriColos> potentialIsolatedTriangleProposer = triangledistributionObject.getPotentialIsolatedTriangleProposer(); // get isolated triangle proposer
+		Set<TriColos> potentialIsolatedTriangleProposer = triangleDistribution.getPotentialIsolatedTriangleProposer(); // get isolated triangle proposer
 		
 		// initialize tracker variable
 		actualVerticesSimplexes = 0;
@@ -1810,7 +1175,8 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		Set<TriColos> setIsoTriInMimicGraph = new HashSet<TriColos>();
 		
 		while ( ((estimatedVerticesIsolatedTriangle - actualVerticesSimplexes) >= 3) && ((estimatedEdgesIsolatedTriangle - actualEdgesSimplexes) >= 3 ) && (potentialIsolatedTriangleProposer != null) ) {
-			TriColos possIsoTri = potentialIsolatedTriangleProposer.getPotentialItem();
+			TriColos possIsoTri = potentialIsolatedTriangleProposer.toArray(new TriColos[potentialIsolatedTriangleProposer.size()])[mRandom.nextInt(potentialIsolatedTriangleProposer.size())];
+			
 			// add the selected random triangle to mimic graph			
 			addTriangleToMimicGraph( possIsoTri, mColourMapperIsolatedTriangles, mMapColourToVertexIDs2SimplexIsolated, mMapColourToEdgeIDs2SimplexIsolated, mIsolatedTriangleColorsVertexIds);
 			
@@ -1822,16 +1188,15 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			//increment no. of edges in triangle
 			actualEdgesSimplexes = actualEdgesSimplexes + 3;
 		}
-		//TODO: Add edges to isolated triangles when it is not possible to further add vertices. Check logs for earlier executions.
 		
 		int iterationCount = 0;
 		
-		while ((estimatedEdgesIsolatedTriangle > actualEdgesSimplexes) && (iterationCount < 5000)) {
+		while ((estimatedEdgesIsolatedTriangle > actualEdgesSimplexes) && (iterationCount < maximumIteration)) {
 			
 			if (setIsoTriInMimicGraph.size() > 0) {
 			
 				// Logic for adding edges to existing triangles
-				TriColos proposeTriangleToAddEdge = triangledistributionObject.proposeTriangleToAddEdge(setIsoTriInMimicGraph);
+				TriColos proposeTriangleToAddEdge = triangleDistribution.proposeIsoTriToAddEdge(setIsoTriInMimicGraph);
 				
 				// Best case: A triangle is returned
 				List<IntSet> selectedTrianglesList = mIsolatedTriangleColorsVertexIds.get(proposeTriangleToAddEdge);
@@ -1889,57 +1254,60 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Added Vertices: " + actualVerticesSimplexes);
 		
 		
-		//******************* Logic for connected 1-simplexes ***********************//
-		// TODO: pending
-		// Determine number of edges and vertices for this case [done]
+		//********************** Growing 1-simplexes (connected 1-simplexes) ****************************************//
 		
 		int actualEdgesMimicGraph = mMimicGraph.getEdges().size();
-		int edgesConnected1Simplexes = mIDesiredNoOfEdges - actualEdgesMimicGraph - estimatedEdgesCommon - estEdgesSelfLoopIsoTri - estEdgesSelfLoopConnTri - estEdgesSelfLoop1SimplexConnToTri - estEdgesSelfLoopConn1Simplexes;
+		//int edgesConnected1Simplexes = mIDesiredNoOfEdges - actualEdgesMimicGraph - estimatedEdgesCommon - estEdgesSelfLoopIsoTri - estEdgesSelfLoopConnTri - estEdgesSelfLoop1SimplexConnToTri - estEdgesSelfLoopConn1Simplexes;
+		int edgesConnected1Simplexes = estimatedEdgesConnS1;
 				
 		int actualVerticesMimicGraph = mMimicGraph.getVertices().size();
 		int verticesConnected1Simplexes = mIDesiredNoOfVertices - actualVerticesMimicGraph - estVerts1SimplexesConntoTri; // subtracting estimated number of vertices for 1-simplexes connected only to triangles. Such vertices are created in next step.
+		//int verticesConnected1Simplexes = estimatedVertsConnS1;
 		
-		// initialize tracker variable
-		actualVerticesSimplexes = 0;
-		actualEdgesSimplexes = 0;
-		
-		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = 0;
-		numOfIterationAddingEdgesToGraph = 0;
-		
-		// Get vertex color proposer
-		OfferedItemByRandomProb<BitSet> potentialVertColoProposer = connectedSimplex1distObj.getPotentialHeadColoProposer();
-		
-		// set to track class colors. New vertices need to be created for them later
-		Set<BitSet> vertexClassColoSet = new HashSet<BitSet>();
 		LOGGER.info("Case 6: Connected 1-simplexes");
 		LOGGER.info("Estimated Edges: " + edgesConnected1Simplexes);
 		LOGGER.info("Estimated Vertices: " + verticesConnected1Simplexes);
 		
-		while((edgesConnected1Simplexes > actualEdgesSimplexes) && (potentialVertColoProposer != null)) {
-			// check until it is possible to add more edges for 1-simplexes
+		//initialize variable tracking iteration count for this case
+		numOfIterationAddingEdgesToGraph = 0;
+		
+		EdgeColos initialRandomEdge = getRandomEdge();
+		
+		// Variables to track number of edges and vertices added in triangle
+		int actualEdgesInConnS1 = 0;
+		int actualVerticesInConnS1 = 0;
+		
+		if ((initialRandomEdge!=null) && (edgesConnected1Simplexes >= 1) && (verticesConnected1Simplexes >=2)) { 
 			
-			//variable to track if new vertex is not added
-			boolean newVertexNotAdded = true;
+			// Update the count in the map
+			double[] arrTriProbCount = mEdgeColosv1v2Dist.get(initialRandomEdge.getA()).get(initialRandomEdge.getB());
+			arrTriProbCount[2] = arrTriProbCount[2] - 1; 
 			
-			// Maximum iteration check
-			if (oldEdgesCountGraph == actualEdgesSimplexes) {
-				numOfIterationAddingEdgesToGraph++;
-				//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-			} else {
-				oldEdgesCountGraph = actualEdgesSimplexes;
-				numOfIterationAddingEdgesToGraph = 0;
-			}
-						
-			// terminate while loop if maximum iteration reached
-			if (numOfIterationAddingEdgesToGraph == 5000)
-				break;
+			// Variable to track vertices that cannot be linked with other vertices
+			IntSet verticesNotGrowing = new DefaultIntSet(Constants.DEFAULT_SIZE);
 			
-			// get potential head for it and create vertex
-			BitSet potentialvertColo = potentialVertColoProposer.getPotentialItem();
+			// Variable to track set of triangle added to the mimic graph (i.e. set of Colors of the vertices forming the triangle)
+			Set<EdgeColos> setEdgeColorsMimicGraph = new HashSet<EdgeColos>();
 			
-			// get class colors for head color and check if class vertex exist for them
-			Set<BitSet> classColourSet = mMimicGraph.getClassColour(potentialvertColo);
+			BitSet potentialHeadColo = initialRandomEdge.getA();
+			BitSet potentialTailColo = initialRandomEdge.getB();
+			
+			Set<BitSet> setOfColosInGraph = new HashSet<BitSet>();
+			setOfColosInGraph.add(potentialHeadColo);
+			setOfColosInGraph.add(potentialTailColo);
+			
+			int vertexIDTail = addVertexToMimicGraph(potentialTailColo, mMapColourToVertexIDs1SimplexConnected);
+			int vertexIDHead = addVertexToMimicGraph(potentialHeadColo, mMapColourToVertexIDs1SimplexConnected);
+			
+			addEdgeWithTriangleCheck(potentialHeadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, false);
+			
+			updateMapEdgeColorsVertices(vertexIDHead, vertexIDTail, initialRandomEdge); // update the map to track edges along with vertices added
+			
+			// set to track class colors. New vertices need to be created for them later
+			Set<BitSet> vertexClassColoSet = new HashSet<BitSet>();
+			
+			// check class nodes for potential head color (Note: This check is essential since we need to add required number of vertices in the output graph) 
+			Set<BitSet> classColourSet = mMimicGraph.getClassColour(potentialHeadColo);
 			int numberOfClassVertices = 0;
 			for (BitSet classColour: classColourSet) {
 				Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
@@ -1949,34 +1317,10 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				}
 			}
 			
-			// temporary assignment for head vertex id
-			int vertexIDHead;
+			// update vertices count
+			verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassVertices;
 			
-			//check if vertex can be added or existing vertex should be selected
-			if ((actualVerticesSimplexes+numberOfClassVertices) < verticesConnected1Simplexes) {
-				// add a vertex if enough vertices are not created for 1-simplexes
-				vertexIDHead = addVertexToMimicGraph(potentialvertColo, mMapColourToVertexIDs1SimplexConnected);
-				actualVerticesSimplexes++;
-				//updating estimated vertices for this case. Note: class nodes are created in next step
-				verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassVertices;
-				//updating estimated edges for this case. Since type edges need to be added for this vertices depending upon number of classes assigned to the vertex
-				edgesConnected1Simplexes = edgesConnected1Simplexes - classColourSet.size();
-				
-				newVertexNotAdded = false;//set the variable to false, since new variable is added
-				
-			}else {
-				// New vertex cannot be created, select an existing vertex of the potential head color at random
-				IntSet vertexIDshead = mMapColourToVertexIDs1SimplexConnected.get(potentialvertColo); // TODO: returned set could be null. Need to consider that [done]
-				if (vertexIDshead == null)
-					continue; // Propose another color if no vertex found. TODO: Evaluate If this condition runs into infinite loop
-				vertexIDHead = vertexIDshead.toArray(new Integer[vertexIDshead.size()])[mRandom.nextInt(vertexIDshead.size())];
-			}
-			
-			// Get potential tail color and add edge for it
-			BitSet potentialTailColo = connectedSimplex1distObj.proposeVertColo(potentialvertColo).getPotentialItem();
-			
-			// get class colors for head color and check if class vertex exist for them
-			classColourSet = mMimicGraph.getClassColour(potentialvertColo);
+			classColourSet = mMimicGraph.getClassColour(potentialTailColo);
 			numberOfClassVertices = 0;
 			for (BitSet classColour: classColourSet) {
 				Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
@@ -1986,43 +1330,327 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				}
 			}
 			
-			// temporary assignment for tail vertex id
-			int vertexIDTail;
+			verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassVertices;
 			
-			//Check similar to above
-			if ((actualVerticesSimplexes+numberOfClassVertices) < verticesConnected1Simplexes) {
-				vertexIDTail = addVertexToMimicGraph(potentialTailColo, mMapColourToVertexIDs1SimplexConnected);
-				actualVerticesSimplexes++;
-				
-				//updating estimated vertices for this case. Note: class nodes are created in next step
-				verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassVertices;
-				//updating estimated edges for this case. Since type edges need to be added for this vertices
-				edgesConnected1Simplexes = edgesConnected1Simplexes - classColourSet.size();
-				
-				newVertexNotAdded = false;//set the variable to false, since new variable is added
-			} else {
-				IntSet vertexIDstail = mMapColourToVertexIDs1SimplexConnected.get(potentialTailColo);
-				
-				if (vertexIDstail == null)
-					continue; // Propose another color if no vertex found. TODO: Evaluate If this condition runs into infinite loop
-				
-				vertexIDTail = vertexIDstail.toArray(new Integer[vertexIDstail.size()])[mRandom.nextInt(vertexIDstail.size())];
-			}
+			//increment no of vertices in triangle
+			actualVerticesInConnS1 = actualVerticesInConnS1 + 2;
 			
-			boolean edgeAdded = addEdgeWithTriangleCheck(potentialvertColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, newVertexNotAdded);
-			//boolean edgeAdded = addEdgeInAnyDirectionWithDuplicateCheck(potentialvertColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes);
-			if (edgeAdded)
-				actualEdgesSimplexes++;
-		}
+			//increment no. of edges in triangle
+			actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
+			
+			// Add the triangle colors to set variable
+			setEdgeColorsMimicGraph.add(initialRandomEdge);
+			
+			// initial head color proposer
+			Set<BitSet> potentialHeadColoProposerConnS1 = s1ConnheadTailDist.getPotentialHeadColoProposer();
+			
+			numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
+			while(actualEdgesInConnS1< edgesConnected1Simplexes) {
+				
+				//if(actualVerticesInConnS1 < verticesConnected1Simplexes) {
+				if((actualVerticesInConnS1 < verticesConnected1Simplexes) && (numOfIterationAddingEdgesToGraph < maximumIteration)) {
+					//If we can add more edges when we are allowed to include additional vertices otherwise edges need to be added to existing 1-simplexes
+				
+					
+					if (setOfColosInGraph.size() != 0) {
+						// Propose a head color from existing colors in the mimic graph
+						BitSet proposedHeadColo = setOfColosInGraph.toArray(new BitSet[setOfColosInGraph.size()])[mRandom.nextInt(setOfColosInGraph.size())];
+						
+						IntSet verticesWithProposedColor = mMapColourToVertexIDs1SimplexConnected.get(proposedHeadColo);
+						if (verticesWithProposedColor==null) {// Propose a new head color when none present
+							if (setOfColosInGraph.contains(proposedHeadColo)) {
+								setOfColosInGraph.remove(proposedHeadColo);
+							}
+							numOfIterationAddingEdgesToGraph++;
+							continue;
+						}
+			
+						// select a vertex at random from the mimic graph
+						int randomVertexID = verticesWithProposedColor.toArray(new Integer[verticesWithProposedColor.size()])[mRandom.nextInt(verticesWithProposedColor.size())];
+						
+						// Propose possible tail colors
+						Set<BitSet> possTailColos = s1ConnDist.getPossTailColos(proposedHeadColo);
+				
+						if (possTailColos == null) {//Propose colors again when it is not possible to add an edge for the proposed colors
+							setOfColosInGraph.remove(proposedHeadColo);
+							numOfIterationAddingEdgesToGraph++;
+							continue;
+						}
+						
+						// boolean variable to track if new edge are added
+						boolean newEdgesNotAddedToTriangle = true;
+						
+						if (possTailColos != null) {
+							// If tail vertex color is proposed, create an edge with it
+							
+							//Get a tail color randomly from it
+							BitSet proposedTail = possTailColos.toArray(new BitSet[possTailColos.size()])[mRandom.nextInt(possTailColos.size())];
+							
+							// get triangle count
+							double[] arrNewPossTriProbCount = mEdgeColosv1v2Dist.get(proposedHeadColo).get(proposedTail);// get count of triangle for the proposed new triangle
+							
+							// temporary variable to track count of loops
+							int numOfLoopsTri = 0;
+							
+							//check class vertices to create
+							Set<BitSet> vertexClassColoSetTemp = new HashSet<BitSet>(); // temporary class colors
+							
+							classColourSet = mMimicGraph.getClassColour(proposedTail);
+							numberOfClassVertices = 0;
+							for (BitSet classColour: classColourSet) {
+								Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+								if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour))) {
+									numberOfClassVertices++;//class vertex need to be created for this vertex
+									vertexClassColoSetTemp.add(classColour);
+								}
+							}
+							
+							// try to propose a color for tail vertex multiple times if it is not possible to create an edge
+							while ( (arrNewPossTriProbCount[2] < 1)  && (numOfLoopsTri < 500) && ((actualVerticesInConnS1+numberOfClassVertices) < verticesConnected1Simplexes)) { 
+								proposedTail = possTailColos.toArray(new BitSet[possTailColos.size()])[mRandom.nextInt(possTailColos.size())];
+								arrNewPossTriProbCount = mEdgeColosv1v2Dist.get(proposedHeadColo).get(proposedTail);// get the count for the proposed new 1-simplex
+								numOfLoopsTri++;
+								
+								// check class vertices
+								classColourSet = mMimicGraph.getClassColour(proposedTail);
+								numberOfClassVertices = 0;
+								vertexClassColoSetTemp = new HashSet<BitSet>();
+								for (BitSet classColour: classColourSet) {
+									Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+									if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour))) {
+										numberOfClassVertices++;//class vertex need to be created for this vertex
+										vertexClassColoSetTemp.add(classColour);
+									}
+								}
+							}
+							
+							if ((arrNewPossTriProbCount[2] >= 1) && ((actualVerticesInConnS1+numberOfClassVertices) < verticesConnected1Simplexes)) {
+								//Update the count of triangle since a triangle will be created
+								arrNewPossTriProbCount[2] = arrNewPossTriProbCount[2] - 1;
+					
+								// create vertex for the proposed color
+								int proposedVertId = addVertexToMimicGraph(proposedTail, mMapColourToVertexIDs1SimplexConnected);
+								
+								setOfColosInGraph.add(proposedTail);
+						
+								// add edges among selected vertices and proposed color
+								//Note: Ideally properties should exist among them. since they were also forming an edge in input graphs
+								addEdgeWithTriangleCheck(proposedHeadColo, proposedTail, randomVertexID, proposedVertId, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, false);
+						
+								// increment number of vertices and edges added in the mimic graph for triangles
+								actualVerticesInConnS1 = actualVerticesInConnS1 + 1;
+								actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
+								
+								EdgeColos tempEdgeColors = new EdgeColos(proposedHeadColo, proposedTail);
+								
+								//Add the created triangle Colors to set
+								setEdgeColorsMimicGraph.add(tempEdgeColors);
+								
+								updateMapEdgeColorsVertices(randomVertexID, proposedVertId, tempEdgeColors); // update the map to track edges along with vertices added
+								
+								//update the boolean variable
+								newEdgesNotAddedToTriangle = false;
+								
+								// update class colors to consider
+								vertexClassColoSet.addAll(vertexClassColoSetTemp);
+								
+								verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassVertices;
+								
+								numOfIterationAddingEdgesToGraph = 0;
+							} 
+						} 
+						
+						if (newEdgesNotAddedToTriangle){
+							// Logic if no tail vertex color could be proposed
+							// Don't consider the proposed head color, since it is not able to form a 1-simplex
+							setOfColosInGraph.remove(proposedHeadColo);
+							numOfIterationAddingEdgesToGraph++;
+						}
+						
+					} // end if condition - check if edges can grow
+					else {
+						LOGGER.info("Growing 1-simplexes not possible.... Proposing new 1-simplex");
+						
+						// If no tail color could be included for the existing head colors in the mimic graph. Add a new 1-simplex
+						
+						EdgeColos randomEdge = getRandomEdge();
+						
+						// get count
+						double[] arrNewTriProbCount = mEdgeColosv1v2Dist.get(randomEdge.getA()).get(randomEdge.getB());
+						
+						// variable to track number of times a random edge was selected
+						int numOfIterationRandomTri = 1;
+						
+						Set<BitSet> vertexClassColoSetTemp = new HashSet<BitSet>(); // temporary class colors
+						
+						//check number of class vertices required for proposed head and tail colors
+						classColourSet = mMimicGraph.getClassColour(randomEdge.getA());
+						int numberOfClassHeadVertices = 0;
+						for (BitSet classColour: classColourSet) {
+							Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+							if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour))) {
+								numberOfClassHeadVertices++;//class vertex need to be created for this vertex
+								vertexClassColoSetTemp.add(classColour);
+							}
+						}
+						
+						classColourSet = mMimicGraph.getClassColour(randomEdge.getA());
+						int numberOfClassTailVertices = 0;
+						for (BitSet classColour: classColourSet) {
+							Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+							if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour)) && (!vertexClassColoSetTemp.contains(classColour))) {
+								numberOfClassTailVertices++;//class vertex need to be created for this vertex
+								vertexClassColoSetTemp.add(classColour);
+							}
+						}
+						
+						
+						
+						// check if it is possible to add new triangle
+						while ((arrNewTriProbCount[2] < 1) && (numOfIterationRandomTri < 500) && ((actualVerticesInConnS1+numberOfClassHeadVertices+numberOfClassTailVertices) < verticesConnected1Simplexes)) { // discontinue after trying 500 times
+							randomEdge = getRandomEdge();
+							arrNewTriProbCount = mEdgeColosv1v2Dist.get(randomEdge.getA()).get(randomEdge.getB());// get count of triangle for the proposed new triangle
+							numOfIterationRandomTri++;
+							
+							vertexClassColoSetTemp = new HashSet<BitSet>(); // temporary class colors
+							
+							//check number of class vertices required for proposed head and tail colors
+							classColourSet = mMimicGraph.getClassColour(randomEdge.getA());
+							numberOfClassHeadVertices = 0;
+							for (BitSet classColour: classColourSet) {
+								Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+								if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour))) {
+									numberOfClassHeadVertices++;//class vertex need to be created for this vertex
+									vertexClassColoSetTemp.add(classColour);
+								}
+							}
+							
+							classColourSet = mMimicGraph.getClassColour(randomEdge.getA());
+							numberOfClassTailVertices = 0;
+							for (BitSet classColour: classColourSet) {
+								Integer vertexIdClass = mMapClassColourToVertexIDSimplexes.get(classColour);
+								if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour)) && (!vertexClassColoSetTemp.contains(classColour))) {
+									numberOfClassTailVertices++;//class vertex need to be created for this vertex
+									vertexClassColoSetTemp.add(classColour);
+								}
+							}
+						}
+						
+						if ((arrNewTriProbCount[2] > 1) && ((actualVerticesInConnS1+numberOfClassHeadVertices+numberOfClassTailVertices) < verticesConnected1Simplexes)) {
+							// Update the triangle count
+							arrNewTriProbCount[2] = arrNewTriProbCount[2] - 1;
+							
+							potentialHeadColo = randomEdge.getA();
+							potentialTailColo = randomEdge.getB();
+
+							setOfColosInGraph.add(potentialHeadColo);
+							setOfColosInGraph.add(potentialTailColo);
+
+							vertexIDTail = addVertexToMimicGraph(potentialTailColo, mMapColourToVertexIDs1SimplexConnected);
+							vertexIDHead = addVertexToMimicGraph(potentialHeadColo, mMapColourToVertexIDs1SimplexConnected);
+
+							addEdgeWithTriangleCheck(potentialHeadColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, false);
+
+							//increment no of vertices in triangle
+							actualVerticesInConnS1 = actualVerticesInConnS1 + 2;
+
+							//increment no. of edges in triangle
+							actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
+
+							// Add the edge colors to set variable
+							setEdgeColorsMimicGraph.add(randomEdge);
+							
+							// update class colors to consider
+							vertexClassColoSet.addAll(vertexClassColoSetTemp);
+							
+							updateMapEdgeColorsVertices(vertexIDHead, vertexIDTail, randomEdge); // update the map to track edges along with vertices added
+							
+							verticesConnected1Simplexes = verticesConnected1Simplexes - numberOfClassHeadVertices - numberOfClassTailVertices;
+							
+							numOfIterationAddingEdgesToGraph = 0;
+							
+						} else {
+							break; // terminate while condition if it is not possible to add random edge
+						}
+						
+					}
+				} else {
+					break; // Cannot add more vertices 
+				}
+			} // end while condition checking if actual number of edges is less than estimated number of edges
+			LOGGER.info("Growing 1-simplexes phase completed");
+			LOGGER.info("Added Edges: " + actualEdgesInConnS1);
+			LOGGER.info("Added Vertices: " + actualVerticesInConnS1);
+			
+			LOGGER.info("Adding additional Edges to created 1-simplexes");
+			
+			numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
+			while ((actualEdgesInConnS1 < edgesConnected1Simplexes) && (numOfIterationAddingEdgesToGraph < maximumIteration)) { // Case: Triangles cannot be added to the mimic graph but edges can be added to existing triangles
+					
+					if (setEdgeColorsMimicGraph.size() != 0) {
+					
+					// Logic for adding edges to existing connected 1-simplexes
+					EdgeColos proposeS1 = s1ConnDist.proposeTriangleToAddEdge(setEdgeColorsMimicGraph);
+					
+					// Best case: A triangle is returned
+					List<IntSet> selectedEdgesList = mEdgeColorsVertexIds.get(proposeS1);
+					
+					// randomly selecting one of these triangles
+					IntSet selectedVertices = selectedEdgesList.toArray(new IntSet[selectedEdgesList.size()])[mRandom.nextInt(selectedEdgesList.size())];
+					
+					//Convert vertices to Array
+					Integer[] vertexIDExisting = selectedVertices.toArray(new Integer[selectedVertices.size()]);
+					
+					Integer existingVertexID1 = vertexIDExisting[0];
+					Integer existingVertexID2 = vertexIDExisting[1];
+					BitSet existingVertexColo1 = mMimicGraph.getVertexColour(existingVertexID1);
+					BitSet existingVertexColo2 = mMimicGraph.getVertexColour(existingVertexID2);
+					
+					boolean edgeAdded = addEdgeWithTriangleCheck(existingVertexColo1, existingVertexColo2, existingVertexID1, existingVertexID2, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, false); // triangle check not required since working with 1-simplexes instead of sampling head and tail
+					
+					//boolean edgeAdded = addEdgeInAnyDirectionWithDuplicateCheck(potentialvertColo, potentialTailColo, vertexIDHead, vertexIDTail, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes);
+					if (edgeAdded) {
+						actualEdgesInConnS1++;
+						numOfIterationAddingEdgesToGraph = 0;
+					} else {
+						//try to add edge in different direction
+						edgeAdded = addEdgeWithTriangleCheck(existingVertexColo2, existingVertexColo1, existingVertexID2, existingVertexID1, mMapColourToEdgeIDs1Simplex, mColourMapperConnected1Simplexes, false); // triangle check not required since working with 1-simplexes instead of sampling head and tail
+						if (edgeAdded) {
+							actualEdgesInConnS1++;
+							numOfIterationAddingEdgesToGraph = 0;
+						}else {
+							numOfIterationAddingEdgesToGraph++;
+							//Not able to add edge increase the iteration count
+						}
+					}
+					
+					
+					
+				} // end if condition - check if candidate triangles exists for adding edges to them
+				else { 
+					
+						// No edges can be added to existing 
+						// Give warning and break while loop
+					LOGGER.warn("Not able to add edges to existing and add new 1-simplexes to the mimic graph. Estimated number is greater than actual number of edges! The process of adding edge ends. ");
+					break; // terminate out of while condition
+					
+				}
+			
+			} // end else condition adding edges to existing triangles
+			
+		}// end if condition - initial random triangle is not null
 		LOGGER.info("Case 6 completed!");
-		LOGGER.info("Added Edges: " + actualEdgesSimplexes);
-		LOGGER.info("Added Vertices: " + actualVerticesSimplexes);
+		LOGGER.info("Added Edges: " + actualEdgesInConnS1);
+		LOGGER.info("Added Vertices: " + actualVerticesInConnS1);
 		
 		// Add RDF Type edges for connected 1-simplexes
 		generateRDFTypeEdges(mMapColourToVertexIDs1SimplexConnected);
 		LOGGER.info("Added RDF Type edges for case 6");
 		LOGGER.info("Total Edges in graph: " + mMimicGraph.getEdges().size());
 		LOGGER.info("Total Vertices in graph: " + mMimicGraph.getVertices().size());
+
+		
+		//**********************End Growing 1-simplexes (connected 1-simplexes) ************************************//
 		
 		//******************* Logic for 2-simplexes connected to rest of the graph ********************// 
 		//update temporary variables
@@ -2044,14 +1672,14 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesCommon);
 		
 		// get proposer of Vertex color (to create vertices connected to triangles) 
-		OfferedItemByRandomProb<BitSet> potentialColoProposerForVertConnectedToTriangle = simplex2distObj.getPotentialColoProposerForVertConnectedToTriangle();
+		Set<BitSet> potentialColoProposerForVertConnectedToTriangle = s1connToTriVertDist.getPotentialColoProposer();
 		
 		// set to track class colors. New vertices need to be created for them later
-		vertexClassColoSet = new HashSet<BitSet>();
+		Set<BitSet> vertexClassColoSet = new HashSet<BitSet>();
 		
 		// Add vertices if not enough vertices
 		while((actualVerticesSimplexes < estimatedVerticesCommon) && (potentialColoProposerForVertConnectedToTriangle!= null)) {
-			BitSet potentialvertexColo = potentialColoProposerForVertConnectedToTriangle.getPotentialItem();
+			BitSet potentialvertexColo = potentialColoProposerForVertConnectedToTriangle.toArray(new BitSet[potentialColoProposerForVertConnectedToTriangle.size()])[mRandom.nextInt(potentialColoProposerForVertConnectedToTriangle.size())];
 			
 			// check class node exists for the proposed color
 			Set<BitSet> classColourSet = mMimicGraph.getClassColour(potentialvertexColo);
@@ -2085,44 +1713,30 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		actualEdgesSimplexes = 0;
 		
 		//initialize variable tracking iteration count for this case
-		oldEdgesCountGraph = 0;
 		numOfIterationAddingEdgesToGraph = 0;
 		
 		// compute remaining edges
-		int remainingEdges = mIDesiredNoOfEdges - actualEdgesMimicGraph;
+		int remainingEdges = mIDesiredNoOfEdges - actualEdgesMimicGraph - estEdgesSelfLoopConnTri - estEdgesSelfLoop1SimplexConnToTri - estEdgesSelfLoopIsoTri - estimatedEdgesSelfLoopIn1Simplex - estEdgesSelfLoopConn1Simplexes;
 		
 		//update the estimated counts for "2-simplexes connected" if remaining counts is greater than estimated counts
-		if (remainingEdges > estimatedEdgesCommon) {
-			estimatedEdgesCommon = remainingEdges;
-		}
+		//if (remainingEdges > estimatedEdgesCommon) {
+			//estimatedEdgesCommon = remainingEdges;
+		//}
 		
 		LOGGER.info("Estimated Edges: " + estimatedEdgesCommon);
 		
 		// Get head color proposer for creating 1-simplexes connected to triangles
-		OfferedItemByRandomProb<BitSet> potentialHeadColoCommon2Simplex = simplex2distObj.getPotentialHeadColoProposer();
+		Set<EdgeColos> potentialHeadColoCommon2Simplex = s1connToTriDist.getPotentialConnEdgeProposer();
 		
-		while((actualEdgesSimplexes < estimatedEdgesCommon) && (potentialHeadColoCommon2Simplex != null)) {
+		while((actualEdgesSimplexes < estimatedEdgesCommon) && (potentialHeadColoCommon2Simplex != null) && (numOfIterationAddingEdgesToGraph < maximumIteration)) {
 			
-			// Maximum iteration check
-			if (oldEdgesCountGraph == actualEdgesSimplexes) {
-				numOfIterationAddingEdgesToGraph++;
-				//System.out.println("Iteration: " + numOfIterationAddingEdgesToGraph);
-			} else {
-				oldEdgesCountGraph = actualEdgesSimplexes;
-				numOfIterationAddingEdgesToGraph = 0;
-			}
-									
-			// terminate while loop if maximum iteration reached
-			if (numOfIterationAddingEdgesToGraph == 5000)
-				break;
-			
-			//TODO: Simplify below logic			
+			EdgeColos potentialItem = potentialHeadColoCommon2Simplex.toArray(new EdgeColos[potentialHeadColoCommon2Simplex.size()])[mRandom.nextInt(potentialHeadColoCommon2Simplex.size())];
 			
 			// Get possible head color from distribution
-			BitSet potentialheadColo = potentialHeadColoCommon2Simplex.getPotentialItem();
+			BitSet potentialheadColo = potentialItem.getA();
 			
 			//Get possible tail Color for the head color
-			BitSet potentialTailColo = simplex2distObj.proposeVertColo(potentialheadColo).getPotentialItem();
+			BitSet potentialTailColo = potentialItem.getB();
 			
 			// Check if head Color is available in 2-Simplexes
 			IntSet vertsWithHeadColo = mMapColourToVertexIDs2Simplex.get(potentialheadColo);
@@ -2143,6 +1757,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			}
 			
 			if (vertsWithHeadColo == null) {
+				numOfIterationAddingEdgesToGraph++;
 				// There does not exist any vertex with potential color, continue and try to use other head color
 				continue;
 			}
@@ -2179,8 +1794,10 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				}
 				
 				// Continue if vertices are not found for head color even after swap
-				if (vertsWithHeadColo == null)
+				if (vertsWithHeadColo == null) {
+					numOfIterationAddingEdgesToGraph++;
 					continue;
+				}
 				
 				// Get vertices for tail color
 				if (headColoIn2Simplex) {
@@ -2195,8 +1812,10 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 					vertsWithTailColo = mMapColourToVertexIDs2Simplex.get(potentialTailColo);
 				
 				// Continue if vertices are not found for tail color even after swap
-				if (vertsWithTailColo == null)
+				if (vertsWithTailColo == null) {
+					numOfIterationAddingEdgesToGraph++;
 					continue;
+				}
 				
 			}
 			
@@ -2222,11 +1841,13 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				mMimicGraph.addEdge(vertexIDWithTailColo, vertexIDWithHeadColo, possEdgeColo);
 				actualEdgesSimplexes++;
 				
-				//TODO: tracking the added edges
+				numOfIterationAddingEdgesToGraph = 0;
 				
 				//update the map to track edge colors, tail id and head ids
 				updateMappingOfEdgeColoHeadTailColo(possEdgeColo, vertexIDWithHeadColo, vertexIDWithTailColo);
 				
+			} else {
+				numOfIterationAddingEdgesToGraph++;
 			}
 			
 		}
@@ -2237,20 +1858,24 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		LOGGER.info("Adding Self loops...........");
 		
 		//Isolated 2-simplexes		
+		LOGGER.info("Isolated 1-simplexes");
+		addSelfLoops(estimatedEdgesSelfLoopIn1Simplex, selfLoopsInS1Dist.getPotentialColoProposer(), mMapColourToVertexIDs1Simplex, mColourMapperSelfLoopIn1Simplex, mMapColourToEdgeIDs1Simplex);
+		
+		//Isolated 2-simplexes		
 		LOGGER.info("Isolated 2-simplexes");
-		addSelfLoops(estEdgesSelfLoopIsoTri, distColoProposerSelfLoopIsoTri, mMapColourToVertexIDs2SimplexIsolated, mColourMapperSelfLoopIsoTri, mMapColourToEdgeIDs2SimplexIsolated);
+		addSelfLoops(estEdgesSelfLoopIsoTri, selfLoopIsoTritDist.getPotentialColoProposer(), mMapColourToVertexIDs2SimplexIsolated, mColourMapperSelfLoopIsoTri, mMapColourToEdgeIDs2SimplexIsolated);
 		
 		// Connected 2-simplexes		
 		LOGGER.info("Connected 2-simplexes");
-		addSelfLoops(estEdgesSelfLoopConnTri, distColoProposerSelfLoopConnTri, mMapColourToVertexIDs2Simplex, mColourMapperSelfLoopConnTri, mMapColourToEdgeIDs2Simplex);
+		addSelfLoops(estEdgesSelfLoopConnTri, selfLoopConnTriDist.getPotentialColoProposer(), mMapColourToVertexIDs2Simplex, mColourMapperSelfLoopConnTri, mMapColourToEdgeIDs2Simplex);
 		
 		//1-simplexes only connected to triangles
 		LOGGER.info("1-simplexes connected only to triangles");
-		addSelfLoops(estEdgesSelfLoop1SimplexConnToTri, distColoProposerSelfLoop1SimplexConnToTri, mMapColourToVertexIDsConnectedTo2Simplex, mColourMapperSelfLoop1SimplexConnToTri, mMapColourToEdgeIDs1Simplex);
+		addSelfLoops(estEdgesSelfLoop1SimplexConnToTri, selfLoops1ConnToTriDist.getPotentialColoProposer(), mMapColourToVertexIDsConnectedTo2Simplex, mColourMapperSelfLoop1SimplexConnToTri, mMapColourToEdgeIDs1Simplex);
 		
 		//Connected 1-simplexes
 		LOGGER.info("Connected 1-simplexes");
-		addSelfLoops(estEdgesSelfLoopConn1Simplexes, distColoProposerSelfLoopConn1Simplexes, mMapColourToVertexIDs1SimplexConnected, mColourMapperSelfLoopConn1Simplexes, mMapColourToEdgeIDs1Simplex);
+		addSelfLoops(estEdgesSelfLoopConn1Simplexes, selfLoopsInConnS1Dist.getPotentialColoProposer(), mMapColourToVertexIDs1SimplexConnected, mColourMapperSelfLoopConn1Simplexes, mMapColourToEdgeIDs1Simplex);
 		
 		System.out.println("Number of edges in the mimic graph: " + mMimicGraph.getEdges().size());
 		System.out.println("Number of vertices in the mimic graph: " + mMimicGraph.getVertices().size());
@@ -2266,14 +1891,14 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		return mMimicGraph;
 	}
 	
-	private void addSelfLoops(int estEdgesInput, OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput) {
+	private void addSelfLoops(int estEdgesInput, Set<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput) {
 		LOGGER.info("Estimated edges: " + estEdgesInput);
 		int actualEdgesSimplexes = 0;
 		int iterationCountSelf = 0;
-		while ((estEdgesInput > actualEdgesSimplexes) && (iterationCountSelf < 5000)) {
-			BitSet proposedVertexColor = distColoProposerSelfLoopInput.getPotentialItem();
+		while ((estEdgesInput > actualEdgesSimplexes) && (iterationCountSelf < maximumIteration) && (distColoProposerSelfLoopInput!=null)) {
+			BitSet proposedVertexColor = distColoProposerSelfLoopInput.toArray(new BitSet[distColoProposerSelfLoopInput.size()])[mRandom.nextInt(distColoProposerSelfLoopInput.size())];
 			IntSet possVertices = mMapColourToVertexIDsInput.get(proposedVertexColor);
-			if (possVertices.size() > 0) {
+			if (possVertices != null) {
 				Integer vertexID = possVertices.toArray(new Integer[possVertices.size()])[mRandom.nextInt(possVertices.size())];
 				boolean edgeAdded = addEdgeInAnyDirectionWithDuplicateCheck(proposedVertexColor, proposedVertexColor, vertexID, vertexID, mMapColourToEdgeIDsInput, mColourMapperSelfLoopInput);
 				if (edgeAdded) {
@@ -2282,7 +1907,9 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 				} else {
 					iterationCountSelf++;
 				}
-			}	
+			} else {
+				iterationCountSelf++;
+			}
 		}
 		LOGGER.info("Added edges: " + actualEdgesSimplexes);
 	}
@@ -2422,6 +2049,30 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		
 		tempVerticesList.add(verticesOfNewTriangle);
 		mTriColVertexIDsToUpdate.put(inputTriangleColours, tempVerticesList);
+	}
+	
+	/**
+	 * This method is used to update the map that tracks the triangle colours and vertices for those colours.
+	 * @param vert1Id - Integer vertex id for the first vertex of the triangle
+	 * @param vert2Id - Integer vertex id  for the second vertex of the triangle
+	 * @param vert3Id - Integer vertex id for the third vertex of the triangle
+	 * @param inputEdgeColours - TriangleColours object with the colours for the vertices of the triangle
+	 */
+	private void updateMapEdgeColorsVertices(int vert1Id, int vert2Id, EdgeColos inputEdgeColours) {
+		
+		//list of vertex ids, initially checks if the vertex ids exists for the input triangle colours
+		List<IntSet> tempVerticesList = mEdgeColorsVertexIds.get(inputEdgeColours);
+		if (tempVerticesList == null) {
+			tempVerticesList = new ArrayList<IntSet>();
+		}
+		
+		// create set for vertex ids
+		IntSet verticesOfNewEdge = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		verticesOfNewEdge.add(vert1Id);
+		verticesOfNewEdge.add(vert2Id);
+		
+		tempVerticesList.add(verticesOfNewEdge);
+		mEdgeColorsVertexIds.put(inputEdgeColours, tempVerticesList);
 	}
 	
 	/**
@@ -2790,7 +2441,6 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		}
 					
 		// Difference between possible colors and existing colors
-		// TODO: Create a BitSetUtil? Similar to IntSetUtil.
 		SetView<BitSet> differenceSet = Sets.difference(possEdgeColov1tailv2head, existingEdgeColours);
 		possEdgeColov1tailv2head = new HashSet<BitSet>();
 		possEdgeColov1tailv2head.addAll(differenceSet);
@@ -2815,6 +2465,22 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		return randomTriangleColor;
 	}
 	
+	/**
+	 * The method selects a random edge by using Random object. It will return null, if no edges are found in the input graphs.
+	 * 
+	 * @return - EdgeColors
+	 */
+	private EdgeColos getRandomEdge() {
+		EdgeColos randomEdgeColor = null;
+		
+		if (setAllTriangleColours.size() != 0) {
+			randomEdgeColor = setAllEdgeColours.toArray(new EdgeColos[setAllEdgeColours.size()])[mRandom.nextInt(setAllEdgeColours.size())];
+		}
+		
+		
+		return randomEdgeColor;
+	}
+	
 	private void removeTypeEdgesFromGraphs(ColouredGraph[] origGrphs) {
 		
 		for (ColouredGraph graph : origGrphs) {
@@ -2836,19 +2502,4 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 			}
 		}
 	}
-	
-	private void computeTotalEdgesInGraphs(ColouredGraph[] origGrphs) {
-		
-		// temporary variable to track graph number
-		int graphId = 1;
-		
-		for (ColouredGraph graph : origGrphs) {
-			if (graph!= null) {
-				int edgesCount = graph.getEdges().size();
-				mGraphEdges.put(graphId, edgesCount);
-				graphId++;
-			}
-		}
-	}
-		
 }

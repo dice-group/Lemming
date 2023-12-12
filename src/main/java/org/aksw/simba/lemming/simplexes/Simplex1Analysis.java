@@ -17,7 +17,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class Simplex1Analysis extends SimplexAnalysis {
 	
-	//TODO: Create interface, such a class may also be required for 0 simplex.
 	
 	/**
 	 * Map for storing number of edges forming 1-simplexes. The key is incremented as new graph is analysed. Thus, the key for the first input graph is 1, second input graph is 2, and so on.

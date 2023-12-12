@@ -3,6 +3,8 @@ package org.aksw.simba.lemming.simplexes.analysis;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRulesSimplexes;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
+import org.aksw.simba.lemming.simplexes.EdgeColos;
+import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -17,7 +19,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * 		 While extending this class, the implementation of findSimplexes method needs to defined that 
  * 		 finds edges and verts for the simplexes in input graph and updates the map.
  */
-public abstract class AbstractFindSimplexes implements IFindSimplexes{
+public abstract class AbstractFindSimplexes implements ISimplexesAnalysis{
 	
 	/**
 	 * Variable storing estimated number of edges
@@ -60,6 +62,8 @@ public abstract class AbstractFindSimplexes implements IFindSimplexes{
 	 * Number of input graphs
 	 */
 	protected int mNumOfInputGrphs;
+	
+	protected ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectDoubleOpenHashMap<BitSet>> mVertColosPropDist = new ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectDoubleOpenHashMap<BitSet>>();
 	
 	public AbstractFindSimplexes() {
 		
@@ -230,6 +234,135 @@ public abstract class AbstractFindSimplexes implements IFindSimplexes{
 		}
 	}
 	
+	protected void updateCountGlobalMap1Simplexes(ColouredGraph graph, ObjectObjectOpenHashMap<EdgeColos, double[]> mGlobalColoEdgesCountDistAvg, ObjectObjectOpenHashMap<EdgeColos, double[]> mEdgeColosEdgeCountsTemp, int countEdges) {
+		double totalVertices = graph.getNumberOfVertices();
+           
+        //******************************* Logic to update map for connected triangles *********************************//
+           
+        // Iterate over temporary map and add an element at the 3rd index of the array (No. of edges in triangle)/(Total number of triangles)
+        Object[] keysTriColo = mEdgeColosEdgeCountsTemp.keys;
+           
+		// iterate over results and update the global map
+		keysTriColo = mEdgeColosEdgeCountsTemp.keys;
+		for (int i = 0; i < keysTriColo.length; i++) {
+			if (mEdgeColosEdgeCountsTemp.allocated[i]) {
+				EdgeColos edgeColos = (EdgeColos) keysTriColo[i];
+				double[] arrCountDist = mEdgeColosEdgeCountsTemp.get(edgeColos);
+
+				// create a new array for storing avg count
+				double[] arrCountDistTemp = new double[4]; // additional element in the array for storing average
+															// count of triangles per vertices
+				arrCountDistTemp[0] = arrCountDist[0];
+				arrCountDistTemp[1] = (arrCountDist[1] * 1.0) / countEdges;
+				arrCountDistTemp[2] = (arrCountDist[2] * 1.0) / totalVertices; 
+
+				// update the distribution in global maps
+				if (mGlobalColoEdgesCountDistAvg.containsKey(edgeColos)) {
+
+					// get old distribution values
+					double[] previousCountdist = mGlobalColoEdgesCountDistAvg.get(edgeColos);
+
+					// update the distribution values
+					arrCountDistTemp[0] = arrCountDistTemp[0] + previousCountdist[0];
+					arrCountDistTemp[1] = arrCountDistTemp[1] + previousCountdist[1];
+					arrCountDistTemp[2] = arrCountDistTemp[2] + previousCountdist[2];
+
+				}
+				mGlobalColoEdgesCountDistAvg.put(edgeColos, arrCountDistTemp); // update the map with the new array
+			}
+		}
+    }
+	
+	public void computePropertyProbabilities() {
+		int graphId = 1;
+		
+		for (ColouredGraph graph : inputGrphs) {
+			
+			if (graph!= null) {
+				ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectIntOpenHashMap<BitSet>> mEdgeColosPropCountTemp = new ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectIntOpenHashMap<BitSet>>();
+				
+				IntSet edgesSet = mGraphsEdgesIds.get(graphId); // get total number of edges
+				for (int edgeId: edgesSet) {// iterate over edges
+					
+					BitSet edgeColour = graph.getEdgeColour(edgeId); // get edge color
+					IntSet verticesIncidentToEdge = graph.getVerticesIncidentToEdge(edgeId);
+					
+					BitSet[] vertexColors = new BitSet[2];
+					int tempIndex = 0;
+					// get vertex colors
+					for (int vertexId: verticesIncidentToEdge) {
+						BitSet vertexColour = graph.getVertexColour(vertexId);
+						vertexColors[tempIndex] = vertexColour;
+						tempIndex++;
+					}
+					
+					if (verticesIncidentToEdge.size() == 1)
+						vertexColors[1] = vertexColors[0];
+					
+					EdgeColorsSorted edgeColorsSorted = new EdgeColorsSorted(vertexColors[0], vertexColors[1]);
+					
+					ObjectIntOpenHashMap<BitSet> mPropColoCount = mEdgeColosPropCountTemp.get(edgeColorsSorted);
+					if (mPropColoCount == null) {
+						mPropColoCount = new ObjectIntOpenHashMap<BitSet>();
+					}
+					mPropColoCount.putOrAdd(edgeColour, 1, 1);
+					mEdgeColosPropCountTemp.put(edgeColorsSorted, mPropColoCount);
+					
+				}
+				
+				
+				// update global map
+				updatePropertyMap(mEdgeColosPropCountTemp);
+				
+				graphId++;
+				
+			}
+		}
+	}
+	
+	private void updatePropertyMap(ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectIntOpenHashMap<BitSet>> mEdgeColosPropCountTemp) {
+		
+		Object[] keysEdgeColo = mEdgeColosPropCountTemp.keys;
+		
+		for (int i = 0; i < keysEdgeColo.length; i++) {
+			if (mEdgeColosPropCountTemp.allocated[i]) {
+				EdgeColorsSorted edgeColorsSorted = (EdgeColorsSorted) keysEdgeColo[i];
+				
+				//find distribution for input graph and update the global map
+				ObjectIntOpenHashMap<BitSet> mColoCount = mEdgeColosPropCountTemp.get(edgeColorsSorted);
+				
+				//variable to track total number of tail colors for the head color
+				int totalnumOfpropColo = 0;
+				
+				// iterate over all tail colors and get total number of tail colors for a specific head color
+				Object[] keysPropColo = mColoCount.keys;
+				
+				for (int propIndex = 0; propIndex < keysPropColo.length; propIndex++) {
+					if (mColoCount.allocated[propIndex]) {
+						BitSet propColo = (BitSet) keysPropColo[propIndex];
+						totalnumOfpropColo = totalnumOfpropColo + mColoCount.get(propColo);
+					}
+				}
+				
+				for (int propIndex = 0; propIndex < keysPropColo.length; propIndex++) {
+					if (mColoCount.allocated[propIndex]) {
+						BitSet propColo = (BitSet) keysPropColo[propIndex];
+						double distributionPropInGraph = mColoCount.get(propColo) * 1.0 / totalnumOfpropColo;
+						
+						ObjectDoubleOpenHashMap<BitSet> globalPropColoCount = mVertColosPropDist.get(edgeColorsSorted);
+						if (globalPropColoCount == null) {
+							globalPropColoCount = new ObjectDoubleOpenHashMap<BitSet>();
+						}
+						globalPropColoCount.putOrAdd(propColo, distributionPropInGraph, distributionPropInGraph);
+						mVertColosPropDist.put(edgeColorsSorted, globalPropColoCount);
+					}
+				}
+				
+			}
+		}
+		
+	}
+	
 	// Defining getters for computed variables
 
 	public int getEstEdges() {
@@ -238,6 +371,10 @@ public abstract class AbstractFindSimplexes implements IFindSimplexes{
 
 	public int getEstVertices() {
 		return estVertices;
+	}
+
+	public ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectDoubleOpenHashMap<BitSet>> getmVertColosPropDist() {
+		return mVertColosPropDist;
 	}
 
 	public IColourMappingRules getmColourMapperSimplexes() {

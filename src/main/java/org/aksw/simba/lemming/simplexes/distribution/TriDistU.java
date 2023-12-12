@@ -1,26 +1,19 @@
-package org.aksw.simba.lemming.simplexes;
+package org.aksw.simba.lemming.simplexes.distribution;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
-import org.aksw.simba.lemming.util.MapUtil;
+import org.aksw.simba.lemming.simplexes.TriColos;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
- * The class stores the colors of vertices for triangles in all possible combination. These combinations are utilized while generating the simulated graph.
+ * Random Triangle Distribution for connected and isolated triangles.
  */
-public class TriangleDistribution2 {
-	
+public class TriDistU {
 	/**
 	 * HashMap to store different permutation of colors for triangle vertices. Note: Always sort the two input colors when evaluating against these maps.
 	 * Example: If three vertices have colors such that 1st vertex color is represented by long value 1, 2nd vertex - long value 2, and 3rd vertex - long value 3. 
@@ -36,16 +29,6 @@ public class TriangleDistribution2 {
 	// 4th index: Probability of the third vertex given two vertices
 	
 	/**
-	 * Variable to store count of distinct triangle colours, which is used to initialize collections. These collections help to compute probability distribution.
-	 */
-	private int numberOfDistinctTriangleColours;
-	
-	/**
-	 * Variable to store number of input graphs.
-	 */
-	int iNoOfVersions;
-	
-	/**
 	 * Object of Random class for generating random values.
 	 */
 	private Random mRandom;
@@ -53,22 +36,22 @@ public class TriangleDistribution2 {
 	/**
 	 * Object for storing distributions by analyzing triangles found in all input graphs.
 	 */
-	OfferedItemByRandomProb<TriColos> potentialTriangleProposer;
+	private Set<TriColos> potentialConnectedTriangleProposer;
 	
 	/**
 	 * Object for storing distributions by analyzing isolated triangles found in all input graphs.
 	 */
-	OfferedItemByRandomProb<TriColos> potentialIsolatedTriangleProposer;
+	private Set<TriColos> potentialIsolatedTriangleProposer;
 	
 	/**
 	 * Map for storing probability distributions computed for two vertex colors.
 	 * Note: The vertex color are sorted in ascending order. The vertex color having lower long value is the key for the first hashmap and the one with the highest long value is the key for the second hashmap.
 	 */
-	ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
+	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
 	
-	public TriangleDistribution2(ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
+	public TriDistU(ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
 		
-		this.iNoOfVersions = iNoOfVersions;
+		
 		this.mRandom = mRandom;
 		
 		// Initializing the map variables
@@ -96,18 +79,30 @@ public class TriangleDistribution2 {
 			}
 		}
 		
-		numberOfDistinctTriangleColours = mTriColoEdgesTriCountDistAvg.assigned;
-		
 		//*************************** Below computation is performed for Triangle colours and edge counts **********************//
 		// Below distribution is used to propose a triangle and more edges are added to this triangle.
 		
 		//Initialize distribution of triangle colors based on edge count
-		initializeDistributionAllTriangles(mTriColoEdgesTriCountDistAvg, iNoOfVersions, mRandom);
+		potentialConnectedTriangleProposer = initializeDistributionAllTriangles(mTriColoEdgesTriCountDistAvg);
 		
-		initializeDistributionIsolatedTri(mIsolatedTriColosCountsDist, iNoOfVersions, mRandom);
+		potentialIsolatedTriangleProposer = initializeDistributionAllTriangles(mIsolatedTriColosCountsDist);
 		
 		// Add the probability of the third vertex given two vertices
-		updateVertexProbabilities();
+		//updateVertexProbabilities();
+	}
+	
+	private Set<TriColos> initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg) {
+		Set<TriColos> setAllTriangleColours = new HashSet<TriColos>();
+		
+		Object[] keysTriangleColours = mTriColoEdgesTriCountDistAvg.keys;
+		for(int i = 0; i < keysTriangleColours.length ; i++) {
+			if(mTriColoEdgesTriCountDistAvg.allocated[i]) {
+				TriColos triangleColorObj = (TriColos) keysTriangleColours[i];
+				setAllTriangleColours.add(triangleColorObj);
+			}
+		}
+		
+		return setAllTriangleColours;
 	}
 	
 	public void updateVertexProbabilities() {
@@ -215,13 +210,8 @@ public class TriangleDistribution2 {
 		}
 	}
 	
-
-	public ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> getmTriangleColorsv1v2v3() {
-		return mTriangleColorsv1v2v3;
-	}
-	
 	/**
-	 * The function proposes a Color for the third vertex to create a triangle, given the colors of first and second vertices as input.
+	 * The function proposes a random Color for the third vertex to create a triangle, given the colors of first and second vertices as input.
 	 * @param vertex1Color - BitSet color for vertex 1.
 	 * @param vertex2Color - BitSet color for vertex 2.
 	 * @return - Bitset color for vertex 3.
@@ -277,158 +267,55 @@ public class TriangleDistribution2 {
 		if (mapPossV3Count == null)
 			return thirdVertexColor; //No third vertex color possible for the input colors, returning null
 		
-		//List<BitSet> listPossibleColoV3 = MapUtil.keysToList(mapPossV3Count);
-		int sampleSize = mapPossV3Count.assigned;
-		
-		BitSet[] allPossibleColoV3 = new BitSet[sampleSize];
-		
-		// create array of double values for ObjectDistribution class
-		double[] possEdgesInTriangle = new double[sampleSize];
-		int sampleSpaceIndex = 0;
-		
+		Set<BitSet> possVertexColos = new HashSet<BitSet>();
 		Object[] keysVertColo = mapPossV3Count.keys;
-		
 		for(int i = 0; i < keysVertColo.length; i++) {
 			if (mapPossV3Count.allocated[i]) {
-				allPossibleColoV3[sampleSpaceIndex] = (BitSet) keysVertColo[i];
-				double numOfEdgesV3 = mapPossV3Count.get((BitSet) keysVertColo[i])[4]; // get the triangle probability stored at first index
-				
-				 double sampleDistribution = numOfEdgesV3 * 1.0 /iNoOfVersions; // get average values
-				 possEdgesInTriangle[sampleSpaceIndex] = sampleDistribution;
-				 
-				 sampleSpaceIndex++;
+				BitSet vertex3Colo = (BitSet) keysVertColo[i];
+				possVertexColos.add(vertex3Colo);
 			}
 		}
 		
-		// create distribution
-		ObjectDistribution<BitSet> potentialColo = new ObjectDistribution<BitSet>(allPossibleColoV3, possEdgesInTriangle);
-		OfferedItemByRandomProb<BitSet> potentialColoProposer = new OfferedItemByRandomProb<BitSet>(potentialColo, mRandom);
-		
-		// get potential third color
-		thirdVertexColor = potentialColoProposer.getPotentialItem();
-		
-		// save the created probability distribution
-		if (mV2ColoProbDistOpenHashMap == null) {
-			// There is no distribution for vertex color 1 initializing the map
-			mV2ColoProbDistOpenHashMap = new ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>();
-		}
-		// Add computed distribution to the map of vertex color 2 and probability distribution
-		mV2ColoProbDistOpenHashMap.put(sortedVertex2Colo, potentialColoProposer);
-		
-		//Add to map vertex color 1, vertex color 2 and probability distribution 
-		mV1ColoV2ColoProbDist.put(sortedVertex1Colo, mV2ColoProbDistOpenHashMap);
+		thirdVertexColor = possVertexColos.toArray(new BitSet[possVertexColos.size()])[mRandom.nextInt(possVertexColos.size())];
 		
 		return thirdVertexColor;
 	}
 	
 	/**
-	 * This function returns a TriangleColours from the input set of TriangleColours based on probability distribution of TriangleColours found in Input graphs. 
+	 * This function returns a random TriangleColours from the input set of TriangleColours based on probability distribution of TriangleColours found in Input graphs. 
 	 * 
 	 * @param setTriangleColorsMimicGraph - Set of TriangleColours that needs to be filtered.
 	 * @return
 	 */
 	public TriColos proposeTriangleToAddEdge(Set<TriColos> setTriangleColorsMimicGraph) {
-		
-		//Utilize initialized object distribution for all triangles
 
-		// get the selected triangle colors
-		TriColos potentialTriangleColours = potentialTriangleProposer.getPotentialItem(setTriangleColorsMimicGraph);
-		
-		for(TriColos triangleColourObject: setTriangleColorsMimicGraph) {
-			if ( triangleColourObject.equals(potentialTriangleColours)) {
-				return triangleColourObject;
-			}
-		}
-		
-		return null;
+		TriColos triangleColours = setTriangleColorsMimicGraph.toArray(new TriColos[setTriangleColorsMimicGraph.size()])[mRandom.nextInt(setTriangleColorsMimicGraph.size())];
+		return triangleColours;
 		
 		
 	}
 	
 	/**
-	 * This method initializes the probability distribution of triangles. It checks all the triangles found in the input graphs and the number of edges in them to create the probability distribution.
+	 * This function returns a random TriangleColours from the input set of TriangleColours based on probability distribution of TriangleColours found in Input graphs. 
 	 * 
-	 * @param inputSetTriangleColors - Set of TriangleColours object found after analyzing input graphs
-	 * @param iNoOfVersions - Number of input graphs
-	 * @param mRandom - Random object
+	 * @param setTriangleColorsMimicGraph - Set of TriangleColours that needs to be filtered.
+	 * @return
 	 */
-	private void initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, int iNoOfVersions, Random mRandom) {
+	public TriColos proposeIsoTriToAddEdge(Set<TriColos> setTriangleColorsMimicGraph) {
 		
-		// create sample space & values for triangle colors
-		TriColos[] triangleColorsSampleSpace = new TriColos[numberOfDistinctTriangleColours];
-		double[] possEdgesInTriangle = new double[numberOfDistinctTriangleColours];
-		
-		Object[] keysTriangleColours = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.keys;
-		
-		
-		int i = 0; //temp variable to track index of array
-		for(int mapKeyIndex = 0; mapKeyIndex < keysTriangleColours.length ; mapKeyIndex++) {
-			if(mTriangleColoursTriangleCountsEdgeCountsResourceNodes.allocated[mapKeyIndex]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[mapKeyIndex];
-				double[] triangleEdgeCountArr = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.get(triangleColorObj);
-				double countOfEdges = triangleEdgeCountArr[2];//probability of triangle is stored at 2nd index
-				
-				triangleColorsSampleSpace[i] = triangleColorObj;
-				
-				double tempMeanValue = countOfEdges * 1.0 / iNoOfVersions;
-				possEdgesInTriangle[i] = tempMeanValue;
-				
-				i++;
-			}
-		}
-		
-		ObjectDistribution<TriColos> potentialTriangle = new ObjectDistribution<TriColos>(triangleColorsSampleSpace, possEdgesInTriangle);
-		if (!potentialTriangle.isEmpty()) // When samplespace is empty, initialzing the proposer with null
-			potentialTriangleProposer = new OfferedItemByRandomProb<TriColos>(potentialTriangle, mRandom);
-		else
-			potentialTriangleProposer = null;
-		
-	}
-	
-	/**
-	 * This method initializes the probability distribution of isolated triangles. It checks all the isolated triangles found in the input graphs and the number of edges in them to create the probability distribution.
-	 * 
-	 * @param inputSetTriangleColors - Set of TriangleColours object found after analyzing input graphs
-	 * @param iNoOfVersions - Number of input graphs
-	 * @param mRandom - Random object
-	 */
-	private void initializeDistributionIsolatedTri(ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, Random mRandom) {
-		//TODO: Duplicate of previous method. Need to create a single method for this.
-		
-		int sampleSize = mIsolatedTriColosCountsDist.assigned;
-		
-		// create sample space & values for triangle colors
-		TriColos[] triangleColorsSampleSpace = new TriColos[sampleSize];
-		double[] possEdgesInTriangle = new double[sampleSize];
-		
-		Object[] keysTriangleColours = mIsolatedTriColosCountsDist.keys;
-		
-		
-		int i = 0; //temp variable to track index of array
-		for(int mapKeyIndex = 0; mapKeyIndex < keysTriangleColours.length ; mapKeyIndex++) {
-			if(mIsolatedTriColosCountsDist.allocated[mapKeyIndex]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[mapKeyIndex];
-				double[] triangleEdgeCountArr = mIsolatedTriColosCountsDist.get(triangleColorObj);
-				double countOfEdges = triangleEdgeCountArr[2];//probability of triangle is stored at 2nd index
-				
-				triangleColorsSampleSpace[i] = triangleColorObj;
-				
-				double tempMeanValue = countOfEdges * 1.0 / iNoOfVersions;
-				possEdgesInTriangle[i] = tempMeanValue;
-				
-				i++;
-			}
-		}
-		
-		ObjectDistribution<TriColos> potentialTriangle = new ObjectDistribution<TriColos>(triangleColorsSampleSpace, possEdgesInTriangle);
-		if (!potentialTriangle.isEmpty()) // When samplespace is empty, initialzing the proposer with null
-			potentialIsolatedTriangleProposer = new OfferedItemByRandomProb<TriColos>(potentialTriangle, mRandom);
-		else
-			potentialIsolatedTriangleProposer = null;
-		
+		TriColos triangleColours = setTriangleColorsMimicGraph.toArray(new TriColos[setTriangleColorsMimicGraph.size()])[mRandom.nextInt(setTriangleColorsMimicGraph.size())];
+		return triangleColours;
 	}
 
-	public OfferedItemByRandomProb<TriColos> getPotentialIsolatedTriangleProposer() {
+	public Set<TriColos> getPotentialIsolatedTriangleProposer() {
 		return potentialIsolatedTriangleProposer;
+	}
+
+	public Set<TriColos> getPotentialTriangleProposer() {
+		return potentialConnectedTriangleProposer;
+	}
+	
+	public ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> getmTriangleColorsv1v2v3() {
+		return mTriangleColorsv1v2v3;
 	}
 }

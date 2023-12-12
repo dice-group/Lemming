@@ -38,7 +38,6 @@ public class Simplex2Distribution extends Simplex1Distribution{
 	 */
 	public void createColoProposerForVertConnectedToTriangle(ObjectDoubleOpenHashMap<BitSet> mVertColoCountConnectedToTriangles) {
 		
-		//TODO: Check if first call to get keys of map can be avoided? Iterating map twice
 		System.out.println();
 		
 		int sampleSize = mVertColoCountConnectedToTriangles.assigned;

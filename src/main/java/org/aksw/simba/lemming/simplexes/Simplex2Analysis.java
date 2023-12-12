@@ -32,7 +32,6 @@ public class Simplex2Analysis extends SimplexAnalysis{
 		graphId = 1;
 	}
 	
-	//TODO: Find distribution of head colors and tail colors, similar to 1-simplexes.
 	
 	/**
 	 * The function analyzes the input graphs, edge ids and to generates statistics for 2-simplexes.

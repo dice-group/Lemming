@@ -29,7 +29,7 @@ public class Isolated1Simplexes extends AbstractFindSimplexes{
 	private ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mHeadColoTailColoCount;
 	
 	public Isolated1Simplexes(ColouredGraph[] origGrphs, int desiredNoVertices, int iNoOfVersions) {
-		System.out.println("Debug!");
+		//System.out.println("Debug!");
 		inputGrphs = origGrphs;
 		inputDesiredNoVert = desiredNoVertices;
 		mNumOfInputGrphs = iNoOfVersions;

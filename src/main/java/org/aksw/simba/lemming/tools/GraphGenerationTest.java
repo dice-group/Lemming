@@ -5,10 +5,12 @@ import grph.Grph.DIRECTION;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
@@ -32,12 +34,16 @@ import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach2;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimplexApproach2;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
-import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproach1;
+import org.aksw.simba.lemming.simplexes.ConfigureExpressions;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproachS;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproachI1;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproachI2;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproachComplProbBased;
+import org.aksw.simba.lemming.simplexes.generator.GraphGenerationSimplexApproachU;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +59,7 @@ public class GraphGenerationTest {
 	
 	//default number of vertices is 10000
 	private static int mNumberOfDesiredVertices = 10000;
+	private static int maximumIteration = 5000;
 	
 	public static void main(String[] args) {
 		IGraphGeneration mGrphGenerator;
@@ -139,13 +146,24 @@ public class GraphGenerationTest {
         }
         
         graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
-        
       
+        
         
         /*---------------------------------------------------
         Loading metrics values and constant expressions 
         ----------------------------------------------------*/
         ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+        
+        /*------------------------------------------------------
+        Configure Expressions for simplex generator
+        -------------------------------------------------------*/
+       String typeGenerator = mapArgs.get("-t");
+       if ( ( (dataset.equalsIgnoreCase("swdf")) || dataset.equalsIgnoreCase("lgeo") )) { // Consider these expressions for every generator (typeGenerator.equalsIgnoreCase("S") || typeGenerator.equalsIgnoreCase("S2")) &&
+    	   ConfigureExpressions configExpObj = new ConfigureExpressions(graphs, dataset);
+    	   valuesCarrier.setMetricValues(configExpObj.getMapMetricValues());
+    	   valuesCarrier.setConstantValues(configExpObj.getMapConstantValues());
+     	}
+        
         metrics = valuesCarrier.getMetricsOfExpressions(metrics);
         if(!valuesCarrier.isComputableMetrics(metrics)){
         	LOGGER.error("The list of metrics has some metrics that are not existing in the precomputed metric values.");
@@ -156,6 +174,14 @@ public class GraphGenerationTest {
         /*---------------------------------------------------
         Generation for a draft graph
         ----------------------------------------------------*/
+        //maximum number of iteration for simplex approach
+        String maxNoOfIteration = mapArgs.get("-mi");
+        if(maxNoOfIteration!= null){
+        	try{
+        		maximumIteration = Integer.parseInt(maxNoOfIteration);
+        	}catch(Exception e){}
+        }
+        
         //number of vertices
         String strNoOfVertices = mapArgs.get("-nv");
         if(strNoOfVertices!= null){
@@ -184,7 +210,7 @@ public class GraphGenerationTest {
         LOGGER.info("Current Seed is "+seed);
        
         //define generator
-        String typeGenerator = mapArgs.get("-t");
+        long startRunTime = System.nanoTime();
         if(typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("R")){
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }else if(typeGenerator.equalsIgnoreCase("RD")){
@@ -197,13 +223,27 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
         	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
-        }else if(typeGenerator.equalsIgnoreCase("S")){
-        	mGrphGenerator = new GraphGenerationSimplexApproach1(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        }else if(typeGenerator.equalsIgnoreCase("S5")){
+        	mGrphGenerator = new GraphGenerationSimplexApproachS(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
+        } else if(typeGenerator.equalsIgnoreCase("S2")) {
+        	mGrphGenerator = new GraphGenerationSimplexApproachI1(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
+        }else if (typeGenerator.equalsIgnoreCase("S1")) {
+        	mGrphGenerator = new GraphGenerationSimplexApproachU(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
+        }else if (typeGenerator.equalsIgnoreCase("S3")) {
+        	mGrphGenerator = new GraphGenerationSimplexApproachI2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
+        }else if (typeGenerator.equalsIgnoreCase("S4")) {
+        	mGrphGenerator = new GraphGenerationSimplexApproachComplProbBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
         }
         else{
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 
+        long completeRunTime = System.nanoTime() - startRunTime;
+        LOGGER.info("Analysis Time (in seconds): " + TimeUnit.NANOSECONDS.toSeconds(completeRunTime));
+        
+        
+        startRunTime = System.nanoTime();
+        
         double startTime = System.currentTimeMillis();
 		String loadMimicGraph = mapArgs.get("-l");
 		boolean isLoaded = false;
@@ -232,6 +272,8 @@ public class GraphGenerationTest {
 			LOGGER.info("Intermediate results saved under: "+loadMimicGraph);
 
 		}
+		completeRunTime = System.nanoTime() - startRunTime;
+		LOGGER.info("Graph Generation Time (in seconds): " + TimeUnit.NANOSECONDS.toSeconds(completeRunTime));
 		
         /*---------------------------------------------------
         Optimization with constant expressions
@@ -322,6 +364,8 @@ public class GraphGenerationTest {
 					}
 					else if (param.equalsIgnoreCase("-s")) {
 						mapArgs.put("-s", value);
+					}else if (param.equalsIgnoreCase("-mi")) {
+						mapArgs.put("-mi", value);
 					}
 				}
 			}

@@ -76,7 +76,6 @@ public class Simplex1Distribution {
 	 */
 	public void createVertColoProposer(ObjectDoubleOpenHashMap<BitSet> mVertColoCount1Simplex) {
 		
-		//TODO: Check if first call to get keys of map can be avoided? Iterating map twice
 		System.out.println();
 		
 		int sampleSize = mVertColoCount1Simplex.assigned;
@@ -193,7 +192,6 @@ public class Simplex1Distribution {
 			
 			int sampleSize = mtailColoCount.assigned;
 			
-			//TODO: Code repetition. create a method in one of the utils class? Similar code is used in TriangleDistribution class as well.
 			
 			// initialize array for sample space and values
 			BitSet[] tailColoSampleSpace = new BitSet[sampleSize];

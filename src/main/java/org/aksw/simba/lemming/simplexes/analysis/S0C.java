@@ -1,7 +1,4 @@
-package org.aksw.simba.lemming.simplexes;
-
-import java.util.HashMap;
-import java.util.Map;
+package org.aksw.simba.lemming.simplexes.analysis;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.util.Constants;
@@ -10,53 +7,47 @@ import org.aksw.simba.lemming.util.IntSetUtil;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class Simplex0Analysis {
-	
-	/**
-	* Map for storing number of vertices forming 0-simplexes for different input graphs. The key is incremented as new graph is analysed. Thus, the key for the first input graph is 1, second input graph is 2, and so on.
-	*/
-	private Map<Integer, Integer> mGraphIdNumberOf0SimplexVertices = new HashMap<Integer, Integer>();
+/**
+ * This class analyzes 0-simplexes present in the input graphs.
+ */
+public class S0C extends AbstractFindSimplexes{
 	
 	/**
 	 * Map for storing count of colours for 0-simplexes.
 	 */
 	private ObjectDoubleOpenHashMap<BitSet> mColoCount0Simplex;
+	
+	public S0C(ColouredGraph[] origGrphs, int desiredNoVertices, int iNoOfVersions) {
+		inputGrphs = origGrphs;
+		inputDesiredNoVert = desiredNoVertices;
+		mNumOfInputGrphs = iNoOfVersions;
 		
+		mGraphsVertIds = new ObjectObjectOpenHashMap<Integer, IntSet>();
 		
-	/**
-	* Variable to track graph ids.
-	*/
-	private int graphId;
-		
-		
-	public Simplex0Analysis() {
-		graphId = 1;
+		//initialize global map
 		mColoCount0Simplex = new ObjectDoubleOpenHashMap<BitSet>();
+		
+		findSimplexes();
+		
+		estimateVertices();
 	}
-		
-		
-	/**
-	* The function analyzes the input graphs and generates statistics for 1-simplex.
-	*/
-	public void analyze(ColouredGraph[] origGrphs) {
+	
+	@Override
+	public void findSimplexes() {
+		int graphId = 1;
+		for (ColouredGraph graph : inputGrphs) {
 			
-		for (ColouredGraph graph : origGrphs) {
-				
 			if (graph!= null) {
-					
-				// temporary variables to track number of vertices forming 0-simplexes
-				int numberOfVertices0Simplex = 0;
 				
-				// Iterating over all edges to find class nodes, such nodes should not be considered as neighbors since they are connected with RDF type edges
-//				IntSet classNodes = new DefaultIntSet(Constants.DEFAULT_SIZE);
-//				for (int edgeId: graph.getEdges()) {
-//					if (graph.getEdgeColour(edgeId).equals(graph.getRDFTypePropertyColour()))
-//						classNodes.add(graph.getHeadOfTheEdge(edgeId));
-//				}
+				IntSet vertices0Simplexes = new DefaultIntSet(Constants.DEFAULT_SIZE);
+					
+				int numberOfVertices0Simplex = 0; // temporary variables to track number of vertices forming 0-simplexes
+				
 				System.out.println(graph.getRDFTypePropertyColour());
 				
 				ObjectIntOpenHashMap<BitSet> mVertexColorCountTemp = new ObjectIntOpenHashMap<BitSet>();
@@ -71,6 +62,7 @@ public class Simplex0Analysis {
 						//allNeighborsVertices = IntSetUtil.difference(allNeighborsVertices, classNodes);
 						if (allNeighborsVertices.size() == 0) {
 							numberOfVertices0Simplex++;
+							vertices0Simplexes.add(vertexId);
 							BitSet vertexColour = graph.getVertexColour(vertexId);
 							mVertexColorCountTemp.putOrAdd(vertexColour, 1, 1);
 							
@@ -88,23 +80,18 @@ public class Simplex0Analysis {
 					}
 				}
 				
-				mGraphIdNumberOf0SimplexVertices.put(graphId, numberOfVertices0Simplex);
+				mGraphsVertIds.put(graphId, vertices0Simplexes);
 				graphId++;
 					
 			}
 		}
-			
 	}
-
-
+	
+	
+	//getter
 	public ObjectDoubleOpenHashMap<BitSet> getmColoCount0Simplex() {
 		return mColoCount0Simplex;
 	}
 
-
-	public Map<Integer, Integer> getmGraphIdNumberOf0SimplexVertices() {
-		return mGraphIdNumberOf0SimplexVertices;
-	}
-
-
+	
 }
