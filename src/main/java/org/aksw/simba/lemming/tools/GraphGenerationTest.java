@@ -223,9 +223,7 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
         	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
-        }else if(typeGenerator.equalsIgnoreCase("S5")){
-        	mGrphGenerator = new GraphGenerationSimplexApproachS(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
-        } else if(typeGenerator.equalsIgnoreCase("S2")) {
+        }else if(typeGenerator.equalsIgnoreCase("S2")) {
         	mGrphGenerator = new GraphGenerationSimplexApproachI1(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
         }else if (typeGenerator.equalsIgnoreCase("S1")) {
         	mGrphGenerator = new GraphGenerationSimplexApproachU(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
@@ -233,7 +231,9 @@ public class GraphGenerationTest {
         	mGrphGenerator = new GraphGenerationSimplexApproachI2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
         }else if (typeGenerator.equalsIgnoreCase("S4")) {
         	mGrphGenerator = new GraphGenerationSimplexApproachComplProbBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
-        }
+        }//else if(typeGenerator.equalsIgnoreCase("S5")){ //Additional simplex generators
+        	//mGrphGenerator = new GraphGenerationSimplexApproachS(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed, maximumIteration);
+        //}
         else{
         	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
