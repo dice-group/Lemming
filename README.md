@@ -1,4 +1,4 @@
-# Simulate RDF Graphs: A Simplex Approach
+# Graph generator simplexes-based approach
 We propose changes to [Lemming Repo](https://github.com/dice-group/Lemming/tree/pgmerge) such that it uses simplexes.
 
 ## Overview (Röder et al., [2021](https://ieeexplore.ieee.org/document/9364380))
