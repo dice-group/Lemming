@@ -42,12 +42,12 @@ The generated result files for the performed execution can be found in the folde
 ### console logs
 - We have saved console logs for the proposed generators, and they are in [console_logs.zip](https://github.com/atulpundir88/Lemming-Simplexes/blob/generator_using_simplexes/generated_results/console_logs.zip).
 - They follow the same hierarchy as that defined for .result files.
-- Example: `console_logs > Simplex > LGD > lgeo_S1_r1.txt` denotes the result file for the first execution of the generator with parameter "S1" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
+- Example: `console_logs > Simplex > LGD > lgeo_S1_r1.txt` denotes the console logs for the first execution of the generator with parameter "S1" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
 
 ### Benchmarking 
 - Benchmarking was performed using [IGUANA](https://link.springer.com/chapter/10.1007/978-3-319-68204-4_5), and the generated results are available in [benchmarking.zip](https://github.com/atulpundir88/Lemming-Simplexes/blob/generator_using_simplexes/generated_results/benchmarking.zip).
 - The initial folder hierarchy is same as the previous files. The parent folder name indicates the generators. The dataset-specific folders are defined for them. Then, folders are defined for each generator's execution parameter, and the files are present for every execution run in these folders.
-- General folder hierarchy: `benchmarking > \<Generator\> > \<Dataset name\> > \<Generator execution parameter\> > r\<execution_id\>`
+- General folder hierarchy: `benchmarking > <Generator> > <Dataset name> > <Generator execution parameter> > r<execution_id>`
 - Example: `benchmarking > Lemming > LGD > R > r1` - The files in this folder are for the first execution of the existing generator with parameter "R" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
 - The files found in a specific folder consists of results for different triple stores evaluated using [IGUANA](https://link.springer.com/chapter/10.1007/978-3-319-68204-4_5).
 
