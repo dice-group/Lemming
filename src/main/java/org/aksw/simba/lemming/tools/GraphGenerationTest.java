@@ -1,16 +1,10 @@
 package org.aksw.simba.lemming.tools;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Resource;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.creation.AbstractDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassBiasedInstance;
@@ -31,7 +25,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.beust.jcommander.JCommander;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 @SpringBootApplication
 public class GraphGenerationTest {
@@ -66,7 +59,7 @@ public class GraphGenerationTest {
 		/*---------------------------------------------------
 		Generation for a draft graph
 		----------------------------------------------------*/
-
+		// TODO resume from here
 		// define generator
 		String typeGenerator = pArgs.typeGenerator;
 		int iNumberOfThreads = pArgs.noThreads;
@@ -142,124 +135,5 @@ public class GraphGenerationTest {
 		// output results to file "LemmingEx.result" 
 		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, seed);
 		LOGGER.info("Application exits!!!");
-	}
-
-	/**
-	 * 
-	 * @param args list of input arguments
-	 * @return a map of key and values
-	 */
-	private static Map<String, String> parseArguments(String[] args) {
-		/*
-		 * -ds: dataset value: swdf (semanticwebdogfood), or pg (persongraph)
-		 * 
-		 * -nv: number of vertices
-		 * 
-		 * -t: methods of generator value: R: random approach, RD: random with degree
-		 * approach value: D: distribution approach, DD: disitrbution and degree
-		 * approach value: C: clustering approach, CD: clustering and degree approach
-		 * 
-		 * -r: random optimization -thrs: the number of threads by default, the
-		 * application runs with a single thread
-		 * 
-		 * -op: (optional) number of optimization steps
-		 */
-		Map<String, String> mapArgs = new HashMap<String, String>();
-
-		if (args.length != 0) {
-			for (int i = 0; i < args.length; i++) {
-				String param = args[i];
-				if ((i + 1) < args.length) {
-					String value = args[i + 1];
-					// target dataset
-					if (param.equalsIgnoreCase("-ds")) {
-						mapArgs.put("-ds", value);
-					}
-					// number of vertices
-					else if (param.equalsIgnoreCase("-nv")) {
-						mapArgs.put("-nv", value);
-					}
-					// type of graph generator
-					else if (param.equalsIgnoreCase("-t")) {
-						mapArgs.put("-t", value);
-					} else if (param.equalsIgnoreCase("-r")) {
-						mapArgs.put("-r", value);
-					} else if (param.equalsIgnoreCase("-thrs")) {
-						mapArgs.put("-thrs", value);
-					} else if (param.equalsIgnoreCase("-op")) {
-						mapArgs.put("-op", value);
-					} else if (param.equalsIgnoreCase("-l")) {
-						mapArgs.put("-l", value);
-					} else if (param.equalsIgnoreCase("-s")) {
-						mapArgs.put("-s", value);
-					}
-				}
-			}
-		}
-		return mapArgs;
-	}
-
-	private static void printConstantResults(List<SingleValueMetric> lstMetrics, ConstantValueStorage constStorage,
-			ColouredGraph[] origGraphs) {
-		BufferedWriter fWriter;
-		try {
-			LOGGER.warn("Output results to file!");
-
-			fWriter = new BufferedWriter(new FileWriter("ConstantOfLatestGraph.result", true));
-
-			for (ColouredGraph grph : origGraphs) {
-				if (grph.getVertices().size() == 45387 || grph.getVertices().size() == 792921) {
-
-					ObjectDoubleOpenHashMap<String> mapMetricValues = new ObjectDoubleOpenHashMap<String>();
-					// compute list of metrics
-
-					for (SingleValueMetric metric : lstMetrics) {
-						double val = metric.apply(grph);
-						mapMetricValues.putOrAdd(metric.getName(), 0, 0);
-						mapMetricValues.put(metric.getName(), val);
-					}
-
-					Set<Expression> setExpressions = constStorage.getConstantExpressions();
-
-					fWriter.write("#----------------------------------------------------------------------#\n");
-					fWriter.write("# Graph " + 45387 + ".\n");
-					for (Expression expr : setExpressions) {
-						double constVal = expr.getValue(mapMetricValues);
-						fWriter.write("\t Expr: " + expr.toString() + ":" + constVal + "\n");
-					}
-					fWriter.write("#----------------------------------------------------------------------#\n");
-				}
-			}
-			// metric values of all graphs
-			fWriter.close();
-		} catch (Exception ex) {
-			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
-		}
-	}
-
-	private static void printMetricResults(List<SingleValueMetric> lstMetrics, ColouredGraph[] origGraphs) {
-		BufferedWriter fWriter;
-		try {
-			LOGGER.warn("Output results to file!");
-
-			fWriter = new BufferedWriter(new FileWriter("MetricsOfLatestGraph.result", true));
-
-			int iIndex = 1;
-
-			for (ColouredGraph grph : origGraphs) {
-				fWriter.write("#----------------------------------------------------------------------#\n");
-				fWriter.write("# Graph " + iIndex + ".\n");
-				for (SingleValueMetric metric : lstMetrics) {
-					double val = metric.apply(grph);
-					fWriter.write("\t Metric: " + metric.getName() + ": " + val + "\n");
-				}
-				iIndex++;
-				fWriter.write("#----------------------------------------------------------------------#\n");
-			}
-			// metric values of all graphs
-			fWriter.close();
-		} catch (Exception ex) {
-			LOGGER.warn("Cannot output results to file! Please check: " + ex.getMessage());
-		}
 	}
 }
