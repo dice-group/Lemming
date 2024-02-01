@@ -20,317 +20,329 @@ import com.carrotsearch.hppc.BitSet;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class UniformClassSelection extends AbstractGraphGeneration implements IGraphGeneration{
+/**
+ * Implementation of the Uniform Class Selection - Uniform Instance Selection
+ * (UCS-UIS) from the paper.
+ *
+ */
+public class UniformClassSelection extends AbstractGraphGeneration implements IGraphGeneration {
 
+	/** Logger object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(UniformClassSelection.class);
-	private int maxIterationFor1EdgeColo ;
-	private Random mRandom; 
-	
-	public UniformClassSelection(int iNumberOfVertices,
-			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+
+	/** Counter for the number of iterations for each edge colour */
+	private int maxIterationFor1EdgeColour;
+
+	/** Random generator object */
+	private Random mRandom;
+
+	/**
+	 * Constructor.
+	 * 
+	 * @param iNumberOfVertices Number of vertices
+	 * @param origGrphs         Original/Input/Versioned graphs
+	 * @param iNumberOfThreads  Number of threads for graph generation
+	 * @param seed              Seed for the RNG
+	 */
+	public UniformClassSelection(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		mRandom = new Random(this.seed);
-		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+		maxIterationFor1EdgeColour = Constants.MAX_ITERATION_FOR_1_COLOUR;
 	}
 
-	public ColouredGraph generateGraph(){
-		if(mNumberOfThreads==1){
+	/**
+	 * Kick-starts the graph generation in single or multi-threaded way.
+	 * 
+	 * @return The initial mimic graph
+	 */
+	public ColouredGraph generateGraph() {
+		if (mNumberOfThreads == 1) {
 			LOGGER.info("Run graph generation with single thread!");
 			generateGraphSingleThread();
-		}else{
-			LOGGER.info("Run graph generation with "+mNumberOfThreads+ " threads!");
+		} else {
+			LOGGER.info("Run graph generation with " + mNumberOfThreads + " threads!");
 			generateGraphMultiThreads();
 		}
 		return mMimicGraph;
 	}
-	
-	
-	private void generateGraphMultiThreads(){
+
+	/**
+	 * 	Generates the graph in a multi-threaded way
+	 */
+	private void generateGraphMultiThreads() {
 		
-		//exploit all possible threads
-		int iNumberOfThreads = mNumberOfThreads;
-		//int iNumberOfThreads = 4;
-		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(iNumberOfThreads);
-		ExecutorService service = Executors.newFixedThreadPool(iNumberOfThreads);
+		// divides the coloured edges across the available threads
+		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(mNumberOfThreads);
+		LOGGER.info("Create " + lstAssignedEdges.size() + " threads for processing graph generation!");
 		
-		LOGGER.info("Create "+lstAssignedEdges.size()+" threads for processing graph generation!");
+		// Create thread pool, assign each thread a set of edges to work with
+		ExecutorService service = Executors.newFixedThreadPool(mNumberOfThreads);
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-		 
-		for(int i = 0 ; i < lstAssignedEdges.size() ; i++){
+		for (int i = 0; i < lstAssignedEdges.size(); i++) {
+			// get the set of edges for the thread
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 			final Set<BitSet> setAvailableVertexColours = new HashSet<BitSet>(mMapColourToVertexIDs.keySet());
-			
+
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
-					//random
-					Random random = new Random(seed); 
+					// random
+					Random random = new Random(seed);
 					seed++;
-					//max iteration of 1 edge
+					// max iteration of 1 edge
 					int maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
-					//track the index of previous iteration
+					// track the index of previous iteration
 					int iProcessingEdgeIndex = -1;
-					//set of process edges
+					// set of process edges
 					int[] arrOfEdges = setOfEdges.toIntArray();
 					// set of failed edge colours
 					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
-					
-					int j = 0 ; 
-					while( j < arrOfEdges.length ){
-						//get an edge id
+
+					int j = 0;
+					while (j < arrOfEdges.length) {
+						// get an edge id
 						int fakeEdgeId = arrOfEdges[j];
 						BitSet edgeColo = getEdgeColour(fakeEdgeId);
-						
-						if(edgeColo == null){
-							//skip the edge that has failed edge colour
+
+						if (edgeColo == null) {
+							// skip the edge that has failed edge colour
 							j++;
 							continue;
 						}
-						
-						if(failedEdgeColours.contains(edgeColo)){
-							//skip the edge that has failed edge colour
+
+						if (failedEdgeColours.contains(edgeColo)) {
+							// skip the edge that has failed edge colour
 							j++;
 							continue;
 						}
-						
-						if(iProcessingEdgeIndex != j){
+
+						if (iProcessingEdgeIndex != j) {
 							maxIterationFor1Edge = Constants.MAX_EXPLORING_TIME;
 							iProcessingEdgeIndex = j;
-						}else{
-							if(maxIterationFor1Edge == 0){
-								LOGGER.error("Could not create an edge of "
-										+ edgeColo
-										+ " colour since it could not find any approriate vertices to connect.");						
-								//skip the edge that has failed attempt after MAX_EXPLORING_TIME
+						} else {
+							if (maxIterationFor1Edge == 0) {
+								LOGGER.error("Could not create an edge of " + edgeColo
+										+ " colour since it could not find any approriate vertices to connect.");
+								// skip the edge that has failed attempt after MAX_EXPLORING_TIME
 								failedEdgeColours.add(edgeColo);
 								j++;
 								continue;
 							}
 						}
-						
-						//get potential tail colours
-						Set<BitSet> setTailColours = new HashSet<BitSet>(mColourMapper.getTailColoursFromEdgeColour(edgeColo));
+
+						// get potential tail colours
+						Set<BitSet> setTailColours = new HashSet<BitSet>(
+								mColourMapper.getTailColoursFromEdgeColour(edgeColo));
 						setTailColours.retainAll(setAvailableVertexColours);
 
 						/*
-						 * in case there is no tail colours => the edge colour should not 
-						 * be considered again
+						 * in case there is no tail colours => the edge colour should not be considered
+						 * again
 						 */
-						if(setTailColours.size() == 0){
+						if (setTailColours.size() == 0) {
 							failedEdgeColours.add(edgeColo);
 							j++;
 							continue;
 						}
-						
-						//get random a tail colour
+
+						// get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-						
-						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];	
-						Set<BitSet> setHeadColours = new HashSet<BitSet>(mColourMapper.getHeadColours(tailColo, edgeColo));
-						
-						if(setHeadColours == null || setHeadColours.size() == 0){
+
+						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];
+						Set<BitSet> setHeadColours = new HashSet<BitSet>(
+								mColourMapper.getHeadColours(tailColo, edgeColo));
+
+						if (setHeadColours == null || setHeadColours.size() == 0) {
 							maxIterationFor1Edge--;
 							continue;
 						}
 						setHeadColours.retainAll(setAvailableVertexColours);
-						
-						if(setHeadColours.size() == 0){
+
+						if (setHeadColours.size() == 0) {
 							maxIterationFor1Edge--;
 							continue;
 						}
-						
-						BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
-						
+
+						BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
+
 						BitSet headColo = arrHeadColours[random.nextInt(arrHeadColours.length)];
-						
-						//get set of tail ids and head ids
+
+						// get set of tail ids and head ids
 						IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-						
-						if(mMapColourToVertexIDs.containsKey(tailColo)){
+
+						if (mMapColourToVertexIDs.containsKey(tailColo)) {
 							setTailIDs.addAll(mMapColourToVertexIDs.get(tailColo));
 						}
-						
-						if(mMapColourToVertexIDs.containsKey(headColo)){
+
+						if (mMapColourToVertexIDs.containsKey(headColo)) {
 							setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 						}
-						
-						if(setTailIDs!= null && setTailIDs.size()> 0 && setHeadIDs!=null && setHeadIDs.size()> 0){
+
+						if (setTailIDs != null && setTailIDs.size() > 0 && setHeadIDs != null
+								&& setHeadIDs.size() > 0) {
 							int[] arrTailIDs = setTailIDs.toIntArray();
 							int tailId = -1;
 							int iAttemptToGetTailIds = 1000;
-							while(iAttemptToGetTailIds > 0){
+							while (iAttemptToGetTailIds > 0) {
 								tailId = arrTailIDs[random.nextInt(arrTailIDs.length)];
-								if(!mReversedMapClassVertices.containsKey(tailColo))
+								if (!mReversedMapClassVertices.containsKey(tailColo))
 									break;
 								tailId = -1;
-								iAttemptToGetTailIds --;	
+								iAttemptToGetTailIds--;
 							}
-							
-							if(tailId ==-1){
+
+							if (tailId == -1) {
 								maxIterationFor1Edge--;
 								continue;
 							}
-							
+
 							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
-							if(tmpSetOfConnectedHeads!= null && tmpSetOfConnectedHeads.size() >0  ){
-								//int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray(); 
-								for(int connectedHead: tmpSetOfConnectedHeads){
-									if(setHeadIDs.contains(connectedHead))
+							if (tmpSetOfConnectedHeads != null && tmpSetOfConnectedHeads.size() > 0) {
+								// int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray();
+								for (int connectedHead : tmpSetOfConnectedHeads) {
+									if (setHeadIDs.contains(connectedHead))
 										setHeadIDs.remove(connectedHead);
 								}
 							}
-							
-							if(setHeadIDs.size() == 0 ){
+
+							if (setHeadIDs.size() == 0) {
 								maxIterationFor1Edge--;
 								continue;
 							}
-							
+
 							int[] arrHeadIDs = setHeadIDs.toIntArray();
 							int headId = arrHeadIDs[random.nextInt(arrHeadIDs.length)];
 							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
-							if(isFoundVerticesConnected){
+							if (isFoundVerticesConnected) {
 								j++;
 								continue;
 							}
 						}
-						
+
 						maxIterationFor1Edge--;
 						if (maxIterationFor1Edge == 0) {
-							LOGGER.error("Could not create an edge of "
-									+ edgeColo
-									+ " colour since it could not find any approriate vertices to connect.");					
-							
+							LOGGER.error("Could not create an edge of " + edgeColo
+									+ " colour since it could not find any approriate vertices to connect.");
+
 							failedEdgeColours.add(edgeColo);
 							j++;
 						}
-						
-					}//end of for of edge ids
+
+					} // end of for of edge ids
 				}
 			};
 			tasks.add(Executors.callable(worker));
 		}
-		
+
 		try {
 			service.invokeAll(tasks);
 			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
-			LOGGER.error("Could not shutdown the service executor! Be carefule");
+			LOGGER.error("Could not shutdown the service executor! Be careful");
 			e.printStackTrace();
-		};
+		}
+		;
 	}
-	
+
 	/**
 	 * Generate graph randomly with a single thread
 	 */
-	private void generateGraphSingleThread(){
-		
+	private void generateGraphSingleThread() {
+
 		/*
-		 * mMapColourToEdgeIDs contains only normal edges (not datatype property edges and
-		 * rdf:type edges)
+		 * mMapColourToEdgeIDs contains only normal edges (not datatype property edges
+		 * and rdf:type edges)
 		 */
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
 		int iColoCounter = 0;
-		for(BitSet edgeColo : keyEdgeColo){
+		for (BitSet edgeColo : keyEdgeColo) {
 			iColoCounter++;
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
 			setTailColours.retainAll(setAvailableVertexColours);
-			
+
 			BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-			
-			/* the setFakeEdgeIDs helps us to know how many edges existing
-			 * in a specific edge's colour*/ 
+
+			/*
+			 * the setFakeEdgeIDs helps us to know how many edges existing in a specific
+			 * edge's colour
+			 */
 			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
-			LOGGER.info("Generate edges for "+edgeColo +" edge colour ("+iColoCounter+"/"+keyEdgeColo.size()+")");
-			
-			int i = 0 ;
-			while(i < setFakeEdgeIDs.size()){
-					
+			LOGGER.info("Generate edges for " + edgeColo + " edge colour (" + iColoCounter + "/" + keyEdgeColo.size()
+					+ ")");
+
+			int i = 0;
+			while (i < setFakeEdgeIDs.size()) {
+
 				boolean isFoundVerticesConnected = false;
-				BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];	
+				BitSet tailColo = arrTailColours[mRandom.nextInt(arrTailColours.length)];
 				Set<BitSet> setHeadColours = mColourMapper.getHeadColours(tailColo, edgeColo);
-				
-				if(setHeadColours == null || setHeadColours.size() ==0){
+
+				if (setHeadColours == null || setHeadColours.size() == 0) {
 					continue;
 				}
-				
+
 				setHeadColours.retainAll(setAvailableVertexColours);
-				
-				if(setHeadColours.size() ==0)
+
+				if (setHeadColours.size() == 0)
 					continue;
-				
-				BitSet [] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
+
+				BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
 				BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
 				IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 				IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				
-				if(mMapColourToVertexIDs.containsKey(tailColo)){
+
+				if (mMapColourToVertexIDs.containsKey(tailColo)) {
 					setTailIDs.addAll(mMapColourToVertexIDs.get(tailColo));
 				}
-				
-				if(mMapColourToVertexIDs.containsKey(headColo)){
+
+				if (mMapColourToVertexIDs.containsKey(headColo)) {
 					setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 				}
-				
-				if(setTailIDs!= null && setTailIDs.size()> 0 && setHeadIDs!=null && setHeadIDs.size()> 0){
+
+				if (setTailIDs != null && setTailIDs.size() > 0 && setHeadIDs != null && setHeadIDs.size() > 0) {
 					int[] arrTailIDs = setTailIDs.toIntArray();
 					int tailId = -1;
-					while(true){
+					while (true) {
 						tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
-						if(!mReversedMapClassVertices.containsKey(tailColo))
+						if (!mReversedMapClassVertices.containsKey(tailColo))
 							break;
 					}
-					
-					int[] arrConnectedHeads = getConnectedHeads(tailId,edgeColo).toIntArray(); 
-					for(int connectedHead: arrConnectedHeads){
-						if(setHeadIDs.contains(connectedHead))
+
+					int[] arrConnectedHeads = getConnectedHeads(tailId, edgeColo).toIntArray();
+					for (int connectedHead : arrConnectedHeads) {
+						if (setHeadIDs.contains(connectedHead))
 							setHeadIDs.remove(connectedHead);
 					}
-					
-					if(setHeadIDs.size() == 0 ){
+
+					if (setHeadIDs.size() == 0) {
 						continue;
 					}
-					
+
 					int[] arrHeadIDs = setHeadIDs.toIntArray();
 					int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
 					isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
-					if(isFoundVerticesConnected){
-						isFoundVerticesConnected = true;	
+					if (isFoundVerticesConnected) {
+						isFoundVerticesConnected = true;
 						i++;
 					}
-//						else{
-//							System.err.println("Found same vertices to connect");
-//						}
 				}
-//					else{
-//						System.err.println("Could not find any vertices with the tail's or head's colours!");
-//						LOGGER.warn("Could not find any vertices with the tail's or head's colours!");
-//					}
-				
+
 				if (!isFoundVerticesConnected) {
-					maxIterationFor1EdgeColo--;
-					if (maxIterationFor1EdgeColo == 0) {
-						LOGGER.error("Could not create "
-								+ (setFakeEdgeIDs.size() - i)
-								+ " edges in the "
-								+ edgeColo
-								+ " colour since it could not find any approriate vertices to connect.");
-						
-						System.err.println("Could not create "
-								+ (setFakeEdgeIDs.size() - i)
-								+ " edges in the "
-								+ edgeColo
+					maxIterationFor1EdgeColour--;
+					if (maxIterationFor1EdgeColour == 0) {
+						LOGGER.error("Could not create " + (setFakeEdgeIDs.size() - i) + " edges in the " + edgeColo
 								+ " colour since it could not find any approriate vertices to connect.");
 						break;
 					}
 				}
 			}
-			
-			maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
+			// reset
+			maxIterationFor1EdgeColour = Constants.MAX_ITERATION_FOR_1_COLOUR;
 		}
 	}
-	
+
 }

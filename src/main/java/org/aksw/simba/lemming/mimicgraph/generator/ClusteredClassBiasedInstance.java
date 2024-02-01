@@ -35,9 +35,14 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration implements IGraphGeneration{
+/**
+ *  Implementation of the Clustered Class Selection - Biased Instance Selection
+ * (BCS-BIS) from the paper.
+ *
+ */
+public class ClusteredClassBiasedInstance extends AbstractGraphGeneration implements IGraphGeneration{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationClusteringBased2.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ClusteredClassBiasedInstance.class);
 	
 	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
@@ -56,7 +61,7 @@ public class GraphGenerationClusteringBased2 extends AbstractGraphGeneration imp
 	 */
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
 	
-	public GraphGenerationClusteringBased2(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+	public ClusteredClassBiasedInstance(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();

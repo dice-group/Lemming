@@ -26,12 +26,12 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeTriangleMetric;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.NodeTriangleMetric;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationClusteringBased2;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationRandomly2;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerationSimpleApproach2;
+import org.aksw.simba.lemming.mimicgraph.generator.ClusteredClassSelection;
+import org.aksw.simba.lemming.mimicgraph.generator.ClusteredClassBiasedInstance;
+import org.aksw.simba.lemming.mimicgraph.generator.UniformClassSelection;
+import org.aksw.simba.lemming.mimicgraph.generator.UniformClassBiasedInstance;
+import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassSelection;
+import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassBiasedInstance;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
@@ -184,19 +184,19 @@ public class GraphGenerationTest {
         //define generator
         String typeGenerator = mapArgs.get("-t");
         if(typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("R")){
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
+        	mGrphGenerator = new UniformClassSelection(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }else if(typeGenerator.equalsIgnoreCase("RD")){
-        	mGrphGenerator = new GraphGenerationRandomly2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new UniformClassBiasedInstance(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("D")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new BiasedClassSelection(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("DD")){
-        	mGrphGenerator = new GraphGenerationSimpleApproach2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new BiasedClassBiasedInstance(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         }else if(typeGenerator.equalsIgnoreCase("C")){
-        	mGrphGenerator = new GraphGenerationClusteringBased(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
+        	mGrphGenerator = new ClusteredClassSelection(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);        	
         }else if(typeGenerator.equalsIgnoreCase("CD")){
-        	mGrphGenerator = new GraphGenerationClusteringBased2(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
+        	mGrphGenerator = new ClusteredClassBiasedInstance(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
         } else{
-        	mGrphGenerator = new GraphGenerationRandomly(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
+        	mGrphGenerator = new UniformClassSelection(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);       	
         }
 
         double startTime = System.currentTimeMillis();

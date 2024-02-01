@@ -28,9 +28,14 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements IGraphGeneration{
+/**
+ * Implementation of the Uniform Class Selection - Biased Instance Selection
+ * (UCS-BIS) from the paper.
+ *
+ */
+public class UniformClassBiasedInstance extends AbstractGraphGeneration implements IGraphGeneration{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationRandomly2.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UniformClassBiasedInstance.class);
 	private int maxIterationFor1EdgeColo ;
 	private Random mRandom;
 	/*
@@ -46,7 +51,7 @@ public class GraphGenerationRandomly2 extends AbstractGraphGeneration implements
 	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleIDegreePerIEColo;
 	
 	
-	public GraphGenerationRandomly2(int iNumberOfVertices,
+	public UniformClassBiasedInstance(int iNumberOfVertices,
 			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		maxIterationFor1EdgeColo = Constants.MAX_ITERATION_FOR_1_COLOUR;
