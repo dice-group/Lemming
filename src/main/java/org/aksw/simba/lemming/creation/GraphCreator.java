@@ -61,6 +61,7 @@ public class GraphCreator {
 	}
 
 	public ColouredGraph processModel(Model model) {
+		
 		ColourPalette vertexPalette = createVertexPalette(model);
 		ColourPalette edgePalette = createEdgePalette(model);
 		ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
@@ -94,6 +95,15 @@ public class GraphCreator {
 				}
 				// Add the property if it is not existing
 				property = statement.getPredicate();
+				
+				// if this triple defines the class of the subject
+				if (property.equals(RDF.type)) {
+					graph.setVertexColour(subjectId,
+							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
+					// skip, we don't want to add the edge to the graph
+					continue;
+				}
+				
 				propertyId = graph.addEdge(subjectId, objectId);
 				// Set the colour of the edge
 				propertyUri = property.getURI();
@@ -101,12 +111,6 @@ public class GraphCreator {
 					edgePalette.addColour(propertyUri);
 				}
 				graph.setEdgeColour(propertyId, edgePalette.getColour(propertyUri));
-
-				// if this triple defines the class of the subject
-				if (property.equals(RDF.type)) {
-					graph.setVertexColour(subjectId,
-							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
-				}
 			}
 
 			/*
