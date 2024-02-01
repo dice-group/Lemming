@@ -98,7 +98,7 @@ public class BuildBaselineGraph {
 			seed = Long.parseLong(seedString);
 		}
 
-		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
+		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles();
 		double startTime = System.currentTimeMillis();
 		BaselineGenerator mGrphGenerator = new BaselineGenerator(noVertices, graphs, seed, valuesCarrier, metrics);
 		double duration = System.currentTimeMillis() - startTime;

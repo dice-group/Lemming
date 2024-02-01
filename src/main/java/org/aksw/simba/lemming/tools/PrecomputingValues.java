@@ -118,7 +118,7 @@ public class PrecomputingValues {
         	datasetPath = GEOLOGY_DATASET_FOLDER_PATH;
         	mDatasetManager = new GeologyDataset();
         }
-        graphs = mDatasetManager.readGraphsFromFiles(datasetPath);
+        graphs = mDatasetManager.readGraphsFromFiles();
 
         // compute metrics for each graph here
         ConstantValueStorage valueCarrier = new ConstantValueStorage(datasetPath);

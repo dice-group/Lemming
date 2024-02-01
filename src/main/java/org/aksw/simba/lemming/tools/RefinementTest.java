@@ -75,7 +75,7 @@ public class RefinementTest {
         }
 
         if (USE_SEMANTIC_DOG_FOOD) {
-            graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
+            graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles();
         }
 
         // FitnessFunction fitnessFunc = new MinSquaredError();
