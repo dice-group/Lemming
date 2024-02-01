@@ -17,19 +17,22 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.expression.ExpressionIterator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.tools.RefinementTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
+@Component
 public class ConstantValueStorage implements Serializable	{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConstantValueStorage.class);
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final String METRIC_CACHE_NAME = "value_store.val"; 
+	@Value("${metrics.store}")
+	private static String METRIC_CACHE_NAME; 
 	private Map<String, ValueStorage> mMapValueStorage ;
 	
 	private String mDataSetPath;
@@ -91,7 +94,9 @@ public class ConstantValueStorage implements Serializable	{
 				}
 			}
 		}
-		
+		if(!isExistingMetric) {
+			throw new IllegalStateException("The list of metrics has some metrics that don't exist in the precomputed metric values.");
+		}
 		return isExistingMetric;
 	}
 	

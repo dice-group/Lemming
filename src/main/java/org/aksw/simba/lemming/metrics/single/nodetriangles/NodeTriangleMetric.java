@@ -11,10 +11,12 @@ import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+@Component("nodetriangle")
 public class NodeTriangleMetric extends AbstractMetric implements SingleValueMetric {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeTriangleMetric.class);

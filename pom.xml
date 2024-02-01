@@ -10,10 +10,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.target>1.8</maven.compiler.target>
-		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
 		<slf4j.version>1.7.15</slf4j.version>
-		<junit.version>4.11</junit.version>
+		<junit.version>4.13.2</junit.version>
+		<spring.boot.version>2.6.3</spring.boot.version>
 	</properties>
 
 	<repositories>
@@ -23,19 +24,31 @@
 			<name>Luc Hogie Maven repository</name>
 			<url>http://www.i3s.unice.fr/~hogie/maven_repository/</url>
 		</repository>
-        <repository>
-            <id>maven.aksw.internal</id>
-            <name>University Leipzig, AKSW Maven2 Repository</name>
-            <url>https://maven.aksw.org/repository/internal</url>
-        </repository>
-        <repository>
-            <id>maven.aksw.snapshots</id>
-            <name>University Leipzig, AKSW Maven2 Repository</name>
-            <url>https://maven.aksw.org/repository/snapshots</url>
-        </repository>
+		<repository>
+			<id>maven.aksw.internal</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>https://maven.aksw.org/repository/internal</url>
+		</repository>
+		<repository>
+			<id>maven.aksw.snapshots</id>
+			<name>University Leipzig, AKSW Maven2 Repository</name>
+			<url>https://maven.aksw.org/repository/snapshots</url>
+		</repository>
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-logging</artifactId>
+			<version>${spring.boot.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<version>${spring.boot.version}</version>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.aksw</groupId>
 			<artifactId>word2vec-restful-webservice</artifactId>
@@ -51,7 +64,7 @@
 			<groupId>grph</groupId>
 			<artifactId>grph</artifactId>
 			<version>2.1.2</version>
-		</dependency> 
+		</dependency>
 		<!-- Jena 3.6 -->
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -73,7 +86,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>23.6-jre</version>
+			<version>33.0.0-jre</version>
 		</dependency>
 
 		<!-- JMH Benchmark -->
@@ -127,6 +140,12 @@
 		</dependency>
 		<!-- End JMH Benchmark -->
 
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+			<version>1.78</version>
+		</dependency>
+
 		<!-- ~~~~~~~~~~~~~~~~~~~ End Testing ~~~~~~~~~~~~~~~~~~~~~~ -->
 	</dependencies>
 
@@ -143,7 +162,8 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>org.aksw.simba.lemming.tools.RefinementTest</mainClass>
+							<mainClass>
+								org.aksw.simba.lemming.tools.RefinementTest</mainClass>
 							<addClasspath>true</addClasspath>
 						</manifest>
 					</archive>
@@ -158,11 +178,13 @@
 					<transformers>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<mainClass>org.aksw.simba.lemming.tools.GraphGenerationTest</mainClass>
+							<mainClass>
+								org.aksw.simba.lemming.tools.GraphGenerationTest</mainClass>
 						</transformer>
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer" />
-						<!-- We need the combined service resources of the jena framework -->
+						<!-- We need the combined service resources of the jena
+						framework -->
 						<transformer
 							implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
 					</transformers>
@@ -170,7 +192,8 @@
 						<filter>
 							<artifact>*:*</artifact>
 							<excludes>
-								<!-- Some jars are signed but shading breaks that. Don't include 
+								<!-- Some jars are signed but shading breaks
+								that. Don't include 
 									signing files. -->
 								<exclude>META-INF/*.SF</exclude>
 								<exclude>META-INF/*.DSA</exclude>
@@ -187,6 +210,10 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

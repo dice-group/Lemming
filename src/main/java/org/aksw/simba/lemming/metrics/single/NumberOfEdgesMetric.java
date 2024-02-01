@@ -4,6 +4,7 @@ import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.springframework.stereotype.Component;
 
 /**
  * This metric is the number of edges of the graph.
@@ -11,6 +12,7 @@ import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
+@Component("#edges")
 public class NumberOfEdgesMetric extends AbstractMetric implements SingleValueMetric {
 
     public NumberOfEdgesMetric() {

@@ -29,6 +29,7 @@ import com.carrotsearch.hppc.ObjectArrayList;
 public class AbstractDatasetManager implements IDatasetManager{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatasetManager.class);
 	protected String mDatasetName;
+	protected String dataFolderPath;
 	
 	public AbstractDatasetManager(String datasetName){
 		mDatasetName = datasetName;
@@ -42,6 +43,15 @@ public class AbstractDatasetManager implements IDatasetManager{
 		mDatasetName = datasetName;
 	}
 	
+	
+	public String getDataFolderPath() {
+		return dataFolderPath;
+	}
+
+	public void setDataFolderPath(String dataFolderPath) {
+		this.dataFolderPath = dataFolderPath;
+	}
+
 	@Override
 	public String writeGraphsToFile(ColouredGraph grph) {
 		Model datasetModel = ModelFactory.createDefaultModel();
@@ -88,7 +98,7 @@ public class AbstractDatasetManager implements IDatasetManager{
 	}
 
 	@Override
-	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
+	public ColouredGraph[] readGraphsFromFiles() {
 		return null;
 	}
 

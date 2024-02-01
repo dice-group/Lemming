@@ -4,6 +4,7 @@ import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.springframework.stereotype.Component;
 
 import grph.path.ArrayListPath;
 
@@ -13,6 +14,7 @@ import grph.path.ArrayListPath;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
+@Component("diameter")
 public class DiameterMetric extends AbstractMetric implements SingleValueMetric {
 
     public DiameterMetric() {

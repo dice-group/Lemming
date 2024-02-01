@@ -4,6 +4,8 @@ import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.springframework.stereotype.Component;
+
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 import grph.Grph.DIRECTION;
@@ -14,6 +16,7 @@ import grph.Grph.DIRECTION;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
+@Component
 public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValueMetric {
 
     protected DIRECTION direction;

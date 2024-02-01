@@ -12,16 +12,22 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component("geology") 
 public class GeologyDataset extends AbstractDatasetManager implements IDatasetManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeologyDataset.class);
+	
+	@Value("${datasets.geology.filepath}")
+	String dataFolderPath;
 
 	public GeologyDataset() {
 		super("Geology");
 	}
 
 	@Override
-	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
+	public ColouredGraph[] readGraphsFromFiles() {
 		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
 		GraphCreator creator = new GraphCreator();
 
@@ -61,6 +67,7 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
+
 
 //	public static void main(String[] args) {
 //		String DATA_FOLDER_PATH = "GeologyGraphs/";

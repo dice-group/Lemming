@@ -1,0 +1,100 @@
+package org.aksw.simba.lemming.configuration;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.stereotype.Component;
+
+import grph.Grph.DIRECTION;
+
+/**
+ * Bean configuration file
+ * 
+ * @author Ana Silva
+ *
+ */
+@Configuration
+@PropertySource(value = "classpath:application.properties")
+public class BeanFactory {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(BeanFactory.class);
+
+	@Autowired
+	private ApplicationContext applicationContext;
+
+	/** Supported datasets and respective folder path */
+	@Value("#{PropertySplitter.toSet('${datasets.allowed}')}")
+	private Set<String> allowedDatasets;
+
+	@Value("#{PropertySplitter.toSet('${metrics}')}")
+	private Set<String> metrics;
+
+	@Bean
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+		return new PropertySourcesPlaceholderConfigurer();
+	}
+
+	@Bean(name = "maxindegree")
+	public MaxVertexDegreeMetric createMaxVertexDegreeMetricIn() {
+		return new MaxVertexDegreeMetric(DIRECTION.in);
+	}
+
+	@Bean(name = "maxoutdegree")
+	public MaxVertexDegreeMetric createMaxVertexDegreeMetricOut() {
+		return new MaxVertexDegreeMetric(DIRECTION.out);
+	}
+
+	@Bean(name = "stdindegree")
+	public StdDevVertexDegree createStdDevVertexDegreeIn() {
+		return new StdDevVertexDegree(DIRECTION.in);
+	}
+
+	@Bean(name = "stdoutdegree")
+	public StdDevVertexDegree createStdDevVertexDegreeOut() {
+		return new StdDevVertexDegree(DIRECTION.out);
+	}
+
+	@Bean(name = "metrics")
+	public List<SingleValueMetric> getMetrics() {
+		List<SingleValueMetric> finalMetrics = new ArrayList<>();
+		for (String metric : metrics) {
+			SingleValueMetric met = applicationContext.getBean(metric, SingleValueMetric.class);
+			finalMetrics.add(met);
+		}
+		return finalMetrics;
+	}
+
+}
+
+/**
+ * This class can be used to parse string arrays as Set<String> from the
+ * properties file.
+ * 
+ * @author Ana Silva
+ *
+ */
+@Component("PropertySplitter")
+class PropertySplitter {
+	public Set<String> toSet(String property) {
+		Set<String> set = new HashSet<String>();
+		if (!property.trim().isEmpty()) {
+			Collections.addAll(set, property.split(","));
+		}
+		return set;
+	}
+}

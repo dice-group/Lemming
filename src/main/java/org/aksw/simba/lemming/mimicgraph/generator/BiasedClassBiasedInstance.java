@@ -25,6 +25,7 @@ import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
@@ -37,6 +38,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * (BCS-BIS) from the paper.
  *
  */
+@Component("BCSBIS")
 public class BiasedClassBiasedInstance extends AbstractGraphGeneration implements IGraphGeneration {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BiasedClassBiasedInstance.class);
 

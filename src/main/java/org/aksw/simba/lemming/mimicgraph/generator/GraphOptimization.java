@@ -4,27 +4,18 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphDecorator;
-import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
@@ -280,7 +271,7 @@ public class GraphOptimization {
      * @param startingTime the starting time of generation process
      * @param savedFile    the saved file's name of the mimic dataset
      */
-    public void printResult(Map<String, String> args, double startingTime, String savedFile, long seed) {
+    public void printResult(String args, double startingTime, String savedFile, long seed) {
         BufferedWriter fWriter;
         try {
             LOGGER.warn("Output results to file!");
@@ -304,22 +295,7 @@ public class GraphOptimization {
             fWriter.write("# Duration: " + ((int) (mOptimizedTime - startingTime) / 1000) + " (s).\n");
             fWriter.write("# Optimization: " + mTrueNoOfIteration + "/" + mMaxIteration + " iterations\n");
             fWriter.write("# Seed: " + seed + "\n");
-            if (args != null && args.size() > 0) {
-                // dataset
-                if (args.containsKey("-ds")) {
-                    // fWriter.write("# Input dataset: " + (args.get("-ds").equals("pg")?
-                    // "PersonGraph" : "Sematic Web Dog Food")+ ".\n");
-                    fWriter.write("# Input dataset: " + args.get("-ds") + ".\n");
-                } else {
-                    fWriter.write("# Default input dataset: Sematic Web Dog Food.\n");
-                }
-                // generation approach
-                if (args.containsKey("-t")) {
-                    fWriter.write("# Generation approach: " + args.get("-t") + ".\n");
-                } else {
-                    fWriter.write("# Defaule generation approach: random generation.\n");
-                }
-            }
+            fWriter.write(args);
 
             fWriter.write("#----------------------------------------------------------------------#\n");
 

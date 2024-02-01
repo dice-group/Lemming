@@ -10,20 +10,26 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component("swdf") 
 public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements IDatasetManager{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodDataset.class);
 
     private static final int START_YEAR = 2001;
     private static final int END_YEAR = 2019;
+    
+    @Value("${datasets.swdf.filepath}")
+	String dataFolderPath;
 
     public SemanticWebDogFoodDataset() {
 		super("SemanticWebDogFood");
 	}
     
     @Override
-    public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
+    public ColouredGraph[] readGraphsFromFiles() {
         Model dogFoodModel = ModelFactory.createDefaultModel();
         
         List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
@@ -87,6 +93,11 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                 System.exit(1);
             }
         }
+    }
+    
+    @Override
+    public String toString() {
+    	return "swdf";
     }
 
 //    public static void main(String[] args) {

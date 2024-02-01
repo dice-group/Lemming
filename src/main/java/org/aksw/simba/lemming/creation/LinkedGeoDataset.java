@@ -12,17 +12,23 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component("lgeo") 
 public class LinkedGeoDataset extends AbstractDatasetManager implements IDatasetManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedGeoDataset.class);
+	
+	@Value("${datasets.lgeo.filepath}")
+	String dataFolderPath;
 
 	public LinkedGeoDataset() {
 		super("LinkedGeo");
 	}
 
 	@Override
-	public ColouredGraph[] readGraphsFromFiles(String dataFolderPath) {
+	public ColouredGraph[] readGraphsFromFiles() {
 		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
 		GraphCreator creator = new GraphCreator();
 
@@ -78,6 +84,11 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 		}
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
+	}
+	
+	@Override
+	public String toString() {
+		return "lgeo";
 	}
 	
 //	public static void main(String[] args) {
