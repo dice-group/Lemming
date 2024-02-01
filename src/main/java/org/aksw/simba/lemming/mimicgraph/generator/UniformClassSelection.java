@@ -20,13 +20,13 @@ import com.carrotsearch.hppc.BitSet;
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-public class GraphGenerationRandomly extends AbstractGraphGeneration implements IGraphGeneration{
+public class UniformClassSelection extends AbstractGraphGeneration implements IGraphGeneration{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationRandomly.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(UniformClassSelection.class);
 	private int maxIterationFor1EdgeColo ;
 	private Random mRandom; 
 	
-	public GraphGenerationRandomly(int iNumberOfVertices,
+	public UniformClassSelection(int iNumberOfVertices,
 			ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		mRandom = new Random(this.seed);
