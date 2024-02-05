@@ -20,31 +20,32 @@ import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-@Component
-@Scope(value = "prototype")
 public class ConstantValueStorage implements Serializable	{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConstantValueStorage.class);
 	
 	private static final long serialVersionUID = 1L;
 	
-	@Value("${metrics.store}")
-	private String METRIC_CACHE_NAME; 
+	private final String METRIC_CACHE_NAME; 
+	
 	private Map<String, ValueStorage> mMapValueStorage ;
 	
 	private String mDataSetPath;
 	
-	@Value("#{PropertySplitter.toList('${metrics}')}")
 	private List<SingleValueMetric> metrics;
 	
-	public ConstantValueStorage(String datasetPath){
+	public ConstantValueStorage(String cacheName, String datasetPath, List<SingleValueMetric> metrics){
 		//load value from file
+		this.METRIC_CACHE_NAME = cacheName;
+		this.metrics = metrics;
 		LOGGER.info("Load metric values and constants values from file: " + METRIC_CACHE_NAME);
 		mDataSetPath = datasetPath;
 		loadData();

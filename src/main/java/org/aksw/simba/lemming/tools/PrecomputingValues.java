@@ -68,8 +68,7 @@ public class PrecomputingValues {
 
 		// Compute metrics for each graph
 		LOGGER.info("Compute metric values for graph ......");
-		ConstantValueStorage valueCarrier = application.getBean(ConstantValueStorage.class,
-				mDatasetManager.getDatasetPath());
+		ConstantValueStorage valueCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
 		ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.computeMetrics(graphs, pArgs.recalculateMetrics);
 
 		// Compute constant expressions with metrics from above

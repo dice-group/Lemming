@@ -10,9 +10,11 @@ import java.util.Set;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -38,11 +40,12 @@ public class BeanFactory {
 
 	@Autowired
 	private ApplicationContext applicationContext;
-
 	
-
-	@Value("#{PropertySplitter.toSet('${metrics}')}")
-	private Set<String> metrics;
+	@Value("${metrics.store}") 
+	private String cacheName;
+	
+	@Value("#{PropertySplitter.toList('${metrics}')}")
+	private List<String> metrics;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -82,6 +85,15 @@ public class BeanFactory {
 		}
 		return finalMetrics;
 	}
+	
+	@Autowired
+	List<SingleValueMetric> finalMetrics;
+
+	@Bean
+	@Scope(value = "prototype")
+	public ConstantValueStorage constantValueStorage(String datasetPath) {
+		return new ConstantValueStorage(cacheName, datasetPath, finalMetrics);
+	}
 
 }
 
@@ -101,12 +113,12 @@ class PropertySplitter {
 		}
 		return set;
 	}
-	
+
 	public List<String> toList(String property) {
-        List<String> list = new ArrayList<>();
-        if (!property.trim().isEmpty()) {
-            list.addAll(Arrays.asList(property.split(",")));
-        }
-        return list;
-    }
+		List<String> list = new ArrayList<>();
+		if (!property.trim().isEmpty()) {
+			list.addAll(Arrays.asList(property.split(",")));
+		}
+		return list;
+	}
 }

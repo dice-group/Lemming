@@ -24,6 +24,9 @@ import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
 
 import grph.Grph.DIRECTION;
 
@@ -42,6 +45,9 @@ public class BuildBaselineGraph {
 	private static final String GEOLOGY_DATASET_FOLDER_PATH = "GeologyGraphs/";
 
 	public static void main(String[] args) {
+		// Start spring
+		ConfigurableApplicationContext application = new SpringApplicationBuilder(GraphGenerationTest.class)
+						.web(WebApplicationType.NONE).run(args);
 		IDatasetManager mDatasetManager;
 		ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(false);
 		Map<String, String> mapArgs = parseArguments(args);
@@ -78,7 +84,7 @@ public class BuildBaselineGraph {
 		metrics.add(new NumberOfEdgesMetric());
 		metrics.add(new NumberOfVerticesMetric());
 
-		ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
+		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
 		if (!valuesCarrier.isComputableMetrics()) {
 			LOGGER.error(
 					"The list of metrics has some metrics that are not existing in the precomputed metric values.");

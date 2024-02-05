@@ -3,7 +3,6 @@ package org.aksw.simba.lemming.tools;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.AbstractDatasetManager;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassBiasedInstance;
@@ -24,8 +23,6 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import com.beust.jcommander.JCommander;
-
-import jakarta.annotation.Resource;
 
 @SpringBootApplication
 public class GraphGenerationTest {
@@ -53,7 +50,7 @@ public class GraphGenerationTest {
 		graphs = mDatasetManager.readGraphsFromFiles();
 
 		// Load and verify metric values and constant expressions
-		ConstantValueStorage valuesCarrier = new ConstantValueStorage(mDatasetManager.getDatasetPath());
+		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
 		metrics = valuesCarrier.getMetricsOfExpressions(metrics);
 		valuesCarrier.isComputableMetrics();
 
