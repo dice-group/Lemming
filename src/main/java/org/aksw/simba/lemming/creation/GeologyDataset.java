@@ -13,9 +13,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("geology") 
+//@Scope(value = "prototype")
 public class GeologyDataset extends AbstractDatasetManager implements IDatasetManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeologyDataset.class);
 	
@@ -24,6 +26,11 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 
 	public GeologyDataset() {
 		super("Geology");
+	}
+	
+	@Override
+	public String getDatasetPath() {
+		return dataFolderPath;
 	}
 
 	@Override

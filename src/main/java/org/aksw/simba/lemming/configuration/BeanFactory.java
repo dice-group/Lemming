@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.configuration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.stereotype.Component;
 
@@ -37,9 +39,7 @@ public class BeanFactory {
 	@Autowired
 	private ApplicationContext applicationContext;
 
-	/** Supported datasets and respective folder path */
-	@Value("#{PropertySplitter.toSet('${datasets.allowed}')}")
-	private Set<String> allowedDatasets;
+	
 
 	@Value("#{PropertySplitter.toSet('${metrics}')}")
 	private Set<String> metrics;
@@ -50,21 +50,25 @@ public class BeanFactory {
 	}
 
 	@Bean(name = "maxindegree")
+	@Scope(value = "prototype")
 	public MaxVertexDegreeMetric createMaxVertexDegreeMetricIn() {
 		return new MaxVertexDegreeMetric(DIRECTION.in);
 	}
 
 	@Bean(name = "maxoutdegree")
+	@Scope(value = "prototype")
 	public MaxVertexDegreeMetric createMaxVertexDegreeMetricOut() {
 		return new MaxVertexDegreeMetric(DIRECTION.out);
 	}
 
 	@Bean(name = "stdindegree")
+	@Scope(value = "prototype")
 	public StdDevVertexDegree createStdDevVertexDegreeIn() {
 		return new StdDevVertexDegree(DIRECTION.in);
 	}
 
 	@Bean(name = "stdoutdegree")
+	@Scope(value = "prototype")
 	public StdDevVertexDegree createStdDevVertexDegreeOut() {
 		return new StdDevVertexDegree(DIRECTION.out);
 	}
@@ -97,4 +101,12 @@ class PropertySplitter {
 		}
 		return set;
 	}
+	
+	public List<String> toList(String property) {
+        List<String> list = new ArrayList<>();
+        if (!property.trim().isEmpty()) {
+            list.addAll(Arrays.asList(property.split(",")));
+        }
+        return list;
+    }
 }

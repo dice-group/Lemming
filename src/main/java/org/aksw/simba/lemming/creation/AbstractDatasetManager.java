@@ -26,10 +26,9 @@ import org.slf4j.LoggerFactory;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
-public class AbstractDatasetManager implements IDatasetManager{
+public abstract class AbstractDatasetManager implements IDatasetManager{
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatasetManager.class);
 	protected String mDatasetName;
-	protected String dataFolderPath;
 	
 	public AbstractDatasetManager(String datasetName){
 		mDatasetName = datasetName;
@@ -41,15 +40,6 @@ public class AbstractDatasetManager implements IDatasetManager{
 	
 	public void setDatasetName(String datasetName){
 		mDatasetName = datasetName;
-	}
-	
-	
-	public String getDataFolderPath() {
-		return dataFolderPath;
-	}
-
-	public void setDataFolderPath(String dataFolderPath) {
-		this.dataFolderPath = dataFolderPath;
 	}
 
 	@Override

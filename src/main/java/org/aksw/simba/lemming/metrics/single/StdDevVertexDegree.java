@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-@Component
+//@Component
 public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     protected DIRECTION direction;

@@ -13,9 +13,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("lgeo") 
+//@Scope(value = "prototype")
 public class LinkedGeoDataset extends AbstractDatasetManager implements IDatasetManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedGeoDataset.class);
@@ -25,6 +27,11 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 
 	public LinkedGeoDataset() {
 		super("LinkedGeo");
+	}
+	
+	@Override
+	public String getDatasetPath() {
+		return dataFolderPath;
 	}
 
 	@Override

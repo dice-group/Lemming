@@ -16,7 +16,7 @@ import grph.Grph.DIRECTION;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
-@Component
+//@Component
 public class MaxVertexDegreeMetric extends AbstractMetric implements SingleValueMetric {
 
     protected DIRECTION direction;

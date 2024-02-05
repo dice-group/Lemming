@@ -2,10 +2,9 @@ package org.aksw.simba.lemming.tools;
 
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.AbstractDatasetManager;
+import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassBiasedInstance;
 import org.aksw.simba.lemming.mimicgraph.generator.BiasedClassSelection;
@@ -26,35 +25,37 @@ import org.springframework.context.ConfigurableApplicationContext;
 
 import com.beust.jcommander.JCommander;
 
+import jakarta.annotation.Resource;
+
 @SpringBootApplication
 public class GraphGenerationTest {
 
 	// Logging object
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerationTest.class);
-	
+
 	// Load metrics from configuration
-	@Resource(name="metrics")
+//	@Resource(name="metrics")
 	private static List<SingleValueMetric> metrics;
 
 	public static void main(String[] args) {
-		
+
 		// Start spring
 		ConfigurableApplicationContext application = new SpringApplicationBuilder(GraphGenerationTest.class)
 				.web(WebApplicationType.NONE).run(args);
-		
+
 		// Parse arguments
 		GraphGenerationArgs pArgs = new GraphGenerationArgs();
 		JCommander.newBuilder().addObject(pArgs).build().parse(args);
 
-		// Load RDF graphs into ColouredGraph models 
-		AbstractDatasetManager mDatasetManager = (AbstractDatasetManager) application.getBean(pArgs.dataset);
+		// Load RDF graphs into ColouredGraph models
+		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
 		ColouredGraph graphs[] = new ColouredGraph[20];
 		graphs = mDatasetManager.readGraphsFromFiles();
 
-		// Load and verify metric values and constant expressions 
-		ConstantValueStorage valuesCarrier = new ConstantValueStorage(mDatasetManager.getDataFolderPath());
+		// Load and verify metric values and constant expressions
+		ConstantValueStorage valuesCarrier = new ConstantValueStorage(mDatasetManager.getDatasetPath());
 		metrics = valuesCarrier.getMetricsOfExpressions(metrics);
-		valuesCarrier.isComputableMetrics(metrics); 
+		valuesCarrier.isComputableMetrics();
 
 		/*---------------------------------------------------
 		Generation for a draft graph
@@ -65,6 +66,7 @@ public class GraphGenerationTest {
 		int iNumberOfThreads = pArgs.noThreads;
 		int mNumberOfDesiredVertices = pArgs.noVertices;
 		IGraphGeneration mGrphGenerator;
+		mGrphGenerator = (IGraphGeneration) application.getBean(pArgs.typeGenerator);
 		long seed = pArgs.seed;
 		if (typeGenerator == null || typeGenerator.isEmpty() || typeGenerator.equalsIgnoreCase("UCSUIS")) {
 			mGrphGenerator = new UniformClassSelection(mNumberOfDesiredVertices, graphs, iNumberOfThreads, seed);
@@ -132,7 +134,7 @@ public class GraphGenerationTest {
 		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
 				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()));
 
-		// output results to file "LemmingEx.result" 
+		// output results to file "LemmingEx.result"
 		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, seed);
 		LOGGER.info("Application exits!!!");
 	}

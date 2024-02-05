@@ -16,15 +16,18 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.algo.expression.Expression;
 import org.aksw.simba.lemming.algo.expression.ExpressionIterator;
+import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 @Component
+@Scope(value = "prototype")
 public class ConstantValueStorage implements Serializable	{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConstantValueStorage.class);
@@ -32,10 +35,13 @@ public class ConstantValueStorage implements Serializable	{
 	private static final long serialVersionUID = 1L;
 	
 	@Value("${metrics.store}")
-	private static String METRIC_CACHE_NAME; 
+	private String METRIC_CACHE_NAME; 
 	private Map<String, ValueStorage> mMapValueStorage ;
 	
 	private String mDataSetPath;
+	
+	@Value("#{PropertySplitter.toList('${metrics}')}")
+	private List<SingleValueMetric> metrics;
 	
 	public ConstantValueStorage(String datasetPath){
 		//load value from file
@@ -83,11 +89,11 @@ public class ConstantValueStorage implements Serializable	{
 		}
 	}
 	
-	public boolean isComputableMetrics(List<SingleValueMetric> lstMetrics){
+	public boolean isComputableMetrics(){
 		boolean isExistingMetric = true;
-		if(lstMetrics != null){
+		if(metrics != null){
 			ValueStorage mValueStorage = mMapValueStorage.get(mDataSetPath);
-			for(SingleValueMetric metric: lstMetrics){
+			for(SingleValueMetric metric: metrics){
 				if(!mValueStorage.isExistingMetric(metric.getName())){
 					isExistingMetric = false;
 					break;
@@ -100,13 +106,13 @@ public class ConstantValueStorage implements Serializable	{
 		return isExistingMetric;
 	}
 	
-	public ObjectDoubleOpenHashMap<String>[] getGraphMetricsVector(ColouredGraph[] graphs, List<SingleValueMetric> metrics){
+	public ObjectDoubleOpenHashMap<String>[] getGraphMetricsVector(ColouredGraph[] graphs){
 		if(graphs != null && graphs.length > 0 && metrics != null & metrics.size() > 0){
 			
 			ObjectDoubleOpenHashMap<String> graphVectors[] = new ObjectDoubleOpenHashMap[graphs.length];
 			int i = 0 ; 
 			for(ColouredGraph grph: graphs){
-				ObjectDoubleOpenHashMap<String> objMapMetricValues = getMetricValues(grph, metrics);
+				ObjectDoubleOpenHashMap<String> objMapMetricValues = getMetricValues(grph);
 				if(objMapMetricValues!= null){
 					graphVectors[i]=objMapMetricValues;
 				}else{
@@ -137,7 +143,7 @@ public class ConstantValueStorage implements Serializable	{
 		mValueStorage.setConstantValues(mapConstantValues);
 	}
 	
-	public ObjectDoubleOpenHashMap<String> getMetricValues(ColouredGraph grph, List<SingleValueMetric> metrics){
+	public ObjectDoubleOpenHashMap<String> getMetricValues(ColouredGraph grph){
 		String keyOfGraph = generateGraphKey(grph);
 		//get list of metric name
 		Set<String> metricNames = new HashSet<String>();
@@ -268,5 +274,48 @@ public class ConstantValueStorage implements Serializable	{
 	    }
 	    
 	    return metrics;
+	}
+	
+	/**
+	 * get value of each metric applied on each graph
+	 * 
+	 * @param origGrphs
+	 * @param lstMetrics
+	 * @return
+	 */
+	public Map<String, ObjectDoubleOpenHashMap<String>> getMapMetricValues(ColouredGraph origGrphs[]) {
+		Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
+
+		for (ColouredGraph grph : origGrphs) {
+			String key = ConstantValueStorage.generateGraphKey(grph);
+			LOGGER.info("Consider graph: " + key);
+			ObjectDoubleOpenHashMap<String> metricValues = MetricUtils.calculateGraphMetrics(grph, metrics);
+			mapMetricValues.put(key, metricValues);
+		}
+		return mapMetricValues;
+	}
+	
+	public ObjectDoubleOpenHashMap<String>[] computeMetrics (ColouredGraph[] graphs, boolean overwrite) {
+		boolean havingData = havingData();
+		Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = null;
+		if (havingData && !overwrite) {
+			mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
+			for (ColouredGraph grph : graphs) {
+				mapMetricValues.put(ConstantValueStorage.generateGraphKey(grph),
+						getMetricValues(grph));
+			}
+		} else {
+			mapMetricValues = getMapMetricValues(graphs);
+			if (mapMetricValues == null) {
+				setMetricValues(mapMetricValues);
+			} else {
+				addMetricValues(mapMetricValues, false);
+			}
+		}
+		return getGraphMetricsVector(graphs);
+	}
+
+	public List<SingleValueMetric> getMetrics() {
+		return metrics;
 	}
 }

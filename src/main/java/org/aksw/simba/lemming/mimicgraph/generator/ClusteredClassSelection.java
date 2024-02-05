@@ -22,6 +22,7 @@ import org.aksw.simba.lemming.util.RandomUtil;
 import org.apache.jena.ext.com.google.common.primitives.Doubles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
@@ -40,6 +41,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author nptsy
  */
 @Component("CCSUIS")
+@Scope(value = "prototype")
 public class ClusteredClassSelection extends AbstractGraphGeneration implements IGraphGeneration {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusteredClassSelection.class);

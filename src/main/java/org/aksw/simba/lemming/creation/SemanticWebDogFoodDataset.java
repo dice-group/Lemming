@@ -11,9 +11,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("swdf") 
+//@Scope(value = "prototype")
 public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements IDatasetManager{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodDataset.class);
@@ -99,6 +101,11 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
     public String toString() {
     	return "swdf";
     }
+
+	@Override
+	public String getDatasetPath() {
+		return dataFolderPath;
+	}
 
 //    public static void main(String[] args) {
 //        String DATA_FOLDER_PATH = "SemanticWebDogFood/";

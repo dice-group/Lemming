@@ -79,7 +79,7 @@ public class BuildBaselineGraph {
 		metrics.add(new NumberOfVerticesMetric());
 
 		ConstantValueStorage valuesCarrier = new ConstantValueStorage(datasetPath);
-		if (!valuesCarrier.isComputableMetrics(metrics)) {
+		if (!valuesCarrier.isComputableMetrics()) {
 			LOGGER.error(
 					"The list of metrics has some metrics that are not existing in the precomputed metric values.");
 			LOGGER.warn("Please generate the file [value_store.val] again!");

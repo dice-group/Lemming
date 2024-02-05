@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.creation;
 import org.aksw.simba.lemming.ColouredGraph;
 
 public interface IDatasetManager {
+	public String getDatasetPath();
 	public ColouredGraph[] readGraphsFromFiles();
 	public String writeGraphsToFile(ColouredGraph grph);
 	
