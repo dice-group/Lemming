@@ -55,25 +55,9 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 	}
 
 	/**
-	 * Kick-starts the graph generation in single or multi-threaded way.
-	 * 
-	 * @return The initial mimic graph
-	 */
-	public ColouredGraph generateGraph() {
-		if (mNumberOfThreads == 1) {
-			LOGGER.info("Run graph generation with single thread!");
-			generateGraphSingleThread();
-		} else {
-			LOGGER.info("Run graph generation with " + mNumberOfThreads + " threads!");
-			generateGraphMultiThreads();
-		}
-		return mMimicGraph;
-	}
-
-	/**
 	 * 	Generates the graph in a multi-threaded way
 	 */
-	private void generateGraphMultiThreads() {
+	protected void generateGraphMultiThreads() {
 		
 		// divides the coloured edges across the available threads
 		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(mNumberOfThreads);
@@ -247,13 +231,12 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 			LOGGER.error("Could not shutdown the service executor! Be careful");
 			e.printStackTrace();
 		}
-		;
 	}
 
 	/**
 	 * Generate graph randomly with a single thread
 	 */
-	private void generateGraphSingleThread() {
+	protected void generateGraphSingleThread() {
 
 		/*
 		 * mMapColourToEdgeIDs contains only normal edges (not datatype property edges

@@ -66,21 +66,9 @@ public class UniformClassBiasedInstance extends AbstractGraphGeneration implemen
 		
 		// extend step compared to the class GraphGenerationSimpleApproach
 		computePotentialIODegreePerVert(origGrphs);
-	}
-
-	public ColouredGraph generateGraph(){
-		if(mNumberOfThreads==1){
-			LOGGER.info("Run graph generation with single thread!");
-			generateGraphSingleThread();
-		}else{
-			LOGGER.info("Run graph generation with "+mNumberOfThreads+ " threads!");
-			generateGraphMultiThreads();
-		}
-		return mMimicGraph;
-	}
-			
+	}			
 	
-	private void generateGraphMultiThreads(){
+	protected void generateGraphMultiThreads(){
 		
 		//exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
@@ -280,7 +268,7 @@ public class UniformClassBiasedInstance extends AbstractGraphGeneration implemen
 		};
 	}
 	
-	private void generateGraphSingleThread(){
+	protected void generateGraphSingleThread(){
 		
 		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();

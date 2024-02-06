@@ -3,12 +3,11 @@ package org.aksw.simba.lemming.metrics.single;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.springframework.stereotype.Component;
 
 import grph.Grph.DIRECTION;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 
-//@Component
+
 public class StdDevVertexDegree extends AvgVertexDegreeMetric {
 
     protected DIRECTION direction;

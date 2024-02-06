@@ -51,7 +51,7 @@ public class PrecomputingValues {
 
 		// Start spring
 		ConfigurableApplicationContext application = new SpringApplicationBuilder(PrecomputingValues.class)
-				.web(WebApplicationType.NONE).sources(PrecomputingValues.class).run(args);
+				.web(WebApplicationType.NONE).run(args);
 		LOGGER.info("Start precomputing metric and constant expressions!");
 
 		// Parse input arguments
@@ -59,7 +59,7 @@ public class PrecomputingValues {
 		JCommander.newBuilder().addObject(pArgs).build().parse(args);
 
 		// Validate dataset
-		Validator val = (Validator) application.getBean("inputValidator");
+		Validator val = (Validator) application.getBean(Validator.class);
 		val.isDatasetAllowed(pArgs.dataset);
 
 		// Read models from file and create corresponding coloured graphs

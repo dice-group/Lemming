@@ -93,6 +93,7 @@ public class ClusteredClassBiasedInstance extends AbstractGraphGeneration implem
 		computeNoOfVerticesInTriples();
 	}
 
+	@Override
 	public ColouredGraph generateGraph(){
 		if(mNumberOfThreads == 1){
 			LOGGER.info("Run graph generation with single thread!");
@@ -218,7 +219,7 @@ public class ClusteredClassBiasedInstance extends AbstractGraphGeneration implem
 		}
 	}
 	
-	private void generateGraphMultiThreads(){
+	protected void generateGraphMultiThreads(){
 		//exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
 		//int iNumberOfThreads = 4;
@@ -404,7 +405,7 @@ public class ClusteredClassBiasedInstance extends AbstractGraphGeneration implem
 		};
 	}
 	
-	private void generateGraphSingleThread(){
+	protected void generateGraphSingleThread(){
 		
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		

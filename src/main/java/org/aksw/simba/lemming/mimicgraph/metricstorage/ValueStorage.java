@@ -36,6 +36,7 @@ public class ValueStorage implements Serializable{
 				Map<String, Double> mapMetricValues = mMapMetricValues.get(key);
 				if(mapMetricValues.containsKey(metricName)){
 					isExist = true;
+					break;
 				}
 			}
 		}

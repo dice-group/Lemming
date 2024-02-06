@@ -90,18 +90,7 @@ public class BiasedClassBiasedInstance extends AbstractGraphGeneration implement
 		computePotentialIODegreePerVert(origGrphs);
 	}
 
-	public ColouredGraph generateGraph() {
-		if (mNumberOfThreads <= 1) {
-			LOGGER.info("Run graph generation with single thread!");
-			generateGraphSingleThread();
-		} else {
-			LOGGER.info("Run graph generation with " + mNumberOfThreads + " threads!");
-			generateGraphMultiThreads();
-		}
-		return mMimicGraph;
-	}
-
-	private void generateGraphMultiThreads() {
+	protected void generateGraphMultiThreads() {
 		// exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
 		// int iNumberOfThreads = 4;
@@ -301,7 +290,7 @@ public class BiasedClassBiasedInstance extends AbstractGraphGeneration implement
 		;
 	}
 
-	private void generateGraphSingleThread() {
+	protected void generateGraphSingleThread() {
 
 		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
 		for (BitSet edgeColo : keyEdgeColo) {

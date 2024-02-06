@@ -2,11 +2,13 @@ package org.aksw.simba.lemming.metrics.single;
 
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 
+@Component("#colourlessVertices")
 public class EmptyVertices extends AbstractMetric implements SingleValueMetric {
 
     public EmptyVertices(String name) {

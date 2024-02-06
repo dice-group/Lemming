@@ -64,19 +64,7 @@ public class BiasedClassSelection extends AbstractGraphGeneration implements IGr
 		computeAvrgIOEdgeDistPerVertColo(origGrphs);
 	}
 
-	public ColouredGraph generateGraph() {
-		if (mNumberOfThreads == 1) {
-			LOGGER.info("Run graph generation with single thread!");
-			generateGraphSingleThread();
-		} else {
-			LOGGER.info("Run graph generation with " + mNumberOfThreads + " threads!");
-			generateGraphMultiThreads();
-		}
-
-		return mMimicGraph;
-	}
-
-	private void generateGraphMultiThreads() {
+	protected void generateGraphMultiThreads() {
 
 		// exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
@@ -260,7 +248,7 @@ public class BiasedClassSelection extends AbstractGraphGeneration implements IGr
 		;
 	}
 
-	private void generateGraphSingleThread() {
+	protected void generateGraphSingleThread() {
 
 		/*
 		 * the map mMapColourToEdgeIDs just contains normal edges (not datatype property

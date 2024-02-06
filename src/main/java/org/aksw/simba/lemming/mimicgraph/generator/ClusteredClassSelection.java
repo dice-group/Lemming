@@ -310,6 +310,7 @@ public class ClusteredClassSelection extends AbstractGraphGeneration implements 
 		}
 	}
 
+	@Override
 	public ColouredGraph generateGraph() {
 
 		if (mNumberOfThreads == 1) {
@@ -393,7 +394,7 @@ public class ClusteredClassSelection extends AbstractGraphGeneration implements 
 	/**
 	 * generate graph with multi-threads
 	 */
-	private void generateGraphMultiThreads() {
+	protected void generateGraphMultiThreads() {
 		// exploit all possible threads
 		int iNumberOfThreads = mNumberOfThreads;
 		// int iNumberOfThreads = 4;
@@ -558,7 +559,7 @@ public class ClusteredClassSelection extends AbstractGraphGeneration implements 
 	/**
 	 * generate graph with single thread
 	 */
-	private void generateGraphSingleThread() {
+	protected void generateGraphSingleThread() {
 
 		Set<BitSet> setVertColo = mMapColourToVertexIDs.keySet();
 		Random rand = new Random(seed);

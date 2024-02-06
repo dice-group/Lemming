@@ -52,8 +52,9 @@ public class GraphOptimization {
      -----------------------------------------------*/
 
     public GraphOptimization(ColouredGraph[] origGrphs, IGraphGeneration graphGenerator,
-            List<SingleValueMetric> metrics, ConstantValueStorage valueCarriers, long seed) {
+            List<SingleValueMetric> metrics, ConstantValueStorage valueCarriers, long seed, int mMaxIteration) {
         this.seed = seed;
+        this.mMaxIteration = mMaxIteration;
         mLstErrorScore = new ArrayList<Double>();
         /*
          * mErrScoreCalculator is used to compute the error score compared to original

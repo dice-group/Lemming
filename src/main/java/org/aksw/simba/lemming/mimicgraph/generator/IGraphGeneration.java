@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 
@@ -27,4 +28,5 @@ public interface IGraphGeneration {
 	public void setMimicGraph(ColouredGraph refinedGraph);
 	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
 	public long getSeed();
+	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad);
 }

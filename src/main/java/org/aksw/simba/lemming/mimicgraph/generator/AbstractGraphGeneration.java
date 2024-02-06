@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgEdgeColoDistMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgVertColoDistMetric;
@@ -134,6 +135,33 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		
 		//defining type of resource vertices
 		connectVerticesWithRDFTypeEdges();
+	}
+	
+	/**
+	 * Load mimic graph from file or generate and save it to file
+	 * 
+	 * @param mDatasetManager
+	 * @param mimicGraphLoad
+	 */
+	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad) {
+		boolean isLoad = (mimicGraphLoad!=null && !mimicGraphLoad.isBlank()) ? true : false;
+		if (isLoad) {
+			LOGGER.info("Loading previously determined Mimic Graph from file.");
+			ColouredGraph colouredGraph = mDatasetManager.readIntResults(mimicGraphLoad);
+			if (colouredGraph != null) {
+				setMimicGraph(colouredGraph);
+			}
+		} else {
+			double startTime = System.currentTimeMillis();
+			LOGGER.info("Generating a first version of mimic graph ...");
+			// create a draft graph
+			generateGraph();
+			// estimate the cost time for generation
+			double duration = System.currentTimeMillis() - startTime;
+			LOGGER.info("Finished graph generation process in " + duration + " ms");
+			mDatasetManager.persistIntResults(getMimicGraph(), mimicGraphLoad);
+			LOGGER.info("Intermediate results saved under: " + mimicGraphLoad);
+		}
 	}
 
 	public Map<BitSet,IntSet> getMappingColoursAndVertices(){
@@ -282,10 +310,21 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	 * generate a new graph
 	 * @return a new mimic graph
 	 */
-	public ColouredGraph generateGraph(){
+	public ColouredGraph generateGraph() {
+		if (mNumberOfThreads <= 1) {
+			LOGGER.info("Run graph generation with single thread!");
+			generateGraphSingleThread();
+		} else {
+			LOGGER.info("Run graph generation with " + mNumberOfThreads + " threads!");
+			generateGraphMultiThreads();
+		}
 		return mMimicGraph;
 	}
 	
+	protected abstract void generateGraphMultiThreads();
+
+	protected abstract void generateGraphSingleThread();
+
 	/**
 	 * assign colours to vertices based on the average distribution of vertices
 	 * per colour over all versions of a graph
