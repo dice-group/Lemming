@@ -81,7 +81,6 @@ public class BeanFactory {
 		return (RefinementOperator) applicationContext.getBean(refinementOperator, metrics);
 	}
 
-	@Bean(name = "metrics")
 	public List<SingleValueMetric> getMetrics() {
 		List<SingleValueMetric> finalMetrics = new ArrayList<>();
 		for (String metric : metrics) {
@@ -90,13 +89,11 @@ public class BeanFactory {
 		}
 		return finalMetrics;
 	}
-	
-	@Autowired
-	List<SingleValueMetric> finalMetrics;
 
 	@Bean
 	@Scope(value = "prototype")
 	public ConstantValueStorage constantValueStorage(String datasetPath) {
+		List<SingleValueMetric> finalMetrics = getMetrics();
 		return new ConstantValueStorage(cacheName, datasetPath, finalMetrics);
 	}
 
