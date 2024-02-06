@@ -12,6 +12,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.FitnessFunction;
 import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError;
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
+import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.configuration.Validator;
 import org.aksw.simba.lemming.creation.IDatasetManager;
@@ -68,7 +69,8 @@ public class PrecomputingValues {
 
 		// Compute metrics for each graph
 		LOGGER.info("Compute metric values for graph ......");
-		ConstantValueStorage valueCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
+		ConstantValueStorage valueCarrier = application.getBean(ConstantValueStorage.class,
+				mDatasetManager.getDatasetPath());
 		ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.computeMetrics(graphs, pArgs.recalculateMetrics);
 
 		// Compute constant expressions with metrics from above
@@ -78,9 +80,9 @@ public class PrecomputingValues {
 		fitnessFunc = new ReferenceGraphBasedFitnessDecorator(fitnessFunc,
 				createReferenceGraphVectors(graphs, metrics));
 
-		CharacteristicExpressionSearcher searcher = new CharacteristicExpressionSearcher(metrics,
-				new LeaveNodeReplacingRefinementOperator(metrics), new RedberryBasedFactory(), fitnessFunc,
-				pArgs.minFitness, pArgs.maxIterations);
+		RefinementOperator refinementOperator = (RefinementOperator) application.getBean("refOperator", metrics);
+		CharacteristicExpressionSearcher searcher = new CharacteristicExpressionSearcher(metrics, refinementOperator,
+				new RedberryBasedFactory(), fitnessFunc, pArgs.minFitness, pArgs.maxIterations);
 		searcher.setDebug(true);
 
 		// Get best 5 invariant expressions

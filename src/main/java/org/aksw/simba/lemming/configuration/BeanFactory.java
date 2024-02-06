@@ -7,14 +7,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -36,8 +34,6 @@ import grph.Grph.DIRECTION;
 @PropertySource(value = "classpath:application.properties")
 public class BeanFactory {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BeanFactory.class);
-
 	@Autowired
 	private ApplicationContext applicationContext;
 	
@@ -46,6 +42,9 @@ public class BeanFactory {
 	
 	@Value("#{PropertySplitter.toList('${metrics}')}")
 	private List<String> metrics;
+	
+	@Value("${refinement.operator}") 
+	private String refinementOperator;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
@@ -74,6 +73,12 @@ public class BeanFactory {
 	@Scope(value = "prototype")
 	public StdDevVertexDegree createStdDevVertexDegreeOut() {
 		return new StdDevVertexDegree(DIRECTION.out);
+	}
+	
+	@Bean(name = "refOperator")
+	@Scope(value = "prototype")
+	public RefinementOperator createRefinementOperator(List<SingleValueMetric> metrics) {
+		return (RefinementOperator) applicationContext.getBean(refinementOperator, metrics);
 	}
 
 	@Bean(name = "metrics")

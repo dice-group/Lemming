@@ -35,8 +35,6 @@ public class RefinementTest {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static final boolean USE_SEMANTIC_DOG_FOOD = true;
-    private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 
     public static void main(String[] args) {
         // MultiThreadProcessing.defaultNumberOfThreads = 1;
@@ -74,9 +72,7 @@ public class RefinementTest {
             graphs[i] = new ColouredGraph(temp, null, null, null);
         }
 
-        if (USE_SEMANTIC_DOG_FOOD) {
-            graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles();
-        }
+        graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles();
 
         // FitnessFunction fitnessFunc = new MinSquaredError();
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();

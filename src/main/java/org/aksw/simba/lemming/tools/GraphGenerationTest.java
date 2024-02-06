@@ -20,6 +20,12 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.beust.jcommander.JCommander;
 
+/**
+ * 
+ * Generates synthetic graphs from the input graphs. Requires a store produced
+ * by PrecomputingValues.java.
+ *
+ */
 @SpringBootApplication
 @ComponentScan(basePackages = "org.aksw.simba.lemming")
 public class GraphGenerationTest {
@@ -57,14 +63,14 @@ public class GraphGenerationTest {
 				graphs, pArgs.noThreads, pArgs.seed);
 		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 
-		/* Optimization with constant expressions */
+		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
 		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
 				mGrphGenerator.getSeed(), pArgs.noOptimizationSteps);
 		grphOptimizer.refineGraph();
 
-		/* Lexicalization with word2vec */
+		// Lexicalization with word2vec
 		LOGGER.info("Lexicalize the mimic graph ...");
 		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
 		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
