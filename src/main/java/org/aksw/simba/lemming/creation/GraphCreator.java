@@ -87,15 +87,8 @@ public class GraphCreator {
 			if (statement.getObject().isResource()) {
 				// Add the object if it is not existing
 				object = statement.getObject().asResource();
-				if (resourceIdMapping.containsKey(object)) {
-					objectId = resourceIdMapping.get(object);
-				} else {
-					objectId = graph.addVertex();
-					resourceIdMapping.put(object, objectId);
-				}
-				// Add the property if it is not existing
-				property = statement.getPredicate();
 				
+				property = statement.getPredicate();
 				// if this triple defines the class of the subject
 				if (property.equals(RDF.type)) {
 					graph.setVertexColour(subjectId,
@@ -104,6 +97,13 @@ public class GraphCreator {
 					continue;
 				}
 				
+				if (resourceIdMapping.containsKey(object)) {
+					objectId = resourceIdMapping.get(object);
+				} else {
+					objectId = graph.addVertex();
+					resourceIdMapping.put(object, objectId);
+				}
+				// Add the property if it is not existing
 				propertyId = graph.addEdge(subjectId, objectId);
 				// Set the colour of the edge
 				propertyUri = property.getURI();

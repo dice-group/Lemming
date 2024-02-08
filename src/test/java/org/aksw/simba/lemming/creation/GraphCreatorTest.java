@@ -18,8 +18,8 @@ public class GraphCreatorTest {
     @Parameters
     public static Collection<Object[]> data() {
         List<Object[]> testConfigs = new ArrayList<Object[]>();
-        testConfigs.add(new Object[] { "graph1.n3", 5, 5 });
-        testConfigs.add(new Object[] { "graph_loop.n3", 3, 5 });
+        testConfigs.add(new Object[] { "graph1.n3", 3, 2 });
+        testConfigs.add(new Object[] { "graph_loop.n3", 3, 2 });
         testConfigs.add(new Object[] { "email-Eu-core.n3", 1005, 25571 });
 
         return testConfigs;
