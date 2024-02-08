@@ -16,7 +16,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("pg") 
@@ -26,7 +25,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersonGraphDataset.class);
 	
 	@Value("${datasets.pg.filepath}")
-	String dataFolderPath;
+	private String dataFolderPath;
 	
 	public PersonGraphDataset() {
 		super("PersonGraph");
@@ -87,11 +86,6 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 		 }
 		 
 		 return graphs.toArray(new ColouredGraph[graphs.size()]);
-	}
-	
-	@Override
-	public String toString() {
-		return "pg";
 	}
 	
 	

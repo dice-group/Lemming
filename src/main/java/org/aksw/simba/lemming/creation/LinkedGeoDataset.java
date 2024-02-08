@@ -13,22 +13,21 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Component("lgeo") 
+@Component("lgeo")
 //@Scope(value = "prototype")
 public class LinkedGeoDataset extends AbstractDatasetManager implements IDatasetManager {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedGeoDataset.class);
-	
+
 	@Value("${datasets.lgeo.filepath}")
 	String dataFolderPath;
 
 	public LinkedGeoDataset() {
 		super("LinkedGeo");
 	}
-	
+
 	@Override
 	public String getDatasetPath() {
 		return dataFolderPath;
@@ -84,7 +83,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 					}
 				}
 			}
-			
+
 		} else {
 			LOGGER.error("Find no files in \"" + folder.getAbsolutePath() + "\". Aborting.");
 			System.exit(1);
@@ -92,12 +91,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
-	
-	@Override
-	public String toString() {
-		return "lgeo";
-	}
-	
+
 //	public static void main(String[] args) {
 //		String DATA_FOLDER_PATH = "LinkedGeoGraphs/";
 //		new LinkedGeoDataset().readGraphsFromFiles(DATA_FOLDER_PATH);

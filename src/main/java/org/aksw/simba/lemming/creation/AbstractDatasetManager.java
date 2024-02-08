@@ -26,51 +26,48 @@ import org.slf4j.LoggerFactory;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectArrayList;
 
-public abstract class AbstractDatasetManager implements IDatasetManager{
+public abstract class AbstractDatasetManager implements IDatasetManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatasetManager.class);
 	protected String mDatasetName;
-	
-	public AbstractDatasetManager(String datasetName){
+
+	public AbstractDatasetManager(String datasetName) {
 		mDatasetName = datasetName;
 	}
-	
-	public String getDatasetName(){
+
+	public String getDatasetName() {
 		return mDatasetName;
 	}
-	
-	public void setDatasetName(String datasetName){
+
+	public void setDatasetName(String datasetName) {
 		mDatasetName = datasetName;
 	}
 
 	@Override
 	public String writeGraphsToFile(ColouredGraph grph) {
 		Model datasetModel = ModelFactory.createDefaultModel();
-		String fileName= "";
-		
-		
-		
+		String fileName = "";
+
 		try {
 			new File("results").mkdirs();
-			
+
 			fileName = "results/Mimic_" + mDatasetName + ".ttl";
 			String[] parts = new String[2];
 			int index = fileName.lastIndexOf('.');
 			parts[0] = fileName.substring(0, index);
 			parts[1] = fileName.substring(index, fileName.length());
-			
-			
+
 			Path path = Paths.get(fileName);
 			File f = null;
 			int i = 1;
 			while (Files.exists(path)) {
-			    LOGGER.warn("File allready exists!");
-			    i++;
-			    path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
-			} 
+				LOGGER.warn("File allready exists!");
+				i++;
+				path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
+			}
 			f = path.toFile();
-			
+
 			LOGGER.warn("Output file: " + path.toString());
-			
+
 			fileName = f.getName();
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, datasetModel);
@@ -83,7 +80,7 @@ public abstract class AbstractDatasetManager implements IDatasetManager{
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
 			ex.printStackTrace();
 		}
-		
+
 		return fileName;
 	}
 
@@ -98,13 +95,15 @@ public abstract class AbstractDatasetManager implements IDatasetManager{
 			FileOutputStream fileOut = new FileOutputStream(filePath);
 			ObjectOutputStream out = new ObjectOutputStream(fileOut);
 
-			List<java.util.BitSet> serVertexColours = SerializationParser.parseBitSetArrayList(curMimicGraph.getVertexColours());
-			List<java.util.BitSet> serEdgeColours = SerializationParser.parseBitSetArrayList(curMimicGraph.getEdgeColours());
+			List<java.util.BitSet> serVertexColours = SerializationParser
+					.parseBitSetArrayList(curMimicGraph.getVertexColours());
+			List<java.util.BitSet> serEdgeColours = SerializationParser
+					.parseBitSetArrayList(curMimicGraph.getEdgeColours());
 
 			ColourPaletteWrapper vertexPaletteWrapper = PersHelper.convertCP(curMimicGraph.getVertexPalette());
 			ColourPaletteWrapper edgePaletteWrapper = PersHelper.convertCP(curMimicGraph.getEdgePalette());
 			ColourPaletteWrapper dtPaletteWrapper = PersHelper.convertCP(curMimicGraph.getDataTypedEdgePalette());
-			
+
 			ColouredGraphWrapper colouredGraphWrapper = new ColouredGraphWrapper(curMimicGraph.getGraph(),
 					serVertexColours, serEdgeColours, vertexPaletteWrapper, edgePaletteWrapper, dtPaletteWrapper);
 
@@ -128,19 +127,18 @@ public abstract class AbstractDatasetManager implements IDatasetManager{
 				ColouredGraphWrapper colouredGraphWrapper = (ColouredGraphWrapper) in.readObject();
 				in.close();
 				fileIn.close();
-				
-				if(colouredGraphWrapper != null) {
+
+				if (colouredGraphWrapper != null) {
 					ColourPalette vertexPalette = PersHelper.convertCP(colouredGraphWrapper.getVertexPalette());
 					ColourPalette edgePalette = PersHelper.convertCP(colouredGraphWrapper.getEdgePalette());
 					ColourPalette dtEdgePalette = PersHelper.convertCP(colouredGraphWrapper.getDtEdgePalette());
-					
-					ObjectArrayList<BitSet> vertexColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getVertexColours());
-					ObjectArrayList<BitSet> edgeColours = SerializationParser.parseBitSetArrayList(colouredGraphWrapper.getEdgeColours());
-					
-					colouredGraph = new ColouredGraph(
-							colouredGraphWrapper.getGraph(), 
-							vertexPalette, 
-							edgePalette,
+
+					ObjectArrayList<BitSet> vertexColours = SerializationParser
+							.parseBitSetArrayList(colouredGraphWrapper.getVertexColours());
+					ObjectArrayList<BitSet> edgeColours = SerializationParser
+							.parseBitSetArrayList(colouredGraphWrapper.getEdgeColours());
+
+					colouredGraph = new ColouredGraph(colouredGraphWrapper.getGraph(), vertexPalette, edgePalette,
 							dtEdgePalette);
 					colouredGraph.setVertexColours(vertexColours);
 					colouredGraph.setEdgeColours(edgeColours);
@@ -148,17 +146,20 @@ public abstract class AbstractDatasetManager implements IDatasetManager{
 			} else {
 				LOGGER.warn("Specified file does not exist");
 			}
-			
+
 		} catch (IOException i) {
 			LOGGER.error("Could not read the file: " + i.getMessage());
 			i.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("Could not read the file: " + e.getMessage());
 			e.printStackTrace();
-		} 
-		
-		
+		}
+
 		return colouredGraph;
 	}
-	
+
+	@Override
+	public String toString() {
+		return mDatasetName;
+	}
 }
