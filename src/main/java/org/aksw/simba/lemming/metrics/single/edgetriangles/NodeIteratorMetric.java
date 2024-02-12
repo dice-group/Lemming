@@ -56,6 +56,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 
     private Grph getUndirectedGraph(Grph graph) {
         Grph undirectedGraph = new InMemoryGrph();
+        undirectedGraph.addNVertices(graph.getNumberOfVertices());
         for (int e : graph.getEdges()) {
             int sourceNode = graph.getOneVertex(e);
             int targetNode = graph.getTheOtherVertex(e, sourceNode);

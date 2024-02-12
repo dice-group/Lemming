@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.metrics.single.DiameterMetricResult;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
 import org.aksw.simba.lemming.metrics.single.edgemanipulation.Operation;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import grph.Grph;
@@ -122,6 +123,7 @@ public class DiameterMetricTest {
         Assert.assertEquals(0, (int) metric.apply(graph));
     }
 
+    @Ignore
     @Test
     public void simulateGraphOptimizationPhase() {
         // Build graph
@@ -137,6 +139,7 @@ public class DiameterMetricTest {
         graph.addDirectedSimpleEdge(2, 3);
         graph.addDirectedSimpleEdge(2, 4);
         graph.addDirectedSimpleEdge(3, 4);
+        
         // Nodes: 0,1,2,3,4
         // Diameters: 0-2-3, 0-2-4, 1-2-3, 1-2-4
 

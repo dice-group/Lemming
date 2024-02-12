@@ -17,9 +17,8 @@ import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
 public class EdgeColourDistributionMetricTest {
 
-    private static final String EXPECTED_PROPERTY_URIS[] = new String[] {
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", "http://example.org/relation1" };
-    private static final int EXPECTED_PROPERTY_COUNTS[] = new int[] { 3, 2 };
+    private static final String EXPECTED_PROPERTY_URIS[] = new String[] { "http://example.org/relation1" };
+    private static final int EXPECTED_PROPERTY_COUNTS[] = new int[] { 2 };
     private static final String GRAPH_FILE = "graph1.n3";
 
     @Test

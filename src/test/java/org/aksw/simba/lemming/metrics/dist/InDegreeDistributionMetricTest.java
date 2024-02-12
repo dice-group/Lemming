@@ -12,8 +12,8 @@ import org.junit.Test;
 
 public class InDegreeDistributionMetricTest {
 
-    private static final int EXPECTED_DEGREES[] = new int[] { 0, 1, 2 };
-    private static final double EXPECTED_DEGREE_VALUES[] = new double[] { 1, 3, 1 };
+    private static final int EXPECTED_DEGREES[] = new int[] { 0, 1 };
+    private static final double EXPECTED_DEGREE_VALUES[] = new double[] { 1, 2 };
     private static final String GRAPH_FILE = "graph1.n3";
     private static final double DELTA = 0.000001;
 

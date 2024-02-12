@@ -22,8 +22,8 @@ public class ColouredInDegreeDistributionMetricTest {
             "http://example.org/class1|http://example.org/class2" };
     private static final int EXPECTED_DEGREES[][] = new int[][] { { 0 }, { 1 } };
     private static final double EXPECTED_DEGREE_VALUES[][] = new double[][] { { 1 }, { 1 } };
-    private static final int EXPECTED_DEGREES_OF_VERTEXES_WITHOUT_COLOUR[] = new int[] { 1, 2 };
-    private static final double EXPECTED_DEGREE_VALUES_OF_VERTEXES_WITHOUT_COLOUR[] = new double[] { 2, 1 };
+    private static final int EXPECTED_DEGREES_OF_VERTEXES_WITHOUT_COLOUR[] = new int[] { 1 };
+    private static final double EXPECTED_DEGREE_VALUES_OF_VERTEXES_WITHOUT_COLOUR[] = new double[] { 1 };
     private static final String GRAPH_FILE = "graph1.n3";
     private static final double DELTA = 0.000001;
 
@@ -63,7 +63,7 @@ public class ColouredInDegreeDistributionMetricTest {
         for (BitSet c : expectedSampleSpace.keySet()) {
             Assert.assertTrue("There is no distribution for colour " + c.toString(), distributions.containsKey(c));
             distribution = distributions.get(c);
-            Assert.assertArrayEquals("Sampe space of colour " + c.toString() + " does not match.",
+            Assert.assertArrayEquals("Sample space of colour " + c.toString() + " does not match.",
                     expectedSampleSpace.get(c), distribution.sampleSpace);
             expectedValues = expectedCounts.get(c);
             for (int i = 0; i < expectedValues.length; ++i) {

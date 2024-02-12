@@ -27,7 +27,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
-        TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
+        TripleBaseSingleID triple = new TripleBaseSingleID(1, null, 0, null, 0, null);
         RemoveEdgeDecorator rDec = new RemoveEdgeDecorator(buildGraph1);
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
@@ -35,7 +35,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals(3.0, newResult.getResult());
 
         // delete an edge 2 = (1, 2)
-        triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
+        triple = new TripleBaseSingleID(2, null, 1, null, 2, null);
         rDec = new RemoveEdgeDecorator(buildGraph1);
         rDec.setTriple(triple);
         newResult = metric.update(rDec, triple, Operation.REMOVE, newResult);
@@ -44,7 +44,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
 
         // add an edge 4 = (1, 2);
         AddEdgeDecorator aDec = new AddEdgeDecorator(buildGraph1);
-        triple = new TripleBaseSingleID(1, null, 2, null, 4, null);
+        triple = new TripleBaseSingleID(2, null, 1, null, 4, null);
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 2);
@@ -73,7 +73,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
-        TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 0, null);
+        TripleBaseSingleID triple = new TripleBaseSingleID(1, null, 0, null, 0, null);
         RemoveEdgeDecorator rDec = new RemoveEdgeDecorator(buildGraph1);
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
@@ -81,7 +81,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals(2.0, newResult.getResult());
 
         // delete an edge 2 = (1, 2)
-        triple = new TripleBaseSingleID(1, null, 2, null, 2, null);
+        triple = new TripleBaseSingleID(2, null, 1, null, 2, null);
         rDec = new RemoveEdgeDecorator(buildGraph1);
         rDec.setTriple(triple);
         newResult = metric.update(rDec, triple, Operation.REMOVE, newResult);
@@ -89,7 +89,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals(1.0, newResult.getResult());
 
         // add an edge 4 = (1, 2);
-        triple = new TripleBaseSingleID(1, null, 2, null, 4, null);
+        triple = new TripleBaseSingleID(2, null, 1, null, 4, null);
         AddEdgeDecorator aDec = new AddEdgeDecorator(buildGraph1);
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
@@ -110,7 +110,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph1 = addEdge(buildGraph1, 1, 1);
-        Assert.assertEquals(3, 0, newResult.getResult());
+        Assert.assertEquals(3.0, newResult.getResult());
     }
 
     @Test
@@ -126,7 +126,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         // SingleValueMetricResult(metric.getName(), result);
 
         // delete an edge 0 = (0, 1)
-        TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
+        TripleBaseSingleID triple = new TripleBaseSingleID(1, null, 0, null, 1, null);
         RemoveEdgeDecorator rDec = new RemoveEdgeDecorator(buildGraph2);
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
@@ -135,7 +135,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
 
         // add an edge 0 = (0, 1);
         AddEdgeDecorator aDec = new AddEdgeDecorator(buildGraph2);
-        triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
+        triple = new TripleBaseSingleID(1, null, 0, null, 1, null);
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
@@ -161,7 +161,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
         Assert.assertEquals(3.0, maxMetricResultObj.getResult());
 
         // delete an edge 0 = (0, 1)
-        TripleBaseSingleID triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
+        TripleBaseSingleID triple = new TripleBaseSingleID(1, null, 0, null, 1, null);
         RemoveEdgeDecorator rDec = new RemoveEdgeDecorator(buildGraph2);
         rDec.setTriple(triple);
         UpdatableMetricResult newResult = metric.update(rDec, triple, Operation.REMOVE, maxMetricResultObj);
@@ -170,7 +170,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
 
         // add an edge 0 = (0, 1);
         AddEdgeDecorator aDec = new AddEdgeDecorator(buildGraph2);
-        triple = new TripleBaseSingleID(0, null, 1, null, 1, null);
+        triple = new TripleBaseSingleID(1, null, 0, null, 1, null);
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);
@@ -186,7 +186,7 @@ public class MaxVertexDegreeMetricTest extends UpdateMetricTest {
 
         // add an edge 5 = (0, 1);
         aDec = new AddEdgeDecorator(buildGraph2);
-        triple = new TripleBaseSingleID(0, null, 1, null, 5, null);
+        triple = new TripleBaseSingleID(1, null, 0, null, 5, null);
         aDec.setTriple(triple);
         newResult = metric.update(aDec, triple, Operation.ADD, newResult);
         buildGraph2 = addEdge(buildGraph2, 0, 1);

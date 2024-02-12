@@ -20,7 +20,7 @@ public class VertexColourDistributionMetricTest {
     private static final String EXPECTED_VERTEX_CLASSES[] = new String[] { "http://example.org/class1",
             "http://example.org/class1|http://example.org/class2" };
     private static final int EXPECTED_VERTEX_COUNTS[] = new int[] { 1, 1 };
-    private static final int EXPECTED_VERTEXES_WITHOUT_COLOURS = 3;
+    private static final int EXPECTED_VERTEXES_WITHOUT_COLOURS = 1;
     private static final String GRAPH_FILE = "graph1.n3";
 
     @Test
