@@ -120,32 +120,33 @@ public class RemoveEdgeDecorator extends AbstractSingleEdgeManipulatingDecorator
      * @param vertexId
      * @return IntSet - set of vertexIds of all in neighbors
      */
-    @Override
-    public IntSet getInNeighbors(int vertexId) {
-        IntSet neighbors = super.getInNeighbors(vertexId);
-        // TODO check for multiple edges connecting these 2 before removing
-        if(this.triple.headId == vertexId) {
-        	neighbors.remove(this.triple.tailId);
-        }
-        return neighbors;
-    }
+	@Override
+	public IntSet getInNeighbors(int vertexId) {
+		IntSet neighbors = super.getInNeighbors(vertexId);
+		// remove if there's only one edge connecting these 2 vertices
+		if (this.triple.headId == vertexId
+				&& super.getNumberOfEdgesBetweenVertices(this.triple.headId, this.triple.tailId) == 1) {
+			neighbors.remove(this.triple.tailId);
+		}
+		return neighbors;
+	}
 
-    /**
-     * Get all out neighbors of a vertex after removing an edge
-     * 
-     * @param vertexId
-     * @return IntSet - set of vertexIds of all in neighbors
-     */
-    @Override
-    public IntSet getOutNeighbors(int vertexId) {
-        IntSet neighbors = super.getOutNeighbors(vertexId);
-        // TODO check for multiple edges connecting these 2 before removing
-        if(this.triple.tailId == vertexId) {
-        	neighbors.remove(this.triple.headId);
-        }
-        
-        return neighbors;
-    }
+	/**
+	 * Get all out neighbors of a vertex after removing an edge
+	 * 
+	 * @param vertexId
+	 * @return IntSet - set of vertexIds of all in neighbors
+	 */
+	@Override
+	public IntSet getOutNeighbors(int vertexId) {
+		IntSet neighbors = super.getOutNeighbors(vertexId);
+		// remove if there's only one edge connecting these 2 vertices
+		if (this.triple.tailId == vertexId
+				&& super.getNumberOfEdgesBetweenVertices(this.triple.headId, this.triple.tailId) == 1) {
+			neighbors.remove(this.triple.headId);
+		}
+		return neighbors;
+	}
 
 //    /**
 //     * Remove a neighbor from the set of all neighbors because an edge has now been
