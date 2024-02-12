@@ -123,10 +123,9 @@ public class RemoveEdgeDecorator extends AbstractSingleEdgeManipulatingDecorator
     @Override
     public IntSet getInNeighbors(int vertexId) {
         IntSet neighbors = super.getInNeighbors(vertexId);
-        // FIXME This could cause a problem if there is more than one edge between these
-        // nodes
-        if (this.triple.tailId == vertexId) {
-            neighbors.remove(this.triple.headId);
+        if(this.triple.headId == vertexId && 
+        		super.getInEdgeDegree(vertexId) == 1) {
+        	neighbors.remove(this.triple.tailId);
         }
         return neighbors;
     }
@@ -140,11 +139,11 @@ public class RemoveEdgeDecorator extends AbstractSingleEdgeManipulatingDecorator
     @Override
     public IntSet getOutNeighbors(int vertexId) {
         IntSet neighbors = super.getOutNeighbors(vertexId);
-        // FIXME This could cause a problem if there is more than one edge between these
-        // nodes
-        if (this.triple.headId == vertexId) {
-            neighbors.remove(this.triple.tailId);
+        if(this.triple.tailId == vertexId && 
+        		super.getOutEdgeDegree(vertexId) == 1) {
+        	neighbors.remove(this.triple.headId);
         }
+        
         return neighbors;
     }
 
