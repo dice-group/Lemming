@@ -47,7 +47,7 @@ public class AddEdgeDecorator extends AbstractSingleEdgeManipulatingDecorator {
     @Override
     public int getInEdgeDegree(int vertexId) {
         int inDegree = super.getInEdgeDegree(vertexId);
-        if (this.triple.tailId == vertexId) {
+        if (this.triple.headId == vertexId) {
             inDegree++;
         }
         return inDegree;
@@ -62,7 +62,7 @@ public class AddEdgeDecorator extends AbstractSingleEdgeManipulatingDecorator {
     @Override
     public int getOutEdgeDegree(int vertexId) {
         int outDegree = super.getOutEdgeDegree(vertexId);
-        if (this.triple.headId == vertexId) {
+        if (this.triple.tailId == vertexId) {
             outDegree++;
         }
         return outDegree;
