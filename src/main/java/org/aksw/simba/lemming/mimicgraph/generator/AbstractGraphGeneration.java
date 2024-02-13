@@ -159,8 +159,8 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 			// estimate the cost time for generation
 			double duration = System.currentTimeMillis() - startTime;
 			LOGGER.info("Finished graph generation process in " + duration + " ms");
-			mDatasetManager.persistIntResults(getMimicGraph(), mimicGraphLoad);
-			LOGGER.info("Intermediate results saved under: " + mimicGraphLoad);
+			mDatasetManager.persistIntResults(getMimicGraph(), "intermediate/InitialMimicGraph.ser");
+			LOGGER.info("Intermediate results saved as InitialMimicGraph.ser");
 		}
 	}
 
