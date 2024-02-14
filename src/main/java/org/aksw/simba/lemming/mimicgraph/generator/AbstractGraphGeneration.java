@@ -144,23 +144,30 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	 * @param mimicGraphLoad
 	 */
 	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad) {
-		boolean isLoad = (mimicGraphLoad!=null && !mimicGraphLoad.isBlank()) ? true : false;
-		if (isLoad) {
+		boolean isLoaded = false;
+		if (mimicGraphLoad != null && !mimicGraphLoad.isBlank()) {
 			LOGGER.info("Loading previously determined Mimic Graph from file.");
 			ColouredGraph colouredGraph = mDatasetManager.readIntResults(mimicGraphLoad);
 			if (colouredGraph != null) {
 				setMimicGraph(colouredGraph);
+				isLoaded = true;
 			}
-		} else {
-			double startTime = System.currentTimeMillis();
+		}
+
+		// in case the mimic graph is not loaded, regenerate it anyways
+		if (isLoaded == false) {
 			LOGGER.info("Generating a first version of mimic graph ...");
+			double startTime = System.currentTimeMillis();
 			// create a draft graph
 			generateGraph();
-			// estimate the cost time for generation
+			// estimate the costed time for generation
 			double duration = System.currentTimeMillis() - startTime;
+			if (mimicGraphLoad == null) {
+				mimicGraphLoad = "Initialized_MimicGraph.ser";
+			}
 			LOGGER.info("Finished graph generation process in " + duration + " ms");
-			mDatasetManager.persistIntResults(getMimicGraph(), "intermediate/InitialMimicGraph.ser");
-			LOGGER.info("Intermediate results saved as InitialMimicGraph.ser");
+			mDatasetManager.persistIntResults(getMimicGraph(), mimicGraphLoad);
+			LOGGER.info("Intermediate results saved under: " + mimicGraphLoad);
 		}
 	}
 
