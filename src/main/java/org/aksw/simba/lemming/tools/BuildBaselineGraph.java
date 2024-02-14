@@ -113,7 +113,7 @@ public class BuildBaselineGraph {
 		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
 
 		String savedFile = mDatasetManager.writeGraphsToFile(graphLexicalization
-				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getColourVertexIds()));
+				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getColourVertexIds()), "results");
 
 		mGrphGenerator.printResult(mapArgs, startTime, savedFile, seed);
 		LOGGER.info("Finished graph generation process in " + duration + " ms");

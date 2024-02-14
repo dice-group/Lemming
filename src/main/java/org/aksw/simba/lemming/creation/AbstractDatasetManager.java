@@ -43,14 +43,14 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 	}
 
 	@Override
-	public String writeGraphsToFile(ColouredGraph grph) {
+	public String writeGraphsToFile(ColouredGraph grph, String folder) {
 		Model datasetModel = ModelFactory.createDefaultModel();
 		String fileName = "";
 
 		try {
-			new File("results").mkdirs();
+			new File(folder).mkdirs();
 
-			fileName = "results/Mimic_" + mDatasetName + ".ttl";
+			fileName = folder+"/Mimic_" + mDatasetName + ".ttl";
 			String[] parts = new String[2];
 			int index = fileName.lastIndexOf('.');
 			parts[0] = fileName.substring(0, index);
@@ -60,7 +60,7 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 			File f = null;
 			int i = 1;
 			while (Files.exists(path)) {
-				LOGGER.warn("File allready exists!");
+				LOGGER.warn("File already exists!");
 				i++;
 				path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
 			}

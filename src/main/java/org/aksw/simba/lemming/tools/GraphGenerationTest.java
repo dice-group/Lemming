@@ -62,6 +62,12 @@ public class GraphGenerationTest {
 		IGraphGeneration mGrphGenerator = (IGraphGeneration) application.getBean(pArgs.typeGenerator, pArgs.noVertices,
 				graphs, pArgs.noThreads, pArgs.seed);
 		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
+		
+		// lexicalize and save initial mimic graph as ttl
+		LOGGER.info("Lexicalize the initial mimic graph ...");
+		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
+		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(), 
+				mGrphGenerator.getMappingColoursAndVertices()), "initial");
 
 		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
@@ -72,10 +78,9 @@ public class GraphGenerationTest {
 
 		// Lexicalization with word2vec
 		LOGGER.info("Lexicalize the mimic graph ...");
-		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
 		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
-				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()));
-
+				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()), "results");
+		
 		// output results to file "LemmingEx.result"
 		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, pArgs.seed);
 		LOGGER.info("Application exits!!!");

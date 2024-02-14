@@ -5,7 +5,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 public interface IDatasetManager {
 	public String getDatasetPath();
 	public ColouredGraph[] readGraphsFromFiles();
-	public String writeGraphsToFile(ColouredGraph grph);
+	public String writeGraphsToFile(ColouredGraph grph, String folder);
 	
 	/**
 	 * Reads the intermediate graph from a specific file path

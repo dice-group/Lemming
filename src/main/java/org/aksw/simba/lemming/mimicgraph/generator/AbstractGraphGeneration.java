@@ -142,6 +142,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	 * 
 	 * @param mDatasetManager
 	 * @param mimicGraphLoad
+	 * @return 
 	 */
 	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad) {
 		boolean isLoaded = false;
@@ -162,12 +163,7 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 			generateGraph();
 			// estimate the costed time for generation
 			double duration = System.currentTimeMillis() - startTime;
-			if (mimicGraphLoad == null) {
-				mimicGraphLoad = "Initialized_MimicGraph.ser";
-			}
 			LOGGER.info("Finished graph generation process in " + duration + " ms");
-			mDatasetManager.persistIntResults(getMimicGraph(), mimicGraphLoad);
-			LOGGER.info("Intermediate results saved under: " + mimicGraphLoad);
 		}
 	}
 
