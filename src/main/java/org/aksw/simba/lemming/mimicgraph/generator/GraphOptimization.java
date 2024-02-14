@@ -117,7 +117,7 @@ public class GraphOptimization {
         return new ErrorScores(false, rErrScore, metricValuesOfRight);
     }
 
-    public void refineGraph() {
+    public void refineGraph(int threads) {
 
         LOGGER.info("Start optimize the mimic graph!");
 
@@ -132,8 +132,7 @@ public class GraphOptimization {
 
         double pErrScore = mErrScoreCalculator.computeErrorScore(baseMetricValues);
 
-        // TODO change number of threads to -thrs argument
-        ExecutorService executor = Executors.newFixedThreadPool(2);
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
 
         for (int i = 0; i < mMaxIteration; ++i) {
             // add errorScore to tracking list result

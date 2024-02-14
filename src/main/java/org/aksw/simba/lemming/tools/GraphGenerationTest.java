@@ -68,7 +68,7 @@ public class GraphGenerationTest {
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
 		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
 				mGrphGenerator.getSeed(), pArgs.noOptimizationSteps);
-		grphOptimizer.refineGraph();
+		grphOptimizer.refineGraph(pArgs.noThreads);
 
 		// Lexicalization with word2vec
 		LOGGER.info("Lexicalize the mimic graph ...");
