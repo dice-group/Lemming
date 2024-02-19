@@ -23,25 +23,25 @@ public class ColourMappingRules implements IColourMappingRules{
 	/*
 	 * the keys are the head's colours and the values are the set of tail's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapHeadColoToTailColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapHeadColoToTailColo;
 	/*
 	 * the keys are the tail's colours and the values are the set of head's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapTailColoToHeadColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapTailColoToHeadColo;
 	
 	/*
 	 * key1: edge's colours, key2: head's colours and the values are the set of tail's colours 
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToHeadAndTailColo;
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToHeadAndTailColo;
 	
 	/*
 	 * key1: edge's colours, key2: tail's colours and the values are the set of head's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToTailAndHeadColo;
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToTailAndHeadColo;
 
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
 	
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
 	
 	boolean mIsMultiThreadProcessing = false;
 	
@@ -61,7 +61,7 @@ public class ColourMappingRules implements IColourMappingRules{
 		analyzeRulesWithSingleThread(origGrphs);
 	}
 	
-	private void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
+	protected void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
 		for(ColouredGraph grph: origGrphs){
 			IntSet setofVIDs = grph.getVertices();
 			int[] arrOfVIDs = setofVIDs.toIntArray();

@@ -68,6 +68,7 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 					if (graph != null) {
 						LOGGER.info("Generated graph of " + geoModel.size() + " triples");
 						graphs.add(graph);
+						//break;
 					}
 				}
 			}

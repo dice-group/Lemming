@@ -67,28 +67,32 @@ public class GraphLexicalization {
 						double avrgNoOfVertices = vColoDistPerDTEColour.values[i];
 
 						if (mapVColoToVertices.containsKey(vColo)) {
-							int[] arrOfVertices = mapVColoToVertices.get(vColo)
-									.toIntArray();
+							int[] arrOfVertices = mapVColoToVertices.get(vColo).toIntArray();
 
-							double numOfConsidedVertices = avrgNoOfVertices	* arrOfVertices.length;
-							if (numOfConsidedVertices == 0) {
-								numOfConsidedVertices = 1;
-							}
-							numOfConsidedVertices = Math.round(numOfConsidedVertices);
-							//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
-							Random rand = new Random();
-							int counterVertices = 0;
-							while (counterVertices < numOfConsidedVertices) {
-								
-								// get a
-								int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
-								LOGGER.info("---- Generate literals for vertex " + vId +" ("+(counterVertices+1)+"/"+numOfConsidedVertices+ ")...");
-								// get literal
-								String literal = mLiteralProposer.getValue(vColo, dteColo);
-
-								// add it to the coloured graph
-								mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
-								counterVertices++;
+							if (arrOfVertices.length > 0 ) { 
+								double numOfConsidedVertices = avrgNoOfVertices	* arrOfVertices.length;
+								if (numOfConsidedVertices == 0) {
+									numOfConsidedVertices = 1;
+								}
+								numOfConsidedVertices = Math.round(numOfConsidedVertices);
+								//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
+								Random rand = new Random();
+								int counterVertices = 0;
+								while (counterVertices < numOfConsidedVertices) {
+									
+									// get a
+									int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
+									LOGGER.info("---- Generate literals for vertex " + vId +" ("+(counterVertices+1)+"/"+numOfConsidedVertices+ ")...");
+									// get literal
+									String literal = mLiteralProposer.getValue(vColo, dteColo);
+	
+									// add it to the coloured graph
+									mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
+									counterVertices++;
+								}
+							
+							} else {
+								LOGGER.warn("Expected a type of node: " + vColo + ", but none found");
 							}
 						}
 					}

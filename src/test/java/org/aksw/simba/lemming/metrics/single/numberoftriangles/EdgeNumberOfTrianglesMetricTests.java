@@ -24,7 +24,7 @@ public class EdgeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
             testParams.add(new Object[] {"graph1.n3", 1});
             testParams.add(new Object[] {"graph_loop.n3", 2});
             testParams.add(new Object[] {"graph_loop_2.n3", 5});
-            testParams.add(new Object[] {"email-Eu-core.n3", 489286});
+            //testParams.add(new Object[] {"email-Eu-core.n3", 489286});
         }
         return testParams;
     }

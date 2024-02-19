@@ -1,108 +1,53 @@
-# Lemming
-LEMMING is an ExaMple MImickiNg graph Generator
+# Graph generator simplexes-based approach
+We propose changes to [Lemming Repo](https://github.com/dice-group/Lemming/tree/pgmerge) such that it uses simplexes.
 
-## Approach overview
+## Overview (Röder et al., [2021](https://ieeexplore.ieee.org/document/9364380))
+Lemming works in five steps to generate the future output graph. Our approach updates its two steps (Step 1 and Step 3).
 
-1. **Load RDF graphs**  
+**Step 1** reads previous versions of input graphs, analyzes simplexes in them, and computes various statistics.
 
-The classes responsible to load the RDF graphs are under the package `org.aksw.simba.lemming.creation`. The graphs are first read from file and are then converted to coloured graphs by `GraphCreator.java`.
+**Step 2** evaluates input to determine expressions.
 
-2. **Initialize a draft graph** 
+**Step 3** uses simplexes to generate the output graph.
 
-The mimic graph is initialized based on the target graph's metrics. All the generator types are located under `org.aksw.simba.lemming.mimicgraph.generator`.
+**Step 4** modifies the output graph using expressions.
 
-3. **Optimize the graph** 
+**Step 5** creates the final version of the output graph.
 
-In `GraphOptimization.java`, two graphs are created by adding and removing an edge from the generated graph. The error score is then computed for these two graphs and the one with the lowest error score is chosen for the next iteration until either the number of maximum iterations has been reached or no improvement is found on the graph for the past 5 000 iterations.
 
-4. **Finalize the graph with semantic data** 
-
-The optimized graph is finalized as a real-world RDF graph in `GraphLexicalization.java` by rendering all the resources' IRIs.
-
-## Process overview
-1. Run metric computation on all graphs
-2. Run graph generation without the target graph in the file path
-
-Place the files present in ``https://hobbitdata.informatik.uni-leipzig.de/lemming/resources.zip`` and in the ``Input graphs/`` folder of ``https://hobbitdata.informatik.uni-leipzig.de/lemming/Experiments_data.zip`` under lemming's directory.
-
-### Metrics pre-computation
-First, the metrics need to be computed on all available graphs of its corresponding dataset: ``Experiments_data/Input graphs``. The pre-computation can be achieved by indicating the dataset through:
-
-```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.PrecomputingValues" -Dexec.args="pg" 
-```
-
-This will produce a file named ``value_store.val`` to be used during graph generation. It is recommended to move/rename the previous metrics store before re-running the store generation.
-
-### Graphs generation
+## Execution
+Our approach is tested on two datasets [Semantic web dog food](https://old.datahub.io/dataset/semantic-web-dog-food) (SWDF) and [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) (LGEO). We have created a class that sets the expressions mentioned in [Lemming](https://ieeexplore.ieee.org/document/9364380) for these datasets. Thus, Step 2 need not be executed. To generate the graph with the proposed approach, an instance of class **GraphGenerationTest** should be invoked with the following parameters, and it supports existing parameters of [Lemming Repo](https://github.com/dice-group/Lemming/tree/pgmerge).
 
 <table>
-  <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
-  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {pg, swdf, lgeo, geology}</td></tr>
-  <tr><th align="left">-nv</th><td>True</td><td>NA</td><td>Desired number of vertices in the generated graph (number of vertices of the target graph)</td></tr>
-  <tr><th align="left">-t</th><td>False</td><td>R</td><td>Type of graph generator {R, RR, C, CD, D, DD}</td></tr>
-  <tr><th align="left">-l</th><td>False</td><td>Initialized_MimicGraph.ser</td><td> File path where to save the initialized mimic graph. If a graph already exists there, the mimic graph generation will be skipped and loaded from file instead.</td></tr>
-  <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
-  <tr><th align="left">-thrs</th><td>False</td><td>availableProcessors*4</td><td>Number of threads</td></tr>
-  <tr><th align="left">-op</th><td>False</td><td>50 000</td><td>Number of optimization iterations</td></tr>
+  <tr><th align="left">Parameter</th><th>Description</th><th>Detailed Description</th></tr>
+  <tr><th align="left">-ds</th><td>Input dataset name</td><td>This parameter should be set to "swdf" and "lgeo" for SWDF and LGEO datasets.</td></tr>
+  <tr><th align="left">-nv</th><td>Number of vertices in the output graph</td><td>For our testing, this parameter was set to "45420" and "591649" for SWDF and LGEO datasets, respectively. We generated the future graph for the year 2015 for both datasets.</td></tr>
+  <tr><th align="left">-t</th><td>Generator to use for creating the future graph</td><td>To test the proposed generators, this parameter should be set to "S1" or "S2" or "S3" or "S4". In this proposed thesis, the parameter "S1" corresponds to Generator 1. Similarly, Generator 2 is defined for parameter "S2", and so on.</td></tr>
+  <tr><th align="left">-mi</th><td>Maximum number of retries</td><td>When the approach is not able to create a simplex, it retries in multiple iterations. This parameter sets the number of retries until the approach terminates. Its default value is 5000 if not provided as input.</td></tr>
 </table>
 
-To run the graph generation, you can use maven's plugin:
+## Results
+We executed each generator three times for both datasets. Existing generators were also executed for comparison with the proposed generators. 
+The generated result files for the performed execution can be found in the folder "generated_results". This folder also consists of benchmarking results and console logs for the proposed generators. 
 
-```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds pg -nv 792923 -t R -op 30000" 
-```
+### .result files
+- The result files are available in [result_files.zip](https://github.com/atulpundir88/Lemming-Simplexes/blob/generator_using_simplexes/generated_results/result_files.zip). 
+- The zip file has two parent folders: "Lemming" and "Simplex". "Lemming" contains results for existing generators, and the results of the proposed generators are available in "Simplex".
+- The folders further consist of the sub-folders "SWDF" and "LGD" for the two datasets. The "SWDF" folder contains results about [Semantic web dog food](https://old.datahub.io/dataset/semantic-web-dog-food), whereas the "LGD" folder contains results for [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052).
+- The files within this folder follow naming conventions such that they end with "_\<Generator execution parameter\>_r\<execution_id\>.result". For example, a file name ending with _R_r1.result denotes the result file for the generator invoked with parameter "R" (Existing generator) for the first execution. 
+- Complete Example (Existing generator): `result_files > Lemming > LGD > LemmingEx_C_r1.result` denotes the result file for the first execution of the generator with parameter "C" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
+- Complete Example (Proposed generator): `result_files > Simplex > SWDF > LemmingEx_S1_r3.result` denotes the result file for the third execution of the generator with parameter "S1" for the [Semantic web dog food](https://old.datahub.io/dataset/semantic-web-dog-food) dataset.
+- Note: The approach specified within these result files might differ, and the file name indicates the generator. To locate a result file for a specific generator, the file name should be used.
 
-To run the graph generation for the baseline generator, use:
+### console logs
+- We have saved console logs for the proposed generators, and they are in [console_logs.zip](https://github.com/atulpundir88/Lemming-Simplexes/blob/generator_using_simplexes/generated_results/console_logs.zip).
+- They follow the same hierarchy as that defined for .result files.
+- Example: `console_logs > Simplex > LGD > lgeo_S1_r1.txt` denotes the console logs for the first execution of the generator with parameter "S1" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
 
-```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.BuildBaselineGraph" -Dexec.args="-ds pg -nv 792923" 
-```
-
-You should move the target graph before starting the graph generation. The target graph is also called held-out graph, it's usually the latest graph of the versioned dataset.
-
-From the metrics pre-computation step, you can get the number of vertices of the target graph. This will serve as an input to the graph generation. 
-Below is a table with the currently accepted datasets and the number of vertices of its target graph.
-
-<table>
-  <tr><th align="left">Dataset</th><th align="center">No. vertices</th><th>Folder</th><th>Description</th><th>Target graph</th></tr>
-  <tr><th align="left">pg</th><td align="center">792 923</td><td>PersonGraph/</td><td>Person Graph (subset of DBpedia)</td><td align="center">2016-10</td></tr>
-  <tr><th align="left">swdf</th><td align="center">45 420</td><td>SemanticWebDogFood/</td><td>Semantic Web Dog Food</td><td align="center">2015</td></tr>
-  <tr><th align="left">lgeo</th><td align="center">591 649</td><td>LinkedGeoGraphs/</td><td>Linked Geo Data</td><td align="center">2015</td></tr>
-  <tr><th align="left">geology</th><td align="center">1 281</td><td>GeologyGraphs/</td><td> International Chronostratigraphic Chart</td><td align="center">2018-1</td></tr>
-</table>
-
-### Reproducing experiments
-You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
-
-The metrics and constant expressions values can be found in ``LemmingEx.result``. 
-
-The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. You can find the queries used for each dataset under ``Experiments_data/IGUANA experiments/queries``. The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after type inference and materialization).
-
-IGUANA produces a N-Triple file with the metrics of interest: Query Mixes Per Hour (QMPH), No. Queries Per Hour (NoQPH) and Queries Per Second (QPS). 
-
-<!-- commented
-These can be collected through the results file:
-
-```
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> "2854.432211867693"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/queryMixes> "135.92534342227108"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669/sparql0>  <http://iguana-benchmark.eu/properties/queriesPerSecond> "70.97457627118645"^^<http://www.w3.org/2001/XMLSchema#double> . 
-```
--->
-
-
-We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
-To use them, you need to specify the folder where the graphs are located: 
-
-```
-./exec_all.sh /home/lemming/generated_graphs/
-```
-
-### Used data and software
-
-Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/software/index.php).
-
-For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by the Stanford University. It has been transformed into a simple RDF file.
-
+### Benchmarking 
+- Benchmarking was performed using [IGUANA](https://link.springer.com/chapter/10.1007/978-3-319-68204-4_5), and the generated results are available in [benchmarking.zip](https://github.com/atulpundir88/Lemming-Simplexes/blob/generator_using_simplexes/generated_results/benchmarking.zip).
+- The initial folder hierarchy is same as the previous files. The parent folder name indicates the generators. The dataset-specific folders are defined for them. Then, folders are defined for each generator's execution parameter, and the files are present for every execution run in these folders.
+- General folder hierarchy: `benchmarking > <Generator> > <Dataset name> > <Generator execution parameter> > r<execution_id>`
+- Example: `benchmarking > Lemming > LGD > R > r1` - The files in this folder are for the first execution of the existing generator with parameter "R" for the [LinkedGeoData](https://content.iospress.com/articles/semantic-web/sw052) dataset.
+- The files found in a specific folder consists of results for different triple stores evaluated using [IGUANA](https://link.springer.com/chapter/10.1007/978-3-319-68204-4_5).
 
