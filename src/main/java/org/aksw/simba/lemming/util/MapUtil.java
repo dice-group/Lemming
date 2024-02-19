@@ -182,6 +182,22 @@ public class MapUtil {
     	return null; 
     }
     
+    public static List<BitSet> keysToList(ObjectIntOpenHashMap<BitSet> mapIntKeyValue){
+    	if(mapIntKeyValue != null){
+    		List<BitSet> res = new ArrayList<BitSet>();
+    		Object[] keySamples = mapIntKeyValue.keys;
+    		int iNoOfSamples = keySamples.length;
+    		for(int i = 0 ; i< iNoOfSamples ; ++i){
+    			if(mapIntKeyValue.allocated[i]){
+    				BitSet key = (BitSet) keySamples[i];
+    				res.add(key);
+    			}
+    		}
+    		return res;
+    	}
+    	return null; 
+    }
+    
     public static Set<Integer> convert(IntSet setInt){
     	Set<Integer> setRes = new HashSet<Integer>();
     	if(setInt!=null && setInt.size() > 0){
