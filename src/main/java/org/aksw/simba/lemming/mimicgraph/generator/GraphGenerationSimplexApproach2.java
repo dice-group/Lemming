@@ -11,35 +11,29 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric2;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRulesSimplexes;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.simplexes.Simplex0Analysis;
 import org.aksw.simba.lemming.simplexes.SelfLoopInSimplexAnalysis;
 import org.aksw.simba.lemming.simplexes.SelfLoopsInGraphs;
+import org.aksw.simba.lemming.simplexes.Simplex0Analysis;
 import org.aksw.simba.lemming.simplexes.Simplex0Distribution;
 import org.aksw.simba.lemming.simplexes.Simplex1Analysis;
 import org.aksw.simba.lemming.simplexes.Simplex1Distribution;
 import org.aksw.simba.lemming.simplexes.Simplex2Analysis;
 import org.aksw.simba.lemming.simplexes.Simplex2Distribution;
 import org.aksw.simba.lemming.simplexes.TriColos;
-import org.aksw.simba.lemming.simplexes.TriangleDistribution;
 import org.aksw.simba.lemming.simplexes.TriangleDistribution2;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.aksw.simba.lemming.util.MapUtil;
-import org.apache.commons.collections.SetUtils;
 import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.apache.jena.ext.com.google.common.collect.Sets.SetView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 import grph.DefaultIntSet;
@@ -906,7 +900,7 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 	}
 	
 	@Override
-	public ColouredGraph generateGraph(){
+	public void generateGraphSingleThread(){
 		
 		//*************************************** 2-simplex creation (that could be connected to each other) ************************************************//
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
@@ -2262,8 +2256,6 @@ public class GraphGenerationSimplexApproach2 extends AbstractGraphGeneration imp
 		updateVertexColoMap(mMapColourToVertexIDs2SimplexIsolated); // isolated 2-simplexes
 		updateVertexColoMap(mMapColourToVertexIDs1SimplexConnected); // connected 1-simplexes
 		updateVertexColoMap(mMapColourToVertexIDsConnectedTo2Simplex); // 1-simplexes connected to 2-simplexes
-		
-		return mMimicGraph;
 	}
 	
 	private void addSelfLoops(int estEdgesInput, OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput) {

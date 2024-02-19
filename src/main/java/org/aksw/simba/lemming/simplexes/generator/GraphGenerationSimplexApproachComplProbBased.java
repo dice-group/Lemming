@@ -453,7 +453,7 @@ public class GraphGenerationSimplexApproachComplProbBased extends AbstractGraphG
 	}
 	
 	@Override
-	public ColouredGraph generateGraph(){
+	public void generateGraphSingleThread(){
 		
 		//*************************************** 2-simplex creation (that could be connected to each other) ************************************************//
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
@@ -1977,8 +1977,6 @@ public class GraphGenerationSimplexApproachComplProbBased extends AbstractGraphG
 		updateVertexColoMap(mMapColourToVertexIDs2SimplexIsolated); // isolated 2-simplexes
 		updateVertexColoMap(mMapColourToVertexIDs1SimplexConnected); // connected 1-simplexes
 		updateVertexColoMap(mMapColourToVertexIDsConnectedTo2Simplex); // 1-simplexes connected to 2-simplexes
-		
-		return mMimicGraph;
 	}
 	
 	private void addSelfLoops(int estEdgesInput, OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput, PropertyDistI mPropDistInput) {
@@ -2639,5 +2637,4 @@ public class GraphGenerationSimplexApproachComplProbBased extends AbstractGraphG
 			}
 		}
 	}
-
 }

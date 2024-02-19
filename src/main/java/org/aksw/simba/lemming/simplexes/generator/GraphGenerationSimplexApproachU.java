@@ -11,32 +11,26 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColos;
-import org.aksw.simba.lemming.simplexes.analysis.S1ConnToS2C;
-import org.aksw.simba.lemming.simplexes.analysis.S1ConnectingS2C;
+import org.aksw.simba.lemming.simplexes.analysis.ConnS1C;
 import org.aksw.simba.lemming.simplexes.analysis.ConnS2;
 import org.aksw.simba.lemming.simplexes.analysis.FindSelfLoops;
 import org.aksw.simba.lemming.simplexes.analysis.FindTri;
-import org.aksw.simba.lemming.simplexes.analysis.ConnS1C;
-import org.aksw.simba.lemming.simplexes.analysis.IsoS2;
 import org.aksw.simba.lemming.simplexes.analysis.IsoS1C;
+import org.aksw.simba.lemming.simplexes.analysis.IsoS2;
 import org.aksw.simba.lemming.simplexes.analysis.IsolatedSelfLoops;
 import org.aksw.simba.lemming.simplexes.analysis.S0C;
-import org.aksw.simba.lemming.simplexes.distribution.ConnS1DistI;
+import org.aksw.simba.lemming.simplexes.analysis.S1ConnToS2C;
+import org.aksw.simba.lemming.simplexes.analysis.S1ConnectingS2C;
 import org.aksw.simba.lemming.simplexes.distribution.ConnS1DistU;
-import org.aksw.simba.lemming.simplexes.distribution.EdgeDistIS;
-import org.aksw.simba.lemming.simplexes.distribution.EdgeDistUS;
-import org.aksw.simba.lemming.simplexes.distribution.EdgeDistI;
 import org.aksw.simba.lemming.simplexes.distribution.EdgeDistU;
-import org.aksw.simba.lemming.simplexes.distribution.TriDistI;
+import org.aksw.simba.lemming.simplexes.distribution.EdgeDistUS;
 import org.aksw.simba.lemming.simplexes.distribution.TriDistU;
-import org.aksw.simba.lemming.simplexes.distribution.VertDistI;
 import org.aksw.simba.lemming.simplexes.distribution.VertDistU;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
@@ -395,7 +389,7 @@ public class GraphGenerationSimplexApproachU extends AbstractGraphGeneration imp
 	}
 	
 	@Override
-	public ColouredGraph generateGraph(){
+	public void generateGraphSingleThread(){
 		
 		//*************************************** 2-simplex creation (that could be connected to each other) ************************************************//
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
@@ -1887,8 +1881,6 @@ public class GraphGenerationSimplexApproachU extends AbstractGraphGeneration imp
 		updateVertexColoMap(mMapColourToVertexIDs2SimplexIsolated); // isolated 2-simplexes
 		updateVertexColoMap(mMapColourToVertexIDs1SimplexConnected); // connected 1-simplexes
 		updateVertexColoMap(mMapColourToVertexIDsConnectedTo2Simplex); // 1-simplexes connected to 2-simplexes
-		
-		return mMimicGraph;
 	}
 	
 	private void addSelfLoops(int estEdgesInput, Set<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput) {

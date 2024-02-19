@@ -338,7 +338,10 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		return mMimicGraph;
 	}
 	
-	protected abstract void generateGraphMultiThreads();
+	protected void generateGraphMultiThreads() {
+		LOGGER.warn("Multithreaded case not supported yet. Switching to single threaded generation.");
+		generateGraphSingleThread();
+	}
 
 	protected abstract void generateGraphSingleThread();
 
@@ -642,8 +645,10 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		/*
 		 * 	process normal edges
 		 */
-			
-		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		
+		
+		int iNumberOfOtherEdges = mIDesiredNoOfEdges;
+		mIDesiredNoOfEdges += iNumberOfRdfTypeEdges;
 		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
 		
 		Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(mSetOfRestrictedEdgeColours);
@@ -915,8 +920,9 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 		/*
 		 * 	process normal edges
 		 */
-			
-		int iNumberOfOtherEdges = mIDesiredNoOfEdges - iNumberOfRdfTypeEdges;
+		int iNumberOfOtherEdges = mIDesiredNoOfEdges;
+		mIDesiredNoOfEdges += iNumberOfRdfTypeEdges;
+		
 		LOGGER.info("Assigning colours to "+iNumberOfOtherEdges + " .......");
 		
 		int iNoOfEdgesPerThread = 0;
@@ -969,7 +975,22 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	public long getSeed() {
 		return seed;
 	}
-	
+
+	public ObjectDistribution<BitSet> getEdgeColoDist() {
+		return mEdgeColoDist;
+	}
+
+	public BitSet getRdfTypePropertyColour() {
+		return mRdfTypePropertyColour;
+	}
+
+	public Map<BitSet, Integer> getmapClassVertices() {
+		return mMapClassVertices;
+	}
+
+	public Map<Integer, BitSet> getReversedMapClassVertices() {
+		return mReversedMapClassVertices;
+	}
 	
 //	private void paintEdgesMultiThreads_orig(){
 //		
