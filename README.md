@@ -29,7 +29,7 @@ Place the files present in ``https://hobbitdata.informatik.uni-leipzig.de/lemmin
 First, the metrics need to be computed on all available graphs of its corresponding dataset: ``Experiments_data/Input graphs``. The pre-computation can be achieved by indicating the dataset through:
 
 ```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.PrecomputingValues" -Dexec.args="pg" 
+mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.PrecomputingValues" -Dexec.args="-ds swdf" 
 ```
 
 This will produce a file named ``value_store.val`` to be used during graph generation. It is recommended to move/rename the previous metrics store before re-running the store generation.
