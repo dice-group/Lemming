@@ -62,20 +62,22 @@ public class BasicGraphGenerator {
 
 			// copy colour palette of all the original graphs to the new one
 			for (ColouredGraph grph : origGraphs) {
-				// merge vertex colours
-				ColourPalette vPalette = grph.getVertexPalette();
-				Map<String, BitSet> mapVertexURIsToColours = vPalette.getMapOfURIAndColour();
-				fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
-
-				// merge edge colours
-				ColourPalette ePalette = grph.getEdgePalette();
-				Map<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
-				fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
-
-				// merge data typed edge colours
-				ColourPalette dtePalette = grph.getDataTypedEdgePalette();
-				Map<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
-				fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
+				if (grph!=null) {
+					// merge vertex colours
+					ColourPalette vPalette = grph.getVertexPalette();
+					Map<String, BitSet> mapVertexURIsToColours = vPalette.getMapOfURIAndColour();
+					fillColourToPalette(newVertexPalette, mapVertexURIsToColours);
+	
+					// merge edge colours
+					ColourPalette ePalette = grph.getEdgePalette();
+					Map<String, BitSet> mapEdgeURIsToColours = ePalette.getMapOfURIAndColour();
+					fillColourToPalette(newEdgePalette, mapEdgeURIsToColours);
+	
+					// merge data typed edge colours
+					ColourPalette dtePalette = grph.getDataTypedEdgePalette();
+					Map<String, BitSet> mapDTEdgeURIsToColours = dtePalette.getMapOfURIAndColour();
+					fillColourToPalette(newDTEdgePalette, mapDTEdgeURIsToColours);
+				}
 			}
 
 			mimicGraph.setVertexPalette(newVertexPalette);

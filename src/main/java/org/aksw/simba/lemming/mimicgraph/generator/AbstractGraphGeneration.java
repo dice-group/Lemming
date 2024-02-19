@@ -71,11 +71,11 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	/*
 	 * 1st key: the edge colour, 2nd key is the tail id and the value is the set of already connected head id
 	 */
-	private Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices;
+	protected Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices;
 	
 	protected IOfferedItem<BitSet> mEdgeColoProposer;
 	
-	private Random mRandom ;
+	protected Random mRandom ;
 	protected long seed;
 	
 	protected BitSet mRdfTypePropertyColour;
@@ -85,6 +85,15 @@ public abstract class AbstractGraphGeneration extends BasicGraphGenerator {
 	
 	//protected final ObjectDoubleOpenHashMap<BitSet> mEdgeColoursThreshold;
 	private Map<Integer, BitSet> mMapEdgeIdsToColour;
+	
+	
+	/**
+	 * New constructor for simplex approach 
+	 */
+	public AbstractGraphGeneration() {
+		
+		
+	}
 	
 	
 	public AbstractGraphGeneration(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed){
