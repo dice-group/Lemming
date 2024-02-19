@@ -62,7 +62,6 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
                     } else {
                         LOGGER.error("Couldn't generate coloured graph.");
                     }
-                    //break; // added for testing purposes, remove later
                 } else {
                     LOGGER.error("The model hasn't been grown after reading additional files.");
                 }

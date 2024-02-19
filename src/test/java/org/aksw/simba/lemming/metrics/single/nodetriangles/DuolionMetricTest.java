@@ -3,7 +3,6 @@ package org.aksw.simba.lemming.metrics.single.nodetriangles;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.nodetriangles.forward.ForwardNodeTriangleMetric;
 import org.aksw.simba.lemming.util.ColouredGraphConverter;
-import org.aksw.simba.lemming.util.IOHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ public class DuolionMetricTest {
 
     @Test
     public void duolionMetric() {
-        ColouredGraph graph = IOHelper.readGraphFromResource("email-Eu-core.n3", "N3");//ColouredGraphConverter.convertFileToGraph("email-Eu-core.n3");
+        ColouredGraph graph = ColouredGraphConverter.convertFileToGraph("email-Eu-core.n3");
         double expectedNumOfTriangles = 105461;
         Assert.assertNotNull(graph);
 

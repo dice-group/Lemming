@@ -107,8 +107,6 @@ public class GraphCreator {
 					graph.setVertexColour(subjectId,
 							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
 				}
-				//Below statement needs to be removed
-				//System.out.println(propertyId + ": " + propertyUri);
 			}
 
 			/*
@@ -144,7 +142,7 @@ public class GraphCreator {
 				}
 			}
 		}
-		//System.out.println(resourceIdMapping);//remove this statement later adding to check mapping
+
 		// set the datatypedEdgePalette to the graph
 		graph.setDataTypeEdgePalette(datatypedEdgePalette);
 		return graph;
