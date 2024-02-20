@@ -11,6 +11,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
+import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +30,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * (UCS-UIS) from the paper.
  *
  */
-@Component("UCSUIS")
+@Component("UCS")
 @Scope(value = "prototype")
 public class UniformClassSelection extends AbstractGraphGeneration implements IGraphGeneration {
 
@@ -41,28 +44,30 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 	private Random mRandom;
 
 	/**
-	 * Constructor.
 	 * 
-	 * @param iNumberOfVertices Number of vertices
-	 * @param origGrphs         Original/Input/Versioned graphs
-	 * @param iNumberOfThreads  Number of threads for graph generation
-	 * @param seed              Seed for the RNG
+	 * @param iNumberOfVertices
+	 * @param origGrphs
+	 * @param iNumberOfThreads
+	 * @param seed
+	 * @param vertexSelector
 	 */
-	public UniformClassSelection(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed) {
+	public UniformClassSelection(int iNumberOfVertices, ColouredGraph[] origGrphs, int iNumberOfThreads, long seed,
+			IVertexSelector vertexSelector) {
 		super(iNumberOfVertices, origGrphs, iNumberOfThreads, seed);
 		mRandom = new Random(this.seed);
 		maxIterationFor1EdgeColour = Constants.MAX_ITERATION_FOR_1_COLOUR;
+
 	}
 
 	/**
-	 * 	Generates the graph in a multi-threaded way
+	 * Generates the graph in a multi-threaded way
 	 */
 	protected void generateGraphMultiThreads() {
-		
+
 		// divides the coloured edges across the available threads
 		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(mNumberOfThreads);
 		LOGGER.info("Create " + lstAssignedEdges.size() + " threads for processing graph generation!");
-		
+
 		// Create thread pool, assign each thread a set of edges to work with
 		ExecutorService service = Executors.newFixedThreadPool(mNumberOfThreads);
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
@@ -74,7 +79,7 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
-					// random
+					// random number generator
 					Random random = new Random(seed);
 					seed++;
 					// max iteration of 1 edge
@@ -86,20 +91,13 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 					// set of failed edge colours
 					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
 
-					int j = 0;
-					while (j < arrOfEdges.length) {
+					for (int j = 0; j < arrOfEdges.length;) {
 						// get an edge id
 						int fakeEdgeId = arrOfEdges[j];
-						BitSet edgeColo = getEdgeColour(fakeEdgeId);
+						BitSet edgeColour = getEdgeColour(fakeEdgeId);
 
-						if (edgeColo == null) {
-							// skip the edge that has failed edge colour
-							j++;
-							continue;
-						}
-
-						if (failedEdgeColours.contains(edgeColo)) {
-							// skip the edge that has failed edge colour
+						// skip failed edge colours
+						if (edgeColour == null || failedEdgeColours.contains(edgeColour)) {
 							j++;
 							continue;
 						}
@@ -109,10 +107,10 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 							iProcessingEdgeIndex = j;
 						} else {
 							if (maxIterationFor1Edge == 0) {
-								LOGGER.error("Could not create an edge of " + edgeColo
+								LOGGER.error("Could not create an edge of " + edgeColour
 										+ " colour since it could not find any approriate vertices to connect.");
 								// skip the edge that has failed attempt after MAX_EXPLORING_TIME
-								failedEdgeColours.add(edgeColo);
+								failedEdgeColours.add(edgeColour);
 								j++;
 								continue;
 							}
@@ -120,7 +118,7 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 
 						// get potential tail colours
 						Set<BitSet> setTailColours = new HashSet<BitSet>(
-								mColourMapper.getTailColoursFromEdgeColour(edgeColo));
+								mColourMapper.getTailColoursFromEdgeColour(edgeColour));
 						setTailColours.retainAll(setAvailableVertexColours);
 
 						/*
@@ -128,18 +126,19 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 						 * again
 						 */
 						if (setTailColours.size() == 0) {
-							failedEdgeColours.add(edgeColo);
+							failedEdgeColours.add(edgeColour);
 							j++;
 							continue;
 						}
 
 						// get random a tail colour
 						BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-
 						BitSet tailColo = arrTailColours[random.nextInt(arrTailColours.length)];
+						
+						// get potential head colours
 						Set<BitSet> setHeadColours = new HashSet<BitSet>(
-								mColourMapper.getHeadColours(tailColo, edgeColo));
-
+								mColourMapper.getHeadColours(tailColo, edgeColour));
+						
 						if (setHeadColours == null || setHeadColours.size() == 0) {
 							maxIterationFor1Edge--;
 							continue;
@@ -151,69 +150,77 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 							continue;
 						}
 
+						// get random head colour
 						BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
-
 						BitSet headColo = arrHeadColours[random.nextInt(arrHeadColours.length)];
 
-						// get set of tail ids and head ids
-						IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-
-						if (mMapColourToVertexIDs.containsKey(tailColo)) {
-							setTailIDs.addAll(mMapColourToVertexIDs.get(tailColo));
+						// We select the instances now
+						IOfferedItem<Integer> tailIDProposer = vertexSelector.getProposedVertex(edgeColour, tailColo,
+								VERTEX_TYPE.TAIL);
+						IOfferedItem<Integer> headIDProposer = vertexSelector.getProposedVertex(edgeColour, headColo,
+								VERTEX_TYPE.HEAD);
+						
+						// skip if proposers are invalid
+						if (tailIDProposer == null || headIDProposer == null) {
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						// attempt to select tail ID
+						int tailId = -1;
+						int iAttemptToGetTailIds = 1000;
+						while (iAttemptToGetTailIds > 0) {
+							tailId = tailIDProposer.getPotentialItem();
+							if (mMapClassVertices.containsKey(tailColo))
+								break;
+							tailId = -1;
+							iAttemptToGetTailIds--;
 						}
 
+						if (tailId == -1) {
+							maxIterationFor1Edge--;
+							continue;
+						}
+
+						// get set of all existing tail and head ids
+						IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 						if (mMapColourToVertexIDs.containsKey(headColo)) {
 							setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
 						}
 
-						if (setTailIDs != null && setTailIDs.size() > 0 && setHeadIDs != null
-								&& setHeadIDs.size() > 0) {
-							int[] arrTailIDs = setTailIDs.toIntArray();
-							int tailId = -1;
-							int iAttemptToGetTailIds = 1000;
-							while (iAttemptToGetTailIds > 0) {
-								tailId = arrTailIDs[random.nextInt(arrTailIDs.length)];
-								if (!mReversedMapClassVertices.containsKey(tailColo))
-									break;
-								tailId = -1;
-								iAttemptToGetTailIds--;
-							}
+						// skip if invalid
+						if (setHeadIDs == null || setHeadIDs.size() == 0) {
+							maxIterationFor1Edge--;
+							continue;
+						}
+						
+						// get heads connected to a tail ID by the edge colour
+						// remove these from the possible set
+						IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColour);
+						setHeadIDs.removeAll(tmpSetOfConnectedHeads);
+						
+						// skip if possible set IDs is empty
+						if (setHeadIDs.size() == 0) {
+							maxIterationFor1Edge--;
+							continue;
+						}
 
-							if (tailId == -1) {
-								maxIterationFor1Edge--;
-								continue;
-							}
+						// get head id, filtered by the already connected
+						Set<Integer> setFilteredHeadIDs = new HashSet<Integer>(setHeadIDs);
+						int headId = headIDProposer.getPotentialItem(setFilteredHeadIDs);
 
-							IntSet tmpSetOfConnectedHeads = getConnectedHeads(tailId, edgeColo);
-							if (tmpSetOfConnectedHeads != null && tmpSetOfConnectedHeads.size() > 0) {
-								// int[] arrConnectedHeads = tmpSetOfConnectedHeads.toIntArray();
-								for (int connectedHead : tmpSetOfConnectedHeads) {
-									if (setHeadIDs.contains(connectedHead))
-										setHeadIDs.remove(connectedHead);
-								}
-							}
-
-							if (setHeadIDs.size() == 0) {
-								maxIterationFor1Edge--;
-								continue;
-							}
-
-							int[] arrHeadIDs = setHeadIDs.toIntArray();
-							int headId = arrHeadIDs[random.nextInt(arrHeadIDs.length)];
-							boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
-							if (isFoundVerticesConnected) {
-								j++;
-								continue;
-							}
+						boolean isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColour);
+						if (isFoundVerticesConnected) {
+							j++;
+							continue;
 						}
 
 						maxIterationFor1Edge--;
 						if (maxIterationFor1Edge == 0) {
-							LOGGER.error("Could not create an edge of " + edgeColo
+							LOGGER.error("Could not create an edge of " + edgeColour
 									+ " colour since it could not find any approriate vertices to connect.");
 
-							failedEdgeColours.add(edgeColo);
+							failedEdgeColours.add(edgeColour);
 							j++;
 						}
 
@@ -238,14 +245,12 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 	 */
 	protected void generateGraphSingleThread() {
 
-		/*
-		 * mMapColourToEdgeIDs contains only normal edges (not datatype property edges
-		 * and rdf:type edges)
-		 */
-		Set<BitSet> keyEdgeColo = mMapColourToEdgeIDs.keySet();
+		// edge map excludes datatype property edges or rdf:type
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
 		Set<BitSet> setAvailableVertexColours = mMapColourToVertexIDs.keySet();
 		int iColoCounter = 0;
-		for (BitSet edgeColo : keyEdgeColo) {
+		for (BitSet edgeColo : setEdgeColours) {
+
 			iColoCounter++;
 			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
 			setTailColours.retainAll(setAvailableVertexColours);
@@ -258,7 +263,7 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 			 */
 			IntSet setFakeEdgeIDs = mMapColourToEdgeIDs.get(edgeColo);
 			// use each edge to connect vertices
-			LOGGER.info("Generate edges for " + edgeColo + " edge colour (" + iColoCounter + "/" + keyEdgeColo.size()
+			LOGGER.info("Generate edges for " + edgeColo + " edge colour (" + iColoCounter + "/" + setEdgeColours.size()
 					+ ")");
 
 			int i = 0;
@@ -279,24 +284,30 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 
 				BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
 				BitSet headColo = arrHeadColours[mRandom.nextInt(arrHeadColours.length)];
-				IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
 
-				if (mMapColourToVertexIDs.containsKey(tailColo)) {
-					setTailIDs.addAll(mMapColourToVertexIDs.get(tailColo));
-				}
+				IOfferedItem<Integer> tailIDProposer = vertexSelector.getProposedVertex(edgeColo, tailColo,
+						VERTEX_TYPE.TAIL);
+				IOfferedItem<Integer> headIDProposer = vertexSelector.getProposedVertex(edgeColo, headColo,
+						VERTEX_TYPE.HEAD);
 
-				if (mMapColourToVertexIDs.containsKey(headColo)) {
-					setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
-				}
+				if (tailIDProposer != null && headIDProposer != null) {
+					int tailId = tailIDProposer.getPotentialItem();
+					if (mReversedMapClassVertices.containsKey(tailId)) {
+						continue;
+					}
 
-				if (setTailIDs != null && setTailIDs.size() > 0 && setHeadIDs != null && setHeadIDs.size() > 0) {
-					int[] arrTailIDs = setTailIDs.toIntArray();
-					int tailId = -1;
-					while (true) {
-						tailId = arrTailIDs[mRandom.nextInt(arrTailIDs.length)];
-						if (!mReversedMapClassVertices.containsKey(tailColo))
-							break;
+					IntSet setTailIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
+					if (mMapColourToVertexIDs.containsKey(tailColo)) {
+						setTailIDs.addAll(mMapColourToVertexIDs.get(tailColo));
+					}
+
+					IntSet setHeadIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
+					if (mMapColourToVertexIDs.containsKey(headColo)) {
+						setHeadIDs.addAll(mMapColourToVertexIDs.get(headColo));
+					}
+
+					if (setHeadIDs == null || setHeadIDs.size() == 0) {
+						continue;
 					}
 
 					int[] arrConnectedHeads = getConnectedHeads(tailId, edgeColo).toIntArray();
@@ -309,8 +320,7 @@ public class UniformClassSelection extends AbstractGraphGeneration implements IG
 						continue;
 					}
 
-					int[] arrHeadIDs = setHeadIDs.toIntArray();
-					int headId = arrHeadIDs[mRandom.nextInt(arrHeadIDs.length)];
+					int headId = headIDProposer.getPotentialItem(setHeadIDs);
 					isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColo);
 					if (isFoundVerticesConnected) {
 						isFoundVerticesConnected = true;

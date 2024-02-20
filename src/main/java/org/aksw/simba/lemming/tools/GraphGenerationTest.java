@@ -10,6 +10,7 @@ import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
+import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
@@ -59,8 +60,9 @@ public class GraphGenerationTest {
 
 		// Generation for a draft graph or loading from file
 		long startTime = System.currentTimeMillis();
+		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector);
 		IGraphGeneration mGrphGenerator = (IGraphGeneration) application.getBean(pArgs.typeGenerator, pArgs.noVertices,
-				graphs, pArgs.noThreads, pArgs.seed);
+				graphs, pArgs.noThreads, pArgs.seed, vertexSelector);
 		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 		
 		// lexicalize and save initial mimic graph as ttl

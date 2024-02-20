@@ -6,7 +6,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-
+import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -21,7 +21,7 @@ public interface IGraphGeneration {
 	//public BitSet getProposedEdgeColour(BitSet headColour, BitSet tailColour);
 	//public BitSet getProposedHeadColour(BitSet edgeColour, BitSet tailColour);
 	//public BitSet getProposedTailColour(BitSet headColour, BitSet edgeColour);
-	public TripleBaseSingleID getProposedTriple(boolean isRamdom);
+	public TripleBaseSingleID getProposedTriple(IVertexSelector vertexSelector);
 	
 	public ColouredGraph getMimicGraph();
 	public String getLiteralType(BitSet dteColo);
@@ -29,4 +29,5 @@ public interface IGraphGeneration {
 	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
 	public long getSeed();
 	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad);
+	public IVertexSelector getVertexSelector();
 }

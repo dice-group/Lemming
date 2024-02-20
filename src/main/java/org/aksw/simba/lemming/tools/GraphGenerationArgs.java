@@ -27,6 +27,9 @@ public class GraphGenerationArgs {
 
 	@Parameter(names = { "-t" }, description = "Generator type", required = true)
 	String typeGenerator;
+	
+	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = true)
+	String vertexSelector;
 
 	@Parameter(names = {
 			"-op" }, description = "Number of iterations during the graph optimization phase", required = true)

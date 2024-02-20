@@ -96,7 +96,6 @@ public class BeanFactory {
 		List<SingleValueMetric> finalMetrics = getMetrics();
 		return new ConstantValueStorage(cacheName, datasetPath, finalMetrics);
 	}
-
 }
 
 /**
