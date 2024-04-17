@@ -42,9 +42,9 @@ import grph.in_memory.InMemoryGrph;
  */
 @SpringBootApplication
 @ComponentScan(basePackages = "org.aksw.simba.lemming")
-public class PrecomputingValues {
+public class PrecomputingValues { 
 
-	/** Logging object */
+	/** Logging object */ 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrecomputingValues.class);
 
 	public static void main(String[] args) {
@@ -70,7 +70,7 @@ public class PrecomputingValues {
 		LOGGER.info("Compute metric values for graph ......");
 		ConstantValueStorage valueCarrier = application.getBean(ConstantValueStorage.class,
 				mDatasetManager.getDatasetPath());
-		ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.computeMetrics(graphs, pArgs.recalculateMetrics);
+		ObjectDoubleOpenHashMap<String> graphVectors[] = valueCarrier.computeMetrics(graphs);
 
 		// Compute constant expressions with metrics from above
 		LOGGER.info("Compute constant expressions ......");
@@ -93,6 +93,7 @@ public class PrecomputingValues {
 			builder.append(n.toString());
 			builder.append('\n');
 
+			// apply the expression to each graph and add values to store
 			for (int i = 0; i < graphs.length; ++i) {
 				ObjectDoubleOpenHashMap<String> metricValues = valueCarrier.getMetricValues(graphs[i]);
 				double constValue = n.getExpression().getValue(metricValues);

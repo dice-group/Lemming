@@ -2,13 +2,13 @@ package org.aksw.simba.lemming.tools;
 
 import com.beust.jcommander.Parameter;
 
+/**
+ * Program arguments expected by the Metrics store.
+ */
 public class PrecomputingArgs {
 	
 	@Parameter(names = { "-ds" }, description = "Dataset name.", required = true)
 	String dataset;
-	
-	@Parameter(names = { "-overwrite" }, description = "Flag if we want to overwrite the results.", required = false)
-	boolean recalculateMetrics = false;
 	
 	@Parameter(names = { "--min-fitness" }, description = "Minimum Fitness", required = false)
 	double minFitness = 100000.0;

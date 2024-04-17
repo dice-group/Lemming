@@ -375,24 +375,14 @@ public class ConstantValueStorage implements Serializable {
 	 * Compute metrics for all graphs
 	 * 
 	 * @param graphs    Array of coloured graphs
-	 * @param recalculateMetrics Flag if we want the metrics to recalculated
 	 * @return
 	 */
-	public ObjectDoubleOpenHashMap<String>[] computeMetrics(ColouredGraph[] graphs, boolean recalculateMetrics) {
-		boolean havingData = havingData();
-		Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = null;
-		if (havingData && !recalculateMetrics) {
-			mapMetricValues = new HashMap<String, ObjectDoubleOpenHashMap<String>>();
-			for (ColouredGraph grph : graphs) {
-				mapMetricValues.put(ConstantValueStorage.generateGraphKey(grph), getMetricValues(grph));
-			}
+	public ObjectDoubleOpenHashMap<String>[] computeMetrics(ColouredGraph[] graphs) {
+		Map<String, ObjectDoubleOpenHashMap<String>> mapMetricValues = getMapMetricValues(graphs);
+		if (mapMetricValues == null) {
+			setMetricValues(mapMetricValues);
 		} else {
-			mapMetricValues = getMapMetricValues(graphs);
-			if (mapMetricValues == null) {
-				setMetricValues(mapMetricValues);
-			} else {
-				addMetricValues(mapMetricValues, false);
-			}
+			addMetricValues(mapMetricValues, false);
 		}
 		return getGraphMetricsVector(graphs);
 	}

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.carrotsearch.hppc.BitSet;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
-import jakarta.annotation.PostConstruct;
 
 /**
  * Implementation of the Uniform Instance Selection (UIS). Retrieves a random
@@ -44,26 +43,13 @@ public class UniformInstanceSelection implements IVertexSelector {
 
 	@Override
 	public IOfferedItem<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type) {
-		return getProposedVertex(vertexColour, type);
+		return getProposedVertex(vertexColour);
 	}
 
-	public IOfferedItem<Integer> getProposedVertex(BitSet vertexColour, VERTEX_TYPE type) {
-		switch (type) {
-		case HEAD: {
-			// TODO do we really need to convert the primitive type to reference type?
-			Integer[] arrHeadIDs = mMapColourToVertexIDs.get(vertexColour).toArray(Integer[]::new);
-			IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrHeadIDs, seed);
-			return item;
-		}
-		case TAIL: {
-			// TODO
-			Integer[] arrTailIDs = mMapColourToVertexIDs.get(vertexColour).toArray(Integer[]::new);
-			IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrTailIDs, seed);
-			return item;
-		}
-		default:
-			throw new IllegalArgumentException("Unknown vertex type " + type);
-		}
+	public IOfferedItem<Integer> getProposedVertex(BitSet vertexColour) {
+		Integer[] arrIDs = mMapColourToVertexIDs.get(vertexColour).toArray(Integer[]::new);
+		IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrIDs, seed);
+		return item;
 	}
 
 }

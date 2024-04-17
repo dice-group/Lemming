@@ -1,7 +1,5 @@
 package org.aksw.simba.lemming.mimicgraph.colourselection;
 
-public interface IClassSelector {
-	
-	
+public class BiasedClassSelector implements IClassSelector {
 
 }

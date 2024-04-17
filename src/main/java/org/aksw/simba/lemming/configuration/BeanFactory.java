@@ -107,6 +107,11 @@ public class BeanFactory {
  */
 @Component("PropertySplitter")
 class PropertySplitter {
+	/**
+	 * 
+	 * @param property String to be parsed
+	 * @return Parse string as Set<String>
+	 */
 	public Set<String> toSet(String property) {
 		Set<String> set = new HashSet<String>();
 		if (!property.trim().isEmpty()) {
@@ -115,6 +120,11 @@ class PropertySplitter {
 		return set;
 	}
 
+	/**
+	 * 
+	 * @param property String to be parsed
+	 * @return Parse string as List<String>
+	 */
 	public List<String> toList(String property) {
 		List<String> list = new ArrayList<>();
 		if (!property.trim().isEmpty()) {

@@ -17,7 +17,7 @@ public class GraphGenerationArgs {
 	int noVertices;
 
 	@Parameter(names = { "-thrs" }, description = "Number of threads", required = false)
-	int noThreads = -1;
+	int noThreads = 1;
 
 	@Parameter(names = { "-seed" }, description = "Seed", required = false)
 	long seed = System.currentTimeMillis();
