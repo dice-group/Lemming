@@ -57,6 +57,7 @@ public class GraphGenerator {
 	 */
 	public GraphGenerator(GraphInitializer graphInitializer, IClassSelector classSelector,
 			IVertexSelector vertexSelector) {
+		// TODO check if graph initializer depends on whether it's BIS or UIS? Use I
 		this.graphInitializer = graphInitializer;
 		this.classSelector = classSelector;
 		this.vertexSelector = vertexSelector;
@@ -87,8 +88,6 @@ public class GraphGenerator {
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		for (int i = 0; i < lstAssignedEdges.size(); i++) {
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			final Set<BitSet> setAvailableVertexColours = graphInitializer.getAvailableVertexColours();
-
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {

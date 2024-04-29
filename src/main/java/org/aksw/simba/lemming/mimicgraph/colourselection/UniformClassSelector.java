@@ -1,5 +1,60 @@
 package org.aksw.simba.lemming.mimicgraph.colourselection;
 
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+
+import org.aksw.simba.lemming.creation.GraphInitializer;
+
+import com.carrotsearch.hppc.BitSet;
+
+/**
+ * 
+ */
 public class UniformClassSelector implements IClassSelector {
+
+	private GraphInitializer graphInit;
+	private Random random;
+
+	public UniformClassSelector(GraphInitializer graphInit) {
+		this.graphInit = graphInit;
+		this.random = new Random(graphInit.getSeed());
+	}
+
+	@Override
+	public BitSet getTailClass(BitSet edgeColour) {
+		// get all possible classes and filter them with what we know is possible
+		Set<BitSet> setTailColours = new HashSet<BitSet>(
+				graphInit.getColourMapper().getTailColoursFromEdgeColour(edgeColour));
+		Set<BitSet> setAvailableVertexColours = graphInit.getAvailableVertexColours();
+		setTailColours.retainAll(setAvailableVertexColours);
+
+		// if empty, return
+		if (setTailColours.isEmpty()) {
+			return null;
+		}
+
+		// get random a tail colour
+		BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
+		return arrTailColours[random.nextInt(arrTailColours.length)];
+	}
+	
+	@Override
+	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
+		// get all possible classes and filter them with what we know is possible
+		Set<BitSet> setHeadColours = new HashSet<BitSet>(
+				graphInit.getColourMapper().getHeadColours(tailColour, edgeColour));
+		Set<BitSet> setAvailableVertexColours = graphInit.getAvailableVertexColours();
+		setHeadColours.retainAll(setAvailableVertexColours);
+
+		// if empty, return
+		if (setHeadColours.isEmpty()) {
+			return null;
+		}
+
+		// get random a tail colour
+		BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
+		return arrHeadColours[random.nextInt(arrHeadColours.length)];
+	}
 
 }

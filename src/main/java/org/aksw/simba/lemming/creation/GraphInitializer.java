@@ -78,6 +78,8 @@ public class GraphInitializer {
 	// seed for rng
 	private long seed;
 
+	private ColouredGraph[] originalGraphs;
+
 	/**
 	 * Constructor.
 	 * 
@@ -108,6 +110,7 @@ public class GraphInitializer {
 	public ColouredGraph initialize(ColouredGraph[] origGrphs, int noOfVertices, int noOfThreads) {
 		// copy colour scheme from input graphs to the synthetic graph
 		ColouredGraph mimicGraph = new ColouredGraph();
+		this.originalGraphs = origGrphs;
 		copyColourPalette(origGrphs, mimicGraph);
 		colourMapper.analyzeRules(origGrphs);
 		rdfTypePropertyColour = mimicGraph.getRDFTypePropertyColour();
@@ -505,11 +508,33 @@ public class GraphInitializer {
 		return mapEdgeIdsToColour.size();
 	}
 
-	public Set<BitSet> getAvailableVertexColours() {
-		return new HashSet<BitSet>(mapColourToVertexIDs.keySet());
+	public IColourMappingRules getColourMapper() {
+		return colourMapper;
 	}
+	
+	public Set<BitSet> getAvailableVertexColours() {
+		return mapColourToVertexIDs.keySet();
+	}
+	
+	public Set<BitSet> getAvailableEdgeColours() {
+		return mapColourToEdgeIDs.keySet();
+	}
+
+//	public Set<BitSet> getAvailableVertexColours() {
+//		TODO do we actually need to copy it?
+//		return new HashSet<BitSet>(mapColourToVertexIDs.keySet());
+//	}
 
 	public BitSet getEdgeColour(int fakeEdgeId) {
 		return mapEdgeIdsToColour.get(fakeEdgeId);
 	}
+
+	public long getSeed() {
+		return seed;
+	}
+
+	public ColouredGraph[] getOriginalGraphs() {
+		return originalGraphs;
+	}
+
 }
