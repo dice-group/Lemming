@@ -40,9 +40,6 @@ public class BiasedInstanceSelector implements IVertexSelector {
 
 	/** Map of tail vertices proposers per edge */
 	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
-
-	public BiasedInstanceSelector() {
-	}
 	
 	/**
 	 * Constructor.

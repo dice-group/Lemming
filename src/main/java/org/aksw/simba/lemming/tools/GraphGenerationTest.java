@@ -1,19 +1,15 @@
 package org.aksw.simba.lemming.tools;
 
-import java.util.List;
-
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.configuration.Validator;
 import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
-import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
-import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
+import org.dice_research.ldcbench.generate.SeedGenerator;
+import org.dice_research.ldcbench.generate.SequentialSeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
@@ -51,6 +47,7 @@ public class GraphGenerationTest {
 		Validator val = (Validator) application.getBean(Validator.class);
 		val.isDatasetAllowed(pArgs.dataset);
 		pArgs.noThreads = val.validateThreads(pArgs.noThreads); // TODO
+		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
 		// Load RDF graphs into ColouredGraph models
 		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
@@ -64,11 +61,11 @@ public class GraphGenerationTest {
 
 		// Generation for a draft graph or loading from file
 		long startTime = System.currentTimeMillis();
-		GraphInitializer initializer = application.getBean(GraphInitializer.class, pArgs.seed);
+		GraphInitializer initializer = application.getBean(GraphInitializer.class, seedGenerator);
 		IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
-		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer, pArgs.seed);
+		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
 		GraphGenerator mGrphGenerator = application.getBean(GraphGenerator.class, initializer, classSelector, vertexSelector);
-		ColouredGraph mimicGraph = mGrphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads, pArgs.seed);
+		ColouredGraph mimicGraph = mGrphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads);
 //		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 		
 		// lexicalize and save initial mimic graph as ttl

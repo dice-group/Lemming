@@ -25,6 +25,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandom
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.util.Constants;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -77,8 +78,7 @@ public class GraphInitializer {
 	// desired number of edges
 	private int desiredNoOfEdges;
 
-	// seed for rng
-	private long seed;
+	private SeedGenerator seedGenerator;
 
 	private ColouredGraph[] originalGraphs;
 
@@ -87,8 +87,8 @@ public class GraphInitializer {
 	 * 
 	 * @param seed
 	 */
-	public GraphInitializer(long seed) {
-		this.seed = seed;
+	public GraphInitializer(SeedGenerator seedGenerator) {
+		this.seedGenerator = seedGenerator;
 		mapEdgeIdsToColour = new HashMap<Integer, BitSet>();
 		mapClassVertices = new HashMap<BitSet, Integer>();
 		reversedMapClassVertices = new HashMap<Integer, BitSet>();
@@ -216,7 +216,7 @@ public class GraphInitializer {
 
 	private void paintVertices(ColouredGraph mimicGraph, int noVertices) {
 		LOGGER.info("Assign colors to vertices.");
-		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist, seed);
+		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist, seedGenerator.getNextSeed());
 		for (int i = 0; i < noVertices; i++) {
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
 			int vertId = mimicGraph.addVertex(offeredColor);
@@ -280,7 +280,7 @@ public class GraphInitializer {
 			final int indexOfThread = i + 1;
 
 			final IOfferedItem<BitSet> eColoProposer = new OfferedItemByRandomProb<>(
-					new ObjectDistribution<BitSet>(edgeColourDist.sampleSpace, edgeColourDist.values), seed);
+					new ObjectDistribution<BitSet>(edgeColourDist.sampleSpace, edgeColourDist.values), seedGenerator.getNextSeed());
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -424,7 +424,7 @@ public class GraphInitializer {
 	 */
 	private void connectVerticesWithRDFTypeEdges(ColouredGraph mMimicGraph) {
 
-		Random mRandom = new Random(seed);
+		Random mRandom = new Random(seedGenerator.getNextSeed());
 
 		/*
 		 * filter colour and empty colour vertices
@@ -551,12 +551,11 @@ public class GraphInitializer {
 		return mapEdgeIdsToColour.get(fakeEdgeId);
 	}
 
-	public long getSeed() {
-		return seed;
-	}
-
 	public ColouredGraph[] getOriginalGraphs() {
 		return originalGraphs;
 	}
-
+	
+	public SeedGenerator getSeedGenerator() {
+		return seedGenerator;
+	}
 }

@@ -21,8 +21,6 @@ import com.carrotsearch.hppc.BitSet;
 @Scope(value = "prototype")
 public class UniformInstanceSelection implements IVertexSelector {
 
-	private long seed;
-	
 	private GraphInitializer graphInit;
 
 	/**
@@ -31,9 +29,8 @@ public class UniformInstanceSelection implements IVertexSelector {
 	 * @param mMapColourToVertexIDs Map of colours to vertex IDs
 	 * @param seed                  Seed for the random number generator
 	 */
-	public UniformInstanceSelection(GraphInitializer graphInit, long seed) {
+	public UniformInstanceSelection(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
-		this.seed = seed;
 	}
 
 	@Override
@@ -43,7 +40,8 @@ public class UniformInstanceSelection implements IVertexSelector {
 
 	public IOfferedItem<Integer> getProposedVertex(BitSet vertexColour) {
 		Integer[] arrIDs = graphInit.getmMapColourToVertexIDs().get(vertexColour).toArray(Integer[]::new);
-		IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrIDs, seed);
+		IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrIDs,
+				graphInit.getSeedGenerator().getNextSeed());
 		return item;
 	}
 
@@ -59,8 +57,5 @@ public class UniformInstanceSelection implements IVertexSelector {
 		Set<Integer> tmpSetOfConnectedHeads = graphInit.getConnectedHeadsSet(candidateTailId, edgeColour);
 		return headIdProposer.getPotentialItem(tmpSetOfConnectedHeads);
 	}
-	
-	
-	
 
 }

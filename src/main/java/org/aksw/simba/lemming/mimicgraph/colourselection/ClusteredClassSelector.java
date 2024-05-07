@@ -15,6 +15,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandom
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.RandomUtil;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -32,7 +33,7 @@ public class ClusteredClassSelector implements IClassSelector {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusteredClassSelector.class);
 
 	private GraphInitializer graphInit;
-	private Random random;
+	private SeedGenerator seedGenerator;
 
 	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
@@ -40,7 +41,7 @@ public class ClusteredClassSelector implements IClassSelector {
 
 	public ClusteredClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
-		this.random = new Random(graphInit.getSeed());
+		this.seedGenerator = graphInit.getSeedGenerator();
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
@@ -199,7 +200,7 @@ public class ClusteredClassSelector implements IClassSelector {
 		Set<BitSet> setVertColo = graphInit.getAvailableVertexColours();
 		Set<BitSet> setEdgeColo = graphInit.getAvailableEdgeColours();
 
-		long seed = graphInit.getSeed();
+		long seed = seedGenerator.getNextSeed();
 		for (BitSet edgeColo : setEdgeColo) {
 
 			List<TripleBaseSetOfIDs> lstGrpTriples = new ArrayList<TripleBaseSetOfIDs>();
@@ -413,6 +414,7 @@ public class ClusteredClassSelector implements IClassSelector {
 			}
 
 			while (iNoOfVertices > 0) {
+				Random random = new Random(seedGenerator.getNextSeed());
 				int vertId = RandomUtil.getRandomWithExclusion(random, setVertices.size(), exclusionSet);
 				if (!res.contains(vertId)) {
 					res.add(vertId);

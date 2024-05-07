@@ -71,8 +71,7 @@ public class GraphGenerator {
 	 * @param noOfThreads
 	 * @return
 	 */
-	public ColouredGraph initializeMimicGraph(ColouredGraph[] origGrphs, int noOfVertices, int noOfThreads, long seed) {
-
+	public ColouredGraph initializeMimicGraph(ColouredGraph[] origGrphs, int noOfVertices, int noOfThreads) {
 		// create new coloured graph for the synthetic graph from the input graphs
 		ColouredGraph mimicGraph = graphInitializer.initialize(origGrphs, noOfVertices, noOfThreads);
 

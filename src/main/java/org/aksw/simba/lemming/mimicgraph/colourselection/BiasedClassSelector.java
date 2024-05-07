@@ -54,12 +54,12 @@ public class BiasedClassSelector implements IClassSelector {
 		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric
 				.getMapAvrgOutEdgeDist(graphInit.getAvailableEdgeColours(), graphInit.getAvailableVertexColours());
 
-		long seed = graphInit.getSeed();
 		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
 		for (BitSet edgeColo : outEdgeColours) {
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if (outEdgeDistPerVertColo != null) {
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo, seed);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(outEdgeDistPerVertColo,
+						graphInit.getSeedGenerator().getNextSeed());
 				mMapOEColoToTailColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
@@ -72,7 +72,8 @@ public class BiasedClassSelector implements IClassSelector {
 		for (BitSet edgeColo : inEdgeColours) {
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if (inEdgeDistPerVertColo != null) {
-				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo, seed);
+				IOfferedItem<BitSet> vertColoProposer = new OfferedItemByRandomProb<>(inEdgeDistPerVertColo,
+						graphInit.getSeedGenerator().getNextSeed());
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}

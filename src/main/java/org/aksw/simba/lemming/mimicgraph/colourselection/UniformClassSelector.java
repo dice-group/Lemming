@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.creation.GraphInitializer;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +19,16 @@ import com.carrotsearch.hppc.BitSet;
 public class UniformClassSelector implements IClassSelector {
 
 	private GraphInitializer graphInit;
-	private Random random;
+	private SeedGenerator seedGenerator;
 
 	public UniformClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
-		this.random = new Random(graphInit.getSeed());
+		this.seedGenerator = graphInit.getSeedGenerator();
 	}
 
 	@Override
 	public BitSet getTailClass(BitSet edgeColour) {
+		Random random = new Random(seedGenerator.getNextSeed());
 		// get all possible classes and filter them with what we know is possible
 		Set<BitSet> setTailColours = new HashSet<BitSet>(
 				graphInit.getColourMapper().getTailColoursFromEdgeColour(edgeColour));
@@ -45,6 +47,7 @@ public class UniformClassSelector implements IClassSelector {
 	
 	@Override
 	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
+		Random random = new Random(seedGenerator.getNextSeed());
 		// get all possible classes and filter them with what we know is possible
 		Set<BitSet> setHeadColours = new HashSet<BitSet>(
 				graphInit.getColourMapper().getHeadColours(tailColour, edgeColour));
