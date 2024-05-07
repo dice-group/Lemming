@@ -26,4 +26,9 @@ public interface IVertexSelector {
 	 */
 	public IOfferedItem<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type);
 
+	public int selectTailFromColour(BitSet tailColour);
+
+	public int selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId);
+	
+
 }

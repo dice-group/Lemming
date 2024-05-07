@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.configuration.Validator;
+import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
+import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerator;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
@@ -47,6 +50,7 @@ public class GraphGenerationTest {
 		// Validate dataset
 		Validator val = (Validator) application.getBean(Validator.class);
 		val.isDatasetAllowed(pArgs.dataset);
+		pArgs.noThreads = val.validateThreads(pArgs.noThreads); // TODO
 
 		// Load RDF graphs into ColouredGraph models
 		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
@@ -60,31 +64,33 @@ public class GraphGenerationTest {
 
 		// Generation for a draft graph or loading from file
 		long startTime = System.currentTimeMillis();
-		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector);
-		IGraphGeneration mGrphGenerator = (IGraphGeneration) application.getBean(pArgs.typeGenerator, pArgs.noVertices,
-				graphs, pArgs.noThreads, pArgs.seed, vertexSelector);
-		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
+		GraphInitializer initializer = application.getBean(GraphInitializer.class, pArgs.seed);
+		IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
+		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer, pArgs.seed);
+		GraphGenerator mGrphGenerator = application.getBean(GraphGenerator.class, initializer, classSelector, vertexSelector);
+		ColouredGraph mimicGraph = mGrphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads, pArgs.seed);
+//		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 		
 		// lexicalize and save initial mimic graph as ttl
 		LOGGER.info("Lexicalize the initial mimic graph ...");
-		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
-		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mGrphGenerator.getMimicGraph(), 
-				mGrphGenerator.getMappingColoursAndVertices()), "initial");
-
-		// Optimization with constant expressions
-		LOGGER.info("Optimizing the mimic graph ...");
-		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
-		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
-				mGrphGenerator.getSeed(), pArgs.noOptimizationSteps);
-		grphOptimizer.refineGraph(pArgs.noThreads);
-
-		// Lexicalization with word2vec
-		LOGGER.info("Lexicalize the mimic graph ...");
-		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
-				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()), "results");
-		
-		// output results to file "LemmingEx.result"
-		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, pArgs.seed);
-		LOGGER.info("Application exits!!!");
+//		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
+//		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mimicGraph, 
+//				mGrphGenerator.getMappingColoursAndVertices()), "initial");
+//
+//		// Optimization with constant expressions
+//		LOGGER.info("Optimizing the mimic graph ...");
+//		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
+//		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
+//				mGrphGenerator.getSeed(), pArgs.noOptimizationSteps);
+//		grphOptimizer.refineGraph(pArgs.noThreads);
+//
+//		// Lexicalization with word2vec
+//		LOGGER.info("Lexicalize the mimic graph ...");
+//		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
+//				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()), "results");
+//		
+//		// output results to file "LemmingEx.result"
+//		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, pArgs.seed);
+//		LOGGER.info("Application exits!!!");
 	}
 }

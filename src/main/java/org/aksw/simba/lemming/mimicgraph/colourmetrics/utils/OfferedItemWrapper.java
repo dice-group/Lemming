@@ -17,12 +17,15 @@ public class OfferedItemWrapper<T> implements IOfferedItem<T> {
 		this.seed = seed;
 		this.random = new Random(seed);
 	}
-	
+
 	public T[] findIntersection(Set<T> setOfRestrictedItems) {
+		if(setOfRestrictedItems.isEmpty()) {
+			return arrBaseItems;
+		} 
         return Arrays.stream(arrBaseItems)
                 .filter(setOfRestrictedItems::contains)
                 .toArray(size -> Arrays.copyOf(arrBaseItems, size));
-    }
+		}
 
 	@Override
 	public T getPotentialItem() {
@@ -32,6 +35,9 @@ public class OfferedItemWrapper<T> implements IOfferedItem<T> {
 	@Override
 	public T getPotentialItem(Set<T> setOfRestrictedItems) {
 		T[] intersection = findIntersection(setOfRestrictedItems);
+		if (intersection.length == 0) {
+			return null;
+		}
 		return intersection[random.nextInt(intersection.length)];
 	}
 

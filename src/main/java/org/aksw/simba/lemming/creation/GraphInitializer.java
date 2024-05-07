@@ -28,6 +28,7 @@ import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -41,6 +42,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * 
  * @author Ana Silva
  */
+@Component
 @Scope(value = "prototype")
 public class GraphInitializer {
 	// logging object
@@ -476,6 +478,26 @@ public class GraphInitializer {
 		}
 	}
 
+	public IntSet getConnectedHeads(int tailId, BitSet eColo) {
+		IntSet setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		Map<Integer, IntSet> mapTailToHeads = mapEdgeColoursToConnectedVertices.get(eColo);
+		if (mapTailToHeads != null && mapTailToHeads.containsKey(tailId)) {
+			setOfHeads = mapTailToHeads.get(tailId);
+		}
+
+		return setOfHeads;
+	}
+	
+	public Set<Integer> getConnectedHeadsSet(int tailId, BitSet eColo) {
+		Set<Integer> setOfHeads = new HashSet<>();
+		Map<Integer, IntSet> mapTailToHeads = mapEdgeColoursToConnectedVertices.get(eColo);
+		if (mapTailToHeads != null && mapTailToHeads.containsKey(tailId)) {
+			setOfHeads = mapTailToHeads.get(tailId);
+		}
+
+		return setOfHeads;
+	}
+
 	public Map<Integer, BitSet> getmReversedMapClassVertices() {
 		return reversedMapClassVertices;
 	}
@@ -511,11 +533,11 @@ public class GraphInitializer {
 	public IColourMappingRules getColourMapper() {
 		return colourMapper;
 	}
-	
+
 	public Set<BitSet> getAvailableVertexColours() {
 		return mapColourToVertexIDs.keySet();
 	}
-	
+
 	public Set<BitSet> getAvailableEdgeColours() {
 		return mapColourToEdgeIDs.keySet();
 	}

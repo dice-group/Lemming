@@ -5,12 +5,16 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.creation.GraphInitializer;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
 /**
  * 
  */
+@Component("UCS")
+@Scope(value = "prototype")
 public class UniformClassSelector implements IClassSelector {
 
 	private GraphInitializer graphInit;
@@ -34,7 +38,7 @@ public class UniformClassSelector implements IClassSelector {
 			return null;
 		}
 
-		// get random a tail colour
+		// get a random tail colour
 		BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
 		return arrTailColours[random.nextInt(arrTailColours.length)];
 	}
@@ -52,7 +56,7 @@ public class UniformClassSelector implements IClassSelector {
 			return null;
 		}
 
-		// get random a tail colour
+		// get a random tail colour
 		BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
 		return arrHeadColours[random.nextInt(arrHeadColours.length)];
 	}

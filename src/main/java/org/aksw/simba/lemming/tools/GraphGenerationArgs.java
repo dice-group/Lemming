@@ -25,8 +25,8 @@ public class GraphGenerationArgs {
 	@Parameter(names = { "-l" }, description = "Load mimic graph", required = false)
 	String loadMimicGraph;
 
-	@Parameter(names = { "-t" }, description = "Generator type", required = true)
-	String typeGenerator;
+	@Parameter(names = { "-c" }, description = "Class Selector Type", required = true)
+	String classSelector;
 	
 	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = true)
 	String vertexSelector;

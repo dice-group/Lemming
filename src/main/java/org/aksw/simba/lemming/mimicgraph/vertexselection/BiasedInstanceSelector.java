@@ -155,4 +155,16 @@ public class BiasedInstanceSelector implements IVertexSelector {
 			throw new IllegalArgumentException("Unknown vertex type " + type);
 		}
 	}
+
+	@Override
+	public int selectTailFromColour(BitSet tailColour) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 }

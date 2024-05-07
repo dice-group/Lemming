@@ -17,10 +17,7 @@ public interface IGraphGeneration {
 	public IColourMappingRules getColourMapper();
 	public Map<BitSet,IntSet> getMappingColoursAndVertices();
 	public Map<BitSet,IntSet> getMappingColoursAndEdges();
-	
-	//public BitSet getProposedEdgeColour(BitSet headColour, BitSet tailColour);
-	//public BitSet getProposedHeadColour(BitSet edgeColour, BitSet tailColour);
-	//public BitSet getProposedTailColour(BitSet headColour, BitSet edgeColour);
+
 	public TripleBaseSingleID getProposedTriple(IVertexSelector vertexSelector);
 	
 	public ColouredGraph getMimicGraph();
@@ -29,5 +26,4 @@ public interface IGraphGeneration {
 	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
 	public long getSeed();
 	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad);
-	public IVertexSelector getVertexSelector();
 }

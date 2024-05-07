@@ -240,7 +240,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	@Override
 	public T getPotentialItem(Set<T> setOfFilteredItems) {
 		
-		if(setOfFilteredItems != null){
+		if(setOfFilteredItems != null || !setOfFilteredItems.isEmpty()){
 			
 			// find the intersection of 2 set
 			

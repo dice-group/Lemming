@@ -13,14 +13,21 @@ import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.TripleColourDistributionMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
+import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.RandomUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 import com.google.common.primitives.Doubles;
 
+import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
+@Component("CCS")
+@Scope(value = "prototype")
 public class ClusteredClassSelector implements IClassSelector {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ClusteredClassSelector.class);
 
@@ -31,9 +38,9 @@ public class ClusteredClassSelector implements IClassSelector {
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
 	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
 
-	public ClusteredClassSelector(GraphInitializer graphInit, long seed) {
+	public ClusteredClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
-		this.random = new Random(seed);
+		this.random = new Random(graphInit.getSeed());
 		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
@@ -49,16 +56,42 @@ public class ClusteredClassSelector implements IClassSelector {
 
 		// assign specific number of vertices to each grouped triple
 		computeNoOfVerticesInTriples();
+		
+		assignVerticesToTriples();
 	}
 
+	/**
+	 * @deprecated TODO This is to be removed. Create a different interface for when both
+	 *             tail and head classes need to be sampled at the same time
+	 */
 	@Override
+	@Deprecated
 	public BitSet getTailClass(BitSet edgeColour) {
 		return null;
 	}
 
+	/**
+	 * @deprecated TODO This is to be removed. Create a different interface for when both
+	 *             tail and head classes need to be sampled at the same time
+	 */
 	@Override
+	@Deprecated
 	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
 		return null;
+	}
+
+	@Override
+	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId) {
+		List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
+		if (tripleColours == null || tripleColours.size() != 3) {
+			return null;
+		}
+
+		BitSet tailColour = tripleColours.get(0);
+		BitSet checkedColour = tripleColours.get(1);
+		BitSet headColour = tripleColours.get(2);
+
+		return new ClassProposal(tailColour, checkedColour, headColour);
 	}
 
 	private void computeEVColoDist(ColouredGraph[] origGrphs) {
@@ -289,4 +322,113 @@ public class ClusteredClassSelector implements IClassSelector {
 			}
 		}
 	}
+
+	/**
+	 * assign vertices to triples
+	 */
+	private void assignVerticesToTriples() {
+		Set<BitSet> setVertColo = graphInit.getAvailableVertexColours();
+
+		for (BitSet tailColo : setVertColo) {
+
+			if (!mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
+				continue;
+			}
+
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
+					.get(tailColo);
+
+			for (BitSet headColo : setVertColo) {
+
+				if (!mapHeadEdgeToGrpTriples.containsKey(headColo)) {
+					continue;
+				}
+
+				Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
+
+				Set<BitSet> setEdgeColours = mapEdgeToGrpTriples.keySet();
+
+				for (BitSet edgeColo : setEdgeColours) {
+
+					if (!mapEdgeToGrpTriples.containsKey(edgeColo)) {
+						continue;
+					}
+
+					TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
+
+					if (triple.edgeIDs.size() > 0) {
+						double noOfEdges = triple.edgeIDs.size();
+						IntSet setOfRandomTailIds = getRandomVertices(triple.tailColour, triple.noOfTails);
+						IntSet setOfRandomHeadIds = getRandomVertices(triple.headColour, triple.noOfHeads);
+
+						if (setOfRandomHeadIds == null || setOfRandomTailIds == null) {
+							LOGGER.warn("There exists no vertices in " + triple.headColour + " or " + triple.tailColour
+									+ " colour. Skip: " + noOfEdges + " edges!");
+							continue;
+						}
+
+						triple.tailIDs.addAll(setOfRandomTailIds);
+						triple.headIDs.addAll(setOfRandomHeadIds);
+						/*
+						 * standardize the amount of edges and vertices this makes sure there is no pair
+						 * of vertices are connected by 2 edges in same colour
+						 */
+						double totalEdges = (double) (setOfRandomTailIds.size() * setOfRandomHeadIds.size());
+
+						if (totalEdges < noOfEdges) {
+							LOGGER.warn("Not generate " + (noOfEdges - totalEdges) + " edges in " + edgeColo);
+							noOfEdges = totalEdges;
+						}
+
+						triple.noOfEdges = noOfEdges;
+					}
+				}
+			}
+		}
+	}
+
+	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices) {
+		IntSet setVertices = graphInit.getmMapColourToVertexIDs().get(vertColo);
+		if (setVertices != null) {
+
+			IntSet res = new DefaultIntSet(Constants.DEFAULT_SIZE);
+
+			if (iNoOfVertices >= setVertices.size()) {
+				iNoOfVertices = setVertices.size();
+				return setVertices;
+			}
+
+			// store the array indices for which the vertID should not match in order to
+			// exclude these
+			// array indexes from the random number generation
+			IntSet exclusionSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
+			for (int e : graphInit.getmReversedMapClassVertices().keySet()) {
+				if (setVertices.contains(e)) {
+					exclusionSet.add(e);
+				}
+			}
+			if (exclusionSet.size() >= setVertices.size()) {
+				LOGGER.warn("No possible vertices to connect of " + vertColo);
+				return null;
+			}
+
+			while (iNoOfVertices > 0) {
+				int vertId = RandomUtil.getRandomWithExclusion(random, setVertices.size(), exclusionSet);
+				if (!res.contains(vertId)) {
+					res.add(vertId);
+					iNoOfVertices--;
+				}
+
+				if (res.size() == (setVertices.size() - 1)) {
+					if (iNoOfVertices != 0)
+						LOGGER.warn("Could not get " + iNoOfVertices + " vertices of " + vertColo);
+					break;
+				}
+			}
+
+			return res;
+		}
+		return null;
+	}
+
 }

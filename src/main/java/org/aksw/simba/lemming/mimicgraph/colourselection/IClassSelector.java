@@ -19,7 +19,7 @@ public interface IClassSelector {
 		return new ClassProposal(tailColour, edgeColour, headColour);
 	}
 
-	
-	
-
+	default public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId) {
+		return getProposal(edgeColour);
+	}
 }
