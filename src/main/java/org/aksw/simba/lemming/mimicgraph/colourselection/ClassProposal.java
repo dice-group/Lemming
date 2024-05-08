@@ -24,6 +24,4 @@ public class ClassProposal {
 	public BitSet getHeadColour() {
 		return headColour;
 	}
-	
-
 }

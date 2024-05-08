@@ -11,7 +11,6 @@ import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.metrics.single.MaxVertexDegreeMetric;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.StdDevVertexDegree;
-import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

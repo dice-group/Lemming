@@ -127,16 +127,8 @@ public class GraphInitializer {
 		// assign colors to vertices
 		paintVertices(mimicGraph, noOfVertices);
 
-		// TODO remove it from here, this is only needed for BCS, not UIS or CCS
-		// mEdgeColoProposer = new OfferedItemByRandomProb<>(mEdgeColoDist,
-		// mSetOfRestrictedEdgeColours, seed);
-
 		// assign colors to edges
 		paintEdges(mimicGraph, noOfThreads);
-
-		// TODO move this to the final stage instead, ignore RDF edges completely
-		// defining type of resource vertices
-		connectVerticesWithRDFTypeEdges(mimicGraph);
 
 		return mimicGraph;
 	}
@@ -539,13 +531,11 @@ public class GraphInitializer {
 	}
 
 	public Set<BitSet> getAvailableEdgeColours() {
-		return mapColourToEdgeIDs.keySet();
+		Set<BitSet> temp = mapColourToEdgeIDs.keySet();
+		temp.remove(rdfTypePropertyColour);
+		return temp;
 	}
 
-//	public Set<BitSet> getAvailableVertexColours() {
-//		TODO do we actually need to copy it?
-//		return new HashSet<BitSet>(mapColourToVertexIDs.keySet());
-//	}
 
 	public BitSet getEdgeColour(int fakeEdgeId) {
 		return mapEdgeIdsToColour.get(fakeEdgeId);
@@ -558,4 +548,18 @@ public class GraphInitializer {
 	public SeedGenerator getSeedGenerator() {
 		return seedGenerator;
 	}
+
+	public ObjectDistribution<BitSet> getVertexColourDist() {
+		return vertexColourDist;
+	}
+
+	public ObjectDistribution<BitSet> getEdgeColourDist() {
+		return edgeColourDist;
+	}
+
+	public Set<BitSet> getSetOfRestrictedEdgeColours() {
+		return setOfRestrictedEdgeColours;
+	}
+	
+	
 }

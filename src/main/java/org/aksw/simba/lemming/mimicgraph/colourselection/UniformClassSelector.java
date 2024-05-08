@@ -1,10 +1,8 @@
 package org.aksw.simba.lemming.mimicgraph.colourselection;
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-
 import org.aksw.simba.lemming.creation.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -27,41 +25,25 @@ public class UniformClassSelector implements IClassSelector {
 	}
 
 	@Override
-	public BitSet getTailClass(BitSet edgeColour) {
-		Random random = new Random(seedGenerator.getNextSeed());
-		// get all possible classes and filter them with what we know is possible
-		Set<BitSet> setTailColours = new HashSet<BitSet>(
-				graphInit.getColourMapper().getTailColoursFromEdgeColour(edgeColour));
-		Set<BitSet> setAvailableVertexColours = graphInit.getAvailableVertexColours();
-		setTailColours.retainAll(setAvailableVertexColours);
-
-		// if empty, return
-		if (setTailColours.isEmpty()) {
-			return null;
-		}
-
-		// get a random tail colour
-		BitSet[] arrTailColours = setTailColours.toArray(new BitSet[0]);
-		return arrTailColours[random.nextInt(arrTailColours.length)];
+	public IOfferedItem<BitSet> getTailClass(BitSet edgeColour) {		
+		IOfferedItem<BitSet> proposer = new OfferedItemWrapper<BitSet>(
+				graphInit.getColourMapper().getTailColoursFromEdgeColour(edgeColour).toArray(BitSet[]::new),
+				seedGenerator);
+		return proposer;
 	}
 	
 	@Override
-	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
-		Random random = new Random(seedGenerator.getNextSeed());
-		// get all possible classes and filter them with what we know is possible
-		Set<BitSet> setHeadColours = new HashSet<BitSet>(
-				graphInit.getColourMapper().getHeadColours(tailColour, edgeColour));
-		Set<BitSet> setAvailableVertexColours = graphInit.getAvailableVertexColours();
-		setHeadColours.retainAll(setAvailableVertexColours);
-
-		// if empty, return
-		if (setHeadColours.isEmpty()) {
-			return null;
-		}
-
-		// get a random tail colour
-		BitSet[] arrHeadColours = setHeadColours.toArray(new BitSet[0]);
-		return arrHeadColours[random.nextInt(arrHeadColours.length)];
+	public IOfferedItem<BitSet> getHeadClass(BitSet tailColour, BitSet edgeColour) {
+		IOfferedItem<BitSet> proposer = new OfferedItemWrapper<BitSet>(
+				graphInit.getColourMapper().getHeadColours(tailColour, edgeColour).toArray(BitSet[]::new),
+				seedGenerator);
+		return proposer;
 	}
-
+	
+	@Override
+	public BitSet getEdgeColourProposal() {
+		BitSet[] possibilities = graphInit.getAvailableEdgeColours().toArray(BitSet[]::new);
+		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
+		return tryValidColour(proposer, 500);
+	}
 }

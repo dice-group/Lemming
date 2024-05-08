@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredIEDistPerVCol
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -24,28 +25,29 @@ import com.carrotsearch.hppc.BitSet;
 public class BiasedClassSelector implements IClassSelector {
 
 	private GraphInitializer graphInit;
+	private SeedGenerator seedGenerator;
 
 	private Map<BitSet, IOfferedItem<BitSet>> mMapOEColoToTailColoProposer;
 	private Map<BitSet, IOfferedItem<BitSet>> mMapIEColoToHeadColoProposer;
 
-	public BiasedClassSelector(GraphInitializer graphInit) {
+	public BiasedClassSelector(GraphInitializer graphInit, SeedGenerator seedGenerator) {
 		this.graphInit = graphInit;
+		this.seedGenerator = seedGenerator;
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		computeAvrgIOEdgeDistPerVertColo(graphInit.getOriginalGraphs());
 	}
 
 	@Override
-	public BitSet getTailClass(BitSet edgeColour) {
+	public IOfferedItem<BitSet>  getTailClass(BitSet edgeColour) {
 		IOfferedItem<BitSet> tailColourProposer = mMapOEColoToTailColoProposer.get(edgeColour);
-		return tailColourProposer.getPotentialItem();
+		return tailColourProposer;
 	}
 
 	@Override
-	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
+	public IOfferedItem<BitSet>  getHeadClass(BitSet tailColour, BitSet edgeColour) {
 		IOfferedItem<BitSet> headColourProposer = mMapIEColoToHeadColoProposer.get(edgeColour);
-		Set<BitSet> setRestrictedHeadColours = graphInit.getColourMapper().getHeadColours(tailColour, edgeColour);
-		return headColourProposer.getPotentialItem(setRestrictedHeadColours);
+		return headColourProposer;
 	}
 
 	private void computeAvrgIOEdgeDistPerVertColo(ColouredGraph[] origGrphs) {
@@ -77,6 +79,15 @@ public class BiasedClassSelector implements IClassSelector {
 				mMapIEColoToHeadColoProposer.put(edgeColo, vertColoProposer);
 			}
 		}
+	}
+	
+	@Override
+	public BitSet getEdgeColourProposal() {
+		ObjectDistribution<BitSet> edgeDistribution = graphInit.getEdgeColourDist();
+		Set<BitSet> restrictedColours = graphInit.getSetOfRestrictedEdgeColours();
+		IOfferedItem<BitSet> edgeProposer = new OfferedItemByRandomProb<BitSet>(edgeDistribution, restrictedColours,
+				seedGenerator.getNextSeed());
+		return edgeProposer.getPotentialItem();
 	}
 
 }

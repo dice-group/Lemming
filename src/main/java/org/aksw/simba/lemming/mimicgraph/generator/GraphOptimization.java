@@ -23,6 +23,7 @@ import org.aksw.simba.lemming.metrics.single.edgemanipulation.ErrorScores;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,23 +38,23 @@ public class GraphOptimization {
     private int mMaxIteration = 50000;
     private int mTrueNoOfIteration = 0;
     private int mMaxRepeatedSelection = 5000;
-    private boolean mProcessRandomly = false;
 
-    private IGraphGeneration mGraphGenerator;
+    private GraphGenerator graphGenerator;
     private EdgeModifier mEdgeModifier;
     private ErrorScoreCalculator mErrScoreCalculator;
     private List<Double> mLstErrorScore;
     private double mOptimizedTime = 0;
 
-    private long seed;
+    private SeedGenerator seedGenerator;
+   
 
     /*-----------------------------------------------
      * Variable for storing calculation information *
      -----------------------------------------------*/
 
-    public GraphOptimization(ColouredGraph[] origGrphs, IGraphGeneration graphGenerator,
-            List<SingleValueMetric> metrics, ConstantValueStorage valueCarriers, long seed, int mMaxIteration) {
-        this.seed = seed;
+    public GraphOptimization(ColouredGraph[] origGrphs, ColouredGraph mimicGraph, GraphGenerator graphGenerator,
+            List<SingleValueMetric> metrics, ConstantValueStorage valueCarriers, SeedGenerator seedGenerator, int mMaxIteration) {
+        this.seedGenerator = seedGenerator;
         this.mMaxIteration = mMaxIteration;
         mLstErrorScore = new ArrayList<Double>();
         /*
@@ -63,14 +64,10 @@ public class GraphOptimization {
         mErrScoreCalculator = new ErrorScoreCalculator(origGrphs, valueCarriers);
 
         // the graph generator
-        mGraphGenerator = graphGenerator;
+        this.graphGenerator = graphGenerator;
 
-        ColouredGraph clonedGrph = mGraphGenerator.getMimicGraph().clone();
+        ColouredGraph clonedGrph = mimicGraph.clone();
         mEdgeModifier = new EdgeModifier(clonedGrph, metrics);
-    }
-
-    public void setRefineGraphRandomly(boolean isRandom) {
-        mProcessRandomly = isRandom;
     }
 
     /**
@@ -117,7 +114,7 @@ public class GraphOptimization {
         return new ErrorScores(false, rErrScore, metricValuesOfRight);
     }
 
-    public void refineGraph(int threads) {
+    public ColouredGraph refineGraph(int threads) {
 
         LOGGER.info("Start optimize the mimic graph!");
 
@@ -194,8 +191,9 @@ public class GraphOptimization {
             mTrueNoOfIteration = mMaxIteration;
         }
 
-        mGraphGenerator.setMimicGraph(mEdgeModifier.getGraph());
+//        mGraphGenerator.setMimicGraph(mEdgeModifier.getGraph());
         mOptimizedTime = System.currentTimeMillis();
+        return mEdgeModifier.getGraph();
     }
 
     /**
@@ -229,8 +227,7 @@ public class GraphOptimization {
     private TripleBaseSingleID getOfferedEdgeforRemoving(ColouredGraphDecorator clonedGrph) {
         int edgeId = -1;
         BitSet edgeColour = null;
-        Random rand = new Random(seed);
-        seed++;
+        Random rand = new Random(seedGenerator.getNextSeed());
         while (true) {
             // LOGGER.info("Try to get an edge for removing!");
             IntSet setOfEdges = clonedGrph.getEdges();
@@ -241,6 +238,7 @@ public class GraphOptimization {
             if (!edgeColour.equals(clonedGrph.getRDFTypePropertyColour())) {
                 break;
             }
+            rand.setSeed(seedGenerator.getNextSeed());
         }
 
         // track the head and tail of the removed edge
@@ -261,7 +259,7 @@ public class GraphOptimization {
      * @param mimicGrph the target graph
      */
     private TripleBaseSingleID getOfferedEdgeForAdding(ColouredGraphDecorator mimicGrph) {
-        return mGraphGenerator.getProposedTriple(mProcessRandomly);
+        return graphGenerator.getProposedTriple();
     }
 
     /**

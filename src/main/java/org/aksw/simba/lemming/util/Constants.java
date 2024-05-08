@@ -21,10 +21,10 @@ public class Constants {
 	public static final boolean SINGLE_THREAD = false;
 	public static final int MAX_EXPLORING_TIME = 5000;
 	
-	public static final String SIMULATED_URI= "http://aksw.simba.lemming.org/resouce#";
-	public static final String SIMULATED_CLASS_URI = "http://aksw.simba.lemming.org/class#";
-	public static final String SIMULATED_PROPERTY_URI = "http://aksw.simba.lemming.org/property#";
-	public static final String SIMULATED_DATA_TYPED_PROPERTY_URI = "http://aksw.simba.lemming.org/data_typed_property#";
+	public static final String SIMULATED_URI= "http://dice.research.lemming.org/resource#";
+	public static final String SIMULATED_CLASS_URI = "http://dice.research.lemming.org/class#";
+	public static final String SIMULATED_PROPERTY_URI = "http://dice.research.lemming.org/property#";
+	public static final String SIMULATED_DATA_TYPED_PROPERTY_URI = "http://dice.research.lemming.org/data_typed_property#";
 	public static final String SIMULATED_BLANK_OBJECT_RESOURCE = "http://org.apache.jena.rdfxml/blankObj#";
 	public static final String SIMULATED_BLANK_SUBJECT_RESOURCE = "http://org.apache.jena.rdfxml/blankSub#";
 	public static final String TYPE_CLASS_PREFIX = "class_";

@@ -105,4 +105,25 @@ public class ValueStorage implements Serializable{
 		}
 		mapValues.put(metricName,val);
 	}
+	
+	public String getHumanMetrics() {
+		StringBuilder builder = new StringBuilder();
+		Set<String> setOfkeyOfGraphs = mMapMetricValues.keySet();
+		for(String keyOfGraph : setOfkeyOfGraphs){
+			builder.append(keyOfGraph);
+			ObjectDoubleOpenHashMap<String> objMapValues = (ObjectDoubleOpenHashMap<String>) mMapMetricValues.get(keyOfGraph);
+			Object[] arrOfMetricNames = objMapValues.keys;
+			for(int i = 0 ; i < arrOfMetricNames.length; i++){
+				if(objMapValues.allocated[i]){
+					String metricName = (String) arrOfMetricNames[i];
+					double val = objMapValues.get(metricName);
+					builder.append(metricName);
+					builder.append(": ");
+					builder.append(val);
+					builder.append("\n");
+				}
+			}
+		}
+		return builder.toString();
+	}
 }

@@ -34,28 +34,28 @@ public class UniformInstanceSelection implements IVertexSelector {
 	}
 
 	@Override
-	public IOfferedItem<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type) {
+	public OfferedItemWrapper<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type) {
 		return getProposedVertex(vertexColour);
 	}
 
-	public IOfferedItem<Integer> getProposedVertex(BitSet vertexColour) {
+	public OfferedItemWrapper<Integer> getProposedVertex(BitSet vertexColour) {
 		Integer[] arrIDs = graphInit.getmMapColourToVertexIDs().get(vertexColour).toArray(Integer[]::new);
-		IOfferedItem<Integer> item = new OfferedItemWrapper<Integer>(arrIDs,
-				graphInit.getSeedGenerator().getNextSeed());
+		OfferedItemWrapper<Integer> item = new OfferedItemWrapper<Integer>(arrIDs,
+				graphInit.getSeedGenerator());
 		return item;
 	}
 
 	@Override
-	public int selectTailFromColour(BitSet tailColour) {
+	public Integer selectTailFromColour(BitSet tailColour) {
 		IOfferedItem<Integer> tailIdProposer = getProposedVertex(tailColour);
 		return tailIdProposer.getPotentialItem();
 	}
 
 	@Override
-	public int selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId) {
-		IOfferedItem<Integer> headIdProposer = getProposedVertex(headColour);
+	public Integer selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId) {
+		OfferedItemWrapper<Integer> headIdProposer = getProposedVertex(headColour);
 		Set<Integer> tmpSetOfConnectedHeads = graphInit.getConnectedHeadsSet(candidateTailId, edgeColour);
-		return headIdProposer.getPotentialItem(tmpSetOfConnectedHeads);
+		return headIdProposer.getPotentialItemRemove(tmpSetOfConnectedHeads);
 	}
 
 }

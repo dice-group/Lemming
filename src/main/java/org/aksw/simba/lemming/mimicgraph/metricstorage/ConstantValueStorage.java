@@ -393,4 +393,9 @@ public class ConstantValueStorage implements Serializable {
 	public List<SingleValueMetric> getMetrics() {
 		return metrics;
 	}
+	
+	public ValueStorage getValueStorage() {
+		return mMapValueStorage.get(mDataSetPath);
+	}
+	
 }

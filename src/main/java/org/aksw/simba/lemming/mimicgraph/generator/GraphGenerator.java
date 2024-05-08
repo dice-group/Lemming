@@ -1,21 +1,28 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphInitializer;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
 import org.aksw.simba.lemming.util.Constants;
@@ -80,7 +87,11 @@ public class GraphGenerator {
 		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
 		LOGGER.info("Creating {} threads for processing graph generation!", lstAssignedEdges.size());
 
+		// keep track of failed colours for all threads
+		Set<BitSet> failedEdgeColours = ConcurrentHashMap.newKeySet();
+
 		// iterate each set of edges and assign to a thread
+		Set<BitSet> setAvailableVertexColours = graphInitializer.getAvailableVertexColours();
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		for (int i = 0; i < lstAssignedEdges.size(); i++) {
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
@@ -90,38 +101,37 @@ public class GraphGenerator {
 					int curEdgeIterations = Constants.MAX_EXPLORING_TIME;
 					int[] arrOfEdges = setOfEdges.toIntArray();
 
-					// set of failed edge colours
-					Set<BitSet> failedEdgeColours = new HashSet<BitSet>();
-
 					// iterate through assigned edges
 					for (int j = 0; j < arrOfEdges.length;) {
 						// get an edge id
 						int fakeEdgeId = arrOfEdges[j];
-						BitSet edgeColour = graphInitializer.getEdgeColour(fakeEdgeId);
 
 						// skip if we previously failed to find a triple for this edge colour
+						BitSet edgeColour = graphInitializer.getEdgeColour(fakeEdgeId);
 						if (edgeColour == null || failedEdgeColours.contains(edgeColour)) {
 							j++;
 							continue;
 						}
 
-						// get tail and head colours from edge colour
-						ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId);
+						// get tail and head colour proposers from edge colour with n attempts
+						ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId, 1000,
+								setAvailableVertexColours);
 						BitSet tailColour = proposal.getTailColour();
 						BitSet headColour = proposal.getHeadColour();
 
-						// if invalid, skip edge
-						// TODO check why was the third condition in CCS?
-						if (tailColour == null || headColour == null || !edgeColour.equals(proposal.getEdgeColour())) {
+						// if it's still invalid, skip the edge colour entirely for next times
+						if (tailColour == null || headColour == null) {
+							LOGGER.error("Could not find valid tail and head colours for {} edge colour.", edgeColour);
 							failedEdgeColours.add(edgeColour);
+							j++;
 							continue;
 						}
 
 						// get instance proposers
-						IOfferedItem<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
-								VERTEX_TYPE.TAIL);
-						IOfferedItem<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
-								VERTEX_TYPE.HEAD);
+						OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour,
+								tailColour, VERTEX_TYPE.TAIL);
+						OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour,
+								headColour, VERTEX_TYPE.HEAD);
 
 						// get instances from proposers
 						int maxAttempts = 1000;
@@ -129,13 +139,13 @@ public class GraphGenerator {
 						for (int i = 0; i < maxAttempts; i++) {
 							// get candidate tail, skip if null
 							Integer tailId = tailProposer.getPotentialItem();
-							if(tailId == null)
+							if (tailId == null)
 								continue;
-							
+
 							// get candidate head filtered by the existing connections, skip if null
 							Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
-							Integer headId = headProposer.getPotentialItem(connectedHeads);
-							if(headId == null)
+							Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
+							if (headId == null)
 								continue;
 
 							// connect instances if possible and break from it
@@ -147,19 +157,21 @@ public class GraphGenerator {
 
 						// if it failed to connect, and we ran out of iterations, add to failed colours
 						// and move on
-						if (!isFoundVerticesConnected) {
+						if (isFoundVerticesConnected) {
+							// reset iterations and advance
+							curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+							j++;
+						} else {
 							curEdgeIterations--;
 							if (curEdgeIterations == 0) {
-								LOGGER.error("Could not create {} edges in the {} colour since it could not find any "
-										+ "approriate vertices to connect.", arrOfEdges.length - j, edgeColour);
+								LOGGER.error("Could not create edges with the {} colour since it could not find any "
+										+ "approriate vertices to connect.", edgeColour);
 								failedEdgeColours.add(edgeColour);
-
+								curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+								j++;
 							}
 						}
 
-						// reset iterations and advance
-						curEdgeIterations = Constants.MAX_EXPLORING_TIME;
-						j++;
 					}
 				}
 			};
@@ -271,6 +283,73 @@ public class GraphGenerator {
 		}
 
 		return lstAssingedEdges;
+	}
+
+	public void finishSaveMimicGraph(ColouredGraph mimicGraph, ConstantValueStorage metrics,
+			GraphLexicalization graphLexicalization, GraphInitializer graphInitializer,
+			IDatasetManager datasetManager) {
+		// get metrics on initial graph
+		ColouredGraph initial = mimicGraph.clone();
+		String metricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
+		graphLexicalization.connectVerticesWithRDFTypeEdges(initial, graphInitializer);
+		graphLexicalization.lexicalizeGraph(initial, graphInitializer.getmMapColourToVertexIDs());
+		String afterMetricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
+		datasetManager.writeGraphsToFile(initial, "initial");
+
+		// save them to logs
+		try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true));) {
+			fWriter.write("Initial Mimic Graph:\n");
+			fWriter.write(metricValues);
+			fWriter.write("\nAfter Mimic Graph:\n");
+			fWriter.write(afterMetricValues);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public TripleBaseSingleID getProposedTriple() {
+		Set<BitSet> edgeColoursSet = graphInitializer.getAvailableEdgeColours();
+
+		// get proposed edge colour
+		BitSet edgeColour = classSelector.getEdgeColourProposal();
+
+		// get tail and head colour proposers from edge colour with n attempts
+		ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, edgeColoursSet);
+		BitSet tailColour = proposal.getTailColour();
+		BitSet headColour = proposal.getHeadColour();
+
+		// get instance proposers
+		OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
+				VERTEX_TYPE.TAIL);
+		OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
+				VERTEX_TYPE.HEAD);
+
+		// get instances from proposers
+		int maxAttempts = 1000;
+		for (int i = 0; i < maxAttempts; i++) {
+			// get candidate tail, skip if null
+			Integer tailId = tailProposer.getPotentialItem();
+			if (tailId == null)
+				continue;
+
+			// get candidate head filtered by the existing connections, skip if null
+			Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
+			Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
+			if (headId == null)
+				continue;
+
+			// check if they can connect
+			if (connectableVertices(tailId, headId, edgeColour)) {
+				TripleBaseSingleID triple = new TripleBaseSingleID();
+				triple.tailId = tailId;
+				triple.tailColour = tailColour;
+				triple.headId = headId;
+				triple.headColour = headColour;
+				triple.edgeColour = edgeColour;
+				return triple;
+			}
+		}
+		return null;
 	}
 
 }

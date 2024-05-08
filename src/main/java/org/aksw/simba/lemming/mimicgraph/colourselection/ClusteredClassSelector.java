@@ -11,6 +11,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.TripleColourDistributionMetric;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.util.Constants;
@@ -67,7 +68,7 @@ public class ClusteredClassSelector implements IClassSelector {
 	 */
 	@Override
 	@Deprecated
-	public BitSet getTailClass(BitSet edgeColour) {
+	public IOfferedItem<BitSet> getTailClass(BitSet edgeColour) {
 		return null;
 	}
 
@@ -77,11 +78,15 @@ public class ClusteredClassSelector implements IClassSelector {
 	 */
 	@Override
 	@Deprecated
-	public BitSet getHeadClass(BitSet tailColour, BitSet edgeColour) {
+	public IOfferedItem<BitSet> getHeadClass(BitSet tailColour, BitSet edgeColour) {
 		return null;
 	}
 
 	@Override
+	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, int n, Set<BitSet> restrictions) {
+		return getProposal(edgeColour, fakeEdgeId);
+	}
+	
 	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId) {
 		List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
 		if (tripleColours == null || tripleColours.size() != 3) {
@@ -432,5 +437,13 @@ public class ClusteredClassSelector implements IClassSelector {
 		}
 		return null;
 	}
+
+	@Override
+	public BitSet getEdgeColourProposal() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
 
 }

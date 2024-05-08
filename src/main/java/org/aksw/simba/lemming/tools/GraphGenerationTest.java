@@ -1,11 +1,16 @@
 package org.aksw.simba.lemming.tools;
 
+import java.util.List;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.configuration.Validator;
 import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.dice_research.ldcbench.generate.SeedGenerator;
@@ -50,37 +55,38 @@ public class GraphGenerationTest {
 		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
 		// Load RDF graphs into ColouredGraph models
+		LOGGER.info("Loading the input graphs...");
 		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
 		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles();
 
 		// Load and verify metric values and constant expressions
-		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class,
-				mDatasetManager.getDatasetPath());
+		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class,mDatasetManager.getDatasetPath());
 		valuesCarrier.getMetricsOfExpressions();
 		valuesCarrier.isComputableMetrics();
 
-		// Generation for a draft graph or loading from file
+		// Generation of a draft graph or loads it from file
 		long startTime = System.currentTimeMillis();
+		LOGGER.info("Generating the mimic graph...");
 		GraphInitializer initializer = application.getBean(GraphInitializer.class, seedGenerator);
 		IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
 		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
-		GraphGenerator mGrphGenerator = application.getBean(GraphGenerator.class, initializer, classSelector, vertexSelector);
-		ColouredGraph mimicGraph = mGrphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads);
+		GraphGenerator graphGenerator = application.getBean(GraphGenerator.class, initializer, classSelector, vertexSelector);
+		ColouredGraph mimicGraph = graphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads);
 //		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 		
-		// lexicalize and save initial mimic graph as ttl
-		LOGGER.info("Lexicalize the initial mimic graph ...");
-//		GraphLexicalization graphLexicalization = new GraphLexicalization(graphs);
-//		mDatasetManager.writeGraphsToFile(graphLexicalization.lexicalizeGraph(mimicGraph, 
-//				mGrphGenerator.getMappingColoursAndVertices()), "initial");
-//
-//		// Optimization with constant expressions
-//		LOGGER.info("Optimizing the mimic graph ...");
-//		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
-//		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mGrphGenerator, metrics, valuesCarrier,
-//				mGrphGenerator.getSeed(), pArgs.noOptimizationSteps);
-//		grphOptimizer.refineGraph(pArgs.noThreads);
-//
+		// finish initial mimic graph and save it for comparison
+		LOGGER.info("Saving the initial mimic graph...");
+		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
+		graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer, mDatasetManager);
+
+		// Optimization with constant expressions
+		LOGGER.info("Optimizing the mimic graph ...");
+		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
+		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mimicGraph, 
+				graphGenerator, metrics, valuesCarrier, seedGenerator, pArgs.noOptimizationSteps);
+		ColouredGraph refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
+		
+		System.out.println();
 //		// Lexicalization with word2vec
 //		LOGGER.info("Lexicalize the mimic graph ...");
 //		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
