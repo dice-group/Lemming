@@ -1,8 +1,5 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
-import org.aksw.simba.lemming.metrics.single.edgemanipulation.EdgeModifier;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
@@ -285,68 +281,78 @@ public class GraphGenerator {
 		return lstAssingedEdges;
 	}
 
-	public void finishSaveMimicGraph(ColouredGraph mimicGraph, ConstantValueStorage metrics,
+	public String finishSaveMimicGraph(ColouredGraph mimicGraph, ConstantValueStorage metrics,
 			GraphLexicalization graphLexicalization, GraphInitializer graphInitializer,
 			IDatasetManager datasetManager) {
 		// get metrics on initial graph
 		ColouredGraph initial = mimicGraph.clone();
-		String metricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
+//		String metricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
 		graphLexicalization.connectVerticesWithRDFTypeEdges(initial, graphInitializer);
 		graphLexicalization.lexicalizeGraph(initial, graphInitializer.getmMapColourToVertexIDs());
-		String afterMetricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
-		datasetManager.writeGraphsToFile(initial, "initial");
+//		String afterMetricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
+		String initialFile = datasetManager.getSavedFileName("initial");
+		datasetManager.writeGraphsToFile(initial, initialFile);
 
-		// save them to logs
-		try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true));) {
-			fWriter.write("Initial Mimic Graph:\n");
-			fWriter.write(metricValues);
-			fWriter.write("\nAfter Mimic Graph:\n");
-			fWriter.write(afterMetricValues);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		// save them to logs
+//		try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true));) {
+//			fWriter.write("Initial Mimic Graph:\n");
+//			fWriter.write(metricValues);
+//			fWriter.write("\nAfter Mimic Graph:\n");
+//			fWriter.write(afterMetricValues);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		return initialFile;
 	}
 
 	public TripleBaseSingleID getProposedTriple() {
-		Set<BitSet> edgeColoursSet = graphInitializer.getAvailableEdgeColours();
+		int max = 1000;
+		for (int j = 0; j < max; j++) {
 
-		// get proposed edge colour
-		BitSet edgeColour = classSelector.getEdgeColourProposal();
+			// get proposed edge colour
+			BitSet edgeColour = classSelector.getEdgeColourProposal();
 
-		// get tail and head colour proposers from edge colour with n attempts
-		ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, edgeColoursSet);
-		BitSet tailColour = proposal.getTailColour();
-		BitSet headColour = proposal.getHeadColour();
+			// let if fall if edgeColour is null, there's something really wrong if it's
+			// null
 
-		// get instance proposers
-		OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
-				VERTEX_TYPE.TAIL);
-		OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
-				VERTEX_TYPE.HEAD);
-
-		// get instances from proposers
-		int maxAttempts = 1000;
-		for (int i = 0; i < maxAttempts; i++) {
-			// get candidate tail, skip if null
-			Integer tailId = tailProposer.getPotentialItem();
-			if (tailId == null)
+			// get tail and head colour proposers from edge colour with n attempts
+			Set<BitSet> availableColours = graphInitializer.getAvailableVertexColours();
+			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, availableColours);
+			if(proposal == null)
 				continue;
+			BitSet tailColour = proposal.getTailColour();
+			BitSet headColour = proposal.getHeadColour();
 
-			// get candidate head filtered by the existing connections, skip if null
-			Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
-			Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
-			if (headId == null)
-				continue;
+			// get instance proposers
+			OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
+					VERTEX_TYPE.TAIL);
+			OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
+					VERTEX_TYPE.HEAD);
 
-			// check if they can connect
-			if (connectableVertices(tailId, headId, edgeColour)) {
-				TripleBaseSingleID triple = new TripleBaseSingleID();
-				triple.tailId = tailId;
-				triple.tailColour = tailColour;
-				triple.headId = headId;
-				triple.headColour = headColour;
-				triple.edgeColour = edgeColour;
-				return triple;
+			// get instances from proposers
+			int maxAttempts = 1000;
+			for (int i = 0; i < maxAttempts; i++) {
+				// get candidate tail, skip if null
+				Integer tailId = tailProposer.getPotentialItem();
+				if (tailId == null)
+					continue;
+
+				// get candidate head filtered by the existing connections, skip if null
+				Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
+				Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
+				if (headId == null)
+					continue;
+
+				// check if they can connect
+				if (connectableVertices(tailId, headId, edgeColour)) {
+					TripleBaseSingleID triple = new TripleBaseSingleID();
+					triple.tailId = tailId;
+					triple.tailColour = tailColour;
+					triple.headId = headId;
+					triple.headColour = headColour;
+					triple.edgeColour = edgeColour;
+					return triple;
+				}
 			}
 		}
 		return null;

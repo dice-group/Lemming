@@ -37,7 +37,7 @@ public class GraphOptimization {
 
     private int mMaxIteration = 50000;
     private int mTrueNoOfIteration = 0;
-    private int mMaxRepeatedSelection = 5000;
+    private int mMaxRepeatedSelection = 50000;
 
     private GraphGenerator graphGenerator;
     private EdgeModifier mEdgeModifier;
@@ -138,6 +138,9 @@ public class GraphOptimization {
             // Arguments passed to a 'Callable task' have to be final
             final TripleBaseSingleID lTriple = getOfferedEdgeforRemoving(mRemoveEdgeDecorator);
             final TripleBaseSingleID rTriple = getOfferedEdgeForAdding(mAddEdgeDecorator);
+            
+            if(lTriple == null || rTriple == null)
+            	System.out.println();
 
             Future<ErrorScores> leftFutureScore = executor.submit(() -> tryToRemoveAnEdgeThread(lTriple));
             Future<ErrorScores> rightFutureScore = executor.submit(() -> tryToAddAnEdgeThread(rTriple));
@@ -269,18 +272,14 @@ public class GraphOptimization {
      * @param startingTime the starting time of generation process
      * @param savedFile    the saved file's name of the mimic dataset
      */
-    public void printResult(String args, double startingTime, String savedFile, long seed) {
-        BufferedWriter fWriter;
-        try {
-            LOGGER.warn("Output results to file!");
+    public void printResult(String args, double startingTime, String savedFile, String initialFile, long seed) {
+        try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true))) {
+            LOGGER.info("Output results to file!");
 
-            fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true));
-
-            BufferedWriter fErrorScoreWriter;
+            // Save error scores from optimization phase
             String errorScoreFile = new String(savedFile);
-            errorScoreFile = "results/" + errorScoreFile.replace(".ttl", ".scores");
-
-            fErrorScoreWriter = new BufferedWriter(new FileWriter(errorScoreFile, true));
+            errorScoreFile = errorScoreFile.replace(".ttl", ".scores");
+            BufferedWriter fErrorScoreWriter = new BufferedWriter(new FileWriter(errorScoreFile, true));
 
             // number of input graphs
             fWriter.write("#----------------------------------------------------------------------#\n");
@@ -289,12 +288,12 @@ public class GraphOptimization {
             fWriter.write("# Generate a mimic graph of " + mEdgeModifier.getGraph().getVertices().size()
                     + " vertices and " + mEdgeModifier.getGraph().getEdges().size() + " edges.\n");
             fWriter.write("# Saved file: " + savedFile + ".\n");
+            fWriter.write("# Initial Mimic Graph: " + initialFile + ".\n");
             fWriter.write("# Saved error score file: " + errorScoreFile + ".\n");
             fWriter.write("# Duration: " + ((int) (mOptimizedTime - startingTime) / 1000) + " (s).\n");
             fWriter.write("# Optimization: " + mTrueNoOfIteration + "/" + mMaxIteration + " iterations\n");
             fWriter.write("# Seed: " + seed + "\n");
             fWriter.write(args);
-
             fWriter.write("#----------------------------------------------------------------------#\n");
 
             Map<String, String> mapGraphName = new HashMap<String, String>();
@@ -371,7 +370,6 @@ public class GraphOptimization {
             fWriter.write("\t The opimized mimic graph: " + mLstErrorScore.get(mLstErrorScore.size() - 1) + "\n");
 
             fWriter.write("\n\n\n");
-            fWriter.close();
 
             fErrorScoreWriter.write("# Error score of " + mMaxIteration + " iteration\n");
             // list of of error score

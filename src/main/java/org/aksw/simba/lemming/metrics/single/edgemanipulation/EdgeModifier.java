@@ -118,7 +118,7 @@ public class EdgeModifier {
                 mapMetricValues.put(metric.getName(), result.getResult());
             }
             // reverse the graph, note: the edgeId could be changed after reversion
-            triple.edgeId = graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
+//            triple.edgeId = graph.addEdge(triple.tailId, triple.headId, triple.edgeColour);
 
             return mapMetricValues;
         } else {

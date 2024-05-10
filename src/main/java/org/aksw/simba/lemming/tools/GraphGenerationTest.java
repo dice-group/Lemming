@@ -77,7 +77,7 @@ public class GraphGenerationTest {
 		// finish initial mimic graph and save it for comparison
 		LOGGER.info("Saving the initial mimic graph...");
 		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
-		graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer, mDatasetManager);
+		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer, mDatasetManager);
 
 		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
@@ -86,14 +86,18 @@ public class GraphGenerationTest {
 				graphGenerator, metrics, valuesCarrier, seedGenerator, pArgs.noOptimizationSteps);
 		ColouredGraph refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
 		
-		System.out.println();
-//		// Lexicalization with word2vec
-//		LOGGER.info("Lexicalize the mimic graph ...");
-//		String saveFiled = mDatasetManager.writeGraphsToFile(graphLexicalization
-//				.lexicalizeGraph(mGrphGenerator.getMimicGraph(), mGrphGenerator.getMappingColoursAndVertices()), "results");
-//		
-//		// output results to file "LemmingEx.result"
-//		grphOptimizer.printResult(pArgs.getArguments(), startTime, saveFiled, pArgs.seed);
-//		LOGGER.info("Application exits!!!");
+		// output results to file "LemmingEx.result"
+		// before we connect the RDF.type edges
+		String savedFile = mDatasetManager.getSavedFileName("results");
+		grphOptimizer.printResult(pArgs.getArguments(), startTime, savedFile, initialFile, pArgs.seed);
+		
+		// Lexicalization with word2vec
+		LOGGER.info("Lexicalize the mimic graph ...");
+		lexicalizer.connectVerticesWithRDFTypeEdges(refinedGraph, initializer);
+		lexicalizer.lexicalizeGraph(refinedGraph, initializer.getmMapColourToVertexIDs());
+		mDatasetManager.writeGraphsToFile(refinedGraph, savedFile);
+		
+		
+		
 	}
 }

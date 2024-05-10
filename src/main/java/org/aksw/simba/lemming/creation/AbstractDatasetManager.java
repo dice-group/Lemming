@@ -41,47 +41,38 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 	public void setDatasetName(String datasetName) {
 		mDatasetName = datasetName;
 	}
+	
+	public String getSavedFileName(String folder) {
+		new File(folder).mkdirs();
+		String fileName = folder+"/Mimic_" + mDatasetName + ".ttl";
+		String[] parts = new String[2];
+		int index = fileName.lastIndexOf('.');
+		parts[0] = fileName.substring(0, index);
+		parts[1] = fileName.substring(index, fileName.length());
+
+		Path path = Paths.get(fileName);
+		int i = 1;
+		while (Files.exists(path)) {
+			LOGGER.warn("File already exists!");
+			i++;
+			path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
+		}
+		LOGGER.info("Output file: " + path.toString());
+		return path.toString();
+	}
 
 	@Override
-	public String writeGraphsToFile(ColouredGraph grph, String folder) {
+	public void writeGraphsToFile(ColouredGraph grph, String filePath) {
 		Model datasetModel = ModelFactory.createDefaultModel();
-		String fileName = "";
-
-		try {
-			new File(folder).mkdirs();
-
-			fileName = folder+"/Mimic_" + mDatasetName + ".ttl";
-			String[] parts = new String[2];
-			int index = fileName.lastIndexOf('.');
-			parts[0] = fileName.substring(0, index);
-			parts[1] = fileName.substring(index, fileName.length());
-
-			Path path = Paths.get(fileName);
-			File f = null;
-			int i = 1;
-			while (Files.exists(path)) {
-				LOGGER.warn("File already exists!");
-				i++;
-				path = Paths.get(parts[0] + "(" + i + ")" + parts[1]);
-			}
-			f = path.toFile();
-
-			LOGGER.warn("Output file: " + path.toString());
-
-			fileName = f.getName();
+		try (Writer writerforOutModel = new FileWriter(filePath);) {
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, datasetModel);
 			Model newModel = reverter.processGraph();
-
-			Writer writerforOutModel = new FileWriter(f);
 			newModel.write(writerforOutModel, "TURTLE");
-			writerforOutModel.close();
 		} catch (Exception ex) {
 			LOGGER.error("Failed to write to file: " + ex.getMessage());
 			ex.printStackTrace();
 		}
-
-		return fileName;
 	}
 
 	@Override
