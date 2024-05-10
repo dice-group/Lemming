@@ -68,10 +68,12 @@ public class GraphGenerationTest {
 		long startTime = System.currentTimeMillis();
 		LOGGER.info("Generating the mimic graph...");
 		GraphInitializer initializer = application.getBean(GraphInitializer.class, seedGenerator);
+		// create new coloured graph for the synthetic graph from the input graphs
+		ColouredGraph mimicGraph = initializer.initialize(graphs, pArgs.noVertices, pArgs.noThreads);
 		IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
 		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
 		GraphGenerator graphGenerator = application.getBean(GraphGenerator.class, initializer, classSelector, vertexSelector);
-		ColouredGraph mimicGraph = graphGenerator.initializeMimicGraph(graphs, pArgs.noVertices, pArgs.noThreads);
+		mimicGraph = graphGenerator.initializeMimicGraph(mimicGraph, pArgs.noThreads);
 //		mGrphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph);
 		
 		// finish initial mimic graph and save it for comparison

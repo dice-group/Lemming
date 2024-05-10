@@ -30,9 +30,9 @@ public class BiasedClassSelector implements IClassSelector {
 	private Map<BitSet, IOfferedItem<BitSet>> mMapOEColoToTailColoProposer;
 	private Map<BitSet, IOfferedItem<BitSet>> mMapIEColoToHeadColoProposer;
 
-	public BiasedClassSelector(GraphInitializer graphInit, SeedGenerator seedGenerator) {
+	public BiasedClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
-		this.seedGenerator = seedGenerator;
+		this.seedGenerator = graphInit.getSeedGenerator();
 		mMapOEColoToTailColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		mMapIEColoToHeadColoProposer = new HashMap<BitSet, IOfferedItem<BitSet>>();
 		computeAvrgIOEdgeDistPerVertColo(graphInit.getOriginalGraphs());
