@@ -14,9 +14,13 @@ import java.util.concurrent.TimeUnit;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
+import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
+import org.aksw.simba.lemming.mimicgraph.colourselection.ClusteredClassSelector;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
+import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
@@ -28,6 +32,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
+import com.google.common.primitives.Doubles;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -124,10 +129,10 @@ public class GraphGenerator {
 						}
 
 						// get instance proposers
-						OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour,
-								tailColour, VERTEX_TYPE.TAIL);
-						OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour,
-								headColour, VERTEX_TYPE.HEAD);
+						IOfferedItem<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
+								VERTEX_TYPE.TAIL);
+						IOfferedItem<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
+								VERTEX_TYPE.HEAD);
 
 						// get instances from proposers
 						int maxAttempts = 1000;
@@ -305,7 +310,7 @@ public class GraphGenerator {
 		return initialFile;
 	}
 
-	public TripleBaseSingleID getProposedTriple() {
+	public TripleBaseSingleID getProposedTriple() {		
 		int max = 1000;
 		for (int j = 0; j < max; j++) {
 
@@ -318,15 +323,15 @@ public class GraphGenerator {
 			// get tail and head colour proposers from edge colour with n attempts
 			Set<BitSet> availableColours = graphInitializer.getAvailableVertexColours();
 			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, availableColours);
-			if(proposal == null)
+			if (proposal == null)
 				continue;
 			BitSet tailColour = proposal.getTailColour();
 			BitSet headColour = proposal.getHeadColour();
 
 			// get instance proposers
-			OfferedItemWrapper<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
+			IOfferedItem<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
 					VERTEX_TYPE.TAIL);
-			OfferedItemWrapper<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
+			IOfferedItem<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
 					VERTEX_TYPE.HEAD);
 
 			// get instances from proposers

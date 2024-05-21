@@ -37,7 +37,7 @@ public class GraphOptimization {
 
     private int mMaxIteration = 50000;
     private int mTrueNoOfIteration = 0;
-    private int mMaxRepeatedSelection = 5000;
+    private int mMaxRepeatedSelection = 10000;
 
     private GraphGenerator graphGenerator;
     private EdgeModifier mEdgeModifier;

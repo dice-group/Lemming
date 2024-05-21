@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgDegreeDistBaseVEColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgInDegreeDistBaseVEColo;
@@ -13,6 +14,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
+import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -40,19 +42,19 @@ public class BiasedInstanceSelector implements IVertexSelector {
 
 	/** Map of tail vertices proposers per edge */
 	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
-	
+
+	private GraphInitializer graphInit;
+
 	/**
-	 * Constructor.
 	 * 
-	 * @param origGrphs             Input graphs
-	 * @param mMapColourToEdgeIDs   Map from colours to edge IDs
-	 * @param mMapColourToVertexIDs Map from colours to vertex Ids
-	 * @param mColourMapper         Colour mapper
-	 * @param seed                  Seed
+	 * @param graphInit
 	 */
-	public BiasedInstanceSelector(ColouredGraph[] origGrphs, Map<BitSet, IntSet> mMapColourToEdgeIDs,
-			Map<BitSet, IntSet> mMapColourToVertexIDs, IColourMappingRules mColourMapper, long seed) {
-		computePotentialIODegreePerVert(origGrphs, mMapColourToEdgeIDs, mMapColourToVertexIDs, mColourMapper, seed);
+	public BiasedInstanceSelector(GraphInitializer graphInit) {
+		this.graphInit = graphInit;
+		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+		computePotentialIODegreePerVert(graphInit.getOriginalGraphs(), graphInit.getmMapColourToEdgeIDs(),
+				graphInit.getmMapColourToVertexIDs(), graphInit.getColourMapper(), graphInit.getSeedGenerator());
 	}
 
 	@Override
@@ -62,7 +64,7 @@ public class BiasedInstanceSelector implements IVertexSelector {
 	}
 
 	private void computePotentialIODegreePerVert(ColouredGraph[] origGrphs, Map<BitSet, IntSet> mMapColourToEdgeIDs,
-			Map<BitSet, IntSet> mMapColourToVertexIDs, IColourMappingRules mColourMapper, long seed) {
+			Map<BitSet, IntSet> mMapColourToVertexIDs, IColourMappingRules mColourMapper, SeedGenerator seedGenerator) {
 		// compute for each vertex's colour, the average out-degree associated with a
 		// specific edge's colour
 		AvrgDegreeDistBaseVEColour avrgInDegreeAnalyzer = new AvrgInDegreeDistBaseVEColo(origGrphs);
@@ -80,7 +82,7 @@ public class BiasedInstanceSelector implements IVertexSelector {
 			for (BitSet tailColo : setTailColours) {
 				if (setVertexColours.contains(tailColo)) {
 					computeProposedColours(avrgOutDegreeAnalyzer, mapPossibleODegreePerOEColo, tailColo, edgeColo,
-							mMapColourToVertexIDs, seed);
+							mMapColourToVertexIDs, seedGenerator.getNextSeed());
 				}
 			}
 
@@ -88,7 +90,7 @@ public class BiasedInstanceSelector implements IVertexSelector {
 			for (BitSet headColo : setHeadColours) {
 				if (setVertexColours.contains(headColo)) {
 					computeProposedColours(avrgInDegreeAnalyzer, mapPossibleIDegreePerIEColo, headColo, edgeColo,
-							mMapColourToVertexIDs, seed);
+							mMapColourToVertexIDs, seedGenerator.getNextSeed());
 				}
 			}
 		}

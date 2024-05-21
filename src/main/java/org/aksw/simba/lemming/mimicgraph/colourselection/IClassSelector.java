@@ -12,6 +12,10 @@ public interface IClassSelector {
 	
 	IOfferedItem<BitSet> getHeadClass(BitSet tailColour, BitSet edgeColour);
 	
+//	BitSet getTailClass();
+//	BitSet getHeadClassFromTailColour(BitSet tailColour);
+//	BitSet getEdgeColourFromTailHeadColour(BitSet tailColour, BitSet headColour);
+	
 
 	default public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, int n, Set<BitSet> restrictions) {
 		return getProposal(edgeColour, n, restrictions);
@@ -19,13 +23,28 @@ public interface IClassSelector {
 	
 	default public ClassProposal getProposal(BitSet edgeColour, int n, Set<BitSet> restrictions) {
 		IOfferedItem<BitSet> tailColourProposer = getTailClass(edgeColour);
-		BitSet tailColour = tryValidColour(tailColourProposer, restrictions, n);
+		if(tailColourProposer == null)
+			return null;
+		BitSet tailColour;
+		if(restrictions == null) {
+			tailColour = tryValidColour(tailColourProposer, n);
+		} else {
+			tailColour = tryValidColour(tailColourProposer, restrictions, n);
+		}
+		
 		if (tailColour == null) {
 			return null;
 		}
 		
 		IOfferedItem<BitSet> headColourProposer = getHeadClass(tailColour, edgeColour);
-		BitSet headColour = tryValidColour(headColourProposer, restrictions, n);
+		if(headColourProposer == null)
+			return null;
+		BitSet headColour;
+		if(restrictions == null) {
+			headColour = tryValidColour(headColourProposer, n);
+		} else {
+			headColour = tryValidColour(headColourProposer, restrictions, n);
+		}
 		if (headColour == null) {
 			return null;
 		}

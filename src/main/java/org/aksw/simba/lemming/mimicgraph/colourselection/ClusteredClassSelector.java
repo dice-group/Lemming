@@ -36,14 +36,15 @@ public class ClusteredClassSelector implements IClassSelector {
 	private GraphInitializer graphInit;
 	private SeedGenerator seedGenerator;
 
-	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> mTrippleMapOfTailHeadEdgeRates;
+	private Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> tripleMapTailHeadEdgeRates;
 	private List<TripleColourDistributionMetric> mLstEVColorMapping;
 	private Map<Integer, List<BitSet>> mMapEdgeIdsToTripleColours;
+	private ClassProposal currentProposal;
 
 	public ClusteredClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
 		this.seedGenerator = graphInit.getSeedGenerator();
-		mTrippleMapOfTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
+		tripleMapTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
 		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
 
@@ -58,13 +59,15 @@ public class ClusteredClassSelector implements IClassSelector {
 
 		// assign specific number of vertices to each grouped triple
 		computeNoOfVerticesInTriples();
-		
+
 		assignVerticesToTriples();
+		
+		currentProposal = getProposal();
 	}
 
 	/**
-	 * @deprecated TODO This is to be removed. Create a different interface for when both
-	 *             tail and head classes need to be sampled at the same time
+	 * @deprecated TODO This is to be removed. Create a different interface for when
+	 *             both tail and head classes need to be sampled at the same time
 	 */
 	@Override
 	@Deprecated
@@ -73,8 +76,8 @@ public class ClusteredClassSelector implements IClassSelector {
 	}
 
 	/**
-	 * @deprecated TODO This is to be removed. Create a different interface for when both
-	 *             tail and head classes need to be sampled at the same time
+	 * @deprecated TODO This is to be removed. Create a different interface for when
+	 *             both tail and head classes need to be sampled at the same time
 	 */
 	@Override
 	@Deprecated
@@ -84,9 +87,14 @@ public class ClusteredClassSelector implements IClassSelector {
 
 	@Override
 	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, int n, Set<BitSet> restrictions) {
-		return getProposal(edgeColour, fakeEdgeId);
+		if (fakeEdgeId == -1) {
+			return getProposal(); // get from clusters dist
+		} else {
+			return getProposal(edgeColour, fakeEdgeId); // get from edge grouped clusters
+		}
+		
 	}
-	
+
 	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId) {
 		List<BitSet> tripleColours = mMapEdgeIdsToTripleColours.get(fakeEdgeId);
 		if (tripleColours == null || tripleColours.size() != 3) {
@@ -106,6 +114,10 @@ public class ClusteredClassSelector implements IClassSelector {
 			colorMapping.applyWithSingleThread(grph);
 			mLstEVColorMapping.add(colorMapping);
 		}
+	}
+	
+	public ClassProposal getProposal() {
+		return currentProposal;
 	}
 
 	/**
@@ -154,7 +166,7 @@ public class ClusteredClassSelector implements IClassSelector {
 
 						TripleBaseSetOfIDs trippleForEdge = new TripleBaseSetOfIDs(tailColo, totalTailPercentage,
 								edgeColo, totalEdgePercentage, headColo, totalHeadPercentage);
-						putToMap(tailColo, headColo, edgeColo, trippleForEdge, mTrippleMapOfTailHeadEdgeRates);
+						putToMap(tailColo, headColo, edgeColo, trippleForEdge, tripleMapTailHeadEdgeRates);
 					}
 				}
 			}
@@ -211,8 +223,8 @@ public class ClusteredClassSelector implements IClassSelector {
 			List<TripleBaseSetOfIDs> lstGrpTriples = new ArrayList<TripleBaseSetOfIDs>();
 			List<Double> lstEdgeRatePerGrpTriple = new ArrayList<Double>();
 			for (BitSet tailColo : setVertColo) {
-				if (mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
-					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
+				if (tripleMapTailHeadEdgeRates.containsKey(tailColo)) {
+					Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = tripleMapTailHeadEdgeRates
 							.get(tailColo);
 
 					Set<BitSet> setHeadColours = mapHeadEdgeToGrpTriples.keySet();
@@ -280,7 +292,7 @@ public class ClusteredClassSelector implements IClassSelector {
 			// get all tails
 			IntSet setTails = graphInit.getmMapColourToVertexIDs().get(tailColo);
 			// tail distribution
-			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = tripleMapTailHeadEdgeRates
 					.get(tailColo);
 
 			if (mapHeadEdgeToGrpTriples == null)
@@ -337,11 +349,11 @@ public class ClusteredClassSelector implements IClassSelector {
 
 		for (BitSet tailColo : setVertColo) {
 
-			if (!mTrippleMapOfTailHeadEdgeRates.containsKey(tailColo)) {
+			if (!tripleMapTailHeadEdgeRates.containsKey(tailColo)) {
 				continue;
 			}
 
-			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = mTrippleMapOfTailHeadEdgeRates
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = tripleMapTailHeadEdgeRates
 					.get(tailColo);
 
 			for (BitSet headColo : setVertColo) {
@@ -438,12 +450,49 @@ public class ClusteredClassSelector implements IClassSelector {
 		return null;
 	}
 
+	public Map<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>> getmTrippleMapOfTailHeadEdgeRates() {
+		return tripleMapTailHeadEdgeRates;
+	}
+
+	public OfferedItemByRandomProb<TripleBaseSetOfIDs> getAddSuggestionsFromClusters() {
+		Set<BitSet> setTailColours = tripleMapTailHeadEdgeRates.keySet();
+		List<TripleBaseSetOfIDs> lstTripleGroups = new ArrayList<TripleBaseSetOfIDs>();
+		List<Double> lstGapRequiredEdges = new ArrayList<Double>();
+		for (BitSet tColo : setTailColours) {
+			Set<BitSet> setHeadColours = tripleMapTailHeadEdgeRates.get(tColo).keySet();
+			for (BitSet hColo : setHeadColours) {
+				Set<BitSet> setEdgeColo = tripleMapTailHeadEdgeRates.get(tColo).get(hColo).keySet();
+				for (BitSet eColo : setEdgeColo) {
+					TripleBaseSetOfIDs tripleGroup = tripleMapTailHeadEdgeRates.get(tColo).get(hColo).get(eColo);
+
+					if (tripleGroup.edgeIDs.size() == 0)
+						continue;
+					double gap = (tripleGroup.noOfHeads * tripleGroup.noOfTails) - tripleGroup.noOfEdges;
+
+					if (gap > 0) {
+						lstTripleGroups.add(tripleGroup);
+						lstGapRequiredEdges.add(gap);
+					}
+				}
+			}
+		}
+
+		TripleBaseSetOfIDs[] arrGrpTriples = lstTripleGroups.toArray(new TripleBaseSetOfIDs[0]);
+		double[] arrEdgeRatePerTriple = Doubles.toArray(lstGapRequiredEdges);
+
+		ObjectDistribution<TripleBaseSetOfIDs> objDist = new ObjectDistribution<TripleBaseSetOfIDs>(arrGrpTriples,
+				arrEdgeRatePerTriple);
+		OfferedItemByRandomProb<TripleBaseSetOfIDs> grpTripleProposer = new OfferedItemByRandomProb<TripleBaseSetOfIDs>(
+				objDist, graphInit.getSeedGenerator().getNextSeed());
+
+		return grpTripleProposer;
+	}
+
 	@Override
 	public BitSet getEdgeColourProposal() {
-		// TODO Auto-generated method stub
-		return null;
+		TripleBaseSetOfIDs add = getAddSuggestionsFromClusters().getPotentialItem();
+		currentProposal = new ClassProposal(add.tailColour, add.edgeColour, add.headColour);
+		return currentProposal.getEdgeColour();
 	}
-	
-	
 
 }

@@ -46,4 +46,27 @@ public class UniformClassSelector implements IClassSelector {
 		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
 		return tryValidColour(proposer, 500);
 	}
+//
+//	@Override
+//	public BitSet getTailClass() {
+//		BitSet[] possibilities = graphInit.getAvailableVertexColours().toArray(BitSet[]::new);
+//		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
+//		return tryValidColour(proposer, 500);
+//	}
+//
+//	@Override
+//	public BitSet getHeadClassFromTailColour(BitSet tailColour) {
+//		Set<BitSet> availableColours = graphInit.getAvailableVertexColours();
+//		BitSet[] possibilities =  graphInit.getColourMapper().getHeadColours(tailColour).toArray(BitSet[]::new);
+//		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
+//		return tryValidColour(proposer, availableColours, 500);
+//	}
+//
+//	@Override
+//	public BitSet getEdgeColourFromTailHeadColour(BitSet tailColour, BitSet headColour) {
+//		Set<BitSet> availableColours = graphInit.getAvailableEdgeColours();
+//		BitSet[] possibilities =  graphInit.getColourMapper().getPossibleLinkingEdgeColours(tailColour, headColour).toArray(BitSet[]::new);
+//		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
+//		return tryValidColour(proposer, availableColours, 500);
+//	}
 }

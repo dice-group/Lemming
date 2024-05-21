@@ -1,6 +1,6 @@
 package org.aksw.simba.lemming.mimicgraph.vertexselection;
 
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -24,7 +24,7 @@ public interface IVertexSelector {
 	 * @param type         vertex type
 	 * @return
 	 */
-	public OfferedItemWrapper<Integer> getProposedVertex(BitSet edgeColour, BitSet vertexColour, VERTEX_TYPE type);
+	public IOfferedItem<Integer> getProposedVertex(BitSet edgeColour, BitSet vertexColour, VERTEX_TYPE type);
 
 	public Integer selectTailFromColour(BitSet tailColour);
 
