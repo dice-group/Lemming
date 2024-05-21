@@ -2,16 +2,16 @@
 
 dataset=$1
 opt_iterations=100000
-if [ dataset = 'pg' ]
+if [ $dataset = 'pg' ]
 then 
 	nv=792923
-elif [ dataset = 'swdf' ]
+elif [ $dataset = 'swdf' ]
 then 
 	nv=45398
-elif [ dataset = 'lgeo' ]
+elif [ $dataset = 'lgeo' ]
 then 
 	nv=591649
-elif [ dataset = 'geology' ]
+elif [ $dataset = 'geology' ]
 then 
 	nv=1423
 else
@@ -20,7 +20,7 @@ else
 fi
 
 mkdir -p initial
-
+mvn clean install
 count=3
 for i in $(seq $count); do
   mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c UCS -v UIS -op $opt_iterations"
