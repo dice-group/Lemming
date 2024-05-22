@@ -13,10 +13,15 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFParser;
+import org.apache.jena.riot.RiotException;
+import org.apache.jena.riot.system.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 
 @Component("dbp")
 /**
@@ -24,7 +29,7 @@ import org.springframework.stereotype.Component;
  */
 public class DBpediaDataset extends AbstractDatasetManager implements IDatasetManager {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PersonGraphDataset.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DBpediaDataset.class);
 
 	@Value("${datasets.dbp.filepath}")
 	private String dataFolderPath;
@@ -53,7 +58,12 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 			// key needs only the file name, whereas value needs the full path to the
 			// corresponding Ontology
 			Map<String, String> modelOntMap = new HashMap<>();
-			modelOntMap.put("2016", "dbpedia_2016-10.owl");
+			modelOntMap.put("2022-12", "2022-12-01-194003-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2022-03", "2022-03-04-070002-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2021-12", "2021-12-01-180002-ontology_type=parsed.owl");
+			modelOntMap.put("2021-03", "2021-03-12-142000-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2020-10", "2020-10-01-031000-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2020-05", "2020-06-10-181610-ontology_type=parsed.owl");
 
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
@@ -67,8 +77,7 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 					LOGGER.info("Read data to model - " + model.size() + " triples");
 					OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					ontModel.getDocumentManager().setProcessImports(false);
-					if (modelOntMap.containsKey(fileName))
-						ontModel.read(modelOntMap.get(fileName));
+					ontModel.read(modelOntMap.get(fileName));
 					ontModel.read("22-rdf-syntax-ns", "TTL");
 					ontModel.read("rdf-schema", "TTL");
 					Inferer inferer = new Inferer(true, ontModel);
@@ -87,4 +96,6 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
+
+
 }
