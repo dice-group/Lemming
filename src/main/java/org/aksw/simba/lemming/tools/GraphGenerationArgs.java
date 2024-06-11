@@ -24,12 +24,21 @@ public class GraphGenerationArgs {
 
 	@Parameter(names = { "-l" }, description = "Load mimic graph", required = false)
 	String loadMimicGraph;
+	
+	@Parameter(names = { "-m" }, description = "Mode", required = false)
+	String mode = "Binary";
 
-	@Parameter(names = { "-c" }, description = "Class Selector Type", required = true)
+	@Parameter(names = { "-c" }, description = "Class Selector Type", required = false)
 	String classSelector;
 	
-	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = true)
+	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = false)
 	String vertexSelector;
+	
+	@Parameter(names = { "-sp" }, description = "Simplex Property", required = false)
+	String simplexProperty;
+	
+	@Parameter(names = { "-sc" }, description = "Simplex Class", required = false)
+	String simplexClass;
 
 	@Parameter(names = {
 			"-op" }, description = "Number of iterations during the graph optimization phase", required = true)

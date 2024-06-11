@@ -2,7 +2,7 @@ package org.aksw.simba.lemming.simplexes.analysis;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 

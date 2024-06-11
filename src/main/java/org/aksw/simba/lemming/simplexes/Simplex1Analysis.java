@@ -6,6 +6,8 @@ import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -16,6 +18,8 @@ import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class Simplex1Analysis extends SimplexAnalysis {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(Simplex1Analysis.class);
 	
 	
 	/**
@@ -298,11 +302,11 @@ public class Simplex1Analysis extends SimplexAnalysis {
 				IntSet allEdgeIds = graph.getEdges();
 				
 				IntSet edgeIdsTriangles = mGraphsEdgesIdsTriangle.get(keyGraphId);
-				System.out.println(edgeIdsTriangles.size());
+				LOGGER.debug("edgeIdsTriangles {}", edgeIdsTriangles.size());
 				IntSet edgeIdsConnectingTriangles = mGraphsCommonEdgesIds.get(keyGraphId);
-				System.out.println(edgeIdsConnectingTriangles.size());
+				LOGGER.debug("edgeIdsConnectingTriangles {}", edgeIdsConnectingTriangles.size());
 				IntSet edgeIds1Simplexes = mGraphIdEdgeIdsFor1Simplex.get(keyGraphId);
-				System.out.println(edgeIds1Simplexes.size());
+				LOGGER.debug("edgeIds1Simplexes {}", edgeIds1Simplexes.size());
 				
 				IntSet result1 = IntSetUtil.difference(allEdgeIds, edgeIdsTriangles);
 				IntSet result2 = IntSetUtil.difference(result1, edgeIdsConnectingTriangles);

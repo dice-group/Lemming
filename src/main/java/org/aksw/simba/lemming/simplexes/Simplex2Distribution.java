@@ -1,22 +1,19 @@
 package org.aksw.simba.lemming.simplexes;
 
-import java.util.List;
 import java.util.Random;
 
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
-import org.aksw.simba.lemming.util.MapUtil;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
  * This class creates different distributions for 2-simplexes.
  */
 public class Simplex2Distribution extends Simplex1Distribution{
+	
 	// Extending class Simplex1Distribution because some of the methods from that class can be used directly for creating distributions of common edges connecting triangles to rest of the graph.
 	
 	
@@ -37,9 +34,7 @@ public class Simplex2Distribution extends Simplex1Distribution{
 	 * @param mRandom - Random generator object.
 	 */
 	public void createColoProposerForVertConnectedToTriangle(ObjectDoubleOpenHashMap<BitSet> mVertColoCountConnectedToTriangles) {
-		
-		System.out.println();
-		
+	
 		int sampleSize = mVertColoCountConnectedToTriangles.assigned;
 		
 		// initialize array for sample space and values

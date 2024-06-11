@@ -12,18 +12,36 @@ import com.carrotsearch.hppc.BitSet;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 
+//public interface IGraphGeneration {
+//	public ColouredGraph generateGraph();
+//	public IColourMappingRules getColourMapper();
+//	public Map<BitSet,IntSet> getMappingColoursAndVertices();
+//	public Map<BitSet,IntSet> getMappingColoursAndEdges();
+//
+//	public TripleBaseSingleID getProposedTriple(IVertexSelector vertexSelector);
+//	
+//	public ColouredGraph getMimicGraph();
+//	public String getLiteralType(BitSet dteColo);
+//	public void setMimicGraph(ColouredGraph refinedGraph);
+//	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
+//	public long getSeed();
+//	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad);
+//}
+
 public interface IGraphGeneration {
 	public ColouredGraph generateGraph();
 	public IColourMappingRules getColourMapper();
 	public Map<BitSet,IntSet> getMappingColoursAndVertices();
 	public Map<BitSet,IntSet> getMappingColoursAndEdges();
-
-	public TripleBaseSingleID getProposedTriple(IVertexSelector vertexSelector);
+	
+	//public BitSet getProposedEdgeColour(BitSet headColour, BitSet tailColour);
+	//public BitSet getProposedHeadColour(BitSet edgeColour, BitSet tailColour);
+	//public BitSet getProposedTailColour(BitSet headColour, BitSet edgeColour);
+	public TripleBaseSingleID getProposedTriple(boolean isRamdom);
 	
 	public ColouredGraph getMimicGraph();
 	public String getLiteralType(BitSet dteColo);
 	public void setMimicGraph(ColouredGraph refinedGraph);
 	public void setNumberOfThreadsForGenerationProcess(int numberOfThreads);
 	public long getSeed();
-	public void loadOrGenerateGraph(IDatasetManager mDatasetManager, String mimicGraphLoad);
 }

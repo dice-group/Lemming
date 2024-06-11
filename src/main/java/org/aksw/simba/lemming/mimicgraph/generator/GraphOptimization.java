@@ -23,6 +23,7 @@ import org.aksw.simba.lemming.metrics.single.edgemanipulation.ErrorScores;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
+import org.aksw.simba.lemming.simplexes.generator.IGraphGenerator;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class GraphOptimization {
     private int mTrueNoOfIteration = 0;
     private int mMaxRepeatedSelection = 10000;
 
-    private GraphGenerator graphGenerator;
+    private IGraphGenerator graphGenerator;
     private EdgeModifier mEdgeModifier;
     private ErrorScoreCalculator mErrScoreCalculator;
     private List<Double> mLstErrorScore;
@@ -52,7 +53,7 @@ public class GraphOptimization {
      * Variable for storing calculation information *
      -----------------------------------------------*/
 
-    public GraphOptimization(ColouredGraph[] origGrphs, ColouredGraph mimicGraph, GraphGenerator graphGenerator,
+    public GraphOptimization(ColouredGraph[] origGrphs, ColouredGraph mimicGraph, IGraphGenerator graphGenerator,
             List<SingleValueMetric> metrics, ConstantValueStorage valueCarriers, SeedGenerator seedGenerator, int mMaxIteration) {
         this.seedGenerator = seedGenerator;
         this.mMaxIteration = mMaxIteration;

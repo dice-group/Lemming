@@ -1,24 +1,27 @@
 package org.aksw.simba.lemming.simplexes.analysis;
 
+import java.util.HashSet;
+
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.simplexes.TriColours;
+import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
 import grph.DefaultIntSet;
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-import java.util.HashSet;
-
-import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.simplexes.TriColos;
-import org.aksw.simba.lemming.util.Constants;
-import org.aksw.simba.lemming.util.IntSetUtil;
-
-import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
-
 /**
  * This class is based on NodeIteratorMetric that counts number of triangles.
  */
 public class FindTri {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FindTri.class);
 	
 	/**
 	 * Map for storing vertex colors for the triangle along with the probability for them in terms of triangle count and edge count in an array.
@@ -27,7 +30,7 @@ public class FindTri {
 	 * the probability of triangle is stored at the 2nd index 
 	 * and the average count of triangles per no. of vertices in the input graph is stored at the 3rd index. 
 	 */
-	private ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColos, double[]>();
+	private ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColours, double[]>();
 	
 	/**
 	 * Map for storing vertex colors specifically for isolated triangles along with the probability for them in terms of triangle count and edge count in an array.
@@ -35,7 +38,7 @@ public class FindTri {
 	 * count of edges in the triangle is stored at the 1st index, 
 	 * and the probability of triangle is stored at the 2nd index.  
 	 */
-	private ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColos, double[]>();
+	private ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColours, double[]>();
 	
 	int graphId = 1;
 	
@@ -73,13 +76,13 @@ public class FindTri {
     	int countResourceTriangles = 0; // Variable to track count of triangles
     	IntSet verticesOnlyFormingTriangleResource = new DefaultIntSet(Constants.DEFAULT_SIZE);//temporary variables to track vertices forming only triangles
     	IntSet edgesWithinTrianglesResource = new DefaultIntSet(Constants.DEFAULT_SIZE);// temporary variable for tracking edge Ids within triangle
-    	ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColos, double[]>(); //temporary map to store count of edges and triangles, which is later used to compute probabilities
+    	ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColours, double[]>(); //temporary map to store count of edges and triangles, which is later used to compute probabilities
     	
     	//Temporary variables for storing isolated 2-simplexes information
     	IntSet verticesForIsolatedTriangles = new DefaultIntSet(Constants.DEFAULT_SIZE);//temporary variables to track vertices forming only triangles
     	IntSet edgesForIsolatedTriangles = new DefaultIntSet(Constants.DEFAULT_SIZE);// temporary variable for tracking edge Ids within triangle
     	int countIsolatedTriangles = 0;// Variable to track count of triangles
-    	ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosTriEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColos, double[]>();//temporary map to store count of edges and triangles, which is later used to compute probabilities
+    	ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosTriEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColours, double[]>();//temporary map to store count of edges and triangles, which is later used to compute probabilities
     	
     	IntSet[] edges = new IntSet[graph.getGraph().getNumberOfVertices()];
 
@@ -93,7 +96,7 @@ public class FindTri {
         
         //Logic to find set of class vertices
         IntSet classVerticesSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
-        System.out.println("Graph: " + graphId);
+        LOGGER.info("Finding triangles in graph: " + graphId);
         for (int edgeId: graph.getEdges()) {
         	if (graph.getEdgeColour(edgeId).equals(graph.getRDFTypePropertyColour())) {
         		int classVertexID = graph.getHeadOfTheEdge(edgeId);
@@ -127,7 +130,7 @@ public class FindTri {
                         
                         if (intersectionResult > 0) {
                         	
-                        	TriColos tempObj = new TriColos(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
+                        	TriColours tempObj = new TriColours(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
                         	
                         	// Set to store colors of every edge within the nodes forming a triangle
                         	HashSet<BitSet> setEdgeColors = new HashSet<BitSet>();
@@ -266,7 +269,7 @@ public class FindTri {
         
     }
     
-    private void updateCountConn2Simplexes(ColouredGraph graph, ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCountsTemp, int countResourceTriangles) {
+    private void updateCountConn2Simplexes(ColouredGraph graph, ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleEdgeCountsTemp, int countResourceTriangles) {
     	// Logic to get total number of vertices in the input graph excluding class vertices
         double totalVertices = graph.getNumberOfVertices();
         //remove number of class vertices from the total vertices count
@@ -280,7 +283,7 @@ public class FindTri {
         Object[] keysTriColo = mTriangleColoursTriangleEdgeCountsTemp.keys;
         for (int i = 0; i < keysTriColo.length; i++ ) {
        	 if (mTriangleColoursTriangleEdgeCountsTemp.allocated[i]) {
-       		 TriColos triangleColours = (TriColos) keysTriColo[i];
+       		 TriColours triangleColours = (TriColours) keysTriColo[i];
        		 double[] arrCountsDist = mTriangleColoursTriangleEdgeCountsTemp.get(triangleColours);
            		
        		 //create a new array for storing avg count 
@@ -298,7 +301,7 @@ public class FindTri {
            	keysTriColo = mTriangleColoursTriangleEdgeCountsTemp.keys;
            	for (int i = 0; i < keysTriColo.length; i++ ) {
            		if (mTriangleColoursTriangleEdgeCountsTemp.allocated[i]) {
-           			TriColos triangleColours = (TriColos) keysTriColo[i];
+           			TriColours triangleColours = (TriColours) keysTriColo[i];
            			double[] arrCountDist = mTriangleColoursTriangleEdgeCountsTemp.get(triangleColours);
            		
            			//create a new array for storing avg count 
@@ -309,10 +312,10 @@ public class FindTri {
            			// Add at the 3rd index, avg count of triangles per total number of vertices in the input graph. Note: 0th and 1st indices store the number of edges and number of triangles respectively.
            			arrCountDistTemp[3] = arrCountDist[0] * 1.0 / totalVertices;
            		
-           			System.out.println("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
-           			System.out.println("Number of triangles: " + arrCountDist[0]);
-           			System.out.println("Total number of vertices: " + totalVertices);
-           			System.out.println("Avg per no. of vertices: " + arrCountDistTemp[3]);
+           			LOGGER.debug("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
+           			LOGGER.debug("Number of triangles: " + arrCountDist[0]);
+           			LOGGER.debug("Total number of vertices: " + totalVertices);
+           			LOGGER.debug("Avg per no. of vertices: " + arrCountDistTemp[3]);
            		
            			// update the distribution in global maps
            			if (mTriColoEdgesTriCountDistAvg.containsKey(triangleColours)) {
@@ -332,7 +335,7 @@ public class FindTri {
            	}
     }
     
-    private void updateCountIso2Simplexes(ColouredGraph graph, ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosTriEdgeCountsTemp, int countIsolatedTriangles) {
+    private void updateCountIso2Simplexes(ColouredGraph graph, ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosTriEdgeCountsTemp, int countIsolatedTriangles) {
     	// Logic to get total number of vertices in the input graph excluding class vertices
         double totalVertices = graph.getNumberOfVertices();
            
@@ -344,7 +347,7 @@ public class FindTri {
            Object[] keysTriColo = mIsolatedTriColosTriEdgeCountsTemp.keys;
            for (int i = 0; i < keysTriColo.length; i++ ) {
            	if (mIsolatedTriColosTriEdgeCountsTemp.allocated[i]) {
-           		TriColos triangleColours = (TriColos) keysTriColo[i];
+           		TriColours triangleColours = (TriColours) keysTriColo[i];
            		double[] arrCountsDist = mIsolatedTriColosTriEdgeCountsTemp.get(triangleColours);
            		
            		//create a new array for storing avg count 
@@ -358,12 +361,12 @@ public class FindTri {
            	}
            }
            
-           System.out.println("Isolated triangles: ");
+           LOGGER.debug("Isolated triangles: ");
            // iterate over results and update the global map
            keysTriColo = mIsolatedTriColosTriEdgeCountsTemp.keys;
            for (int i = 0; i < keysTriColo.length; i++ ) {
            	if (mIsolatedTriColosTriEdgeCountsTemp.allocated[i]) {
-           		TriColos triangleColours = (TriColos) keysTriColo[i];
+           		TriColours triangleColours = (TriColours) keysTriColo[i];
            		double[] arrCountDist = mIsolatedTriColosTriEdgeCountsTemp.get(triangleColours);
            		
            		//create a new array for storing avg count 
@@ -372,9 +375,9 @@ public class FindTri {
            		arrCountDistTemp[1] = arrCountDist[1];
            		arrCountDistTemp[2] = (arrCountDist[2] * 1.0) / totalDistTri; // update the distribution
            		
-           		System.out.println("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
-           		System.out.println("Number of triangles: " + arrCountDist[0]);
-           		System.out.println("Total number of vertices: " + totalVertices);
+           		LOGGER.debug("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
+           		LOGGER.debug("Number of triangles: " + arrCountDist[0]);
+           		LOGGER.debug("Total number of vertices: " + totalVertices);
            		
            		// update the distribution in global maps
            		if (mIsolatedTriColoEdgesTriCountDistAvg.containsKey(triangleColours)) {
@@ -432,11 +435,11 @@ public class FindTri {
 
 	//****************************public getters for triangle counts, edges and vertices*****************************************//
 	
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmTriColoEdgesTriCountDistAvg() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmTriColoEdgesTriCountDistAvg() {
 		return mTriColoEdgesTriCountDistAvg;
 	}
 
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
 		return mIsolatedTriColoEdgesTriCountDistAvg;
 	}
 

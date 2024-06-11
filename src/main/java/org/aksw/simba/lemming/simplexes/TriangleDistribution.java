@@ -47,7 +47,7 @@ public class TriangleDistribution {
 	/**
 	 * Object for storing distributions by analyzing triangles found in all input graphs.
 	 */
-	OfferedItemByRandomProb<TriColos> potentialTriangleProposer;
+	OfferedItemByRandomProb<TriColours> potentialTriangleProposer;
 	
 	/**
 	 * Map for storing probability distributions computed for two vertex colors.
@@ -55,7 +55,7 @@ public class TriangleDistribution {
 	 */
 	ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
 	
-	public TriangleDistribution(ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>> mTriangleColorsProbability, int iNoOfVersions, Random mRandom){
+	public TriangleDistribution(ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>>> mTriangleColorsProbability, int iNoOfVersions, Random mRandom){
 		
 		this.iNoOfVersions = iNoOfVersions;
 		this.mRandom = mRandom;
@@ -330,14 +330,14 @@ public class TriangleDistribution {
 	 * @param setTriangleColorsMimicGraph - Set of TriangleColours that needs to be filtered.
 	 * @return
 	 */
-	public TriColos proposeTriangleToAddEdge(Set<TriColos> setTriangleColorsMimicGraph) {
+	public TriColours proposeTriangleToAddEdge(Set<TriColours> setTriangleColorsMimicGraph) {
 		
 		//Utilize initialized object distribution for all triangles
 
 		// get the selected triangle colors
-		TriColos potentialTriangleColours = potentialTriangleProposer.getPotentialItem(setTriangleColorsMimicGraph);
+		TriColours potentialTriangleColours = potentialTriangleProposer.getPotentialItem(setTriangleColorsMimicGraph);
 		
-		for(TriColos triangleColourObject: setTriangleColorsMimicGraph) {
+		for(TriColours triangleColourObject: setTriangleColorsMimicGraph) {
 			if ( triangleColourObject.equals(potentialTriangleColours)) {
 				return triangleColourObject;
 			}
@@ -355,10 +355,10 @@ public class TriangleDistribution {
 	 * @param iNoOfVersions - Number of input graphs
 	 * @param mRandom - Random object
 	 */
-	private void initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, int iNoOfVersions, Random mRandom) {
+	private void initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, int iNoOfVersions, Random mRandom) {
 		
 		// create sample space & values for triangle colors
-		TriColos[] triangleColorsSampleSpace = new TriColos[numberOfDistinctTriangleColours];
+		TriColours[] triangleColorsSampleSpace = new TriColours[numberOfDistinctTriangleColours];
 		double[] possEdgesInTriangle = new double[numberOfDistinctTriangleColours];
 		
 		Object[] keysTriangleColours = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.keys;
@@ -367,7 +367,7 @@ public class TriangleDistribution {
 		int i = 0; //temp variable to track index of array
 		for(int mapKeyIndex = 0; mapKeyIndex < keysTriangleColours.length ; mapKeyIndex++) {
 			if(mTriangleColoursTriangleCountsEdgeCountsResourceNodes.allocated[mapKeyIndex]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[mapKeyIndex];
+				TriColours triangleColorObj = (TriColours) keysTriangleColours[mapKeyIndex];
 				double[] triangleEdgeCountArr = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.get(triangleColorObj);
 				double countOfEdges = triangleEdgeCountArr[1];
 				
@@ -380,9 +380,9 @@ public class TriangleDistribution {
 			}
 		}
 		
-		ObjectDistribution<TriColos> potentialTriangle = new ObjectDistribution<TriColos>(triangleColorsSampleSpace, possEdgesInTriangle);
+		ObjectDistribution<TriColours> potentialTriangle = new ObjectDistribution<TriColours>(triangleColorsSampleSpace, possEdgesInTriangle);
 		if (!potentialTriangle.isEmpty()) // When samplespace is empty, initialzing the proposer with null
-			potentialTriangleProposer = new OfferedItemByRandomProb<TriColos>(potentialTriangle, mRandom);
+			potentialTriangleProposer = new OfferedItemByRandomProb<TriColours>(potentialTriangle, mRandom);
 		else
 			potentialTriangleProposer = null;
 		

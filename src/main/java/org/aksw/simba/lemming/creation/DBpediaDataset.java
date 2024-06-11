@@ -13,10 +13,6 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFParser;
-import org.apache.jena.riot.RiotException;
-import org.apache.jena.riot.system.ErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,12 +54,12 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 			// key needs only the file name, whereas value needs the full path to the
 			// corresponding Ontology
 			Map<String, String> modelOntMap = new HashMap<>();
-			modelOntMap.put("2022-12", "2022-12-01-194003-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2022-03", "2022-03-04-070002-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2021-12", "2021-12-01-180002-ontology_type=parsed.owl");
-			modelOntMap.put("2021-03", "2021-03-12-142000-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2020-10", "2020-10-01-031000-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2020-05", "2020-06-10-181610-ontology_type=parsed.owl");
+			modelOntMap.put("2022-12-01", "2022-12-01-194003-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2022-03-01", "2022-03-04-070002-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2021-12-01", "2021-12-01-180002-ontology_type=parsed.owl");
+			modelOntMap.put("2021-03-01", "2021-03-12-142000-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2020-10-01", "2020-10-01-031000-ontology--DEV_type=parsed.owl");
+			modelOntMap.put("2020-05-01", "2020-06-10-181610-ontology_type=parsed.owl");
 
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
@@ -96,6 +92,15 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
-
-
+	
+	public void setDataFolderPath(String dataFolderPath) {
+		this.dataFolderPath = dataFolderPath;
+	}
+	
+	
+	public static void main(String[] args) {
+		DBpediaDataset pg = new DBpediaDataset();
+		pg.setDataFolderPath("DBpedia");
+		pg.readGraphsFromFiles();
+	}
 }

@@ -1,16 +1,12 @@
 package org.aksw.simba.lemming.simplexes;
 
-import java.util.List;
 import java.util.Random;
 
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
-import org.aksw.simba.lemming.util.MapUtil;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
-import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
 /**
@@ -20,7 +16,6 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
  * 
  */
 public class Simplex1Distribution {
-	
 	
 	/**
 	 * Map for storing count of head and tail colours for 1-simplexes.
@@ -75,9 +70,7 @@ public class Simplex1Distribution {
 	 * @param mRandom - Random generator object.
 	 */
 	public void createVertColoProposer(ObjectDoubleOpenHashMap<BitSet> mVertColoCount1Simplex) {
-		
-		System.out.println();
-		
+	
 		int sampleSize = mVertColoCount1Simplex.assigned;
 		
 		// initialize array for sample space and values

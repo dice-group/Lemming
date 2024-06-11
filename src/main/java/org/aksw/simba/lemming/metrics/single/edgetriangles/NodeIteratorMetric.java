@@ -16,7 +16,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -37,7 +37,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 	 * Map for storing vertex colors for the triangle along with the probability for them in terms of triangle count and edge count in an array.
 	 * Note: Probability to form triangle is stored at the 0th index of the array, the probability that triangle has more edges is stored at the 1st index, and the raw count of triangles is stored at the 3rd index. 
 	 */
-	ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCountsResourceNodes = new ObjectObjectOpenHashMap<TriColos, double[]>();
+	ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleEdgeCountsResourceNodes = new ObjectObjectOpenHashMap<TriColours, double[]>();
 	
 	/**
 	 * Map for storing vertex colors for the triangle along with the probability. The probability is stored for the third vertex color given two vertex colors. 
@@ -47,14 +47,14 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 	/**
 	 * Map for storing vertex colors for the triangle along with their edge count
 	 */
-	ObjectIntOpenHashMap<TriColos> mTrianglesColoursEdgeCountsClassNodes = new ObjectIntOpenHashMap<TriColos>();
+	ObjectIntOpenHashMap<TriColours> mTrianglesColoursEdgeCountsClassNodes = new ObjectIntOpenHashMap<TriColours>();
 	
 	/**
 	 * Map for storing vertex colors for the triangle along with their edge count
 	 */
-	ObjectIntOpenHashMap<TriColos> mTrianglesColoursTrianglesCountsClassNodes = new ObjectIntOpenHashMap<TriColos>();
+	ObjectIntOpenHashMap<TriColours> mTrianglesColoursTrianglesCountsClassNodes = new ObjectIntOpenHashMap<TriColours>();
 	
-	HashSet<TriColos> setOfTriangleshavingClassNodes = new HashSet<TriColos>();
+	HashSet<TriColours> setOfTriangleshavingClassNodes = new HashSet<TriColours>();
 	
 	ObjectDoubleOpenHashMap<BitSet> mColoCountVertConnectedToTriangle = new ObjectDoubleOpenHashMap<BitSet>();
 	
@@ -163,7 +163,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
     	int numOfEdgesInTriangle = 0;
     	
     	//temporary map to store count of triangles and edges, which is later used to compute probabilities
-    	ObjectObjectOpenHashMap<TriColos, int[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColos, int[]>();
+    	ObjectObjectOpenHashMap<TriColours, int[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColours, int[]>();
     	
     	//temporary variables to track vertices forming only triangles
     	IntSet verticesOnlyFormingTriangleResource = new DefaultIntSet(Constants.DEFAULT_SIZE);
@@ -226,7 +226,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
                         
                         if (intersectionResult > 0) {
                         	
-                        	TriColos tempObj = new TriColos(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
+                        	TriColours tempObj = new TriColours(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
                         	//TriangleColours tempObj = new TriangleColours(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2), intersectionResult1 + intersectionResult2 + intersectionResult3); // Need to update the intersectionResult to intersectionResult1 + intersectionResult2 + intersectionResult3?
                         	
                         	// Set to store colors of every edge within the nodes forming a triangle
@@ -338,7 +338,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
         Object[] triangleColorsKeys = mTriangleColoursTriangleEdgeCountsTemp.keys;
         for (int triColKey = 0; triColKey < triangleColorsKeys.length; triColKey++) {
         	if (mTriangleColoursTriangleEdgeCountsTemp.allocated[triColKey]) {
-        		TriColos triangleColours = (TriColos) triangleColorsKeys[triColKey];
+        		TriColours triangleColours = (TriColours) triangleColorsKeys[triColKey];
         		int[] triangleEdgeCount = mTriangleColoursTriangleEdgeCountsTemp.get(triangleColours);
         		double triDistribution = triangleEdgeCount[0] * 1.0 / countResourceTriangles;
         		double edgeDistribution = triangleEdgeCount[1] * 1.0 / numOfEdgesInTriangle;
@@ -591,7 +591,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 		return mGraphsEdgesIdsConnectTriangles;
 	}
 
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmTriangleColoursTriangleCountsEdgeCountsResourceNodes() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmTriangleColoursTriangleCountsEdgeCountsResourceNodes() {
 		return mTriangleColoursTriangleEdgeCountsResourceNodes;
 	}
 
@@ -599,11 +599,11 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 		return mColoCountVertConnectedToTriangle;
 	}
 
-	public ObjectIntOpenHashMap<TriColos> getmTrianglesColoursTrianglesCountsClassNodes() {
+	public ObjectIntOpenHashMap<TriColours> getmTrianglesColoursTrianglesCountsClassNodes() {
 		return mTrianglesColoursTrianglesCountsClassNodes;
 	}
 
-	public ObjectIntOpenHashMap<TriColos> getmTrianglesColoursEdgeCountsClassNodes() {
+	public ObjectIntOpenHashMap<TriColours> getmTrianglesColoursEdgeCountsClassNodes() {
 		return mTrianglesColoursEdgeCountsClassNodes;
 	}
 
@@ -653,7 +653,7 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
 
 	
 
-	public HashSet<TriColos> getSetOfTriangleshavingClassNodes() {
+	public HashSet<TriColours> getSetOfTriangleshavingClassNodes() {
 		return setOfTriangleshavingClassNodes;
 	}
 

@@ -10,7 +10,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
-public class PropertyDistI {
+public class PropertyDistI implements IPropertyDist {
 	
 	private ObjectObjectOpenHashMap<EdgeColorsSorted, ObjectDoubleOpenHashMap<BitSet>> mPropDist;
 	

@@ -2,14 +2,14 @@ package org.aksw.simba.lemming.simplexes;
 
 import com.carrotsearch.hppc.BitSet;
 
-public class TriColos {
+public class TriColours {
 	private BitSet a, b, c;	
 
-    public TriColos(BitSet a, BitSet b, BitSet c) {
+    public TriColours(BitSet a, BitSet b, BitSet c) {
         set(a, b, c); // sorting logic for the bitset
     }
 
-    TriColos(TriColos t) {
+    TriColours(TriColours t) {
         this.a = t.a;
         this.b = t.b;
         this.c = t.c;
@@ -177,7 +177,7 @@ public class TriColos {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        TriColos other = (TriColos) obj;
+        TriColours other = (TriColours) obj;
         if (a.hashCode() != other.a.hashCode())
             return false;
         if (b.hashCode() != other.b.hashCode())
@@ -187,7 +187,7 @@ public class TriColos {
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        return new TriColos(this);
+        return new TriColours(this);
     }
 
 }

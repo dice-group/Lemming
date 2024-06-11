@@ -5,6 +5,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.dice_research.ldcbench.generate.SeedGenerator;
+import org.dice_research.ldcbench.generate.SequentialSeedGenerator;
 
 public class OfferedItemWrapper<T> implements IOfferedItem<T> {
 
@@ -18,6 +19,12 @@ public class OfferedItemWrapper<T> implements IOfferedItem<T> {
 		this.arrBaseItems = arrBaseItems;
 		this.seedGen = seedGen;
 		this.random = new Random(seedGen.getNextSeed());
+	}
+	
+	public OfferedItemWrapper(T[] arrBaseItems, Random random) {
+		this.arrBaseItems = arrBaseItems;
+		this.random = random;
+		this.seedGen = new SequentialSeedGenerator(System.currentTimeMillis());
 	}
 
 	public T[] findIntersection(Set<T> setOfRestrictedItems) {

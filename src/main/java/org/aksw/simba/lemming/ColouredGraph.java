@@ -301,7 +301,7 @@ public class ColouredGraph implements IColouredGraph {
                         if (arrVertIDs.length == 1) {
                             rawClonedGrph.addDirectedSimpleEdge(arrVertIDs[0], edgeID, arrVertIDs[0]);
                         } else {
-                            System.out.println(" -- edge id : " + edgeID + " has only " + arrVertIDs.length + "");
+                            LOGGER.debug(" -- edge id : " + edgeID + " has only " + arrVertIDs.length + "");
                         }
                     }
                 }

@@ -1,7 +1,7 @@
 package org.aksw.simba.lemming.simplexes.analysis;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -17,7 +17,7 @@ public class IsoS2 extends AbstractFindSimplexes{
 	 * count of edges in the triangle is stored at the 1st index, 
 	 * and the probability of triangle is stored at the 2nd index.  
 	 */
-	private ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColoEdgesTriCountDistAvg;
+	private ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColoEdgesTriCountDistAvg;
 
 	public IsoS2(ColouredGraph[] origGrphs, int desiredNoVertices, int iNoOfVersions, FindTri computedTriObjects) {
 		//System.out.println("Debug!");
@@ -41,7 +41,7 @@ public class IsoS2 extends AbstractFindSimplexes{
 	}
 
 	//getters
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
 		return mIsolatedTriColoEdgesTriCountDistAvg;
 	}
 

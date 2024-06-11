@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,48 +38,50 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 /**
  * This class is responsible for initializing the mimicked graph based on the
  * input graphs. It copies the colouring and computes the colour distributions
- * to be used.
+ * of the vertices and the edges to be used.
  * 
  * @author Ana Silva
  */
-@Component
+@Component("binary")
 @Scope(value = "prototype")
 public class GraphInitializer {
 	// logging object
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphInitializer.class);
 
 	// vertex and edge colours distribution
-	private ObjectDistribution<BitSet> vertexColourDist;
-	private ObjectDistribution<BitSet> edgeColourDist;
+	protected ObjectDistribution<BitSet> vertexColourDist;
+	protected ObjectDistribution<BitSet> edgeColourDist;
 
 	// class to vertices map and reverse
-	private Map<BitSet, Integer> mapClassVertices;
-	private Map<Integer, BitSet> reversedMapClassVertices;
+	protected Map<BitSet, Integer> mapClassVertices;
+	protected Map<Integer, BitSet> reversedMapClassVertices;
 
-	private Map<BitSet, Map<Integer, IntSet>> mapEdgeColoursToConnectedVertices;
+	protected Map<BitSet, Map<Integer, IntSet>> mapEdgeColoursToConnectedVertices;
 
 	// vertex and edge colours to IDs maps
-	private Map<BitSet, IntSet> mapColourToVertexIDs;
-	private Map<BitSet, IntSet> mapColourToEdgeIDs;
+	protected Map<BitSet, IntSet> mapColourToVertexIDs;
+	protected Map<BitSet, IntSet> mapColourToEdgeIDs;
 
 	// edge IDs to edge colour map
-	private Map<Integer, BitSet> mapEdgeIdsToColour;
+	protected Map<Integer, BitSet> mapEdgeIdsToColour;
 
 	// rdf edge colour
-	private BitSet rdfTypePropertyColour;
+	protected BitSet rdfTypePropertyColour;
 
 	// colouring rules
-	private IColourMappingRules colourMapper;
+	protected IColourMappingRules colourMapper;
 
 	// restricted edge colours
-	private Set<BitSet> setOfRestrictedEdgeColours;
+	protected Set<BitSet> setOfRestrictedEdgeColours;
 
 	// desired number of edges
-	private int desiredNoOfEdges;
+	protected int desiredNoOfEdges;
+	
+	protected int desiredNoOfVertices;
 
-	private SeedGenerator seedGenerator;
+	protected SeedGenerator seedGenerator;
 
-	private ColouredGraph[] originalGraphs;
+	protected ColouredGraph[] originalGraphs;
 
 	/**
 	 * Constructor.
@@ -122,6 +123,7 @@ public class GraphInitializer {
 		edgeColourDist = AvrgEdgeColoDistMetric.apply(origGrphs);
 
 		// estimate # edges from # vertices and average degree of input graphs
+		desiredNoOfVertices = noOfVertices;
 		desiredNoOfEdges = estimateNoEdges(origGrphs, noOfVertices);
 
 		// assign colors to vertices
@@ -269,7 +271,6 @@ public class GraphInitializer {
 
 		for (int i = 0; i < lstAssignedEdges.size(); i++) {
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			final int indexOfThread = i + 1;
 
 			final IOfferedItem<BitSet> eColoProposer = new OfferedItemByRandomProb<>(
 					new ObjectDistribution<BitSet>(edgeColourDist.sampleSpace, edgeColourDist.values), seedGenerator.getNextSeed());
@@ -310,7 +311,7 @@ public class GraphInitializer {
 			service.invokeAll(tasks);
 			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
-			LOGGER.info("All threads are finised --> Copy result back to map");
+			LOGGER.info("All threads are finished --> Copy result back to map");
 
 			/*
 			 * copy back to global variable
@@ -408,68 +409,6 @@ public class GraphInitializer {
 		return lstAssignedEdges;
 	}
 
-	/**
-	 * connection typed resource vertices to its class with edge of rdf:type if a
-	 * vertex has a colour, then it connect to some vertices with rdf:type edges.
-	 * the number of connected heads is dependent on the number of colour the target
-	 * has
-	 */
-	private void connectVerticesWithRDFTypeEdges(ColouredGraph mMimicGraph) {
-
-		Random mRandom = new Random(seedGenerator.getNextSeed());
-
-		/*
-		 * filter colour and empty colour vertices
-		 */
-		Set<BitSet> setVertexColours = mapColourToVertexIDs.keySet();
-		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
-		IntSet emptyColourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
-		for (BitSet vColo : setVertexColours) {
-			IntSet setVertices = mapColourToVertexIDs.get(vColo);
-
-			if (vColo.isEmpty()) {
-				// get vertices with empty colours
-				emptyColourVertices.addAll(setVertices);
-			} else {
-				// get vertices with non-empty colour
-				colourVertices.addAll(setVertices);
-			}
-		}
-
-		int[] arrColourVertices = colourVertices.toIntArray();
-		int[] arrEmptyColourVertices = emptyColourVertices.toIntArray();
-		Set<Integer> trackedClassVertices = new HashSet<Integer>();
-		// traverse through all coloured vertices and add classes to them
-		for (int vId : arrColourVertices) {
-			BitSet vColo = mMimicGraph.getVertexColour(vId);
-			Set<BitSet> setClassColours = mMimicGraph.getClassColour(vColo);
-
-			for (BitSet classColo : setClassColours) {
-				if (!mapClassVertices.containsKey(classColo)) {
-					int hId = arrEmptyColourVertices[mRandom.nextInt(arrEmptyColourVertices.length)];
-
-					while (trackedClassVertices.contains(hId)
-							&& trackedClassVertices.size() < arrEmptyColourVertices.length) {
-						hId = arrEmptyColourVertices[mRandom.nextInt(arrEmptyColourVertices.length)];
-					}
-					if (trackedClassVertices.size() <= arrEmptyColourVertices.length) {
-						trackedClassVertices.add(hId);
-						mapClassVertices.put(classColo, hId);
-						reversedMapClassVertices.put(hId, classColo);
-						// connect the vId and hId using the edge rdf:type
-						mMimicGraph.addEdge(vId, hId, rdfTypePropertyColour);
-					} else {
-						LOGGER.warn("Cannot find any empty colour head for consideration as a class of resources!");
-					}
-				} else {
-					int hId = mapClassVertices.get(classColo);
-					// connect the vId and hId using the edge rdf:type
-					mMimicGraph.addEdge(vId, hId, rdfTypePropertyColour);
-				}
-			}
-		}
-	}
-
 	public IntSet getConnectedHeads(int tailId, BitSet eColo) {
 		IntSet setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
 		Map<Integer, IntSet> mapTailToHeads = mapEdgeColoursToConnectedVertices.get(eColo);
@@ -489,6 +428,8 @@ public class GraphInitializer {
 
 		return setOfHeads;
 	}
+	
+	// Setters and Getters
 
 	public Map<Integer, BitSet> getmReversedMapClassVertices() {
 		return reversedMapClassVertices;
@@ -536,7 +477,6 @@ public class GraphInitializer {
 		return temp;
 	}
 
-
 	public BitSet getEdgeColour(int fakeEdgeId) {
 		return mapEdgeIdsToColour.get(fakeEdgeId);
 	}
@@ -559,6 +499,14 @@ public class GraphInitializer {
 
 	public Set<BitSet> getSetOfRestrictedEdgeColours() {
 		return setOfRestrictedEdgeColours;
+	}
+
+	public int getDesiredNoOfVertices() {
+		return desiredNoOfVertices;
+	}
+
+	public int getDesiredNoOfEdges() {
+		return desiredNoOfEdges;
 	}
 	
 	

@@ -53,12 +53,12 @@ public class TriangleDistribution2 {
 	/**
 	 * Object for storing distributions by analyzing triangles found in all input graphs.
 	 */
-	OfferedItemByRandomProb<TriColos> potentialTriangleProposer;
+	OfferedItemByRandomProb<TriColours> potentialTriangleProposer;
 	
 	/**
 	 * Object for storing distributions by analyzing isolated triangles found in all input graphs.
 	 */
-	OfferedItemByRandomProb<TriColos> potentialIsolatedTriangleProposer;
+	OfferedItemByRandomProb<TriColours> potentialIsolatedTriangleProposer;
 	
 	/**
 	 * Map for storing probability distributions computed for two vertex colors.
@@ -66,7 +66,7 @@ public class TriangleDistribution2 {
 	 */
 	ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
 	
-	public TriangleDistribution2(ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
+	public TriangleDistribution2(ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
 		
 		this.iNoOfVersions = iNoOfVersions;
 		this.mRandom = mRandom;
@@ -79,7 +79,7 @@ public class TriangleDistribution2 {
 		Object[] keysTriangleColours = mTriColoEdgesTriCountDistAvg.keys;
 		for(int i = 0; i < keysTriangleColours.length ; i++) {
 			if(mTriColoEdgesTriCountDistAvg.allocated[i]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[i];
+				TriColours triangleColorObj = (TriColours) keysTriangleColours[i];
 				double[] triangleCountsDistArr = mTriColoEdgesTriCountDistAvg.get(triangleColorObj);
 				triangleCountsDistArr[3] = (triangleCountsDistArr[3] * mIDesiredNoOfVertices) /iNoOfVersions;
 			
@@ -327,14 +327,14 @@ public class TriangleDistribution2 {
 	 * @param setTriangleColorsMimicGraph - Set of TriangleColours that needs to be filtered.
 	 * @return
 	 */
-	public TriColos proposeTriangleToAddEdge(Set<TriColos> setTriangleColorsMimicGraph) {
+	public TriColours proposeTriangleToAddEdge(Set<TriColours> setTriangleColorsMimicGraph) {
 		
 		//Utilize initialized object distribution for all triangles
 
 		// get the selected triangle colors
-		TriColos potentialTriangleColours = potentialTriangleProposer.getPotentialItem(setTriangleColorsMimicGraph);
+		TriColours potentialTriangleColours = potentialTriangleProposer.getPotentialItem(setTriangleColorsMimicGraph);
 		
-		for(TriColos triangleColourObject: setTriangleColorsMimicGraph) {
+		for(TriColours triangleColourObject: setTriangleColorsMimicGraph) {
 			if ( triangleColourObject.equals(potentialTriangleColours)) {
 				return triangleColourObject;
 			}
@@ -352,10 +352,10 @@ public class TriangleDistribution2 {
 	 * @param iNoOfVersions - Number of input graphs
 	 * @param mRandom - Random object
 	 */
-	private void initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, int iNoOfVersions, Random mRandom) {
+	private void initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes, int iNoOfVersions, Random mRandom) {
 		
 		// create sample space & values for triangle colors
-		TriColos[] triangleColorsSampleSpace = new TriColos[numberOfDistinctTriangleColours];
+		TriColours[] triangleColorsSampleSpace = new TriColours[numberOfDistinctTriangleColours];
 		double[] possEdgesInTriangle = new double[numberOfDistinctTriangleColours];
 		
 		Object[] keysTriangleColours = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.keys;
@@ -364,7 +364,7 @@ public class TriangleDistribution2 {
 		int i = 0; //temp variable to track index of array
 		for(int mapKeyIndex = 0; mapKeyIndex < keysTriangleColours.length ; mapKeyIndex++) {
 			if(mTriangleColoursTriangleCountsEdgeCountsResourceNodes.allocated[mapKeyIndex]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[mapKeyIndex];
+				TriColours triangleColorObj = (TriColours) keysTriangleColours[mapKeyIndex];
 				double[] triangleEdgeCountArr = mTriangleColoursTriangleCountsEdgeCountsResourceNodes.get(triangleColorObj);
 				double countOfEdges = triangleEdgeCountArr[2];//probability of triangle is stored at 2nd index
 				
@@ -377,9 +377,9 @@ public class TriangleDistribution2 {
 			}
 		}
 		
-		ObjectDistribution<TriColos> potentialTriangle = new ObjectDistribution<TriColos>(triangleColorsSampleSpace, possEdgesInTriangle);
+		ObjectDistribution<TriColours> potentialTriangle = new ObjectDistribution<TriColours>(triangleColorsSampleSpace, possEdgesInTriangle);
 		if (!potentialTriangle.isEmpty()) // When samplespace is empty, initialzing the proposer with null
-			potentialTriangleProposer = new OfferedItemByRandomProb<TriColos>(potentialTriangle, mRandom);
+			potentialTriangleProposer = new OfferedItemByRandomProb<TriColours>(potentialTriangle, mRandom);
 		else
 			potentialTriangleProposer = null;
 		
@@ -392,13 +392,13 @@ public class TriangleDistribution2 {
 	 * @param iNoOfVersions - Number of input graphs
 	 * @param mRandom - Random object
 	 */
-	private void initializeDistributionIsolatedTri(ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, Random mRandom) {
+	private void initializeDistributionIsolatedTri(ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, Random mRandom) {
 		//TODO: Duplicate of previous method. Need to create a single method for this.
 		
 		int sampleSize = mIsolatedTriColosCountsDist.assigned;
 		
 		// create sample space & values for triangle colors
-		TriColos[] triangleColorsSampleSpace = new TriColos[sampleSize];
+		TriColours[] triangleColorsSampleSpace = new TriColours[sampleSize];
 		double[] possEdgesInTriangle = new double[sampleSize];
 		
 		Object[] keysTriangleColours = mIsolatedTriColosCountsDist.keys;
@@ -407,7 +407,7 @@ public class TriangleDistribution2 {
 		int i = 0; //temp variable to track index of array
 		for(int mapKeyIndex = 0; mapKeyIndex < keysTriangleColours.length ; mapKeyIndex++) {
 			if(mIsolatedTriColosCountsDist.allocated[mapKeyIndex]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[mapKeyIndex];
+				TriColours triangleColorObj = (TriColours) keysTriangleColours[mapKeyIndex];
 				double[] triangleEdgeCountArr = mIsolatedTriColosCountsDist.get(triangleColorObj);
 				double countOfEdges = triangleEdgeCountArr[2];//probability of triangle is stored at 2nd index
 				
@@ -420,15 +420,15 @@ public class TriangleDistribution2 {
 			}
 		}
 		
-		ObjectDistribution<TriColos> potentialTriangle = new ObjectDistribution<TriColos>(triangleColorsSampleSpace, possEdgesInTriangle);
+		ObjectDistribution<TriColours> potentialTriangle = new ObjectDistribution<TriColours>(triangleColorsSampleSpace, possEdgesInTriangle);
 		if (!potentialTriangle.isEmpty()) // When samplespace is empty, initialzing the proposer with null
-			potentialIsolatedTriangleProposer = new OfferedItemByRandomProb<TriColos>(potentialTriangle, mRandom);
+			potentialIsolatedTriangleProposer = new OfferedItemByRandomProb<TriColours>(potentialTriangle, mRandom);
 		else
 			potentialIsolatedTriangleProposer = null;
 		
 	}
 
-	public OfferedItemByRandomProb<TriColos> getPotentialIsolatedTriangleProposer() {
+	public OfferedItemByRandomProb<TriColours> getPotentialIsolatedTriangleProposer() {
 		return potentialIsolatedTriangleProposer;
 	}
 }

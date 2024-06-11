@@ -17,7 +17,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.apache.jena.ext.com.google.common.collect.Sets;
@@ -39,7 +39,7 @@ public class NodeIteratorMetric2 {
 	 * the probability of triangle is stored at the 2nd index 
 	 * and the average count of triangles per no. of vertices in the input graph is stored at the 3rd index. 
 	 */
-	ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColos, double[]>();
+	ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColours, double[]>();
 	// TODO: Remove additional elements stored in the array that are not required while creating the mimic graph.
 	
 	/**
@@ -48,7 +48,7 @@ public class NodeIteratorMetric2 {
 	 * count of edges in the triangle is stored at the 1st index, 
 	 * and the probability of triangle is stored at the 2nd index.  
 	 */
-	ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColos, double[]>();
+	ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColoEdgesTriCountDistAvg = new ObjectObjectOpenHashMap<TriColours, double[]>();
 	
 	//HashSet<TriangleColours> setOfTriangleshavingClassNodes = new HashSet<TriangleColours>();
 	
@@ -115,11 +115,11 @@ public class NodeIteratorMetric2 {
     	int countResourceTriangles = 0;
     	
     	//temporary map to store count of edges and triangles, which is later used to compute probabilities
-    	ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColos, double[]>();
+    	ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColours, double[]>();
     	
     	//************************** Variables Declaration for Isolated Triangles ********************************************//
     	//temporary map to store count of edges and triangles, which is later used to compute probabilities
-    	ObjectObjectOpenHashMap<TriColos, double[]> mIsolatedTriColosTriEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColos, double[]>();
+    	ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosTriEdgeCountsTemp = new ObjectObjectOpenHashMap<TriColours, double[]>();
     	
     	//temporary variables to track vertices forming only triangles
     	IntSet verticesForIsolatedTriangles = new DefaultIntSet(Constants.DEFAULT_SIZE);
@@ -197,7 +197,7 @@ public class NodeIteratorMetric2 {
                         
                         if (intersectionResult > 0) {
                         	
-                        	TriColos tempObj = new TriColos(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
+                        	TriColours tempObj = new TriColours(graph.getVertexColour(vertex), graph.getVertexColour(neighbor1), graph.getVertexColour(neighbor2));
                         	
                         	// Set to store colors of every edge within the nodes forming a triangle
                         	HashSet<BitSet> setEdgeColors = new HashSet<BitSet>();
@@ -332,7 +332,7 @@ public class NodeIteratorMetric2 {
      Object[] keysTriColo = mTriangleColoursTriangleEdgeCountsTemp.keys;
      for (int i = 0; i < keysTriColo.length; i++ ) {
     	 if (mTriangleColoursTriangleEdgeCountsTemp.allocated[i]) {
-    		 TriColos triangleColours = (TriColos) keysTriColo[i];
+    		 TriColours triangleColours = (TriColours) keysTriColo[i];
     		 double[] arrCountsDist = mTriangleColoursTriangleEdgeCountsTemp.get(triangleColours);
         		
     		 //create a new array for storing avg count 
@@ -350,7 +350,7 @@ public class NodeIteratorMetric2 {
         	keysTriColo = mTriangleColoursTriangleEdgeCountsTemp.keys;
         	for (int i = 0; i < keysTriColo.length; i++ ) {
         		if (mTriangleColoursTriangleEdgeCountsTemp.allocated[i]) {
-        			TriColos triangleColours = (TriColos) keysTriColo[i];
+        			TriColours triangleColours = (TriColours) keysTriColo[i];
         			double[] arrCountDist = mTriangleColoursTriangleEdgeCountsTemp.get(triangleColours);
         		
         			//create a new array for storing avg count 
@@ -392,7 +392,7 @@ public class NodeIteratorMetric2 {
         keysTriColo = mIsolatedTriColosTriEdgeCountsTemp.keys;
         for (int i = 0; i < keysTriColo.length; i++ ) {
         	if (mIsolatedTriColosTriEdgeCountsTemp.allocated[i]) {
-        		TriColos triangleColours = (TriColos) keysTriColo[i];
+        		TriColours triangleColours = (TriColours) keysTriColo[i];
         		double[] arrCountsDist = mIsolatedTriColosTriEdgeCountsTemp.get(triangleColours);
         		
         		//create a new array for storing avg count 
@@ -411,7 +411,7 @@ public class NodeIteratorMetric2 {
         keysTriColo = mIsolatedTriColosTriEdgeCountsTemp.keys;
         for (int i = 0; i < keysTriColo.length; i++ ) {
         	if (mIsolatedTriColosTriEdgeCountsTemp.allocated[i]) {
-        		TriColos triangleColours = (TriColos) keysTriColo[i];
+        		TriColours triangleColours = (TriColours) keysTriColo[i];
         		double[] arrCountDist = mIsolatedTriColosTriEdgeCountsTemp.get(triangleColours);
         		
         		//create a new array for storing avg count 
@@ -577,7 +577,7 @@ public class NodeIteratorMetric2 {
 		return mGraphsEdgesIdsIsolatedTri;
 	}
 
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmIsolatedTriColoEdgesTriCountDistAvg() {
 		return mIsolatedTriColoEdgesTriCountDistAvg;
 	}
 
@@ -611,7 +611,7 @@ public class NodeIteratorMetric2 {
 		return mGraphsEdgesIdsConnectTriangles;
 	}
 
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmTriangleColoursTriangleCountsEdgeCountsResourceNodes() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmTriangleColoursTriangleCountsEdgeCountsResourceNodes() {
 		return mTriColoEdgesTriCountDistAvg;
 	}
 

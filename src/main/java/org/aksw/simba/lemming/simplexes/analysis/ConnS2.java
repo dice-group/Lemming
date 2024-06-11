@@ -1,7 +1,7 @@
 package org.aksw.simba.lemming.simplexes.analysis;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
@@ -18,7 +18,7 @@ public class ConnS2 extends AbstractFindSimplexes{
 	 * the probability of triangle is stored at the 2nd index 
 	 * and the average count of triangles per no. of vertices in the input graph is stored at the 3rd index. 
 	 */
-	private ObjectObjectOpenHashMap<TriColos, double[]> mTriColoEdgesTriCountDistAvg;
+	private ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg;
 
 	public ConnS2(ColouredGraph[] origGrphs, int desiredNoVertices, int iNoOfVersions, FindTri computedTriObjects) {
 		// initialize variables
@@ -42,7 +42,7 @@ public class ConnS2 extends AbstractFindSimplexes{
 	
 	//getter
 
-	public ObjectObjectOpenHashMap<TriColos, double[]> getmTriColoEdgesTriCountDistAvg() {
+	public ObjectObjectOpenHashMap<TriColours, double[]> getmTriColoEdgesTriCountDistAvg() {
 		return mTriColoEdgesTriCountDistAvg;
 	}
 	

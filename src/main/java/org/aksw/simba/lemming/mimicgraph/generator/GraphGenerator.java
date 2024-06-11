@@ -13,18 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphInitializer;
-import org.aksw.simba.lemming.creation.IDatasetManager;
-import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
-import org.aksw.simba.lemming.mimicgraph.colourselection.ClusteredClassSelector;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
-import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
+import org.aksw.simba.lemming.simplexes.generator.IGraphGenerator;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +27,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
-import com.google.common.primitives.Doubles;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -44,9 +38,9 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author Ana Silva
  *
  */
-@Component
+@Component("Binary")
 @Scope(value = "prototype")
-public class GraphGenerator {
+public class GraphGenerator implements IGraphGenerator{
 
 	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(GraphGenerator.class);
@@ -79,10 +73,8 @@ public class GraphGenerator {
 	 * @param noOfThreads
 	 * @return
 	 */
-	public ColouredGraph initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads) {
-		// create new coloured graph for the synthetic graph from the input graphs
-//		ColouredGraph mimicGraph = graphInitializer.initialize(origGrphs, noOfVertices, noOfThreads);
-
+	@Override
+	public void initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads) {
 		// get set of edges each thread will process
 		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(noOfThreads);
 		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
@@ -188,7 +180,6 @@ public class GraphGenerator {
 			LOGGER.error("Could not shutdown the service executor! Be careful.");
 			e.printStackTrace();
 		}
-		return mimicGraph;
 	}
 
 	public synchronized boolean connectIfPossible(int tailId, int headId, BitSet eColo, ColouredGraph mimicGraph) {
@@ -286,30 +277,8 @@ public class GraphGenerator {
 		return lstAssingedEdges;
 	}
 
-	public String finishSaveMimicGraph(ColouredGraph mimicGraph, ConstantValueStorage metrics,
-			GraphLexicalization graphLexicalization, GraphInitializer graphInitializer,
-			IDatasetManager datasetManager) {
-		// get metrics on initial graph
-		ColouredGraph initial = mimicGraph.clone();
-//		String metricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
-		graphLexicalization.connectVerticesWithRDFTypeEdges(initial, graphInitializer);
-		graphLexicalization.lexicalizeGraph(initial, graphInitializer.getmMapColourToVertexIDs());
-//		String afterMetricValues = EdgeModifier.computeMetricValuesForGraph(initial, metrics.getMetrics());
-		String initialFile = datasetManager.getSavedFileName("initial");
-		datasetManager.writeGraphsToFile(initial, initialFile);
 
-//		// save them to logs
-//		try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true));) {
-//			fWriter.write("Initial Mimic Graph:\n");
-//			fWriter.write(metricValues);
-//			fWriter.write("\nAfter Mimic Graph:\n");
-//			fWriter.write(afterMetricValues);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		return initialFile;
-	}
-
+	@Override
 	public TripleBaseSingleID getProposedTriple() {		
 		int max = 1000;
 		for (int j = 0; j < max; j++) {

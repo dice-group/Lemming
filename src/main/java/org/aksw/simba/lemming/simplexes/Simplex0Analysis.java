@@ -57,7 +57,7 @@ public class Simplex0Analysis {
 //					if (graph.getEdgeColour(edgeId).equals(graph.getRDFTypePropertyColour()))
 //						classNodes.add(graph.getHeadOfTheEdge(edgeId));
 //				}
-				System.out.println(graph.getRDFTypePropertyColour());
+//				System.out.println(graph.getRDFTypePropertyColour());
 				
 				ObjectIntOpenHashMap<BitSet> mVertexColorCountTemp = new ObjectIntOpenHashMap<BitSet>();
 				

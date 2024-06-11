@@ -14,11 +14,11 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.mimicgraph.generator.AbstractGraphGeneration;
+import org.aksw.simba.lemming.simplexes.generator.AbstractGraphGeneration;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGeneration;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
-import org.aksw.simba.lemming.simplexes.TriColos;
+import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.simplexes.analysis.ConnS1C;
 import org.aksw.simba.lemming.simplexes.analysis.ConnS2;
 import org.aksw.simba.lemming.simplexes.analysis.FindSelfLoops;
@@ -101,9 +101,9 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	private Map<BitSet, Integer> mMapClassColourToVertexIDSimplexes = new ConcurrentHashMap<BitSet, Integer>();
 	
 	//******************** Additional Simplex Analysis variables for connected 2-simplexes **********************************************//
-	private ObjectObjectOpenHashMap<TriColos, double[]> mTriangleColoursTriangleEdgeCounts; // Map for storing vertex colors of triangles as keys and array of triangle and edge counts as value.
-	private Set<TriColos> setAllTriangleColours; // Set for storing all triangles
-	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriangleColorsVertexIds; // Map for tracking triangle colors and vertex IDs forming triangles using those colors 
+	private ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleEdgeCounts; // Map for storing vertex colors of triangles as keys and array of triangle and edge counts as value.
+	private Set<TriColours> setAllTriangleColours; // Set for storing all triangles
+	private ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriangleColorsVertexIds; // Map for tracking triangle colors and vertex IDs forming triangles using those colors 
 	private Map<BitSet, IntSet> mMapColourToVertexIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes
 	private Map<BitSet, IntSet> mMapColourToEdgeIDs2Simplex = new ConcurrentHashMap<BitSet, IntSet>(); //Map for storing vertex colours as Keys and Vertex IDs as Value for 2-simplexes 
 	//TODO: Remove Maps for Edge Ids, since they are not used. Could probably be used when working with probabilities for properties?
@@ -114,7 +114,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	//**************** Additional Simplex Analysis variables for isolated 2-simplexes ************************************//
 	private Map<BitSet, IntSet> mMapColourToVertexIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
 	private Map<BitSet, IntSet> mMapColourToEdgeIDs2SimplexIsolated = new ConcurrentHashMap<BitSet, IntSet>(); // Map for storing vertex colours as Keys and Vertex IDs as Value for isolated 2-simplexes
-	private ObjectObjectOpenHashMap<TriColos, List<IntSet>> mIsolatedTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>(); // Map for tracking triangle colors and vertex IDs forming isolated triangles using those colors
+	private ObjectObjectOpenHashMap<TriColours, List<IntSet>> mIsolatedTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColours, List<IntSet>>(); // Map for tracking triangle colors and vertex IDs forming isolated triangles using those colors
 	
 	//*********************Additional Simplex Analysis variables for connected 1-simplexes ********************************//
 	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>> mEdgeColosv1v2Dist; // Map of vertices of EdgeColors and their statistics
@@ -232,7 +232,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 		estVerts1SimplexesConntoTri = s1ConnToTri.getEstVertices();
 		
 		// Initializing hash map used for storing triangle colors and list of vertices for them
-		mTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>();
+		mTriangleColorsVertexIds = new ObjectObjectOpenHashMap<TriColours, List<IntSet>>();
 		
 		//******************* Compute Distribution of 1-simplexes connected to triangles ****************************//
 		s1connToTriDist = new ConnS1DistI(s1ConnToTri.getmColoEdgesCountDistAvg() , iNoOfVersions, mRandom);
@@ -366,12 +366,12 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	
 	private void createSetForTriangleColours() {
 		// Initialize set variable
-		setAllTriangleColours = new HashSet<TriColos>();
+		setAllTriangleColours = new HashSet<TriColours>();
 		
 		Object[] keysTriangleColours = mTriangleColoursTriangleEdgeCounts.keys;
 		for(int i = 0; i < keysTriangleColours.length ; i++) {
 			if(mTriangleColoursTriangleEdgeCounts.allocated[i]) {
-				TriColos triangleColorObj = (TriColos) keysTriangleColours[i];
+				TriColours triangleColorObj = (TriColours) keysTriangleColours[i];
 				setAllTriangleColours.add(triangleColorObj);
 			}
 		}
@@ -391,14 +391,14 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	}
 	
 	@Override
-	public void generateGraphSingleThread(){
+	public ColouredGraph generateGraph(){
 		
 		//*************************************** 2-simplex creation (that could be connected to each other) ************************************************//
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
 		LOGGER.info("Estimated Edges: " + estimatedEdgesTriangle);
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesTriangle);
 		// get random triangle
-		TriColos initialRandomTriangle = triangleDistribution.getPotentialTriangleProposer().getPotentialItem();
+		TriColours initialRandomTriangle = triangleDistribution.getPotentialTriangleProposer().getPotentialItem();
 		
 		// Variable to track number of edges added to mimic graph in previous iteration.
 		// Note: This variable is used to stop the iteration if no new edges could be added to the mimic graph after trying for predefined number of iterations
@@ -424,7 +424,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 			
 			
 			// Variable to track set of triangle added to the mimic graph (i.e. set of Colors of the vertices forming the triangle)
-			Set<TriColos> setTriangleColorsMimicGraph = new HashSet<TriColos>();
+			Set<TriColours> setTriangleColorsMimicGraph = new HashSet<TriColours>();
 			
 			// add the selected random triangle to mimic graph			
 			addTriangleToMimicGraph( initialRandomTriangle, mColourMapperTriangles, mMapColourToVertexIDs2Simplex, mMapColourToEdgeIDs2Simplex, mTriangleColorsVertexIds);
@@ -484,7 +484,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 							// If third vertex color is proposed, create a triangle with it
 							
 							// create a temporary triangle colors object
-							TriColos newPossibleTriangle = new TriColos( selectedVertex1Colo, selectedVertex2Colo, proposedVertex3Colo);
+							TriColours newPossibleTriangle = new TriColours( selectedVertex1Colo, selectedVertex2Colo, proposedVertex3Colo);
 							//System.out.println(newPossibleTriangle.getA());
 							//System.out.println(newPossibleTriangle.getB());
 							//System.out.println(newPossibleTriangle.getC());
@@ -498,7 +498,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 							// try to propose a color for third vertex multiple times if it is not possible to create a triangle
 							while ( (arrNewPossTriProbCount[3] < 1)  && (numOfLoopsTri < 500)) { // trying to create a new triangle 100 times
 								proposedVertex3Colo = triangleDistribution.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
-								newPossibleTriangle = new TriColos( selectedVertex1Colo, selectedVertex2Colo, proposedVertex3Colo);
+								newPossibleTriangle = new TriColours( selectedVertex1Colo, selectedVertex2Colo, proposedVertex3Colo);
 								arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA()).get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());// get count of triangle for the proposed new triangle
 								numOfLoopsTri++;
 							}
@@ -547,7 +547,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 					else {
 						LOGGER.info("Growing 2-simplexes not possible.... Proposing new 2-simplex");
 						// If no candidate edges exist then new random triangle should be added to the mimic graph
-						TriColos randomTriangle = triangleDistribution.getPotentialTriangleProposer().getPotentialItem();
+						TriColours randomTriangle = triangleDistribution.getPotentialTriangleProposer().getPotentialItem();
 						
 						// get triangle count
 						double[] arrNewTriProbCount = mTriColosCountsAvgProb.get(randomTriangle.getA()).get(randomTriangle.getB()).get(randomTriangle.getC());// get count of triangle for the proposed new triangle
@@ -580,7 +580,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 							edgeColosSet.add(new EdgeColorsSorted(randomTriangle.getB(), randomTriangle.getC()));
 							
 							// Add the triangle colors to set variable
-							setTriangleColorsMimicGraph.add(new TriColos(randomTriangle.getA(), randomTriangle.getB(), randomTriangle.getC()));
+							setTriangleColorsMimicGraph.add(new TriColours(randomTriangle.getA(), randomTriangle.getB(), randomTriangle.getC()));
 							
 							numOfIterationAddingEdgesToGraph = 0;
 						} else {
@@ -604,7 +604,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 					if (setTriangleColorsMimicGraph.size() != 0) {
 					
 					// Logic for adding edges to existing triangles
-					TriColos proposeTriangleToAddEdge = triangleDistribution.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
+					TriColours proposeTriangleToAddEdge = triangleDistribution.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
 					
 					// Best case: A triangle is returned
 					List<IntSet> selectedTrianglesList = mTriangleColorsVertexIds.get(proposeTriangleToAddEdge);
@@ -860,7 +860,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 		//********************** Connect Isolated triangles *********************************//
 		LOGGER.info("Finding Isolated triangles to connect (Case 4a)");
 		// temporary map for storing isolated triangle colors and their vertices
-		ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriangleColorsVertexIdsIsolated = new ObjectObjectOpenHashMap<TriColos, List<IntSet>>();
+		ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriangleColorsVertexIdsIsolated = new ObjectObjectOpenHashMap<TriColours, List<IntSet>>();
 		
 		// Variable to store colors found in isolated triangles
 		Set<BitSet> allColoIsolatedTri = new HashSet<BitSet>();
@@ -869,7 +869,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 		Object[] triColoskeys = mTriangleColorsVertexIds.keys;
 		for (int i=0; i < triColoskeys.length; i++) {
 			if (mTriangleColorsVertexIds.allocated[i]) {
-				TriColos triColosToCheck = (TriColos) triColoskeys[i];
+				TriColours triColosToCheck = (TriColours) triColoskeys[i];
 				
 				//get vertices related to this triangle color
 				List<IntSet> listVerticesTri = mTriangleColorsVertexIds.get(triColosToCheck);
@@ -938,16 +938,16 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 					if (potentialTailColoIsolatedTri != null) { // try to connect triangles using 1-simplexes if tail color is also not null
 						
 						//temporary variable to store the Triangle for proposed head color
-						TriColos potentialTriangleHead = null;
+						TriColours potentialTriangleHead = null;
 						
 						//temporary variable to store the Triangle for proposed tail color
-						TriColos potentialTriangleTail = null;
+						TriColours potentialTriangleTail = null;
 						
 						//find triangle with a head color 
 						Object[] triColoIsolatedkeys = mTriangleColorsVertexIdsIsolated.keys;
 						for (int i=0; i< triColoIsolatedkeys.length; i++) {
 							if (mTriangleColorsVertexIdsIsolated.allocated[i]) {
-								TriColos triColoIsolated = (TriColos) triColoIsolatedkeys[i];
+								TriColours triColoIsolated = (TriColours) triColoIsolatedkeys[i];
 								
 								// variable to track same triangles are not selected for head and tail colors
 								boolean triangleFoundForHead = false;
@@ -1059,8 +1059,8 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 				if ( (potentialHeadColocase4b!= null) && (potentialTailColocase4b!=null)) {
 					
 					// Temporary triangles for head and tail color
-					TriColos potentialTriangleHeadCase4b = null;
-					TriColos potentialTriangleTailCase4b = null;
+					TriColours potentialTriangleHeadCase4b = null;
+					TriColours potentialTriangleTailCase4b = null;
 					
 					
 					
@@ -1068,7 +1068,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 					Object[] connTrianglesColos = mTriangleColorsVertexIds.keys;
 					for (int i=0; i< connTrianglesColos.length; i++) {
 						if (mTriangleColorsVertexIds.allocated[i]) {
-							TriColos tempTriColo = (TriColos) connTrianglesColos[i];
+							TriColours tempTriColo = (TriColours) connTrianglesColos[i];
 							
 							// variable to track same triangles are not selected for head and tail colors
 							boolean triangleFoundForHead = false;
@@ -1174,17 +1174,17 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 		LOGGER.info("Case 5: Isolated 2-simplexes");
 		LOGGER.info("Estimated Edges: " + estimatedEdgesIsolatedTriangle);
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesIsolatedTriangle);
-		OfferedItemByRandomProb<TriColos> potentialIsolatedTriangleProposer = triangleDistribution.getPotentialIsolatedTriangleProposer(); // get isolated triangle proposer
+		OfferedItemByRandomProb<TriColours> potentialIsolatedTriangleProposer = triangleDistribution.getPotentialIsolatedTriangleProposer(); // get isolated triangle proposer
 		
 		// initialize tracker variable
 		actualVerticesSimplexes = 0;
 		actualEdgesSimplexes = 0;
 		
 		// Variable to track set of triangle added to the mimic graph (i.e. set of Colors of the vertices forming the triangle)
-		Set<TriColos> setIsoTriInMimicGraph = new HashSet<TriColos>();
+		Set<TriColours> setIsoTriInMimicGraph = new HashSet<TriColours>();
 		
 		while ( ((estimatedVerticesIsolatedTriangle - actualVerticesSimplexes) >= 3) && ((estimatedEdgesIsolatedTriangle - actualEdgesSimplexes) >= 3 ) && (potentialIsolatedTriangleProposer != null) ) {
-			TriColos possIsoTri = potentialIsolatedTriangleProposer.getPotentialItem();
+			TriColours possIsoTri = potentialIsolatedTriangleProposer.getPotentialItem();
 			// add the selected random triangle to mimic graph			
 			addTriangleToMimicGraph( possIsoTri, mColourMapperIsolatedTriangles, mMapColourToVertexIDs2SimplexIsolated, mMapColourToEdgeIDs2SimplexIsolated, mIsolatedTriangleColorsVertexIds);
 			
@@ -1204,7 +1204,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 			if (setIsoTriInMimicGraph.size() > 0) {
 			
 				// Logic for adding edges to existing triangles
-				TriColos proposeTriangleToAddEdge = triangleDistribution.proposeIsoTriToAddEdge(setIsoTriInMimicGraph);
+				TriColours proposeTriangleToAddEdge = triangleDistribution.proposeIsoTriToAddEdge(setIsoTriInMimicGraph);
 				
 				// Best case: A triangle is returned
 				List<IntSet> selectedTrianglesList = mIsolatedTriangleColorsVertexIds.get(proposeTriangleToAddEdge);
@@ -1915,6 +1915,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 		updateVertexColoMap(mMapColourToVertexIDs2SimplexIsolated); // isolated 2-simplexes
 		updateVertexColoMap(mMapColourToVertexIDs1SimplexConnected); // connected 1-simplexes
 		updateVertexColoMap(mMapColourToVertexIDsConnectedTo2Simplex); // 1-simplexes connected to 2-simplexes
+		return mMimicGraph;
 	}
 	
 	private void addSelfLoops(int estEdgesInput, OfferedItemByRandomProb<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput, IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput) {
@@ -2030,8 +2031,8 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	 * The method adds a triangle to mimic graph for the input TriangleColours Object. Edge colors are selected for the given vertex colors of the triangle to create edge and form the complete triangle
 	 * @param inputTriangleColours - TriangleColours Object
 	 */
-	private void addTriangleToMimicGraph(TriColos inputTriangleColours, IColourMappingRules mColourMapperToUse, Map<BitSet, IntSet> mMapColourToVertexIDsToUpdate, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate
-			, ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriangleColorsVertexIdsToUpdate) {
+	private void addTriangleToMimicGraph(TriColours inputTriangleColours, IColourMappingRules mColourMapperToUse, Map<BitSet, IntSet> mMapColourToVertexIDsToUpdate, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate
+			, ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriangleColorsVertexIdsToUpdate) {
 		// storing colors of vertices for initial triangle
 		BitSet vertex1Color = inputTriangleColours.getA();
 		BitSet vertex2Color = inputTriangleColours.getB();
@@ -2059,7 +2060,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	 * @param vert3Id - Integer vertex id for the third vertex of the triangle
 	 * @param inputTriangleColours - TriangleColours object with the colours for the vertices of the triangle
 	 */
-	private void updateMapTriangleColorsVertices(int vert1Id, int vert2Id, int vert3Id, TriColos inputTriangleColours, ObjectObjectOpenHashMap<TriColos, List<IntSet>> mTriColVertexIDsToUpdate) {
+	private void updateMapTriangleColorsVertices(int vert1Id, int vert2Id, int vert3Id, TriColours inputTriangleColours, ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriColVertexIDsToUpdate) {
 		
 		//list of vertex ids, initially checks if the vertex ids exists for the input triangle colours
 		List<IntSet> tempVerticesList = mTriColVertexIDsToUpdate.get(inputTriangleColours);
@@ -2176,7 +2177,7 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	 * @param inputVertex1ID - ID for input vertex 1.
 	 * @param inputVertex2ID - ID for input vertex 2.
 	 */
-	private boolean addEdgeTriangle(BitSet inputVertex1Colo, BitSet inputVertex2Colo, int inputVertex1ID, int inputVertex2ID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse, TriColos inputTriangleColours) {
+	private boolean addEdgeTriangle(BitSet inputVertex1Colo, BitSet inputVertex2Colo, int inputVertex1ID, int inputVertex2ID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse, TriColours inputTriangleColours) {
 		boolean isEdgeFromFirstToSecondVertex = true;
 		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2 is head
 		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo, inputVertex2Colo);
@@ -2480,11 +2481,11 @@ public class GraphGenerationSimplexApproachI2 extends AbstractGraphGeneration im
 	 * @return - Triangle Colours
 	 * 			 Set of colors for each vertex of a randomly selected triangle along with their occurrence count in input graphs.
 	 */
-	private TriColos getRandomTriangle() {
-		TriColos randomTriangleColor = null;
+	private TriColours getRandomTriangle() {
+		TriColours randomTriangleColor = null;
 		
 		if (setAllTriangleColours.size() != 0) {
-			randomTriangleColor = setAllTriangleColours.toArray(new TriColos[setAllTriangleColours.size()])[mRandom.nextInt(setAllTriangleColours.size())];
+			randomTriangleColor = setAllTriangleColours.toArray(new TriColours[setAllTriangleColours.size()])[mRandom.nextInt(setAllTriangleColours.size())];
 		}
 		
 		
