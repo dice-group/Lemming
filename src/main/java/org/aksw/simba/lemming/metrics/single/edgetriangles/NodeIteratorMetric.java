@@ -1,11 +1,5 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import grph.DefaultIntSet;
-import grph.Grph;
-import grph.in_memory.InMemoryGrph;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import toools.collections.primitive.LucIntSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,16 +13,24 @@ import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
+import grph.DefaultIntSet;
+import grph.Grph;
+import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 /**
  * @author DANISH AHMED on 6/13/2018
  */
 public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric {
+	private static final Logger LOGGER = LoggerFactory.getLogger(NodeIteratorMetric.class);
 	
 	// HashSet to store information of triangles
 	//HashSet<TriangleColours> setOfTriangleshavingResourceNodes = new HashSet<>();
@@ -512,10 +514,10 @@ public class NodeIteratorMetric extends AbstractMetric implements TriangleMetric
         // add the computed counts in the ArrayList
         tempList.add(numOfrdfTypeEdgesRemainingVertices); // 6th index - Number of rdf type edges for common vertices and vertices not linked to triangles
         */
-        System.out.println("Graph Id: " + graphId);
+        LOGGER.debug("Graph Id: " + graphId);
         //System.out.println("Count of edges for Resource triangles: " + countResourceTriangles);
         //System.out.println("Count of edges for class triangles: " + countClassTriangles);
-        System.out.println("Count of edges for Resource triangles: " + edgesWithinTrianglesResource.size());
+        LOGGER.debug("Count of edges for Resource triangles: " + edgesWithinTrianglesResource.size());
         //System.out.println("Count of edges for class triangles: " + edgesWithinTrianglesClass.size());
         
         mstatsVertEdges.put(graphId, tempList);

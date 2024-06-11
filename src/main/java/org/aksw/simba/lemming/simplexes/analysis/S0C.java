@@ -48,7 +48,7 @@ public class S0C extends AbstractFindSimplexes{
 					
 				int numberOfVertices0Simplex = 0; // temporary variables to track number of vertices forming 0-simplexes
 				
-				System.out.println(graph.getRDFTypePropertyColour());
+//				System.out.println(graph.getRDFTypePropertyColour());
 				
 				ObjectIntOpenHashMap<BitSet> mVertexColorCountTemp = new ObjectIntOpenHashMap<BitSet>();
 				

@@ -1,37 +1,33 @@
 package org.aksw.simba.lemming.metrics.single.edgetriangles;
 
-import grph.DefaultIntSet;
-import grph.Grph;
-import grph.in_memory.InMemoryGrph;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import toools.collections.primitive.LucIntSet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.IColouredGraph;
-import org.aksw.simba.lemming.metrics.AbstractMetric;
-import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
+import grph.DefaultIntSet;
+import grph.Grph;
+import grph.in_memory.InMemoryGrph;
+import it.unimi.dsi.fastutil.ints.IntSet;
+
 /**
  * This class is based on NodeIteratorMetric that counts number of triangles.
  */
 public class NodeIteratorMetric2 {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(NodeIteratorMetric2.class);
 	/**
 	 * Map for storing vertex colors for the triangle along with the probability for them in terms of triangle count and edge count in an array.
 	 * Note: Count of triangles is stored at the 0th index of the array, 
@@ -361,10 +357,10 @@ public class NodeIteratorMetric2 {
         			// Add at the 3rd index, avg count of triangles per total number of vertices in the input graph. Note: 0th and 1st indices store the number of edges and number of triangles respectively.
         			arrCountDistTemp[3] = arrCountDist[0] * 1.0 / totalVertices;
         		
-        			System.out.println("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
-        			System.out.println("Number of triangles: " + arrCountDist[0]);
-        			System.out.println("Total number of vertices: " + totalVertices);
-        			System.out.println("Avg per no. of vertices: " + arrCountDistTemp[3]);
+        			LOGGER.debug("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
+        			LOGGER.debug("Number of triangles: " + arrCountDist[0]);
+        			LOGGER.debug("Total number of vertices: " + totalVertices);
+        			LOGGER.debug("Avg per no. of vertices: " + arrCountDistTemp[3]);
         		
         			// update the distribution in global maps
         			if (mTriColoEdgesTriCountDistAvg.containsKey(triangleColours)) {
@@ -406,7 +402,7 @@ public class NodeIteratorMetric2 {
         	}
         }
         
-        System.out.println("Isolated triangles: ");
+        LOGGER.debug("Isolated triangles: ");
         // iterate over results and update the global map
         keysTriColo = mIsolatedTriColosTriEdgeCountsTemp.keys;
         for (int i = 0; i < keysTriColo.length; i++ ) {
@@ -420,9 +416,9 @@ public class NodeIteratorMetric2 {
         		arrCountDistTemp[1] = arrCountDist[1];
         		arrCountDistTemp[2] = (arrCountDist[2] * 1.0) / totalDistTri; // update the distribution
         		
-        		System.out.println("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
-        		System.out.println("Number of triangles: " + arrCountDist[0]);
-        		System.out.println("Total number of vertices: " + totalVertices);
+        		LOGGER.debug("Triangle colors: " + triangleColours.getA() + ", " + triangleColours.getB() + ", " + triangleColours.getC() + ".");
+        		LOGGER.debug("Number of triangles: " + arrCountDist[0]);
+        		LOGGER.debug("Total number of vertices: " + totalVertices);
         		
         		// update the distribution in global maps
         		if (mIsolatedTriColoEdgesTriCountDistAvg.containsKey(triangleColours)) {
@@ -529,8 +525,8 @@ public class NodeIteratorMetric2 {
         tempList.add(edgesForIsolatedTriangles.size()); // 7th index - number of vertices for isolated triangles
         
         
-        System.out.println("Graph Id: " + graphId);
-        System.out.println("Count of edges for Resource triangles: " + edgesWithinTrianglesResource.size());
+        LOGGER.debug("Graph Id: " + graphId);
+        LOGGER.debug("Count of edges for Resource triangles: " + edgesWithinTrianglesResource.size());
         
         mstatsVertEdges.put(graphId, tempList);
         

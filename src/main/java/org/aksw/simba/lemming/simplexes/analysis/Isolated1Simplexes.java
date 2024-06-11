@@ -3,6 +3,8 @@ package org.aksw.simba.lemming.simplexes.analysis;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
@@ -16,6 +18,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * This class defined analysis for isolated 1-simplexes found in input graphs.
  */
 public class Isolated1Simplexes extends AbstractFindSimplexes{
+	private static final Logger LOGGER = LoggerFactory.getLogger(Isolated1Simplexes.class);
 	
 	//****************** Variables for storing average count of head color and head-tail color *****************************//
 	/**
@@ -99,7 +102,7 @@ public class Isolated1Simplexes extends AbstractFindSimplexes{
 							//sampleSizeHeadColor = sampleSizeHeadColor + 1; // not required using computed edge set 
 							
 							if (headColo.bits[0]==1)
-								System.out.println("Found head colo causing issue");
+								LOGGER.warn("Found head colo causing issue");
 							
 							// store the details of head and tail color for 1-simplex in the map
 							int tailOfTheEdge = graph.getTailOfTheEdge(edgeId);

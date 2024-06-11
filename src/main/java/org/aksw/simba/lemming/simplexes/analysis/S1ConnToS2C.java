@@ -75,7 +75,7 @@ public class S1ConnToS2C extends AbstractFindSimplexes {
 				
 		        //Logic to find set of class vertices
 		        IntSet classVerticesSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
-		        System.out.println("Graph: " + graphId);
+//		        System.out.println("Graph: " + graphId);
 		        for (int edgeId: graph.getEdges()) {
 		        	if (graph.getEdgeColour(edgeId).equals(graph.getRDFTypePropertyColour())) {
 		        		int classVertexID = graph.getHeadOfTheEdge(edgeId);
