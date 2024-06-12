@@ -1967,8 +1967,8 @@ public class GraphGenerationSimplexApproachComplProbBased extends AbstractGraphG
 		LOGGER.info("Connected 1-simplexes");
 		addSelfLoops(estEdgesSelfLoopConn1Simplexes, selfLoopsInConnS1Dist.getPotentialColoProposer(), mMapColourToVertexIDs1SimplexConnected, mColourMapperSelfLoopConn1Simplexes, mMapColourToEdgeIDs1Simplex, mPropDistSelfLoopConnS1);
 		
-		System.out.println("Number of edges in the mimic graph: " + mMimicGraph.getEdges().size());
-		System.out.println("Number of vertices in the mimic graph: " + mMimicGraph.getVertices().size());
+		LOGGER.info("Number of edges in the mimic graph: " + mMimicGraph.getEdges().size());
+		LOGGER.info("Number of vertices in the mimic graph: " + mMimicGraph.getVertices().size());
 		
 		// Update mMapColourToVertexIDs used for adding edges when improving the graph in next phase
 		updateVertexColoMap(mMapColourToVertexIDs1Simplex); //isolated 1-simplexes

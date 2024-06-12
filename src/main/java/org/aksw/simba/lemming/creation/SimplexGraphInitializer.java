@@ -34,7 +34,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 public class SimplexGraphInitializer extends GraphInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimplexGraphInitializer.class);
 	
-	private int noOfIterations = 1000; // FIXME
+	private int noOfIterations = 10000; // FIXME
 
 	/** Analyzes the different types of simplexes */
 	private SimplexAnalysis simplexAnalysis;
@@ -148,7 +148,7 @@ public class SimplexGraphInitializer extends GraphInitializer {
 		ColouredGraph[] clonedInput = Arrays.stream(origGrphs).map(ColouredGraph::clone).toArray(ColouredGraph[]::new);
 
 		// copy the colour palette as in the normal modes
-		ColouredGraph mimicGraph = super.initialize(clonedInput, noOfVertices, noOfThreads);
+		ColouredGraph mimicGraph = super.init(clonedInput, noOfVertices);
 
 		// set number of input graphs
 		iNoOfVersions = clonedInput.length;

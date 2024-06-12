@@ -76,7 +76,7 @@ public class GraphInitializer {
 
 	// desired number of edges
 	protected int desiredNoOfEdges;
-	
+
 	protected int desiredNoOfVertices;
 
 	protected SeedGenerator seedGenerator;
@@ -111,6 +111,18 @@ public class GraphInitializer {
 	 * @return The initialized synthetic graph
 	 */
 	public ColouredGraph initialize(ColouredGraph[] origGrphs, int noOfVertices, int noOfThreads) {
+		ColouredGraph mimicGraph = init(origGrphs, noOfVertices);
+
+		// assign colors to vertices
+		paintVertices(mimicGraph, noOfVertices);
+
+		// assign colors to edges
+		paintEdges(mimicGraph, noOfThreads);
+
+		return mimicGraph;
+	}
+
+	public ColouredGraph init(ColouredGraph[] origGrphs, int noOfVertices) {
 		// copy colour scheme from input graphs to the synthetic graph
 		ColouredGraph mimicGraph = new ColouredGraph();
 		this.originalGraphs = origGrphs;
@@ -125,13 +137,6 @@ public class GraphInitializer {
 		// estimate # edges from # vertices and average degree of input graphs
 		desiredNoOfVertices = noOfVertices;
 		desiredNoOfEdges = estimateNoEdges(origGrphs, noOfVertices);
-
-		// assign colors to vertices
-		paintVertices(mimicGraph, noOfVertices);
-
-		// assign colors to edges
-		paintEdges(mimicGraph, noOfThreads);
-
 		return mimicGraph;
 	}
 
@@ -210,7 +215,8 @@ public class GraphInitializer {
 
 	private void paintVertices(ColouredGraph mimicGraph, int noVertices) {
 		LOGGER.info("Assign colors to vertices.");
-		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist, seedGenerator.getNextSeed());
+		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist,
+				seedGenerator.getNextSeed());
 		for (int i = 0; i < noVertices; i++) {
 			BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
 			int vertId = mimicGraph.addVertex(offeredColor);
@@ -273,7 +279,8 @@ public class GraphInitializer {
 			final IntSet setOfEdges = lstAssignedEdges.get(i);
 
 			final IOfferedItem<BitSet> eColoProposer = new OfferedItemByRandomProb<>(
-					new ObjectDistribution<BitSet>(edgeColourDist.sampleSpace, edgeColourDist.values), seedGenerator.getNextSeed());
+					new ObjectDistribution<BitSet>(edgeColourDist.sampleSpace, edgeColourDist.values),
+					seedGenerator.getNextSeed());
 			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
@@ -418,7 +425,7 @@ public class GraphInitializer {
 
 		return setOfHeads;
 	}
-	
+
 	public Set<Integer> getConnectedHeadsSet(int tailId, BitSet eColo) {
 		Set<Integer> setOfHeads = new HashSet<>();
 		Map<Integer, IntSet> mapTailToHeads = mapEdgeColoursToConnectedVertices.get(eColo);
@@ -428,7 +435,7 @@ public class GraphInitializer {
 
 		return setOfHeads;
 	}
-	
+
 	// Setters and Getters
 
 	public Map<Integer, BitSet> getmReversedMapClassVertices() {
@@ -484,7 +491,7 @@ public class GraphInitializer {
 	public ColouredGraph[] getOriginalGraphs() {
 		return originalGraphs;
 	}
-	
+
 	public SeedGenerator getSeedGenerator() {
 		return seedGenerator;
 	}
@@ -508,6 +515,5 @@ public class GraphInitializer {
 	public int getDesiredNoOfEdges() {
 		return desiredNoOfEdges;
 	}
-	
-	
+
 }

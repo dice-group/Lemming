@@ -83,7 +83,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 		int estimatedVerticesTriangle = analysis.getConnTriAnalysis().getEstVertices();
 		initializer.setmTriColosCountsAvgProb(simplexClass.getTriangleDistribution().getmTriangleColorsv1v2v3());
 		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb = initializer
-				.getmTriColosCountsAvgProb(); // FIXME not initialized
+				.getmTriColosCountsAvgProb(); 
 
 		// *** 2-simplex creation (that could be connected to each other) ***
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
@@ -141,7 +141,8 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 			//
 			numOfIterationAddingEdgesToGraph = 0;
 			while (actualEdgesInTriangles < estimatedEdgesTriangle) {
-
+				if (actualVerticesInTriangles == 16826)
+					System.out.println();
 				if ((actualVerticesInTriangles < estimatedVerticesTriangle)
 						&& (numOfIterationAddingEdgesToGraph < maximumIteration)) {
 					// If we can add more triangles when we are allowed to include additional
@@ -295,7 +296,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 						int numOfIterationRandomTri = 1;
 
 						// check if it is possible to add new triangle
-						while ((arrNewTriProbCount[3] < 1) && (numOfIterationRandomTri < 500)) { // discontinue after
+						while ((arrNewTriProbCount[3] < 1) && (numOfIterationRandomTri < maximumIteration)) { // discontinue after
 																									// trying 500 times
 							randomTriangle = getRandomTriangle(initializer.getSetAllTriangleColours()); // FIXME
 							arrNewTriProbCount = mTriColosCountsAvgProb.get(randomTriangle.getA())

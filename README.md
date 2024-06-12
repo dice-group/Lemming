@@ -20,19 +20,20 @@ In `GraphOptimization.java`, two graphs are created by adding and removing an ed
 The optimized graph is finalized as a real-world RDF graph in `GraphLexicalization.java` by rendering all the resources' IRIs.
 
 ## Process overview
-1. Run metric computation on all graphs
-2. Run graph generation without the target graph in the file path
+Only keep the previous versions of the graph in the datasets folder!
+1. Run metric computation 
+2. Run graph generation 
 
 Place the files present in ``https://hobbitdata.informatik.uni-leipzig.de/lemming/resources.zip`` and in the ``Input graphs/`` folder of ``https://hobbitdata.informatik.uni-leipzig.de/lemming/Experiments_data.zip`` under lemming's directory.
 
 ### Metrics pre-computation
-First, the metrics need to be computed on all available graphs of its corresponding dataset: ``Experiments_data/Input graphs``. The pre-computation can be achieved by indicating the dataset through:
+First, the metrics need to be computed on all available versions of its corresponding dataset: ``Experiments_data/Input graphs``. The pre-computation can be achieved by indicating the dataset through:
 
 ```
 mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.PrecomputingValues" -Dexec.args="-ds swdf" 
 ```
 
-This will produce a file named ``value_store.val`` to be used during graph generation. It is recommended to move/rename the previous metrics store before re-running the store generation.
+This will produce a file named ``value_store.val`` to be used during graph generation. The same object can store all the datasets metrics/constant expressions.
 
 ### Graphs generation
 
@@ -59,9 +60,6 @@ To run the graph generation for the baseline generator, use:
 mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.BuildBaselineGraph" -Dexec.args="-ds pg -nv 792923" 
 ```
 
-You should move the target graph before starting the graph generation. The target graph is also called held-out graph, it's usually the latest graph of the versioned dataset.
-
-From the metrics pre-computation step, you can get the number of vertices of the target graph. This will serve as an input to the graph generation. 
 Below is a table with the currently accepted datasets and the number of vertices of its target graph.
 
 <table>
