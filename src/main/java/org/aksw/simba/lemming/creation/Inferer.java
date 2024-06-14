@@ -52,13 +52,15 @@ public class Inferer {
 	private Map<OntProperty, OntProperty> propertyEquiMap;
 
 	private Set<OntProperty> ontProperties;
+	
+	private Set<OntClass> ontClasses;
 
 	public Inferer(boolean isMat, @Nonnull OntModel ontModel) {
 		this.isMat = isMat;
 		this.ontModel = ontModel;
 
 		//collect the equivalent properties and classes information from the ontology
-		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		ontClasses = this.ontModel.listClasses().toSet();
 		Map<OntClass, Set<OntClass>> classesEquiSetMap = searchEquivalents(ontClasses);
 		classEquiMap = findRepresentation(classesEquiSetMap);
 
@@ -75,7 +77,7 @@ public class Inferer {
 		}
 		this.ontModel = ontModel;
 		// collect the equivalent properties and classes information from the ontology
-		Set<OntClass> ontClasses = this.ontModel.listClasses().toSet();
+		ontClasses = this.ontModel.listClasses().toSet();
 		Map<OntClass, Set<OntClass>> classesEquiSetMap = searchEquivalents(ontClasses);
 		classEquiMap = findRepresentation(classesEquiSetMap);
 
@@ -227,16 +229,31 @@ public class Inferer {
 				ModelUtil.replaceStatement(model, statement,
 						ResourceFactory.createStatement(subject, newPredicate, object));
 			}
-			for (OntResource domain : representation.listDomain().toList()) {
-				Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, domain);
-				if (!domain.isAnon()) {
-					newStmts.add(subjNewStmt);
+			
+			// ignore if subject is a Class
+			if (!ontClasses.contains(subject)) {
+				for (OntResource domain : representation.listDomain().toList()) {
+					Statement subjNewStmt = ResourceFactory.createStatement(subject, RDF.type, domain);
+					if (subject.equals(domain)) {
+						continue;
+					}
+					if (!domain.isAnon()) {
+						newStmts.add(subjNewStmt);
+					}
 				}
 			}
+			
+			
 			if (object.isResource()) {
-				for (OntResource range : representation.listRange().toList()) {
-					Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, range);
-					newStmts.add(objNewStmt);
+				// ignore if object is a Class
+				if (!ontClasses.contains(object.asResource())) {
+					for (OntResource range : representation.listRange().toList()) {
+						if (object.asResource().equals(range)) {
+							continue;
+						}
+						Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, range);
+						newStmts.add(objNewStmt);
+					}
 				}
 			}
 		}
