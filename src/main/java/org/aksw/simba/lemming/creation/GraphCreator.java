@@ -10,6 +10,7 @@ import java.util.Stack;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.aksw.simba.lemming.util.Constants;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -26,6 +27,9 @@ import org.apache.jena.vocabulary.RDFS;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.DefaultIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphCreator {
 
@@ -76,6 +80,7 @@ public class GraphCreator {
 		while (iterator.hasNext()) {
 			statement = iterator.next();
 			subject = statement.getSubject();
+			
 			// Add the subject if it is not existing
 			if (resourceIdMapping.containsKey(subject)) {
 				subjectId = resourceIdMapping.get(subject);

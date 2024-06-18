@@ -79,14 +79,14 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 	@Override
 	public void initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads) {
 		SimplexAnalysis analysis = initializer.getSimplexAnalysis();
-		int estimatedEdgesTriangle = analysis.getConnTriAnalysis().getEstEdges();
-		int estimatedVerticesTriangle = analysis.getConnTriAnalysis().getEstVertices();
 		initializer.setmTriColosCountsAvgProb(simplexClass.getTriangleDistribution().getmTriangleColorsv1v2v3());
 		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb = initializer
 				.getmTriColosCountsAvgProb(); 
 
 		// *** 2-simplex creation (that could be connected to each other) ***
 		LOGGER.info("Case 1: Model higher dimensional simplexes with 2-simplexes");
+		int estimatedEdgesTriangle = analysis.getConnTriAnalysis().getEstEdges();
+		int estimatedVerticesTriangle = analysis.getConnTriAnalysis().getEstVertices();
 		LOGGER.info("Estimated Edges: " + estimatedEdgesTriangle);
 		LOGGER.info("Estimated Vertices: " + estimatedVerticesTriangle);
 
@@ -104,9 +104,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 			// Update the count of triangles in the map
 			double[] arrTriProbCount = mTriColosCountsAvgProb.get(initialRandomTriangle.getA())
 					.get(initialRandomTriangle.getB()).get(initialRandomTriangle.getC());
-			arrTriProbCount[3] = arrTriProbCount[3] - 1; // Triangle count is stored at first index, updating its count.
-			// Note: As it is the first triangle that is added not validating if we are
-			// allowed to add a triangle or not.
+			arrTriProbCount[3] = arrTriProbCount[3] - 1; 
 
 			// Variables to track number of edges and vertices added in triangle
 			int actualEdgesInTriangles = 0;
@@ -141,8 +139,6 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 			//
 			numOfIterationAddingEdgesToGraph = 0;
 			while (actualEdgesInTriangles < estimatedEdgesTriangle) {
-				if (actualVerticesInTriangles == 16826)
-					System.out.println();
 				if ((actualVerticesInTriangles < estimatedVerticesTriangle)
 						&& (numOfIterationAddingEdgesToGraph < maximumIteration)) {
 					// If we can add more triangles when we are allowed to include additional
@@ -205,29 +201,20 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 
 							// get triangle count
 							double[] arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA())
-									.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());// get count of
-																										// triangle for
-																										// the proposed
-																										// new triangle
+									.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());
 
 							// temporary variable to track count of loops
 							int numOfLoopsTri = 0;
 
 							// try to propose a color for third vertex multiple times if it is not possible
 							// to create a triangle
-							while ((arrNewPossTriProbCount[3] < 1) && (numOfLoopsTri < 500)) { // trying to create a new
-																								// triangle 100 times
+							while ((arrNewPossTriProbCount[3] < 1) && (numOfLoopsTri < 50000)) {
 								proposedVertex3Colo = simplexClass.proposeVertex3Colour(selectedVertex1Colo,
 										selectedVertex2Colo);
 								newPossibleTriangle = new TriColours(selectedVertex1Colo, selectedVertex2Colo,
 										proposedVertex3Colo);
 								arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA())
-										.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());// get count of
-																											// triangle
-																											// for the
-																											// proposed
-																											// new
-																											// triangle
+										.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());
 								numOfLoopsTri++;
 							}
 
@@ -270,6 +257,8 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 
 								numOfIterationAddingEdgesToGraph = 0;
 							}
+						} else {
+							System.out.println();
 						}
 
 						if (newEdgesNotAddedToTriangle) {
@@ -283,6 +272,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 					} // end if condition - check if triangles can be added to the edges
 					else {
 						LOGGER.info("Growing 2-simplexes not possible.... Proposing new 2-simplex");
+					
 						// If no candidate edges exist then new random triangle should be added to the
 						// mimic graph
 						TriColours randomTriangle = simplexClass.getTriangleProposal();
@@ -296,16 +286,15 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 						int numOfIterationRandomTri = 1;
 
 						// check if it is possible to add new triangle
-						while ((arrNewTriProbCount[3] < 1) && (numOfIterationRandomTri < maximumIteration)) { // discontinue after
-																									// trying 500 times
+						while ((arrNewTriProbCount[3] < 1) && (numOfIterationRandomTri < maximumIteration)) { 
 							randomTriangle = getRandomTriangle(initializer.getSetAllTriangleColours()); // FIXME
 							arrNewTriProbCount = mTriColosCountsAvgProb.get(randomTriangle.getA())
-									.get(randomTriangle.getB()).get(randomTriangle.getC());// get count of triangle for
-																							// the proposed new triangle
+									.get(randomTriangle.getB()).get(randomTriangle.getC());
 							numOfIterationRandomTri++;
 						}
+						
 
-						if (arrNewTriProbCount[3] > 1) {
+						if (arrNewTriProbCount[3] >= 1) {
 							// Update the triangle count
 							arrNewTriProbCount[3] = arrNewTriProbCount[3] - 1;
 
@@ -331,6 +320,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 									randomTriangle.getC()));
 							numOfIterationAddingEdgesToGraph = 0;
 						} else {
+							System.out.println();
 							break; // terminate while condition if it is not possible to add random triangle
 						}
 
@@ -1448,7 +1438,7 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 						BitSet proposePropColor = simplexProperty
 								.proposeColour(new EdgeColorsSorted(randomEdge.getA(), randomEdge.getB()));
 
-						if ((arrNewTriProbCount[2] > 1)
+						if ((arrNewTriProbCount[2] >= 1)
 								&& ((actualVerticesInConnS1 + numberOfClassHeadVertices
 										+ numberOfClassTailVertices) < estVerticesConnected1Simplexes)
 								&& (analysis.getConnS1Analysis().getmColourMapperSimplexes()
@@ -2773,18 +2763,11 @@ public class SimplexGraphGenerator implements IGraphGenerator{
 	private TriColours getRandomTriangle(Set<TriColours> setAllTriangleColours) {
 		TriColours randomTriangleColor = null;
 		if (setAllTriangleColours.size() != 0) {
-			randomTriangleColor = setAllTriangleColours.toArray(new TriColours[setAllTriangleColours.size()])[mRandom
+			randomTriangleColor = setAllTriangleColours.toArray(new TriColours[setAllTriangleColours.size()])[new Random(initializer.getSeedGenerator().getNextSeed())
 					.nextInt(setAllTriangleColours.size())];
 		}
 
 		return randomTriangleColor;
-	}
-
-	@Override
-	public String finishSaveMimicGraph(ColouredGraph mimicGraph, ConstantValueStorage valuesCarrier,
-			GraphLexicalization lexicalizer, GraphInitializer initializer, IDatasetManager mDatasetManager) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override

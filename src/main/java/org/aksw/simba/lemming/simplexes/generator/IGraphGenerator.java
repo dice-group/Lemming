@@ -22,7 +22,7 @@ public interface IGraphGenerator {
 	public void initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads);
 
 	/**
-	 * Adds RDF:type edges to the mimic graph, lexializes the literals and saves it
+	 * Adds RDF:type edges to the mimic graph, lexicalizes the literals and saves it
 	 * to file.
 	 * 
 	 * @param mimicGraph

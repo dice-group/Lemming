@@ -77,14 +77,13 @@ public class SimplexAnalysis {
 		selfLoopsInIsoS1.computePropertyProbabilities();
 
 		s0Analysis = new S0C(origGrphs, noOfVertices, iNoOfVersions);
-
-		s0Analysis = new S0C(origGrphs, noOfVertices, iNoOfVersions);
 		ObjectObjectOpenHashMap<Integer, IntSet> edgeIdsUnionMap = addEdgeIdsForDifferentSimplexes(
 				connTriAnalysis.getmGraphsEdgesIds(), isoTriAnalysis.getmGraphsEdgesIds(),
 				s1ConnToTri.getmGraphsEdgesIds(), s1ConnectingTri.getmGraphsEdgesIds(),
 				selfLoopIsoTri.getmGraphsEdgesIds(), selfLoopConnTri.getmGraphsEdgesIds(),
 				selfLoops1ConnToTri.getmGraphsEdgesIds(), isoS1Analysis.getmGraphsEdgesIds(),
 				isoS1SelfLoopAnalysis.getmGraphsEdgesIds(), selfLoopsInIsoS1.getmGraphsEdgesIds(), iNoOfVersions);
+		
 		connS1Analysis = new ConnS1C(origGrphs, noOfVertices, iNoOfVersions, edgeIdsUnionMap);
 		connS1Analysis.computePropertyProbabilities();
 
