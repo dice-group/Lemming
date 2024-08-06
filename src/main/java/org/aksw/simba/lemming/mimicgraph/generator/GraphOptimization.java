@@ -23,7 +23,6 @@ import org.aksw.simba.lemming.metrics.single.edgemanipulation.ErrorScores;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.ErrorScoreCalculator;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
-import org.aksw.simba.lemming.simplexes.generator.IGraphGenerator;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -11,11 +11,12 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.simplexes.distribution.ISimplexClass;
 import org.aksw.simba.lemming.simplexes.distribution.ISimplexProperty;
-import org.aksw.simba.lemming.simplexes.generator.IGraphGenerator;
+import org.aksw.simba.lemming.tools.parameters.GraphGenerationArgs;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.dice_research.ldcbench.generate.SequentialSeedGenerator;
 import org.slf4j.Logger;
@@ -74,9 +75,9 @@ public class GraphGenerationTest {
 		IGraphGenerator graphGenerator;
 		GraphInitializer initializer = (GraphInitializer) application.getBean(pArgs.mode.toLowerCase(), seedGenerator);
 		ColouredGraph mimicGraph = initializer.initialize(graphs, pArgs.noVertices, pArgs.noThreads);
+		IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
+		IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
 		if (pArgs.mode.toLowerCase().equals("binary")) { // FIXME
-			IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
-			IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
 			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, classSelector,
 					vertexSelector);
 		} else {
@@ -84,7 +85,7 @@ public class GraphGenerationTest {
 			ISimplexProperty simplexProperty = (ISimplexProperty) application.getBean(pArgs.simplexProperty,
 					initializer);
 			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, simplexClass,
-					simplexProperty);
+					simplexProperty, classSelector, vertexSelector);
 		}
 		graphGenerator.initializeMimicGraph(mimicGraph, pArgs.noThreads);
 //		graphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph); TODO
@@ -92,11 +93,11 @@ public class GraphGenerationTest {
 		// finish initial mimic graph and save it for comparison
 		LOGGER.info("Saving the initial mimic graph...");
 		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
-		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer,
+       		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer,
 				mDatasetManager);
 
 		// Optimization with constant expressions
-		LOGGER.info("Optimizing the mimic graph ...");
+		LOGGER.info("Optimizing the mimic graph ..."); 
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
 		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mimicGraph, graphGenerator, metrics,
 				valuesCarrier, seedGenerator, pArgs.noOptimizationSteps);

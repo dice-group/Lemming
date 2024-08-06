@@ -11,7 +11,7 @@ import com.carrotsearch.hppc.BitSet;
 
 public interface ISimplexClass {
 
-	TriColours getTriangleProposal();
+	IOfferedItem<TriColours> getTriangleProposal();
 
 	EdgeColorsSorted getEdgeProposalFromTriangleDist(Set<EdgeColorsSorted> edgeColosSet);
 

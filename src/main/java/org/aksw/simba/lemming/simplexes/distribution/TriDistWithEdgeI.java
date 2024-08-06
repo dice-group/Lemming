@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.simplexes.distribution;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 
@@ -71,7 +72,9 @@ public class TriDistWithEdgeI implements ITriDist{
 		return potentialEdgeProposer;
 	}
 
-	public TriDistWithEdgeI(ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
+	public TriDistWithEdgeI(ObjectObjectOpenHashMap<TriColours, 
+			double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColours, 
+			double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
 		
 		this.iNoOfVersions = iNoOfVersions;
 		this.mRandom = mRandom;
@@ -86,7 +89,8 @@ public class TriDistWithEdgeI implements ITriDist{
 			if(mTriColoEdgesTriCountDistAvg.allocated[i]) {
 				TriColours triangleColorObj = (TriColours) keysTriangleColours[i];
 				double[] triangleCountsDistArr = mTriColoEdgesTriCountDistAvg.get(triangleColorObj);
-				triangleCountsDistArr[3] = (triangleCountsDistArr[3] * mIDesiredNoOfVertices) /iNoOfVersions;
+				triangleCountsDistArr[3] = (triangleCountsDistArr[3] * mIDesiredNoOfVertices)/iNoOfVersions;
+				
 			
 				// Update or insert into first map to store the combination of 1st vertex, 2nd vertex, and 3rd vertex, and their count
 				storeTriangleColorsInMaps(mTriangleColorsv1v2v3, triangleColorObj.getA(), triangleColorObj.getB(), triangleColorObj.getC(), triangleCountsDistArr);

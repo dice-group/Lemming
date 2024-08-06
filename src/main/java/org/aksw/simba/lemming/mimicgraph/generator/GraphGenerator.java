@@ -1,9 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +17,6 @@ import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
-import org.aksw.simba.lemming.simplexes.generator.IGraphGenerator;
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,41 +180,11 @@ public class GraphGenerator implements IGraphGenerator{
 	}
 
 	public synchronized boolean connectIfPossible(int tailId, int headId, BitSet eColo, ColouredGraph mimicGraph) {
-		if (connectableVertices(tailId, headId, eColo)) {
+		if (connectableVertices(tailId, headId, eColo, graphInitializer)) {
 			mimicGraph.addEdge(tailId, headId, eColo);
 			return true;
 		}
 		return false;
-	}
-
-	public boolean connectableVertices(int tailId, int headId, BitSet eColo) {
-		Map<Integer, BitSet> mReversedMapClassVertices = graphInitializer.getmReversedMapClassVertices();
-		Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices = graphInitializer
-				.getmMapEdgeColoursToConnectedVertices();
-
-		if (mReversedMapClassVertices.containsKey(headId)) {
-			return false;
-		}
-		boolean canConnect = false;
-
-		Map<Integer, IntSet> mapTailToHeads = mMapEdgeColoursToConnectedVertices.get(eColo);
-		if (mapTailToHeads == null) {
-			mapTailToHeads = new HashMap<Integer, IntSet>();
-			mMapEdgeColoursToConnectedVertices.put(eColo, mapTailToHeads);
-		}
-
-		IntSet setOfHeads = mapTailToHeads.get(tailId);
-		if (setOfHeads == null) {
-			setOfHeads = new DefaultIntSet(Constants.DEFAULT_SIZE);
-			mapTailToHeads.put(tailId, setOfHeads);
-		}
-
-		if (!setOfHeads.contains(headId)) {
-			setOfHeads.add(headId);
-			canConnect = true;
-		}
-
-		return canConnect;
 	}
 
 	/**
@@ -318,7 +285,7 @@ public class GraphGenerator implements IGraphGenerator{
 					continue;
 
 				// check if they can connect
-				if (connectableVertices(tailId, headId, edgeColour)) {
+				if (connectableVertices(tailId, headId, edgeColour, graphInitializer)) {
 					TripleBaseSingleID triple = new TripleBaseSingleID();
 					triple.tailId = tailId;
 					triple.tailColour = tailColour;

@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.tools;
+package org.aksw.simba.lemming.tools.parameters;
 
 import com.beust.jcommander.Parameter;
 
@@ -8,11 +8,11 @@ import com.beust.jcommander.Parameter;
 public class PrecomputingArgs {
 	
 	@Parameter(names = { "-ds" }, description = "Dataset name.", required = true)
-	String dataset;
+	public String dataset;
 	
 	@Parameter(names = { "--min-fitness" }, description = "Minimum Fitness", required = false)
-	double minFitness = 100000.0;
+	public double minFitness = 100000.0;
 	
 	@Parameter(names = { "--max-iterations" }, description = "Maximum number of iterations", required = false)
-	int maxIterations = 50;
+	public int maxIterations = 50;
 }

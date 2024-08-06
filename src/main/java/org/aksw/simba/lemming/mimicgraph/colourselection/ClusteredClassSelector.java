@@ -407,6 +407,7 @@ public class ClusteredClassSelector implements IClassSelector {
 
 	private IntSet getRandomVertices(BitSet vertColo, double iNoOfVertices) {
 		IntSet setVertices = graphInit.getmMapColourToVertexIDs().get(vertColo);
+		Random random = new Random(seedGenerator.getNextSeed());
 		if (setVertices != null) {
 
 			IntSet res = new DefaultIntSet(Constants.DEFAULT_SIZE);
@@ -431,7 +432,7 @@ public class ClusteredClassSelector implements IClassSelector {
 			}
 
 			while (iNoOfVertices > 0) {
-				Random random = new Random(seedGenerator.getNextSeed());
+				
 				int vertId = RandomUtil.getRandomWithExclusion(random, setVertices.size(), exclusionSet);
 				if (!res.contains(vertId)) {
 					res.add(vertId);

@@ -86,7 +86,7 @@ public class GraphInitializer {
 	/**
 	 * Constructor.
 	 * 
-	 * @param seed
+	 * @param seedGenerator
 	 */
 	public GraphInitializer(SeedGenerator seedGenerator) {
 		this.seedGenerator = seedGenerator;
@@ -482,6 +482,14 @@ public class GraphInitializer {
 		Set<BitSet> temp = mapColourToEdgeIDs.keySet();
 		temp.remove(rdfTypePropertyColour);
 		return temp;
+	}
+
+	public void setMapColourToVertexIDs(Map<BitSet, IntSet> mapColourToVertexIDs) {
+		this.mapColourToVertexIDs = mapColourToVertexIDs;
+	}
+
+	public void setMapColourToEdgeIDs(Map<BitSet, IntSet> mapColourToEdgeIDs) {
+		this.mapColourToEdgeIDs = mapColourToEdgeIDs;
 	}
 
 	public BitSet getEdgeColour(int fakeEdgeId) {

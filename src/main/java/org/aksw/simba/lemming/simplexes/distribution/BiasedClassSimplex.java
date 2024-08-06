@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.creation.SimplexGraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
@@ -68,7 +69,8 @@ public class BiasedClassSimplex implements ISimplexClass {
 		triangleDistribution = new TriDistWithEdgeI(
 				simplexAnalysis.getConnTriAnalysis().getmTriColoEdgesTriCountDistAvg(),
 				simplexAnalysis.getIsoTriAnalysis().getmIsolatedTriColoEdgesTriCountDistAvg(), iNoOfVersions,
-				noOfVertices, mRandom);
+				noOfVertices,
+				mRandom);
 		s1connToTriDist = new ConnS1DistI(simplexAnalysis.getS1ConnToTri().getmColoEdgesCountDistAvg(), iNoOfVersions,
 				mRandom);
 		s1connTriDist = new ConnS1DistI(simplexAnalysis.getS1ConnectingTri().getmColoEdgesCountDistAvg(), iNoOfVersions,
@@ -123,8 +125,8 @@ public class BiasedClassSimplex implements ISimplexClass {
 	}
 
 	@Override
-	public TriColours getTriangleProposal() {
-		return triangleDistribution.getPotentialTriangleProposer().getPotentialItem();
+	public IOfferedItem<TriColours> getTriangleProposal() {
+		return triangleDistribution.getPotentialTriangleProposer();
 	}
 
 	@Override

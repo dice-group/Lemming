@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.tools;
+package org.aksw.simba.lemming.tools.parameters;
 
 import com.beust.jcommander.Parameter;
 
@@ -11,38 +11,38 @@ import com.beust.jcommander.Parameter;
 public class GraphGenerationArgs {
 
 	@Parameter(names = { "-ds" }, description = "Dataset name.", required = true)
-	String dataset;
+	public String dataset;
 
 	@Parameter(names = { "-nv" }, description = "Number of vertices", required = true)
-	int noVertices;
+	public int noVertices;
 
 	@Parameter(names = { "-thrs" }, description = "Number of threads", required = false)
-	int noThreads = 1;
+	public int noThreads = 1;
 
 	@Parameter(names = { "-seed" }, description = "Seed", required = false)
-	long seed = System.currentTimeMillis();
+	public long seed = System.currentTimeMillis();
 
 	@Parameter(names = { "-l" }, description = "Load mimic graph", required = false)
-	String loadMimicGraph;
+	public String loadMimicGraph;
 	
 	@Parameter(names = { "-m" }, description = "Mode", required = false)
-	String mode = "Binary";
+	public String mode = "Binary";
 
 	@Parameter(names = { "-c" }, description = "Class Selector Type", required = false)
-	String classSelector;
+	public String classSelector;
 	
 	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = false)
-	String vertexSelector;
+	public String vertexSelector;
 	
 	@Parameter(names = { "-sp" }, description = "Simplex Property", required = false)
-	String simplexProperty;
+	public String simplexProperty;
 	
 	@Parameter(names = { "-sc" }, description = "Simplex Class", required = false)
-	String simplexClass;
+	public String simplexClass;
 
 	@Parameter(names = {
 			"-op" }, description = "Number of iterations during the graph optimization phase", required = true)
-	int noOptimizationSteps;
+	public int noOptimizationSteps;
 
 	/**
 	 * 

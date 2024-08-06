@@ -108,7 +108,6 @@ public class BiasedInstanceSelector implements IVertexSelector {
 		Integer[] objTailIDs = new Integer[arrVertexIDs.length];
 		// for each tail id, we compute the potential out degree for it
 		Random random = new Random(seed);
-		seed++;
 		for (int i = 0; i < arrVertexIDs.length; i++) {
 			objTailIDs[i] = arrVertexIDs[i];
 			// generate a random out degree for each vertex in its set based on the computed
@@ -124,7 +123,6 @@ public class BiasedInstanceSelector implements IVertexSelector {
 				possDegreePerVertexIDs);
 		OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialDegree,
 				random);
-		seed = potentialDegreeProposer.getSeed() + 1;
 		// put to map potential degree proposer
 		ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> mapPossDegree = mapPossibleDegreePerEColour
 				.get(edgeColour);

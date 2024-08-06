@@ -160,6 +160,7 @@ public class SimplexGraphInitializer extends GraphInitializer {
 		// Get all triangles found in input graphs. Note:- metric is invoked by above
 		// function call, thus set of colors for different triangle vertices are already
 		// computed.
+
 		mTriangleColoursTriangleEdgeCounts = computedTriangles.getmTriColoEdgesTriCountDistAvg();
 
 		// Create HashSet of Triangle Colours. This set is used to randomly select an
@@ -268,6 +269,10 @@ public class SimplexGraphInitializer extends GraphInitializer {
 
 	public Set<EdgeColos> getSetAllEdgeColours() {
 		return setAllEdgeColours;
+	}
+	
+	public Set<BitSet> getAvailableEdgeColours() {
+		return getmMapEdgeColoursToConnectedVertices().keySet();
 	}
 
 	public ObjectObjectOpenHashMap<EdgeColos, List<IntSet>> getmEdgeColorsVertexIds() {
