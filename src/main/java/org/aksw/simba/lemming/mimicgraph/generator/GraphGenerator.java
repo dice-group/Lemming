@@ -10,7 +10,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;

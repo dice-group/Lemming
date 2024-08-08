@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgDegreeDistBaseVEColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgInDegreeDistBaseVEColo;
@@ -14,6 +13,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

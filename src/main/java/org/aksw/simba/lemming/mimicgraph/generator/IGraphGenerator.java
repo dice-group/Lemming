@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
@@ -58,6 +57,14 @@ public interface IGraphGenerator {
 	 */
 	public TripleBaseSingleID getProposedTriple();
 	
+	/**
+	 * 
+	 * @param tailId
+	 * @param headId
+	 * @param eColo
+	 * @param graphInitializer
+	 * @return
+	 */
 	default public boolean connectableVertices(int tailId, int headId, BitSet eColo, GraphInitializer graphInitializer) {
 		Map<Integer, BitSet> mReversedMapClassVertices = graphInitializer.getmReversedMapClassVertices();
 		Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices = graphInitializer

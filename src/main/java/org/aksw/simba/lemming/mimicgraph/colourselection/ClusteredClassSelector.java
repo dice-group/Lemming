@@ -8,12 +8,12 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.TripleColourDistributionMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.RandomUtil;
 import org.dice_research.ldcbench.generate.SeedGenerator;

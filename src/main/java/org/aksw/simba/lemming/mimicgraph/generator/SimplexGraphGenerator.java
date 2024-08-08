@@ -10,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.SimplexGraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;

@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredIEDistPerVColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

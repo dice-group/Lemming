@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.creation;
+package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

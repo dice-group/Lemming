@@ -43,6 +43,9 @@ public class GraphGenerationArgs {
 	@Parameter(names = {
 			"-op" }, description = "Number of iterations during the graph optimization phase", required = true)
 	public int noOptimizationSteps;
+	
+	@Parameter(names = { "-bl" }, description = "Baseline model", required = false)
+	public String baselineModel;
 
 	/**
 	 * 

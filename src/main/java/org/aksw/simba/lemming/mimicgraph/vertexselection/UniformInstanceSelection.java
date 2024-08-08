@@ -2,9 +2,9 @@ package org.aksw.simba.lemming.mimicgraph.vertexselection;
 
 import java.util.Set;
 
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
+import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -26,8 +26,6 @@ public class UniformInstanceSelection implements IVertexSelector {
 	/**
 	 * Constructor
 	 * 
-	 * @param mMapColourToVertexIDs Map of colours to vertex IDs
-	 * @param seed                  Seed for the random number generator
 	 */
 	public UniformInstanceSelection(GraphInitializer graphInit) {
 		this.graphInit = graphInit;

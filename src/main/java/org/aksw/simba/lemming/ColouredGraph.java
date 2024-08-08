@@ -87,7 +87,7 @@ public class ColouredGraph implements IColouredGraph {
         return graph;
     }
 
-    protected void setGraph(Grph graph) {
+    public void setGraph(Grph graph) {
         this.graph = graph;
         diameterAlgorithm = new DiameterAlgorithm();
         diameterAlgorithm.cacheResultForGraph(graph);
@@ -839,4 +839,5 @@ public class ColouredGraph implements IColouredGraph {
         return diameterAlgorithm.computeShorterDiameter(this, triple, oldPath);
     }
 
+    
 }
