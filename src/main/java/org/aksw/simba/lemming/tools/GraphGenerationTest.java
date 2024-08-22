@@ -102,7 +102,8 @@ public class GraphGenerationTest {
 		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
 		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer,
 				mDatasetManager);
-
+		
+		// TODO if in baseline mode, don't let it go forward
 		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
