@@ -1,6 +1,8 @@
 #!/bin/bash
 
 main_folder=$1
+rm -rf Experiments/
+rm link_prediction/results_2024/Experiments/*
 for subfolder in "$main_folder"/*; do
   if [ -d "$subfolder" ]; then
     echo "Processing subfolder: $subfolder"
@@ -13,10 +15,14 @@ for subfolder in "$main_folder"/*; do
         JAVA_HOME=jdk-17.0.11 mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.CleanGraphs" -Dexec.args="$file $tmp_file" 
         log_file="${main_folder}Experiments/${base_file}.log"
         echo "Saving logs to: $log_file"
-        dicee --path_single_kg $tmp_file --model Keci --num_folds_for_cv 10 --num_core 63 --backend rdflib > $log_file 2>&1
+        dicee --path_single_kg $tmp_file --model Keci --random_seed $RANDOM --num_folds_for_cv 10 --backend rdflib > $log_file 2>&1
         rm $tmp_file
       fi
     done
   fi
 done
+
+
+
+
 
