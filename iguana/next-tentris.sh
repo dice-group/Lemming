@@ -10,11 +10,11 @@ do
 	sleep 5m
 	gn="${f%%.*}"
 	echo "$gn"
-	cp iguana.config iguanaTMP.config
-	sed -i -e 's,GraphName,'"$gn"',g' iguanaTMP.config
-	sed -i -e 's,TSTORE,Tentris,g' iguanaTMP.config
-	sed -i -e 's,ENDPOINT,http://localhost:9080/sparql,g' iguanaTMP.config
-	./start-iguana.sh iguanaTMP.config
+	cp example-suite.yml example-suiteTMP.yml
+	sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
+	sed -i -e 's,TSTORE,Tentris,g' example-suiteTMP.yml
+	sed -i -e 's,ENDPOINT,http://localhost:9080/sparql,g' example-suiteTMP.yml
+	./start-iguana.sh example-suiteTMP.yml
 	pkill -f tentris
 	echo "done"
 done

@@ -12,11 +12,11 @@ do
 	#gn="geology_target"
 	gn="${f%%.*}"
 	echo "$gn"
-	cp iguana.config iguanaTMP.config
-	sed -i -e 's,GraphName,'"$gn"',g' iguanaTMP.config
-	sed -i -e 's,TSTORE,GraphDB,g' iguanaTMP.config
-	sed -i -e 's,ENDPOINT,http://localhost:7200/repositories/repo,g' iguanaTMP.config
-	./start-iguana.sh iguanaTMP.config
+	cp example-suite.yml example-suiteTMP.yml
+        sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
+        sed -i -e 's,TSTORE,GraphDB,g' example-suiteTMP.yml
+        sed -i -e 's,ENDPOINT,http://localhost:7200/repositories/repo,g' example-suiteTMP.yml
+        ./start-iguana.sh example-suiteTMP.yml
 	pkill -f graphdb
 	echo "done"
 done

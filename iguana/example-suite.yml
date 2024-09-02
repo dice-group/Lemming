@@ -1,0 +1,40 @@
+# This file showcases the configuration of most IGUANA features.
+
+# Datasets are optional and have no functionality.
+datasets:
+  - name: "GraphName"
+
+# Connections that will be used by the workers for the benchmark.
+connections:
+  - name: "TSTORE"
+    endpoint: "ENDPOINT"
+    dataset: "GraphName" # optional
+
+# The tasks that will be executed by the benchmark. They will be executed in the order they are defined.
+tasks:
+  - type: stresstest # Stresstests are used to test the performance of the system by sending a large number of requests.
+    workers:
+      - type: "SPARQLProtocolWorker"
+        number: 1
+        queries:
+          path: "queries.txt"
+          order: "linear"
+          format: "one-per-line"  
+        timeout: 1h
+        connection: "TSTORE"
+        parseResults: false
+        completionTarget:
+          duration: 180s         
+        requestType: get query
+        
+# Define how the results will be stored.
+storages:
+  - type: "csv file"
+    directory: "./results"
+  - type: "rdf file"
+    path: "./results"
+
+responseBodyProcessors:
+  - contentType: "application/sparql-results+json"
+    threads: 1
+    timeout: 1 min
