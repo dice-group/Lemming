@@ -201,14 +201,6 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem#getSeed()
-	 */
-	@Override
-	public long getSeed() {
-		return 0;
-	}
-
 	@Override	
 	public T getPotentialItemRemove(Set<T> setOfRemoval) {
 		T[] minus = Arrays.stream(mArrBaseItems)

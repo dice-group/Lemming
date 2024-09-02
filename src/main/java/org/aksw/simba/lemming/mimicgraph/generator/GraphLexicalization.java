@@ -5,7 +5,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredVDistPerDTEColour;
 import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralGenertor;
 import org.aksw.simba.lemming.util.Constants;
@@ -121,13 +120,18 @@ public class GraphLexicalization {
 		// filter out all coloured vertices
 		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
 		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		int count = 0;
 		for(BitSet vColo: setVertexColours){
 			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
 			if(!vColo.isEmpty()){
 				//get vertices with non-empty colour
 				colourVertices.addAll(setVertices);
+			} else {
+				count++;
 			}
 		}
+		
+		// get difference between number of colours and number of uncoloured vertices
 		
 		// traverse through coloured vertices and add classes to them
 		for(int vId : colourVertices){
