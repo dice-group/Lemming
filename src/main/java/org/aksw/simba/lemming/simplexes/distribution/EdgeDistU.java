@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
 
 import com.carrotsearch.hppc.BitSet;
@@ -29,12 +31,12 @@ public class EdgeDistU {
 	/**
 	 * Object for storing distributions by analyzing triangles found in all input graphs.
 	 */
-	private Set<EdgeColos> potentialConnectedEdgeProposer;
+	private IOfferedItem<EdgeColos> potentialConnectedEdgeProposer;
 	
 	/**
 	 * Object for storing distributions by analyzing isolated triangles found in all input graphs.
 	 */
-	private Set<EdgeColos> potentialIsolatedEdgeProposer;
+	private IOfferedItem<EdgeColos> potentialIsolatedEdgeProposer;
 	
 	public EdgeDistU(ObjectObjectOpenHashMap<EdgeColos, double[]> mConnEdgesColoCountDistAvg, ObjectObjectOpenHashMap<EdgeColos, double[]> mIsoEdgeColosCounts, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
 		
@@ -60,9 +62,11 @@ public class EdgeDistU {
 		}
 		
 		//Initialize distribution of triangle colors based on edge count
-		potentialConnectedEdgeProposer = initializeDistributionAllEdgeColos(mConnEdgesColoCountDistAvg);
+		Set<EdgeColos> edges = initializeDistributionAllEdgeColos(mConnEdgesColoCountDistAvg);
+		potentialConnectedEdgeProposer = new OfferedItemWrapper<EdgeColos>(edges.toArray(EdgeColos[]::new), mRandom) ;
 		
-		potentialIsolatedEdgeProposer = initializeDistributionAllEdgeColos(mIsoEdgeColosCounts);
+		Set<EdgeColos> isolatedEdges = initializeDistributionAllEdgeColos(mIsoEdgeColosCounts);
+		potentialIsolatedEdgeProposer = new OfferedItemWrapper<EdgeColos>(isolatedEdges.toArray(EdgeColos[]::new), mRandom) ;
 		
 		updateMapHeadColoTailColos();
 	}
@@ -167,11 +171,11 @@ public class EdgeDistU {
 		
 	}
 
-	public Set<EdgeColos> getPotentialIsolatedEdgeColoProposer() {
+	public IOfferedItem<EdgeColos> getPotentialIsolatedEdgeColoProposer() {
 		return potentialIsolatedEdgeProposer;
 	}
 
-	public Set<EdgeColos> getPotentialConnEdgeProposer() {
+	public IOfferedItem<EdgeColos> getPotentialConnEdgeProposer() {
 		return potentialConnectedEdgeProposer;
 	}
 	

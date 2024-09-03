@@ -4,7 +4,9 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
+import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 
 import com.carrotsearch.hppc.BitSet;
@@ -22,7 +24,7 @@ public class TriDistI implements ITriDist{
 	 * The use case is when we have any two of these colors in sorted order, we should be able to determine the third color and its count.
 	 * Possible case: given vertex colors 1 and 2, using first map we can get the third vertex color 3 and the count of such triangles in input graphs.
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriangleColorsv1v2v3;
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriangleColorsv1v2v3;
 	// Value of the hashmap stores an array. For this array, different values are stored at different indices as described below:
 	// 0th index: Edge counts
 	// 1st index: Triangle counts
@@ -33,28 +35,31 @@ public class TriDistI implements ITriDist{
 	/**
 	 * Variable to store number of input graphs.
 	 */
-	private int iNoOfVersions;
+	protected int iNoOfVersions;
 	
 	/**
 	 * Object of Random class for generating random values.
 	 */
-	private Random mRandom;
+	protected Random mRandom;
 	
 	/**
 	 * Object for storing distributions by analyzing triangles found in all input graphs.
 	 */
-	private OfferedItemByRandomProb<TriColours> potentialConnectedTriangleProposer;
+	protected OfferedItemByRandomProb<TriColours> potentialConnectedTriangleProposer;
 	
 	/**
 	 * Object for storing distributions by analyzing isolated triangles found in all input graphs.
 	 */
-	private OfferedItemByRandomProb<TriColours> potentialIsolatedTriangleProposer;
+	protected OfferedItemByRandomProb<TriColours> potentialIsolatedTriangleProposer;
 	
 	/**
 	 * Map for storing probability distributions computed for two vertex colors.
 	 * Note: The vertex color are sorted in ascending order. The vertex color having lower long value is the key for the first hashmap and the one with the highest long value is the key for the second hashmap.
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, OfferedItemByRandomProb<BitSet>>> mV1ColoV2ColoProbDist = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet,OfferedItemByRandomProb<BitSet>>>();
+	
+	public TriDistI(){
+	}
 	
 	public TriDistI(ObjectObjectOpenHashMap<TriColours, double[]> mTriColoEdgesTriCountDistAvg, ObjectObjectOpenHashMap<TriColours, double[]> mIsolatedTriColosCountsDist, int iNoOfVersions, int mIDesiredNoOfVertices, Random mRandom){
 		
@@ -161,7 +166,7 @@ public class TriDistI implements ITriDist{
 	 * @param thirdVertexColor - Third vertex color (third key .i.e. key for the second nested map)
 	 * @param countToUpdate - Count for the vertex color of the triangle.
 	 */
-	private void storeTriangleColorsInMaps(ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> triColorMapToUpdate, BitSet firstVertexColor, BitSet secondVertexColor, 
+	public void storeTriangleColorsInMaps(ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> triColorMapToUpdate, BitSet firstVertexColor, BitSet secondVertexColor, 
 			BitSet thirdVertexColor, double arrCountDist[]) {
 		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>> mTriColorsv2v3Temp = triColorMapToUpdate.get(firstVertexColor);
 		
@@ -359,7 +364,7 @@ public class TriDistI implements ITriDist{
 	 * @param iNoOfVersions - Number of input graphs
 	 * @param mRandom - Random object
 	 */
-	private OfferedItemByRandomProb<TriColours> initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes) {
+	public OfferedItemByRandomProb<TriColours> initializeDistributionAllTriangles(ObjectObjectOpenHashMap<TriColours, double[]> mTriangleColoursTriangleCountsEdgeCountsResourceNodes) {
 		
 		OfferedItemByRandomProb<TriColours> triangleProposerOutput;
 		
@@ -408,6 +413,11 @@ public class TriDistI implements ITriDist{
 	
 	public ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> getmTriangleColorsv1v2v3() {
 		return mTriangleColorsv1v2v3;
+	}
+
+	@Override
+	public IOfferedItem<EdgeColorsSorted> getPotentialEdgeProposer() {
+		return null; //TODO
 	}
 }
 

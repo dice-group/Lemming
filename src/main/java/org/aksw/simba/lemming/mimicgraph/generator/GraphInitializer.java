@@ -24,6 +24,8 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandom
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.util.Constants;
+import org.aksw.simba.lemming.util.IntSetUtil;
+import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -523,5 +525,31 @@ public class GraphInitializer {
 	public int getDesiredNoOfEdges() {
 		return desiredNoOfEdges;
 	}
+	/**
+	 * The method returns true if the input vertices have one or more vertices in
+	 * common.
+	 * 
+	 * @param headID
+	 * @param tailID
+	 * @return
+	 */
+	public boolean commonVertices(ColouredGraph mimicGraph, int headID, int tailID) {
+		// get vertices incident on input ids
+		IntSet verticesIncidentHead = IntSetUtil.union(mimicGraph.getInNeighbors(headID),
+				mimicGraph.getOutNeighbors(headID));
+		IntSet verticesIncidentTail = IntSetUtil.union(mimicGraph.getInNeighbors(tailID),
+				mimicGraph.getOutNeighbors(tailID));
 
+		// find vertices incident to both
+		IntSet commonVertices = IntSetUtil.intersection(verticesIncidentHead, verticesIncidentTail);
+		// do not consider class vertices
+		Set<Integer> classVertices = getmReversedMapClassVertices().keySet();
+		Set<Integer> commonVerticesSet = new HashSet<Integer>();
+		for (int vertexId : commonVertices)
+			commonVerticesSet.add(vertexId);
+		commonVerticesSet = Sets.difference(commonVerticesSet, classVertices);
+		if (commonVerticesSet.size() > 0)
+			return true;
+		return false;
+	}
 }

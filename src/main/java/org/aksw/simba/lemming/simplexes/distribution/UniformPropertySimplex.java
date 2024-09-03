@@ -1,17 +1,16 @@
 package org.aksw.simba.lemming.simplexes.distribution;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
-import org.aksw.simba.lemming.simplexes.analysis.SimplexAnalysis;
 import org.aksw.simba.lemming.util.Constants;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,154 +21,69 @@ import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
- * 
+ * Sample all colours randomly
  */
-@Component("BPSI")
+@Component("UPSI")
 @Scope(value = "prototype")
-public class BiasedPropertySimplex implements ISimplexProperty {
+public class UniformPropertySimplex implements ISimplexProperty {
 
 	private SimplexGraphInitializer initializer;
 
-	private IPropertyDist mPropDistConnTri;
-	private IPropertyDist mPropDistIsoTri;
-	private IPropertyDist mPropDistS1ConnToTri;
-	private IPropertyDist mPropDistS1ConnectingTri;
-	private IPropertyDist mPropDistselfLoops1ConnToTri;
-	private IPropertyDist mPropDistselfLoopConnTri;
-	private IPropertyDist mPropDistselfLoopIsoTri;
-	private IPropertyDist mPropDistconnS1Analysis;
-	private IPropertyDist mPropDistselfLoopsInIsoS1;
-	private IPropertyDist mPropDistisoS1SelfLoop;
-	private IPropertyDist mPropDistisoS1;
-	private IPropertyDist mPropDistSelfLoopConnS1;
-
 	private Random mRandom;
 
-	public BiasedPropertySimplex(SimplexGraphInitializer initializer) {
+	public UniformPropertySimplex(SimplexGraphInitializer initializer) {
 		this.initializer = initializer;
-		SimplexAnalysis simplexAnalysis = initializer.getSimplexAnalysis();
-		int iNoOfVersions = initializer.getiNoOfVersions();
-		mRandom = new Random(initializer.getSeedGenerator().getNextSeed());
-		int noOfVertices = initializer.getDesiredNoOfVertices();
-		mPropDistConnTri = new PropertyDistI(simplexAnalysis.getConnTriAnalysis().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistIsoTri = new PropertyDistI(simplexAnalysis.getIsoTriAnalysis().getmVertColosPropDist(), iNoOfVersions,
-				mRandom);
-		mPropDistS1ConnToTri = new PropertyDistI(simplexAnalysis.getS1ConnToTri().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistS1ConnectingTri = new PropertyDistI(simplexAnalysis.getS1ConnectingTri().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistS1ConnToTri = new PropertyDistI(simplexAnalysis.getS1ConnToTri().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistselfLoopIsoTri = new PropertyDistI(simplexAnalysis.getSelfLoopIsoTri().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistselfLoopConnTri = new PropertyDistI(simplexAnalysis.getSelfLoopConnTri().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistselfLoops1ConnToTri = new PropertyDistI(
-				simplexAnalysis.getSelfLoops1ConnToTri().getmVertColosPropDist(), iNoOfVersions, mRandom);
-		mPropDistisoS1 = new PropertyDistI(simplexAnalysis.getIsoS1Analysis().getmVertColosPropDist(), iNoOfVersions,
-				mRandom);
-		mPropDistisoS1SelfLoop = new PropertyDistI(simplexAnalysis.getIsoS1SelfLoopAnalysis().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistselfLoopsInIsoS1 = new PropertyDistI(simplexAnalysis.getSelfLoopsInIsoS1().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistconnS1Analysis = new PropertyDistI(simplexAnalysis.getConnS1Analysis().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
-		mPropDistSelfLoopConnS1 = new PropertyDistI(simplexAnalysis.getSelfLoopsInConnS1().getmVertColosPropDist(),
-				iNoOfVersions, mRandom);
+		this.mRandom = new Random(initializer.getSeedGenerator().getNextSeed());
 	}
 
 	@Override
-	public BitSet proposeColour(EdgeColorsSorted edgeColors) {
-		return mPropDistConnTri.proposePropColor(edgeColors);
+	public BitSet proposeColour(EdgeColorsSorted edgeColours) {
+		return new OfferedItemWrapper<BitSet>(initializer.getAvailableEdgeColours().toArray(BitSet[]::new), mRandom)
+				.getPotentialItem();
 	}
 
 	@Override
-	public BitSet proposeColourForTri(EdgeColorsSorted edgeColors) {
-		return mPropDistS1ConnectingTri.proposePropColor(edgeColors);
+	public BitSet proposeColourForTri(EdgeColorsSorted edgeColours) {
+		return proposeColour(edgeColours);
 	}
 
 	@Override
-	public BitSet proposeConnPropColour(EdgeColorsSorted edgeColorsSorted) {
-		return mPropDistconnS1Analysis.proposePropColor(edgeColorsSorted);
+	public BitSet proposeConnPropColour(EdgeColorsSorted edgeColours) {
+		return proposeColour(edgeColours);
 	}
 
 	@Override
-	public BitSet proposeS1ConnProp(EdgeColorsSorted edgeColorsSorted) {
-		return mPropDistS1ConnToTri.proposePropColor(edgeColorsSorted);
-	}
-
-	public IPropertyDist getmPropDistConnTri() {
-		return mPropDistConnTri;
-	}
-
-	public IPropertyDist getmPropDistIsoTri() {
-		return mPropDistIsoTri;
-	}
-
-	public IPropertyDist getmPropDistS1ConnToTri() {
-		return mPropDistS1ConnToTri;
-	}
-
-	public IPropertyDist getmPropDistS1ConnectingTri() {
-		return mPropDistS1ConnectingTri;
-	}
-
-	public IPropertyDist getmPropDistselfLoops1ConnToTri() {
-		return mPropDistselfLoops1ConnToTri;
-	}
-
-	public IPropertyDist getmPropDistselfLoopConnTri() {
-		return mPropDistselfLoopConnTri;
-	}
-
-	public IPropertyDist getmPropDistselfLoopIsoTri() {
-		return mPropDistselfLoopIsoTri;
-	}
-
-	public IPropertyDist getmPropDistconnS1Analysis() {
-		return mPropDistconnS1Analysis;
-	}
-
-	public IPropertyDist getmPropDistselfLoopsInIsoS1() {
-		return mPropDistselfLoopsInIsoS1;
-	}
-
-	public IPropertyDist getmPropDistisoS1SelfLoop() {
-		return mPropDistisoS1SelfLoop;
-	}
-
-	public IPropertyDist getmPropDistisoS1() {
-		return mPropDistisoS1;
-	}
-
-	public IPropertyDist getmPropDistSelfLoopConnS1() {
-		return mPropDistSelfLoopConnS1;
+	public BitSet proposeS1ConnProp(EdgeColorsSorted edgeColours) {
+		return proposeColour(edgeColours);
 	}
 
 	@Override
 	public boolean addEdgeToMimicGraph(ColouredGraph mimicGraph, BitSet inputVertex1Colo, BitSet inputVertex2Colo,
 			int inputVertex1ID, int inputVertex2ID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate,
 			IColourMappingRules mColourMapperToUse, TriColours inputTriangleColours, IPropertyDist mPropDistInput) {
-
 		boolean isEdgeFromFirstToSecondVertex = true;
 		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2
 		// is head
-
-		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
-		BitSet propColor = proposeColour(edgeColors);
-		if (mColourMapperToUse.isHeadColourOf(inputVertex2Colo, inputVertex1Colo)) { // is v1 head colo?
+		Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices = initializer
+				.getmMapEdgeColoursToConnectedVertices();
+		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
+				inputVertex2Colo);
+		if (possEdgeColov1tailv2head.size() == 0) {
+			// When vertex 1 is not tail and vertex 2 is not head
+			// get edge assuming vertex 1 is head and vertex 2 is tail
+			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex2Colo,
+					inputVertex1Colo);
 			isEdgeFromFirstToSecondVertex = false;
 		}
 
-		if (!propColor.isEmpty()) { // Add edge if edge color is found for the vertices
+		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
 
 			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = propColor;
+			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
+					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
 
 			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
+			Map<Integer, IntSet> mTailHead = mMapEdgeColoursToConnectedVertices.get(randomEdgeColov1v2);
 			if (mTailHead == null) {
 				mTailHead = new HashMap<Integer, IntSet>();
 			}
@@ -205,7 +119,7 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 
 			}
 
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
+			mMapEdgeColoursToConnectedVertices.put(randomEdgeColov1v2, mTailHead);
 
 			// Update or Add to the mapping of edge color and edge Id
 			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
@@ -223,7 +137,61 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 		} else {
 			return false;
 		}
+	}
 
+	@Override
+	public IPropertyDist getmPropDistConnTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistisoS1SelfLoop() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistisoS1() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistS1ConnectingTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistIsoTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistconnS1Analysis() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistselfLoopsInIsoS1() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistselfLoopIsoTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistselfLoopConnTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistselfLoops1ConnToTri() {
+		return null;
+	}
+
+	@Override
+	public IPropertyDist getmPropDistSelfLoopConnS1() {
+		return null;
 	}
 
 	@Override
@@ -231,21 +199,36 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 			int inputVertex1ID, int inputVertex2ID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate,
 			IColourMappingRules mColourMapperToUse, IPropertyDist mPropDistInput) {
 		boolean isEdgeFromSecondToFirstVertex = true;
-
-		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
-		BitSet propColor = mPropDistInput.proposePropColor(edgeColors);
-		if (mColourMapperToUse.isTailColourOf(inputVertex1Colo, inputVertex2Colo)) {
+		Map<BitSet, Map<Integer, IntSet>> mMapEdgeColoursToConnectedVertices = initializer
+				.getmMapEdgeColoursToConnectedVertices();
+		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2
+		// is head
+		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex2Colo,
+				inputVertex1Colo);
+		if (possEdgeColov1tailv2head.size() == 0) {
+			// When vertex 1 is not tail and vertex 2 is not head
+			// get edge assuming vertex 1 is head and vertex 2 is tail
+			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
+					inputVertex2Colo);
 			isEdgeFromSecondToFirstVertex = false;
 		}
-
-		Set<BitSet> possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.add(propColor);
 
 		// Check for duplicate edge color if it is essential
 		// Note: This check is not required when a triangle is created for the first
 		// time or a edge is created between vertices for the first time
 		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, inputVertex2ID, inputVertex1ID,
 				possEdgeColov1tailv2head);
+
+		// when no edge can be added and second assumption is not evaluated (vertex 1 -
+		// head and vertex 2 - tail) get edge colors for the second case
+		if ((possEdgeColov1tailv2head.size() == 0) && isEdgeFromSecondToFirstVertex) {
+			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
+					inputVertex2Colo);
+			isEdgeFromSecondToFirstVertex = false;
+
+			possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, inputVertex2ID, inputVertex1ID,
+					possEdgeColov1tailv2head);
+		}
 
 		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
 
@@ -254,8 +237,7 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
 
 			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
+			Map<Integer, IntSet> mTailHead = mMapEdgeColoursToConnectedVertices.get(randomEdgeColov1v2);
 			if (mTailHead == null) {
 				mTailHead = new HashMap<Integer, IntSet>();
 			}
@@ -289,7 +271,7 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 				mTailHead.put(inputVertex1ID, headIds);
 			}
 
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
+			mMapEdgeColoursToConnectedVertices.put(randomEdgeColov1v2, mTailHead);
 
 			// Update or Add to the mapping of edge color and edge Id
 			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
@@ -313,23 +295,26 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 	public boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
 			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
 			boolean triangleCheck, IPropertyDist mPropDistInput) {
-
-		EdgeColorsSorted edgesColors = new EdgeColorsSorted(headColo, tailColo);
-
-		BitSet proposePropColor = mPropDistInput.proposePropColor(edgesColors);
-
 		return addEdgeWithTriangleCheck(mimicGraph, headColo, tailColo, headID, tailID, mMapColourToEdgeIDsToUpdate,
-				mColourMapperToUse, triangleCheck, proposePropColor);
+				mColourMapperToUse, triangleCheck);
+
 	}
 
 	@Override
 	public boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
 			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			boolean triangleCheck, BitSet propertyColo) {
+			boolean triangleCheck, BitSet mPropDistInput) {
+		return addEdgeWithTriangleCheck(mimicGraph, headColo, tailColo, headID, tailID, mMapColourToEdgeIDsToUpdate,
+				mColourMapperToUse, triangleCheck);
+
+	}
+
+	public boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
+			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
+			boolean triangleCheck) {
 		// Get edge between head and tail, assuming vertex 1 is tail and vertex 2 is
 		// head
-		Set<BitSet> possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.add(propertyColo);
+		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(tailColo, headColo);
 
 		// Check for duplicate edge color if it is essential
 		// Note: This check is not required when a triangle is created for the first
@@ -374,5 +359,4 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 			return false;
 		}
 	}
-
 }

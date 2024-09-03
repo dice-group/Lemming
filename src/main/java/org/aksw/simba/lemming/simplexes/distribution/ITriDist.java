@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.simplexes.distribution;
 import java.util.Set;
 
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 
 import com.carrotsearch.hppc.BitSet;
@@ -35,5 +36,9 @@ public interface ITriDist {
 	TriColours proposeIsoTriToAddEdge(Set<TriColours> setIsoTriInMimicGraph);
 
 	ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> getmTriangleColorsv1v2v3();
+
+	IOfferedItem<TriColours> getPotentialTriangleProposer();
+	
+	IOfferedItem <EdgeColorsSorted> getPotentialEdgeProposer();
 
 }

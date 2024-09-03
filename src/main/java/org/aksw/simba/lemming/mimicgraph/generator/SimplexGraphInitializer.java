@@ -1,6 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.simplexes.analysis.FindTri;
 import org.aksw.simba.lemming.simplexes.analysis.SimplexAnalysis;
+import org.aksw.simba.lemming.util.Constants;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
+import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
@@ -314,5 +317,32 @@ public class SimplexGraphInitializer extends GraphInitializer {
 	public void setmTriColosCountsAvgProb(
 			ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb) {
 		this.mTriColosCountsAvgProb = mTriColosCountsAvgProb;
+	}
+	
+	/**
+	 * This method updates the global map for Edge color => tail ID => head IDs
+	 * 
+	 * @param possEdgeColo
+	 * @param headID
+	 * @param tailID
+	 */
+	public void updateMappingOfEdgeColoHeadTailColo(BitSet possEdgeColo, int headID, int tailID) {
+		// Get the map storing edge colors and corresponding tail and head ids
+		Map<Integer, IntSet> mTailHead = mapEdgeColoursToConnectedVertices.get(possEdgeColo);
+		if (mTailHead == null) {
+			mTailHead = new HashMap<Integer, IntSet>();
+		}
+
+		// initialize head ids for the map
+		IntSet headIds = mTailHead.get(tailID);
+		if (headIds == null) {
+			headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		}
+		headIds.add(headID);
+
+		// update the map for tail id and head ids
+		mTailHead.put(tailID, headIds);
+
+		mapEdgeColoursToConnectedVertices.put(possEdgeColo, mTailHead);
 	}
 }

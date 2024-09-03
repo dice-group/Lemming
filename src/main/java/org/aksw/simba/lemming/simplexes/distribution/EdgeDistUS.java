@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
+
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
@@ -28,22 +31,26 @@ public class EdgeDistUS {
 	/**
 	 * Head Color proposer for 1-simplex.
 	 */
-	private Set<BitSet> potentialVertColoProposer;
+	private IOfferedItem<BitSet> potentialVertColoProposer;
 	
 	/**
 	 * Map for storing probability distributions for different head colors
 	 */
 	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mVertColoProbDist;
+	
+	private Random mRandom;
 
 	public EdgeDistUS(ObjectDoubleOpenHashMap<BitSet> mVertColoCount1Simplex, ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> mHeadColoTailColoCount, int iNoOfVersions, Random mRandom) {
 		// initialization
+		this.mRandom = mRandom;
 		this.mHeadColoTailColoCount = mHeadColoTailColoCount;
 		//this.iNoOfVersions = iNoOfVersions;
 		//this.mRandom = mRandom;
 		mVertColoProbDist = new ObjectObjectOpenHashMap<BitSet, Set<BitSet>>();
 		
 		// create head color proposer
-		createVertColoProposer(mVertColoCount1Simplex);
+		Set<BitSet> colours = createVertColoProposer(mVertColoCount1Simplex);
+		potentialVertColoProposer = new OfferedItemWrapper<>(colours.toArray(BitSet[]::new), mRandom);
 	}
 	
 	/**
@@ -52,9 +59,9 @@ public class EdgeDistUS {
 	 * @param iNoOfVersions - Number of input graphs.
 	 * @param mRandom - Random generator object.
 	 */
-	public void createVertColoProposer(ObjectDoubleOpenHashMap<BitSet> mVertColoCount1Simplex) {
+	public Set<BitSet> createVertColoProposer(ObjectDoubleOpenHashMap<BitSet> mVertColoCount1Simplex) {
 		
-		potentialVertColoProposer = new HashSet<BitSet>();
+		Set<BitSet> potentialVertColoProposer = new HashSet<BitSet>();
 		
 		//iterate list of head colors and add values to sample space and values
 		Object[] keysVertColo = mVertColoCount1Simplex.keys;
@@ -65,11 +72,11 @@ public class EdgeDistUS {
 					
 			}
 		}
-		
+		return potentialVertColoProposer;
 		
 	}
 	
-	public Set<BitSet> proposeVertColo(BitSet headColo) {
+	public IOfferedItem<BitSet> proposeVertColo(BitSet headColo) {
 		
 		Set<BitSet> potentialTailColoProposer = mVertColoProbDist.get(headColo);
 		
@@ -90,16 +97,11 @@ public class EdgeDistUS {
 					potentialTailColoProposer.add(tailColo);
 				}
 			}
-			
-			
-			
 		} 
-		
-		//return potentialTailColoProposer.getPotentialItem(); //changing return type so that the proposer could be filtered
-		return potentialTailColoProposer;
+		return new OfferedItemWrapper<BitSet>(potentialTailColoProposer.toArray(BitSet[]::new), mRandom);
 	}
 
-	public Set<BitSet> getPotentialHeadColoProposer() {
+	public IOfferedItem<BitSet> getPotentialHeadColoProposer() {
 		return potentialVertColoProposer;
 	}
 }

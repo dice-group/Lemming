@@ -4,8 +4,10 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
+import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
+import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 
 import com.carrotsearch.hppc.BitSet;
@@ -362,16 +364,22 @@ public class TriDistU implements ITriDist {
 		return triangleColours;
 	}
 
-	public OfferedItemWrapper<TriColours> getPotentialIsolatedTriangleProposer() {
+	public IOfferedItem<TriColours> getPotentialIsolatedTriangleProposer() {
 		return new OfferedItemWrapper<TriColours>(potentialIsolatedTriangleProposer.toArray(TriColours[]::new),
 				mRandom);
 	}
 
-	public Set<TriColours> getPotentialTriangleProposer() {
-		return potentialConnectedTriangleProposer;
+	public IOfferedItem<TriColours> getPotentialTriangleProposer() {
+		return new OfferedItemWrapper<TriColours>(potentialConnectedTriangleProposer.toArray(TriColours[]::new),
+				mRandom);
 	}
 
 	public ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> getmTriangleColorsv1v2v3() {
 		return mTriangleColorsv1v2v3;
+	}
+
+	@Override
+	public IOfferedItem<EdgeColorsSorted> getPotentialEdgeProposer() {
+		return null;
 	}
 }

@@ -350,7 +350,7 @@ public class GraphOptimization {
                 double origConstantVal = expr.getValue(mOrigMetricValuesOfMimicGrpah);
                 fWriter.write("\t The first mimic graph: " + origConstantVal + "\n");
                 double optimizedConstantVal = expr.getValue(mOptimizedMetricValues);
-                fWriter.write("\t The opimized mimic graph: " + optimizedConstantVal + "\n");
+                fWriter.write("\t The optimized mimic graph: " + optimizedConstantVal + "\n");
             }
 
             fWriter.write("\n");
@@ -366,9 +366,11 @@ public class GraphOptimization {
                 fWriter.write("\t " + mapGraphName.get(keyGraph) + ": " + errorScore + "\n");
 
             }
-            fWriter.write("\t The first mimic graph: " + mLstErrorScore.get(0) + "\n");
-            fWriter.write("\t The opimized mimic graph: " + mLstErrorScore.get(mLstErrorScore.size() - 1) + "\n");
-
+            
+            if(!mLstErrorScore.isEmpty()) {
+	            fWriter.write("\t The first mimic graph: " + mLstErrorScore.get(0) + "\n");
+	            fWriter.write("\t The opimized mimic graph: " + mLstErrorScore.get(mLstErrorScore.size() - 1) + "\n");
+            }
             fWriter.write("\n\n\n");
 
             fErrorScoreWriter.write("# Error score of " + mMaxIteration + " iteration\n");

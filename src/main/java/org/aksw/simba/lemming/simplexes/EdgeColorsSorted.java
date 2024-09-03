@@ -2,7 +2,7 @@ package org.aksw.simba.lemming.simplexes;
 
 import com.carrotsearch.hppc.BitSet;
 
-public class EdgeColorsSorted {
+public class EdgeColorsSorted{
 
 	private BitSet headColo, tailColo;	
 

@@ -148,7 +148,6 @@ public abstract class AbstractFindSimplexes implements ISimplexesAnalysis{
 				int iNoVerts = mGraphsVertIds.get(graphId).size(); // get total number of edges
 				int iNoVertices = graph.getVertices().size();
 				noVertsTemp += iNoVerts / (iNoVertices * 1.0);
-				
 				graphId++;
 			}
 		}

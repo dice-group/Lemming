@@ -42,6 +42,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		buildSimulatedArray();
 	}
 	
+	
 	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, Set<T> setOfFilteredItems, long seed){
 			
 			// find the intersection of 2 set

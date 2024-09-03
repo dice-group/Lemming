@@ -75,9 +75,9 @@ public class GraphGenerationTest {
 		IGraphGenerator graphGenerator;
 		GraphInitializer initializer = (GraphInitializer) application.getBean(pArgs.mode.toLowerCase(), seedGenerator);
 		ColouredGraph mimicGraph = initializer.initialize(graphs, pArgs.noVertices, pArgs.noThreads);
-		
+
 		// FIXME
-		if (pArgs.mode.toLowerCase().equals("binary")) { 
+		if (pArgs.mode.toLowerCase().equals("binary")) {
 			IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
 			IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
 			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, classSelector,
@@ -102,15 +102,19 @@ public class GraphGenerationTest {
 		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
 		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer,
 				mDatasetManager);
-		
-		// TODO if in baseline mode, don't let it go forward
+
 		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
 		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mimicGraph, graphGenerator, metrics,
 				valuesCarrier, seedGenerator, pArgs.noOptimizationSteps);
-		ColouredGraph refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
-
+		// skip optimization if baseline
+		ColouredGraph refinedGraph = null;
+		if (pArgs.mode.toLowerCase().equals("bl")) {
+			refinedGraph = mimicGraph.clone();
+		} else {
+			refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
+		}
 		// output results to file "LemmingEx.result"
 		// before we connect the RDF.type edges
 		String savedFile = mDatasetManager.getSavedFileName("results");

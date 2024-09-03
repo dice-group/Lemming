@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +26,6 @@ import org.aksw.simba.lemming.simplexes.distribution.ISimplexClass;
 import org.aksw.simba.lemming.simplexes.distribution.ISimplexProperty;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.apache.jena.ext.com.google.common.collect.Sets;
-import org.apache.jena.ext.com.google.common.collect.Sets.SetView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -61,14 +58,20 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 	/** Property Selector instance. Dictates the property sampling strategy. */
 	private ISimplexProperty simplexProperty;
-	
-	/** Class Selector. Only used in the optimization phase of simplex-based approaches */
+
+	/**
+	 * Class Selector. Only used in the optimization phase of simplex-based
+	 * approaches
+	 */
 	private IClassSelector classSelector;
-	
-	/** Vertex Selector. Only used in the optimization phase of simplex-based approaches */
+
+	/**
+	 * Vertex Selector. Only used in the optimization phase of simplex-based
+	 * approaches
+	 */
 	private IVertexSelector vertexSelector;
 
-	/** Random sequence generator object*/
+	/** Random sequence generator object */
 	private Random mRandom;
 
 	/**
@@ -137,10 +140,12 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				Set<TriColours> setTriangleColorsMimicGraph = new HashSet<TriColours>();
 
 				// add the selected triangle to mimic graph
-				addTriangleToMimicGraphWithPropProb(mimicGraph, initialTriangle,
+				addTriangleToMimicGraph(mimicGraph, initialTriangle,
 						analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
 						initializer.getmMapColourToVertexIDs2Simplex(), initializer.getmMapColourToEdgeIDs2Simplex(),
 						initializer.getmTriangleColorsVertexIds(), simplexProperty.getmPropDistConnTri());
+				
+				
 
 				vertsPB.stepBy(3);
 				actualVerticesInTriangles += 3;
@@ -176,13 +181,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								TriColours newPossibleTriangle = new TriColours(selectedVertex1Colo,
 										selectedVertex2Colo, proposedVertex3Colo);
 
-								// try to propose a color for third vertex multiple times if it is not possible
-								proposedVertex3Colo = simplexClass.proposeVertex3Colour(selectedVertex1Colo,
-										selectedVertex2Colo);
-
-								newPossibleTriangle = new TriColours(selectedVertex1Colo, selectedVertex2Colo,
-										proposedVertex3Colo);
-
 								// create vertex for the proposed color
 								int proposedVertId = addVertexToMimicGraph(mimicGraph, proposedVertex3Colo,
 										initializer.getmMapColourToVertexIDs2Simplex());
@@ -197,11 +195,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								// add edges among selected vertices and proposed color
 								// Note: Ideally properties should exist among them. since they were also
 								// forming a triangle in input graphs
-								addEdgeTriangleWithPropProb(mimicGraph, selectedVertex1Colo, proposedVertex3Colo,
-										selectedVertex1, proposedVertId, initializer.getmMapColourToEdgeIDs2Simplex(),
-										analysis.getConnTriAnalysis().getmColourMapperSimplexes(), newPossibleTriangle,
-										simplexProperty.getmPropDistConnTri());
-								addEdgeTriangleWithPropProb(mimicGraph, selectedVertex2Colo, proposedVertex3Colo,
+								simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex2Colo, proposedVertex3Colo,
 										selectedVertex2, proposedVertId, initializer.getmMapColourToEdgeIDs2Simplex(),
 										analysis.getConnTriAnalysis().getmColourMapperSimplexes(), newPossibleTriangle,
 										simplexProperty.getmPropDistConnTri());
@@ -251,7 +245,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							// Update the triangle count
 //							arrNewTriProbCount[3] = arrNewTriProbCount[3] - 1;
 							// Add the triangle to mimic graph
-							addTriangleToMimicGraphWithPropProb(mimicGraph, randomTriangle,
+							addTriangleToMimicGraph(mimicGraph, randomTriangle,
 									analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
 									initializer.getmMapColourToVertexIDs2Simplex(),
 									initializer.getmMapColourToEdgeIDs2Simplex(),
@@ -310,8 +304,8 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 						// Convert vertices to Array
 						Integer[] vertexIDExistingTriangle = selectedVertices
 								.toArray(new Integer[selectedVertices.size()]);
-						
-						if(vertexIDExistingTriangle.length < 3) {
+
+						if (vertexIDExistingTriangle.length < 3) {
 							numOfIterationAddingEdgesToGraph++;
 							continue;
 						}
@@ -331,7 +325,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							BitSet existingVertexColo1 = mimicGraph.getVertexColour(pairOfVertices.get(0));
 							BitSet existingVertexColo2 = mimicGraph.getVertexColour(pairOfVertices.get(1));
 
-							boolean edgeAdded = addEdgeInAnyDirectionDuplCheckWithPropProb(mimicGraph,
+							boolean edgeAdded = simplexProperty.addEdgeInAnyDirection(mimicGraph,
 									existingVertexColo1, existingVertexColo2, pairOfVertices.get(0),
 									pairOfVertices.get(1), initializer.getmMapColourToEdgeIDs2Simplex(),
 									analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
@@ -379,7 +373,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			numOfIterationAddingEdgesToGraph = 0;
 
 			// get head proposer defined for 1-simplex distribution
-			IOfferedItem<EdgeColos> potentialEdgeColoProposer = simplexProperty.getIsolatedEdgeProposer();
+			IOfferedItem<EdgeColos> potentialEdgeColoProposer = simplexClass.getIsolatedEdgeProposer();
 //				s1ConnDist
 //				.getPotentialIsolatedEdgeColoProposer();
 
@@ -469,7 +463,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 				}
 
-				boolean edgeAdded = addEdgeIsoS1WithTriCheck(mimicGraph, potentialheadColo, potentialTailColo,
+				boolean edgeAdded = simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialheadColo, potentialTailColo,
 						vertexIDHead, vertexIDTail, initializer.getmMapColourToEdgeIDs1Simplex(),
 						analysis.getIsoS1Analysis().getmColourMapperSimplexes(), false,
 						simplexProperty.getmPropDistisoS1()); // last
@@ -547,7 +541,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				// temporary assignment for tail vertex id
 				int vertexIDTail = vertexIDHead;
 
-				boolean edgeAdded = addEdgeIsoS1WithTriCheck(mimicGraph, potentialColoSelfLoop, potentialColoSelfLoop,
+				boolean edgeAdded = simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialColoSelfLoop, potentialColoSelfLoop,
 						vertexIDHead, vertexIDTail, initializer.getmMapColourToEdgeIDs1Simplex(),
 						analysis.getIsoS1SelfLoopAnalysis().getmColourMapperSimplexes(), newVertexNotAdded,
 						simplexProperty.getmPropDistisoS1SelfLoop());
@@ -776,7 +770,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								numOfIterationAddingEdgesToGraph = 0;
 
 								// update the mapping of edge color and tail-head IDs
-								updateMappingOfEdgeColoHeadTailColo(possEdgeColo, possHeadIDIsolatedTri,
+								initializer.updateMappingOfEdgeColoHeadTailColo(possEdgeColo, possHeadIDIsolatedTri,
 										possTailIDIsolatedTri);
 
 								// update the map storing isolated triangles
@@ -932,7 +926,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 							// Add edge between selected vertices if they do not have a vertex in common
 							// using below function call
-							boolean edgeAdded = addEdgeIsoS1WithTriCheck(mimicGraph, potentialHeadColocase4b,
+							boolean edgeAdded = simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialHeadColocase4b,
 									potentialTailColocase4b, possHeadIDcase4b, possTailIDcase4b,
 									initializer.getmMapColourToEdgeIDs1Simplex(),
 									analysis.getS1ConnectingTri().getmColourMapperSimplexes(), true,
@@ -969,8 +963,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			LOGGER.debug("Estimated Edges: " + estimatedEdgesIsolatedTriangle);
 			LOGGER.debug("Estimated Vertices: " + estimatedVerticesIsolatedTriangle);
 			IOfferedItem<TriColours> potentialIsolatedTriangleProposer = simplexClass.getIsolatedTriangleProposer();
-			ObjectObjectOpenHashMap<EdgeColos, double[]> mEdgesColorsCountDistAvg = analysis.getConnS1Analysis()
-					.getmColoEdgesCountDistAvg();
 
 			// initialize tracker variable
 			actualVerticesSimplexes = 0;
@@ -985,7 +977,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 					&& (potentialIsolatedTriangleProposer != null)) {
 				TriColours possIsoTri = potentialIsolatedTriangleProposer.getPotentialItem();
 				// add the selected random triangle to mimic graph
-				addTriangleToMimicGraphWithPropProb(mimicGraph, possIsoTri,
+				addTriangleToMimicGraph(mimicGraph, possIsoTri,
 						analysis.getIsoTriAnalysis().getmColourMapperSimplexes(),
 						initializer.getmMapColourToVertexIDs2SimplexIsolated(),
 						initializer.getmMapColourToEdgeIDs2SimplexIsolated(),
@@ -1042,7 +1034,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 						BitSet existingVertexColo1 = mimicGraph.getVertexColour(pairOfVertices.get(0));
 						BitSet existingVertexColo2 = mimicGraph.getVertexColour(pairOfVertices.get(1));
 
-						boolean edgeAdded = addEdgeInAnyDirectionDuplCheckWithPropProb(mimicGraph, existingVertexColo1,
+						boolean edgeAdded = simplexProperty.addEdgeInAnyDirection(mimicGraph, existingVertexColo1,
 								existingVertexColo2, pairOfVertices.get(0), pairOfVertices.get(1),
 								initializer.getmMapColourToEdgeIDs2SimplexIsolated(),
 								analysis.getIsoTriAnalysis().getmColourMapperSimplexes(),
@@ -1092,7 +1084,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			// initialize variable tracking iteration count for this case
 			numOfIterationAddingEdgesToGraph = 0;
 
-			EdgeColos initialRandomEdge = simplexProperty.proposeConnEdge();
+			EdgeColos initialRandomEdge = simplexClass.proposeConnEdge();
 
 			// Variables to track number of edges and vertices added in triangle
 			int actualEdgesInConnS1 = 0;
@@ -1117,7 +1109,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				int vertexIDHead = addVertexToMimicGraph(mimicGraph, potentialHeadColo,
 						initializer.getmMapColourToVertexIDs1SimplexConnected());
 
-				addEdgeIsoS1WithTriCheck(mimicGraph, potentialHeadColo, potentialTailColo, vertexIDHead, vertexIDTail,
+				simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialHeadColo, potentialTailColo, vertexIDHead, vertexIDTail,
 						initializer.getmMapColourToEdgeIDs1Simplex(),
 						analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
 						simplexProperty.getmPropDistconnS1Analysis());
@@ -1197,7 +1189,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 									// add edges among selected vertices and proposed color
 									// Note: Ideally properties should exist among them. since they were also
 									// forming an edge in input graphs
-									newEdgesNotAddedToTriangle = !addEdgeConnS1WithTriCheck(mimicGraph,
+									newEdgesNotAddedToTriangle = !simplexProperty.addEdgeWithTriangleCheck(mimicGraph,
 											proposedHeadColo, proposedTail, randomVertexID, proposedVertId,
 											initializer.getmMapColourToEdgeIDs1Simplex(),
 											analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
@@ -1238,7 +1230,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							// If no tail color could be included for the existing head colors in the mimic
 							// graph. Add a new 1-simplex
 
-							EdgeColos randomEdge = simplexProperty.proposeConnEdge();
+							EdgeColos randomEdge = simplexClass.proposeConnEdge();
 
 							// variable to track number of times a random edge was selected
 							int numOfIterationRandomTri = 1;
@@ -1246,7 +1238,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							// check if it is possible to add new triangle
 							while (numOfIterationRandomTri < 500
 									&& actualVerticesInConnS1 < estVerticesConnected1Simplexes) {
-								randomEdge = simplexProperty.proposeConnEdge();
+								randomEdge = simplexClass.proposeConnEdge();
 								numOfIterationRandomTri++;
 							}
 
@@ -1269,9 +1261,9 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								vertexIDHead = addVertexToMimicGraph(mimicGraph, potentialHeadColo,
 										initializer.getmMapColourToVertexIDs1SimplexConnected());
 
-								addEdgeWithTriangleCheck(mimicGraph, potentialHeadColo, potentialTailColo, vertexIDHead,
+								simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialHeadColo, potentialTailColo, vertexIDHead,
 										vertexIDTail, initializer.getmMapColourToEdgeIDs1Simplex(),
-										analysis.getConnS1Analysis().getmColourMapperSimplexes(), false);
+										analysis.getConnS1Analysis().getmColourMapperSimplexes(), false, (IPropertyDist)null);
 
 								// increment no of vertices in triangle
 								actualVerticesInConnS1 = actualVerticesInConnS1 + 2;
@@ -1290,13 +1282,11 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								numOfIterationAddingEdgesToGraph = 0;
 
 							} else {
-								System.out.println();
 								break; // terminate while condition if it is not possible to add random edge
 							}
 
 						}
 					} else {
-						System.out.println();
 						break; // Cannot add more vertices
 					}
 				} // end while condition checking if actual number of edges is less than estimated
@@ -1305,7 +1295,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				LOGGER.debug("Added Edges: " + actualEdgesInConnS1);
 				LOGGER.debug("Added Vertices: " + actualVerticesInConnS1);
 
-				LOGGER.debug("Adding additional Edges to created 1-simplexes");
+				vertsPB.setExtraMessage("Case 6: Adding additional Edges to created 1-simplexes");
 
 				numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
 				while ((actualEdgesInConnS1 < estEdgesConnected1Simplexes)
@@ -1317,7 +1307,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 					if (setEdgeColorsMimicGraph.size() != 0) {
 
 						// Logic for adding edges to existing connected 1-simplexes
-						EdgeColos proposeS1 = simplexProperty.proposeTriangleToAddEdge(setEdgeColorsMimicGraph);
+						EdgeColos proposeS1 = simplexClass.proposeTriangleToAddEdgeColours(setEdgeColorsMimicGraph);
 
 						// Best case: A triangle is returned
 						List<IntSet> selectedEdgesList = initializer.getmEdgeColorsVertexIds().get(proposeS1);
@@ -1336,7 +1326,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 						// triangle check not required since working with 1-simplexes instead of
 						// sampling head and tail
-						boolean edgeAdded = addEdgeIsoS1WithTriCheck(mimicGraph, existingVertexColo1,
+						boolean edgeAdded = simplexProperty.addEdgeWithTriangleCheck(mimicGraph, existingVertexColo1,
 								existingVertexColo2, existingVertexID1, existingVertexID2,
 								initializer.getmMapColourToEdgeIDs1Simplex(),
 								analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
@@ -1347,7 +1337,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							numOfIterationAddingEdgesToGraph = 0;
 						} else {
 							// try to add edge in different direction
-							edgeAdded = addEdgeIsoS1WithTriCheck(mimicGraph, existingVertexColo2, existingVertexColo1,
+							edgeAdded = simplexProperty.addEdgeWithTriangleCheck(mimicGraph, existingVertexColo2, existingVertexColo1,
 									existingVertexID2, existingVertexID1, initializer.getmMapColourToEdgeIDs1Simplex(),
 									analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
 									simplexProperty.getmPropDistconnS1Analysis()); // triangle check not
@@ -1587,10 +1577,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 				// check existing edge colors between vertices and remove them from the possible
 				// edge colors set
-				possibleLinkingEdgeColours = removeDuplicateEdgeColors(mimicGraph, vertexIDWithHeadColo,
+				possibleLinkingEdgeColours = simplexProperty.removeDuplicateEdgeColors(mimicGraph, vertexIDWithHeadColo,
 						vertexIDWithTailColo, possibleLinkingEdgeColours);
 
-				boolean havingVertices = commonVertices(mimicGraph, vertexIDWithHeadColo, vertexIDWithTailColo);
+				boolean havingVertices = initializer.commonVertices(mimicGraph, vertexIDWithHeadColo, vertexIDWithTailColo);
 
 				if ((possibleLinkingEdgeColours.size() > 0) && !havingVertices) {
 					// select a random edge
@@ -1605,7 +1595,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 					numOfIterationAddingEdgesToGraph = 0;
 
 					// update the map to track edge colors, tail id and head ids
-					updateMappingOfEdgeColoHeadTailColo(possEdgeColo, vertexIDWithHeadColo, vertexIDWithTailColo);
+					initializer.updateMappingOfEdgeColoHeadTailColo(possEdgeColo, vertexIDWithHeadColo, vertexIDWithTailColo);
 
 				} else {
 					numOfIterationAddingEdgesToGraph++;
@@ -1668,49 +1658,14 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		updateVertexColoMap(initializer.getmMapColourToVertexIDs2SimplexIsolated()); // isolated 2-simplexes
 		updateVertexColoMap(initializer.getmMapColourToVertexIDs1SimplexConnected()); // connected 1-simplexes
 		updateVertexColoMap(initializer.getmMapColourToVertexIDsConnectedTo2Simplex()); // 1-simplexes connected to
-		
+
 		// update maps to use during optimization
 //		Map<BitSet, IntSet> mergedMap = new HashMap<>(initializer.getmMapColourToEdgeIDs2Simplex());
 //		mergedMap.putAll(initializer.getmMapColourToEdgeIDs2SimplexIsolated());
 //		mergedMap.putAll(initializer.getmMapColourToEdgeIDs1Simplex());
 //		initializer.setMapColourToEdgeIDs(mergedMap);
 	}
-
-	/**
-	 * The method adds a triangle to mimic graph for the input TriangleColours
-	 * Object. Edge colors are selected for the given vertex colors of the triangle
-	 * to create edge and form the complete triangle
-	 * 
-	 * @param inputTriangleColours - TriangleColours Object
-	 */
-	private void addTriangleToMimicGraph(ColouredGraph mimicGraph, TriColours inputTriangleColours,
-			IColourMappingRules mColourMapperToUse, Map<BitSet, IntSet> mMapColourToVertexIDsToUpdate,
-			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate,
-			ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriangleColorsVertexIdsToUpdate) {
-		// storing colors of vertices for initial triangle
-		BitSet vertex1Color = inputTriangleColours.getA();
-		BitSet vertex2Color = inputTriangleColours.getB();
-		BitSet vertex3Color = inputTriangleColours.getC();
-
-		// create vertex for the triangle colors in the mimic graph
-		int vert1Id = addVertexToMimicGraph(mimicGraph, vertex1Color, mMapColourToVertexIDsToUpdate);
-		int vert2Id = addVertexToMimicGraph(mimicGraph, vertex2Color, mMapColourToVertexIDsToUpdate);
-		int vert3Id = addVertexToMimicGraph(mimicGraph, vertex3Color, mMapColourToVertexIDsToUpdate);
-
-		// Add edges between found vertices
-		addEdgeTriangle(mimicGraph, vertex1Color, vertex2Color, vert1Id, vert2Id, mMapColourToEdgeIDsToUpdate,
-				mColourMapperToUse, inputTriangleColours);
-		addEdgeTriangle(mimicGraph, vertex1Color, vertex3Color, vert1Id, vert3Id, mMapColourToEdgeIDsToUpdate,
-				mColourMapperToUse, inputTriangleColours);
-		addEdgeTriangle(mimicGraph, vertex2Color, vertex3Color, vert2Id, vert3Id, mMapColourToEdgeIDsToUpdate,
-				mColourMapperToUse, inputTriangleColours);
-
-		// update the map for trackign the colours of the triangle
-		updateMapTriangleColorsVertices(vert1Id, vert2Id, vert3Id, inputTriangleColours,
-				mTriangleColorsVertexIdsToUpdate);
-
-	}
-
+	
 	/**
 	 * The method adds a vertex of the input color to the mimic graph and returns
 	 * the vertex id. It also updates a map, which stores the mapping of vertex
@@ -1735,99 +1690,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		return vertId;
 	}
 
-	/**
-	 * 
-	 * This method add an edge for the input vertex 1 and vertex 2. It utilizes
-	 * colormapper object to determine edge color and the head and tail vertex. For
-	 * the edge color found, an edge is added between vertex 1 and vertex 2, and the
-	 * edge id is stored with its color information in the map. In contrast with
-	 * earlier method, this method specifically evaluates the existing edge colors
-	 * between input vertices and does not add an edge with duplicate color
-	 * 
-	 * @param inputVertex1Colo - Color for input vertex 1.
-	 * @param inputVertex2Colo - Color for input vertex 2.
-	 * @param inputVertex1ID   - ID for input vertex 1.
-	 * @param inputVertex2ID   - ID for input vertex 2.
-	 */
-	private boolean addEdgeTriangle(ColouredGraph mimicGraph, BitSet inputVertex1Colo, BitSet inputVertex2Colo,
-			int inputVertex1ID, int inputVertex2ID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate,
-			IColourMappingRules mColourMapperToUse, TriColours inputTriangleColours) {
-		boolean isEdgeFromFirstToSecondVertex = true;
-		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2
-		// is head
-		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
-				inputVertex2Colo);
-		if (possEdgeColov1tailv2head.size() == 0) {
-			// When vertex 1 is not tail and vertex 2 is not head
-			// get edge assuming vertex 1 is head and vertex 2 is tail
-			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex2Colo,
-					inputVertex1Colo);
-			isEdgeFromFirstToSecondVertex = false;
-		}
-
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
-			if (mTailHead == null) {
-				mTailHead = new HashMap<Integer, IntSet>();
-			}
-
-			// initialize head ids for the map
-			IntSet headIds = null;
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			if (isEdgeFromFirstToSecondVertex) {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex1ID, inputVertex2ID, randomEdgeColov1v2);
-
-				// get existing head ids if present
-				headIds = mTailHead.get(inputVertex1ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex2ID);
-
-				// update the map for tail id and head ids
-				mTailHead.put(inputVertex1ID, headIds);
-
-			} else {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex2ID, inputVertex1ID, randomEdgeColov1v2);
-
-				headIds = mTailHead.get(inputVertex2ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex1ID);
-
-				mTailHead.put(inputVertex2ID, headIds);
-
-			}
-
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
 
 	/**
 	 * This method is used to update the map that tracks the triangle colours and
@@ -1862,273 +1724,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		mTriColVertexIDsToUpdate.put(inputTriangleColours, tempVerticesList);
 	}
 
-	/**
-	 * 
-	 * This method add an edge for the input vertex 1 and vertex 2. It utilizes
-	 * colormapper object to determine edge color and the head and tail vertex. For
-	 * the edge color found, an edge is added between vertex 1 and vertex 2, and the
-	 * edge id is stored with its color information in the map. In contrast with
-	 * earlier method, this method specifically evaluates the existing edge colors
-	 * between input vertices and does not add an edge with duplicate color
-	 * 
-	 * @param inputVertex1Colo - Color for input vertex 1.
-	 * @param inputVertex2Colo - Color for input vertex 2.
-	 * @param inputVertex1ID   - ID for input vertex 1.
-	 * @param inputVertex2ID   - ID for input vertex 2.
-	 */
-	private boolean addEdgeInAnyDirectionWithDuplicateCheck(ColouredGraph mimicGraph, BitSet inputVertex1Colo,
-			BitSet inputVertex2Colo, int inputVertex1ID, int inputVertex2ID,
-			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse) {
-		boolean isEdgeFromSecondToFirstVertex = true;
-		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2
-		// is head
-		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex2Colo,
-				inputVertex1Colo);
-		if (possEdgeColov1tailv2head.size() == 0) {
-			// When vertex 1 is not tail and vertex 2 is not head
-			// get edge assuming vertex 1 is head and vertex 2 is tail
-			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
-					inputVertex2Colo);
-			isEdgeFromSecondToFirstVertex = false;
-		}
-
-		// Check for duplicate edge color if it is essential
-		// Note: This check is not required when a triangle is created for the first
-		// time or a edge is created between vertices for the first time
-		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, inputVertex2ID, inputVertex1ID,
-				possEdgeColov1tailv2head);
-
-		// when no edge can be added and second assumption is not evaluated (vertex 1 -
-		// head and vertex 2 - tail) get edge colors for the second case
-		if ((possEdgeColov1tailv2head.size() == 0) && isEdgeFromSecondToFirstVertex) {
-			possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(inputVertex1Colo,
-					inputVertex2Colo);
-			isEdgeFromSecondToFirstVertex = false;
-
-			possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, inputVertex2ID, inputVertex1ID,
-					possEdgeColov1tailv2head);
-		}
-
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
-			if (mTailHead == null) {
-				mTailHead = new HashMap<Integer, IntSet>();
-			}
-
-			// initialize head ids for the map
-			IntSet headIds = null;
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			if (isEdgeFromSecondToFirstVertex) {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex2ID, inputVertex1ID, randomEdgeColov1v2);
-
-				// get existing head ids if present
-				headIds = mTailHead.get(inputVertex2ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex1ID);
-
-				// update the map for tail id and head ids
-				mTailHead.put(inputVertex2ID, headIds);
-			} else {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex1ID, inputVertex2ID, randomEdgeColov1v2);
-
-				headIds = mTailHead.get(inputVertex1ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex2ID);
-
-				mTailHead.put(inputVertex1ID, headIds);
-			}
-
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * This method adds a unique edge between given head and tail ids. Additionally,
-	 * it will check that edge should be added only such that no triangles are
-	 * formed between input head and tail ids if the last parameter of the method is
-	 * true.
-	 * 
-	 * @param headColo                    - input color for the head vertex.
-	 * @param tailColo                    - input color for the tail vertex.
-	 * @param headID                      - id for the head vertex.
-	 * @param tailID                      - id for the tail vertex.
-	 * @param mMapColourToEdgeIDsToUpdate - map to update the edge color and ids if
-	 *                                    edge is added.
-	 * @param mColourMapperToUse          - Color mapper to use for edge colors.
-	 * @param triangleCheck               - boolean variable to indicate if it
-	 *                                    should check that triangle is not formed.
-	 *                                    When set to true the edge is added between
-	 *                                    input vertices only if it does not form a
-	 *                                    triangle.
-	 * @return - will return true if edge is added to the mimic graph else false.
-	 */
-	private boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
-			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			boolean triangleCheck) {
-		// Get edge between head and tail, assuming vertex 1 is tail and vertex 2 is
-		// head
-		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(tailColo, headColo);
-
-		// Check for duplicate edge color if it is essential
-		// Note: This check is not required when a triangle is created for the first
-		// time or a edge is created between vertices for the first time
-		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, tailID, headID, possEdgeColov1tailv2head);
-
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
-
-			// check the head id and tail id does not have a vertex in common. Adding an
-			// edge could form a triangle
-			if (triangleCheck) {
-				if (commonVertices(mimicGraph, headID, tailID))
-					return false;// do not add an edge and return false. if input vertices have a vertex in
-									// common.
-			}
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			edgeIdTemp = mimicGraph.addEdge(tailID, headID, randomEdgeColov1v2);
-
-			// update the map of edge colors and tail, head IDs
-			updateMappingOfEdgeColoHeadTailColo(randomEdgeColov1v2, headID, tailID);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * For the input set of edge colors between the given vertices, the function
-	 * removes edge colors that already exist among input vertices. It returns the
-	 * updated set.
-	 * 
-	 * @param inputVertex1ID           - input vertex id 1
-	 * @param inputVertex2ID           - input vertex id 2
-	 * @param possEdgeColov1tailv2head - possible set of edge colors between input
-	 *                                 vertices
-	 * @return - updated input set with not already existing edge colors
-	 */
-	private Set<BitSet> removeDuplicateEdgeColors(ColouredGraph mimicGraph, int inputVertex1ID, int inputVertex2ID,
-			Set<BitSet> possEdgeColov1tailv2head) {
-		// check existing edge colors between vertices and remove them from the possible
-		// edge colors set
-		IntSet edgesIncidentVert1 = mimicGraph.getEdgesIncidentTo(inputVertex1ID);
-		IntSet edgesIncidentVert2 = mimicGraph.getEdgesIncidentTo(inputVertex2ID);
-		IntSet edgesIncidentExistingVertices = IntSetUtil.intersection(edgesIncidentVert1, edgesIncidentVert2);
-
-		Set<BitSet> existingEdgeColours = new HashSet<BitSet>();
-		for (int existingEdgeId : edgesIncidentExistingVertices) {
-			existingEdgeColours.add(mimicGraph.getEdgeColour(existingEdgeId));
-		}
-
-		// Difference between possible colors and existing colors
-		SetView<BitSet> differenceSet = Sets.difference(possEdgeColov1tailv2head, existingEdgeColours);
-		possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.addAll(differenceSet);
-
-		return possEdgeColov1tailv2head;
-	}
-
-	/**
-	 * The method returns true if the input vertices have one or more vertices in
-	 * common.
-	 * 
-	 * @param headID
-	 * @param tailID
-	 * @return
-	 */
-	public boolean commonVertices(ColouredGraph mimicGraph, int headID, int tailID) {
-		// get vertices incident on input ids
-		IntSet verticesIncidentHead = IntSetUtil.union(mimicGraph.getInNeighbors(headID),
-				mimicGraph.getOutNeighbors(headID));
-		IntSet verticesIncidentTail = IntSetUtil.union(mimicGraph.getInNeighbors(tailID),
-				mimicGraph.getOutNeighbors(tailID));
-
-		// find vertices incident to both
-		IntSet commonVertices = IntSetUtil.intersection(verticesIncidentHead, verticesIncidentTail);
-		// do not consider class vertices
-		Set<Integer> classVertices = initializer.getmReversedMapClassVertices().keySet();
-		Set<Integer> commonVerticesSet = new HashSet<Integer>();
-		for (int vertexId : commonVertices)
-			commonVerticesSet.add(vertexId);
-		commonVerticesSet = Sets.difference(commonVerticesSet, classVertices);
-		if (commonVerticesSet.size() > 0)
-			return true;
-		return false;
-	}
-
-	/**
-	 * This method updates the global map for Edge color => tail ID => head IDs
-	 * 
-	 * @param possEdgeColo
-	 * @param headID
-	 * @param tailID
-	 */
-	public void updateMappingOfEdgeColoHeadTailColo(BitSet possEdgeColo, int headID, int tailID) {
-		// Get the map storing edge colors and corresponding tail and head ids
-		Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices().get(possEdgeColo);
-		if (mTailHead == null) {
-			mTailHead = new HashMap<Integer, IntSet>();
-		}
-
-		// initialize head ids for the map
-		IntSet headIds = mTailHead.get(tailID);
-		if (headIds == null) {
-			headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-		}
-		headIds.add(headID);
-
-		// update the map for tail id and head ids
-		mTailHead.put(tailID, headIds);
-
-		initializer.getmMapEdgeColoursToConnectedVertices().put(possEdgeColo, mTailHead);
-	}
-
 	private void addSelfLoops(ColouredGraph mimicGraph, int estEdgesInput,
 			IOfferedItem<BitSet> distColoProposerSelfLoopInput, Map<BitSet, IntSet> mMapColourToVertexIDsInput,
 			IColourMappingRules mColourMapperSelfLoopInput, Map<BitSet, IntSet> mMapColourToEdgeIDsInput,
@@ -2143,7 +1738,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			if (possVertices != null) {
 				Integer vertexID = possVertices.toArray(new Integer[possVertices.size()])[mRandom
 						.nextInt(possVertices.size())];
-				boolean edgeAdded = addEdgeInAnyDirectionDuplCheckWithPropProb(mimicGraph, proposedVertexColor,
+				boolean edgeAdded = simplexProperty.addEdgeInAnyDirection(mimicGraph, proposedVertexColor,
 						proposedVertexColor, vertexID, vertexID, mMapColourToEdgeIDsInput, mColourMapperSelfLoopInput,
 						mPropDistInput);
 				if (edgeAdded) {
@@ -2159,102 +1754,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		LOGGER.debug("Added edges: " + actualEdgesSimplexes);
 	}
 
-	/**
-	 * 
-	 * This method add an edge for the input vertex 1 and vertex 2. It utilizes
-	 * colormapper object to determine edge color and the head and tail vertex. For
-	 * the edge color found, an edge is added between vertex 1 and vertex 2, and the
-	 * edge id is stored with its color information in the map. In contrast with
-	 * earlier method, this method specifically evaluates the existing edge colors
-	 * between input vertices and does not add an edge with duplicate color
-	 * 
-	 * @param inputVertex1Colo - Color for input vertex 1.
-	 * @param inputVertex2Colo - Color for input vertex 2.
-	 * @param inputVertex1ID   - ID for input vertex 1.
-	 * @param inputVertex2ID   - ID for input vertex 2.
-	 */
-	private boolean addEdgeInAnyDirectionDuplCheckWithPropProb(ColouredGraph mimicGraph, BitSet inputVertex1Colo,
-			BitSet inputVertex2Colo, int inputVertex1ID, int inputVertex2ID,
-			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			IPropertyDist mPropDistInput) {
-		boolean isEdgeFromSecondToFirstVertex = true;
-
-		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
-		BitSet propColor = mPropDistInput.proposePropColor(edgeColors);
-		if (mColourMapperToUse.isTailColourOf(inputVertex1Colo, inputVertex2Colo)) {
-			isEdgeFromSecondToFirstVertex = false;
-		}
-
-		Set<BitSet> possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.add(propColor);
-
-		// Check for duplicate edge color if it is essential
-		// Note: This check is not required when a triangle is created for the first
-		// time or a edge is created between vertices for the first time
-		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, inputVertex2ID, inputVertex1ID,
-				possEdgeColov1tailv2head);
-
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
-			if (mTailHead == null) {
-				mTailHead = new HashMap<Integer, IntSet>();
-			}
-
-			// initialize head ids for the map
-			IntSet headIds = null;
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			if (isEdgeFromSecondToFirstVertex) {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex2ID, inputVertex1ID, randomEdgeColov1v2);
-
-				// get existing head ids if present
-				headIds = mTailHead.get(inputVertex2ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex1ID);
-
-				// update the map for tail id and head ids
-				mTailHead.put(inputVertex2ID, headIds);
-			} else {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex1ID, inputVertex2ID, randomEdgeColov1v2);
-
-				headIds = mTailHead.get(inputVertex1ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex2ID);
-
-				mTailHead.put(inputVertex1ID, headIds);
-			}
-
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
 
 	private void updateVertexColoMap(Map<BitSet, IntSet> mMapColourToVertexIDsinput) {
 		Set<BitSet> keySetIso1Simplexes = mMapColourToVertexIDsinput.keySet();
@@ -2273,7 +1772,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 	 * 
 	 * @param inputTriangleColours - TriangleColours Object
 	 */
-	private void addTriangleToMimicGraphWithPropProb(ColouredGraph mimicGraph, TriColours inputTriangleColours,
+	private void addTriangleToMimicGraph(ColouredGraph mimicGraph, TriColours inputTriangleColours,
 			IColourMappingRules mColourMapperToUse, Map<BitSet, IntSet> mMapColourToVertexIDsToUpdate,
 			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate,
 			ObjectObjectOpenHashMap<TriColours, List<IntSet>> mTriangleColorsVertexIdsToUpdate,
@@ -2289,11 +1788,11 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		int vert3Id = addVertexToMimicGraph(mimicGraph, vertex3Color, mMapColourToVertexIDsToUpdate);
 
 		// Add edges between found vertices
-		addEdgeTriangleWithPropProb(mimicGraph, vertex1Color, vertex2Color, vert1Id, vert2Id,
+		simplexProperty.addEdgeToMimicGraph(mimicGraph, vertex1Color, vertex2Color, vert1Id, vert2Id,
 				mMapColourToEdgeIDsToUpdate, mColourMapperToUse, inputTriangleColours, mPropDistInput);
-		addEdgeTriangleWithPropProb(mimicGraph, vertex1Color, vertex3Color, vert1Id, vert3Id,
+		simplexProperty.addEdgeToMimicGraph(mimicGraph, vertex1Color, vertex3Color, vert1Id, vert3Id,
 				mMapColourToEdgeIDsToUpdate, mColourMapperToUse, inputTriangleColours, mPropDistInput);
-		addEdgeTriangleWithPropProb(mimicGraph, vertex2Color, vertex3Color, vert2Id, vert3Id,
+		simplexProperty.addEdgeToMimicGraph(mimicGraph, vertex2Color, vertex3Color, vert2Id, vert3Id,
 				mMapColourToEdgeIDsToUpdate, mColourMapperToUse, inputTriangleColours, mPropDistInput);
 
 		// update the map for trackign the colours of the triangle
@@ -2302,175 +1801,9 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 	}
 
-	/**
-	 * 
-	 * This method add an edge for the input vertex 1 and vertex 2. It utilizes
-	 * colormapper object to determine edge color and the head and tail vertex. For
-	 * the edge color found, an edge is added between vertex 1 and vertex 2, and the
-	 * edge id is stored with its color information in the map. In contrast with
-	 * earlier method, this method specifically evaluates the existing edge colors
-	 * between input vertices and does not add an edge with duplicate color
-	 * 
-	 * @param inputVertex1Colo - Color for input vertex 1.
-	 * @param inputVertex2Colo - Color for input vertex 2.
-	 * @param inputVertex1ID   - ID for input vertex 1.
-	 * @param inputVertex2ID   - ID for input vertex 2.
-	 */
-	private boolean addEdgeTriangleWithPropProb(ColouredGraph mimicGraph, BitSet inputVertex1Colo,
-			BitSet inputVertex2Colo, int inputVertex1ID, int inputVertex2ID,
-			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			TriColours inputTriangleColours, IPropertyDist mPropDistInput) {
-		boolean isEdgeFromFirstToSecondVertex = true;
-		// Get edge between vertex1 and vertex 2, assuming vertex 1 is tail and vertex 2
-		// is head
+	
 
-		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
-		BitSet propColor = simplexProperty.proposeColour(edgeColors);
-		if (mColourMapperToUse.isHeadColourOf(inputVertex2Colo, inputVertex1Colo)) { // is v1 head colo?
-			isEdgeFromFirstToSecondVertex = false;
-		}
-
-		if (!propColor.isEmpty()) { // Add edge if edge color is found for the vertices
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = propColor;
-
-			// Get the map storing edge colors and corresponding tail and head ids
-			Map<Integer, IntSet> mTailHead = initializer.getmMapEdgeColoursToConnectedVertices()
-					.get(randomEdgeColov1v2);
-			if (mTailHead == null) {
-				mTailHead = new HashMap<Integer, IntSet>();
-			}
-
-			// initialize head ids for the map
-			IntSet headIds = null;
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			if (isEdgeFromFirstToSecondVertex) {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex1ID, inputVertex2ID, randomEdgeColov1v2);
-
-				// get existing head ids if present
-				headIds = mTailHead.get(inputVertex1ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex2ID);
-
-				// update the map for tail id and head ids
-				mTailHead.put(inputVertex1ID, headIds);
-
-			} else {
-				edgeIdTemp = mimicGraph.addEdge(inputVertex2ID, inputVertex1ID, randomEdgeColov1v2);
-
-				headIds = mTailHead.get(inputVertex2ID);
-				if (headIds == null) {
-					headIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				}
-				headIds.add(inputVertex1ID);
-
-				mTailHead.put(inputVertex2ID, headIds);
-
-			}
-
-			initializer.getmMapEdgeColoursToConnectedVertices().put(randomEdgeColov1v2, mTailHead);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * This method adds a unique edge between given head and tail ids. Additionally,
-	 * it will check that edge should be added only such that no triangles are
-	 * formed between input head and tail ids if the last parameter of the method is
-	 * true.
-	 * 
-	 * @param headColo                    - input color for the head vertex.
-	 * @param tailColo                    - input color for the tail vertex.
-	 * @param headID                      - id for the head vertex.
-	 * @param tailID                      - id for the tail vertex.
-	 * @param mMapColourToEdgeIDsToUpdate - map to update the edge color and ids if
-	 *                                    edge is added.
-	 * @param mColourMapperToUse          - Color mapper to use for edge colors.
-	 * @param triangleCheck               - boolean variable to indicate if it
-	 *                                    should check that triangle is not formed.
-	 *                                    When set to true the edge is added between
-	 *                                    input vertices only if it does not form a
-	 *                                    triangle.
-	 * @return - will return true if edge is added to the mimic graph else false.
-	 */
-	private boolean addEdgeIsoS1WithTriCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
-			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			boolean triangleCheck, IPropertyDist mPropDistInput) {
-
-		EdgeColorsSorted edgesColors = new EdgeColorsSorted(headColo, tailColo);
-
-		BitSet proposePropColor = mPropDistInput.proposePropColor(edgesColors);
-
-		// Get edge between head and tail, assuming vertex 1 is tail and vertex 2 is
-		// head
-		Set<BitSet> possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.add(proposePropColor);
-
-		// Check for duplicate edge color if it is essential
-		// Note: This check is not required when a triangle is created for the first
-		// time or a edge is created between vertices for the first time
-		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, tailID, headID, possEdgeColov1tailv2head);
-
-		if ((possEdgeColov1tailv2head.size() != 0)
-				&& (mColourMapperToUse.canConnect(headColo, tailColo, proposePropColor))) { // Add edge if edge color is
-																							// found for the vertices
-
-			// check the head id and tail id does not have a vertex in common. Adding an
-			// edge could form a triangle
-			if (triangleCheck) {
-				if (commonVertices(mimicGraph, headID, tailID))
-					return false;// do not add an edge and return false. if input vertices have a vertex in
-									// common.
-			}
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			edgeIdTemp = mimicGraph.addEdge(tailID, headID, randomEdgeColov1v2);
-
-			// update the map of edge colors and tail, head IDs
-			updateMappingOfEdgeColoHeadTailColo(randomEdgeColov1v2, headID, tailID);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
+	
 
 	/**
 	 * This method is used to update the map that tracks the triangle colours and
@@ -2503,103 +1836,13 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		initializer.getmEdgeColorsVertexIds().put(inputEdgeColours, tempVerticesList);
 	}
 
-	/**
-	 * This method adds a unique edge between given head and tail ids. Additionally,
-	 * it will check that edge should be added only such that no triangles are
-	 * formed between input head and tail ids if the last parameter of the method is
-	 * true.
-	 * 
-	 * @param headColo                    - input color for the head vertex.
-	 * @param tailColo                    - input color for the tail vertex.
-	 * @param headID                      - id for the head vertex.
-	 * @param tailID                      - id for the tail vertex.
-	 * @param mMapColourToEdgeIDsToUpdate - map to update the edge color and ids if
-	 *                                    edge is added.
-	 * @param mColourMapperToUse          - Color mapper to use for edge colors.
-	 * @param triangleCheck               - boolean variable to indicate if it
-	 *                                    should check that triangle is not formed.
-	 *                                    When set to true the edge is added between
-	 *                                    input vertices only if it does not form a
-	 *                                    triangle.
-	 * @return - will return true if edge is added to the mimic graph else false.
-	 */
-	private boolean addEdgeConnS1WithTriCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID,
-			int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
-			boolean triangleCheck, BitSet propertyColo) {
-		// Get edge between head and tail, assuming vertex 1 is tail and vertex 2 is
-		// head
-		Set<BitSet> possEdgeColov1tailv2head = new HashSet<BitSet>();
-		possEdgeColov1tailv2head.add(propertyColo);
-
-		// Check for duplicate edge color if it is essential
-		// Note: This check is not required when a triangle is created for the first
-		// time or a edge is created between vertices for the first time
-		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, tailID, headID, possEdgeColov1tailv2head);
-
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
-
-			// check the head id and tail id does not have a vertex in common. Adding an
-			// edge could form a triangle
-			if (triangleCheck) {
-				if (commonVertices(mimicGraph, headID, tailID))
-					return false;// do not add an edge and return false. if input vertices have a vertex in
-									// common.
-			}
-
-			// randomly select edge colo
-			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(
-					new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
-
-			// add the edge to mimic graph
-			int edgeIdTemp;
-			edgeIdTemp = mimicGraph.addEdge(tailID, headID, randomEdgeColov1v2);
-
-			// update the map of edge colors and tail, head IDs
-			updateMappingOfEdgeColoHeadTailColo(randomEdgeColov1v2, headID, tailID);
-
-			// Update or Add to the mapping of edge color and edge Id
-			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared
-			// to previously developed generators.
-			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);// mMapColourToEdgeIDs.get(randomEdgeColov1v2);
-			if (setOfEdgeIds == null) {
-				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
-				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); // mMapColourToEdgeIDs.put(randomEdgeColov1v2,
-																					// setOfEdgeIds);
-			}
-			setOfEdgeIds.add(edgeIdTemp);
-
-			return true;
-
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * The method selects a random triangle by using Random object. It will return
-	 * null, if no triangles are found in the input graphs.
-	 * 
-	 * @return - Triangle Colours Set of colors for each vertex of a randomly
-	 *         selected triangle along with their occurrence count in input graphs.
-	 */
-	private TriColours getRandomTriangle(Set<TriColours> setAllTriangleColours) {
-		TriColours randomTriangleColor = null;
-		if (setAllTriangleColours.size() != 0) {
-			randomTriangleColor = setAllTriangleColours
-					.toArray(new TriColours[setAllTriangleColours.size()])[mRandom.nextInt(setAllTriangleColours.size())];
-		}
-
-		return randomTriangleColor;
-	}
-	
-
 
 	@Override
-	public TripleBaseSingleID getProposedTriple() {		
+	public TripleBaseSingleID getProposedTriple() {
 		int max = 1000;
 		for (int j = 0; j < max; j++) {
-			
-			// get proposed edge colour	
+
+			// get proposed edge colour
 			BitSet edgeColour = classSelector.getEdgeColourProposal();
 
 			// let it fall if edgeColour is null, there's something really wrong if it's

@@ -4,7 +4,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
@@ -14,7 +13,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 
+/**
+ * 
+ */
 @Component("BCSI")
 @Scope(value = "prototype")
 public class BiasedClassSimplex implements ISimplexClass {
@@ -35,20 +38,23 @@ public class BiasedClassSimplex implements ISimplexClass {
 	private VertDistI selfLoopsInS1Dist;
 	/** Distribution of self loops for vertices in connected 1-simplexes */
 	private VertDistI selfLoopsInConnS1Dist;
-	/** Store distributions of isolated and connected 2-simplexes */
-	private TriDistWithEdgeI triangleDistribution;
 	/** Store distributions of 1-simplexes connected to triangles */
 	private ConnS1DistI s1connToTriDist;
 	/** Store distributions of 1-simplexes connecting triangles */
 	private ConnS1DistI s1connTriDist;
 	/** Store distributions of connected 1-simplexes */
+	private EdgeDistI s1ConnDist;
+	/** Store distributions of connected 1-simplexes */
 	private EdgeDistIS s1ConnheadTailDist;
+	/** Store distributions of isolated and connected 2-simplexes */
+	private ITriDist triangleDistribution;
+
 
 	public BiasedClassSimplex(SimplexGraphInitializer initializer) {
 		SimplexAnalysis simplexAnalysis = initializer.getSimplexAnalysis();
 		int iNoOfVersions = initializer.getiNoOfVersions();
-		int noOfVertices = initializer.getDesiredNoOfVertices();
 		Random mRandom = new Random(initializer.getSeedGenerator().getNextSeed());
+		int noOfVertices = initializer.getDesiredNoOfVertices();
 		selfLoopIsoTritDist = new VertDistI(simplexAnalysis.getSelfLoopIsoTri().getmColoCountSelfLoop(), iNoOfVersions,
 				mRandom);
 		selfLoopConnTriDist = new VertDistI(simplexAnalysis.getSelfLoopConnTri().getmColoCountSelfLoop(), iNoOfVersions,
@@ -64,20 +70,121 @@ public class BiasedClassSimplex implements ISimplexClass {
 				iNoOfVersions, mRandom);
 		s1connToTriVertDist = new VertDistI(simplexAnalysis.getS1ConnToTri().getmColoCountVertConnectedToTriangle(),
 				iNoOfVersions, mRandom);
-
-		// ******* Compute Triangle distributions *******
-		triangleDistribution = new TriDistWithEdgeI(
-				simplexAnalysis.getConnTriAnalysis().getmTriColoEdgesTriCountDistAvg(),
-				simplexAnalysis.getIsoTriAnalysis().getmIsolatedTriColoEdgesTriCountDistAvg(), iNoOfVersions,
-				noOfVertices,
-				mRandom);
+		s1ConnDist = new EdgeDistI(simplexAnalysis.getConnS1Analysis().getmColoEdgesCountDistAvg(),
+				simplexAnalysis.getIsoS1Analysis().getmColoEdgesCountDistAvg(), iNoOfVersions,
+				initializer.getDesiredNoOfVertices(), mRandom);
+		s1ConnheadTailDist = new EdgeDistIS(simplexAnalysis.getConnS1Analysis().getmHeadColoCountConnected1Simplex(),
+				simplexAnalysis.getConnS1Analysis().getmHeadColoTailColoCountConnected(), iNoOfVersions, mRandom);
 		s1connToTriDist = new ConnS1DistI(simplexAnalysis.getS1ConnToTri().getmColoEdgesCountDistAvg(), iNoOfVersions,
 				mRandom);
 		s1connTriDist = new ConnS1DistI(simplexAnalysis.getS1ConnectingTri().getmColoEdgesCountDistAvg(), iNoOfVersions,
 				mRandom);
-		s1ConnheadTailDist = new EdgeDistIS(simplexAnalysis.getConnS1Analysis().getmHeadColoCountConnected1Simplex(),
-				simplexAnalysis.getConnS1Analysis().getmHeadColoTailColoCountConnected(), iNoOfVersions, mRandom);
+		triangleDistribution = new TriDistWithEdgeI(simplexAnalysis.getConnTriAnalysis().getmTriColoEdgesTriCountDistAvg(),
+				simplexAnalysis.getIsoTriAnalysis().getmIsolatedTriColoEdgesTriCountDistAvg(), iNoOfVersions,
+				noOfVertices, mRandom);
+	}
+	
+	public void setTriangleDistribution(ITriDist triDist) {
+		triangleDistribution = triDist;
+	}
+	
+	public ITriDist getTriangleDistribution() {
+		return triangleDistribution;
+	}
+	
+	@Override
+	public IOfferedItem<TriColours> getTriangleProposal() {
+		return triangleDistribution.getPotentialTriangleProposer();
+	}
+	
+	@Override
+	public BitSet proposeVertex3Colour(BitSet selectedVertex1Colo, BitSet selectedVertex2Colo) {
+		return triangleDistribution.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
+	}
 
+	@Override
+	public TriColours proposeTriangleToAddEdge(Set<TriColours> setTriangleColorsMimicGraph) {
+		return triangleDistribution.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
+	}
+
+	@Override
+	public IOfferedItem<TriColours> getIsolatedTriangleProposer() {
+		return triangleDistribution.getPotentialIsolatedTriangleProposer();
+	}
+
+	@Override
+	public TriColours proposeIsoTriangleToAddEdge(Set<TriColours> setIsoTriInMimicGraph) {
+		return triangleDistribution.proposeIsoTriToAddEdge(setIsoTriInMimicGraph);
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getHeadProposer() {
+		return selfLoops1IsoS1.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getColourPointProposer() {
+		return s0Dist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<EdgeColos> getIsolatedHeadProposer() {
+		return s1connTriDist.getPotentialConnEdgeProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getColourProposerVertConnTriangle() {
+		return s1connToTriVertDist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<EdgeColos> getHeadConnEdgeProposer() {
+		return s1connToTriDist.getPotentialConnEdgeProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getIsoS1Proposer() {
+		return selfLoopsInS1Dist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getIsoS2Proposer() {
+		return selfLoopIsoTritDist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getConnS2Proposer() {
+		return selfLoopConnTriDist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getConnS1TriProposer() {
+		return selfLoops1ConnToTriDist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<BitSet> getConnS1Proposer() {
+		return selfLoopsInConnS1Dist.getPotentialColoProposer();
+	}
+
+	@Override
+	public IOfferedItem<EdgeColos> getIsolatedEdgeProposer() {
+		return s1ConnDist.getPotentialIsolatedEdgeColoProposer();
+	}
+
+	@Override
+	public EdgeColos proposeConnEdge() {
+		return s1ConnDist.getPotentialConnEdgeProposer().getPotentialItem();
+	}
+
+	@Override
+	public ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>> getEdgeColoursV1V2Dist() {
+		return s1ConnDist.getmEdgeColorsv1v2();
+	}
+
+	@Override
+	public EdgeColos proposeTriangleToAddEdgeColours(Set<EdgeColos> setEdgeColorsMimicGraph) {
+		return s1ConnDist.proposeTriangleToAddEdge(setEdgeColorsMimicGraph);
 	}
 
 	public VertDistI getS1connToTriVertDist() {
@@ -112,10 +219,6 @@ public class BiasedClassSimplex implements ISimplexClass {
 		return selfLoopsInConnS1Dist;
 	}
 
-	public TriDistWithEdgeI getTriangleDistribution() {
-		return triangleDistribution;
-	}
-
 	public ConnS1DistI getS1connToTriDist() {
 		return s1connToTriDist;
 	}
@@ -124,94 +227,26 @@ public class BiasedClassSimplex implements ISimplexClass {
 		return s1connTriDist;
 	}
 
-	@Override
-	public IOfferedItem<TriColours> getTriangleProposal() {
-		return triangleDistribution.getPotentialTriangleProposer();
+	public EdgeDistI getS1ConnDist() {
+		return s1ConnDist;
+	}
+
+	public EdgeDistIS getS1ConnheadTailDist() {
+		return s1ConnheadTailDist;
 	}
 
 	@Override
-	public EdgeColorsSorted getEdgeProposalFromTriangleDist(Set<EdgeColorsSorted> edgeColosSet) {
-		return triangleDistribution.getPotentialEdgeProposer().getPotentialItem(edgeColosSet);
-	}
-
-	@Override
-	public BitSet proposeVertex3Colour(BitSet selectedVertex1Colo, BitSet selectedVertex2Colo) {
-		return triangleDistribution.proposeVertexColorForVertex3(selectedVertex1Colo, selectedVertex2Colo);
-	}
-
-	@Override
-	public TriColours proposeTriangleToAddEdge(Set<TriColours> setTriangleColorsMimicGraph) {
-		return triangleDistribution.proposeTriangleToAddEdge(setTriangleColorsMimicGraph);
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getHeadProposer() {
-		return selfLoops1IsoS1.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getColourPointProposer() {
-		return s0Dist.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<EdgeColos> getIsolatedHeadProposer() {
-		return s1connTriDist.getPotentialConnEdgeProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<TriColours> getIsolatedTriangleProposer() {
-		return triangleDistribution.getPotentialIsolatedTriangleProposer();
-	}
-
-	@Override
-	public TriColours proposeIsoTriangleToAddEdge(Set<TriColours> setIsoTriInMimicGraph) {
-		return triangleDistribution.proposeIsoTriToAddEdge(setIsoTriInMimicGraph);
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getConnHeadProposer() {
-		return s1ConnheadTailDist.getPotentialHeadColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> proposeColour(BitSet proposedHeadColo) {
+	public IOfferedItem<BitSet> proposeColour(BitSet proposedHeadColo) {
 		return s1ConnheadTailDist.proposeVertColo(proposedHeadColo);
 	}
 
 	@Override
-	public OfferedItemByRandomProb<BitSet> getColourProposerVertConnTriangle() {
-		return s1connToTriVertDist.getPotentialColoProposer();
+	public IOfferedItem<BitSet> getConnHeadProposer() {
+		return s1ConnheadTailDist.getPotentialHeadColoProposer();
 	}
-
+	
 	@Override
-	public OfferedItemByRandomProb<EdgeColos> getHeadConnEdgeProposer() {
-		return s1connToTriDist.getPotentialConnEdgeProposer();
+	public EdgeColorsSorted getEdgeProposalFromTriangleDist(Set<EdgeColorsSorted> edgeColosSet) {
+		return triangleDistribution.getPotentialEdgeProposer().getPotentialItem(edgeColosSet);
 	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getIsoS1Proposer() {
-		return selfLoopsInS1Dist.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getIsoS2Proposer() {
-		return selfLoopIsoTritDist.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getConnS2Proposer() {
-		return selfLoopConnTriDist.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getConnS1TriProposer() {
-		return selfLoops1ConnToTriDist.getPotentialColoProposer();
-	}
-
-	@Override
-	public OfferedItemByRandomProb<BitSet> getConnS1Proposer() {
-		return selfLoopsInConnS1Dist.getPotentialColoProposer();
-	}
-
 }
