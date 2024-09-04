@@ -236,8 +236,8 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							// If no candidate edges exist then new random triangle should be added to the
 							// mimic graph
 							IOfferedItem<TriColours> randomProposer = simplexClass.getTriangleProposal();
-
 							if (randomProposer == null) {
+								numOfIterationAddingEdgesToGraph++;
 								continue;
 							}
 							TriColours randomTriangle = randomProposer.getPotentialItem();

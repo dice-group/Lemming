@@ -255,8 +255,10 @@ public class UniformClassSimplex implements ISimplexClass {
 
 	@Override
 	public EdgeColorsSorted getEdgeProposalFromTriangleDist(Set<EdgeColorsSorted> edgeColosSet) {
-		return new OfferedItemWrapper<EdgeColorsSorted>(sortedEdgeColours.toArray(EdgeColorsSorted[]::new),
-				mRandom).getPotentialItem(edgeColosSet);
+		return new OfferedItemWrapper<EdgeColorsSorted>(edgeColosSet.toArray(EdgeColorsSorted[]::new),
+				mRandom).getPotentialItem();
+//		return new OfferedItemWrapper<EdgeColorsSorted>(sortedEdgeColours.toArray(EdgeColorsSorted[]::new),
+//				mRandom).getPotentialItem(edgeColosSet);
 	}
 
 }
