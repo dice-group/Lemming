@@ -34,6 +34,7 @@ public class BaselineGeneratorTest {
 	public static Collection<Object[]> data() {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 		testConfigs.add(new Object[] { 7.652143359100492, 1423, 42 });
+		testConfigs.add(new Object[] { 8.25, 1423, 42 });
 		testConfigs.add(new Object[] { 8, 1423, 42 });
 		testConfigs.add(new Object[] { 1, 1423, 42 });
 		testConfigs.add(new Object[] { 1.2, 1423, 42 });

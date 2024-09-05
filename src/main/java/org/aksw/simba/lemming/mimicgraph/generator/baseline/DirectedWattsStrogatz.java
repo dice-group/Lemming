@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.util.Constants;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +23,18 @@ import toools.collections.primitive.IntCursor;
  * Generalization for directed Watts-Strogatz graphs.
  * 
  * It generates a directed graph based on
- * {@link RandomNewmanWattsStrogatzTopologyGenerator}. The edge directions are
- * added randomly afterwards.
+ * {@link RandomNewmanWattsStrogatzTopologyGenerator}. It supports odd and
+ * fractional degrees. We follow the below steps:
+ * <ol>
+ * <li>Generates a ring graph. For k<2, we connect the adjacent vertices with a
+ * probability of k/2.</li>
+ * <li>Connects each vertex to its k/2 closest neighbours on each side. The
+ * number of edges contributed by each vertex is sampled from a distribution
+ * centered around k/2. We skip this if the desired degree is less than the
+ * degree of a ring graph.</li>
+ * <li>Rewires edges with probability p</li>
+ * <li>Assigns direction to each edge at random</li>
+ * </ol>
  * 
  * @author Alexandra Silva
  */
@@ -124,7 +135,7 @@ public class DirectedWattsStrogatz implements IGenerator {
 
 					// if the target number of edges hasn't been reached yet
 					// add an edge randomly
-					if (graph.getNumberOfEdges() < numEdges && rnd.nextDouble() < k/2)
+					if (graph.getNumberOfEdges() < numEdges && rnd.nextDouble() < k / 2)
 						graph.addUndirectedSimpleEdge(predecessor, a);
 					predecessor = a;
 				}
@@ -134,7 +145,6 @@ public class DirectedWattsStrogatz implements IGenerator {
 					graph.addUndirectedSimpleEdge(predecessor, first);
 			}
 		}
-		
 
 	}
 
@@ -150,7 +160,10 @@ public class DirectedWattsStrogatz implements IGenerator {
 		int noVertices = graph.getVertices().getGreatest() + 1;
 
 		double center = k / 2;
-		double sigma = Math.floor(k / 2);
+		double sigma = 1;
+		double avgDegree = graph.getAverageDegree();
+		LogNormalDistribution logNormal = new LogNormalDistribution(center, sigma);
+        
 
 		// for each vertex, connect to right neighbours and then to right side
 		for (IntCursor v : IntCursor.fromFastUtil(graph.getVertices())) {
@@ -166,8 +179,8 @@ public class DirectedWattsStrogatz implements IGenerator {
 				roundedSample1 = (int) center;
 				roundedSample2 = (int) center;
 			} else {
-				double sample1 = rnd.nextGaussian(center, sigma);
-				double sample2 = rnd.nextGaussian(center, sigma);
+				double sample1 = logNormal.sample();
+				double sample2 = logNormal.sample();
 				roundedSample1 = stochasticRound(sample1, rnd);
 				roundedSample2 = stochasticRound(sample2, rnd);
 			}
@@ -176,8 +189,9 @@ public class DirectedWattsStrogatz implements IGenerator {
 			for (int i = 0; i < roundedSample1; i++) {
 				for (IntCursor n : IntCursor.fromFastUtil(rightNe)) {
 					// check if connection already exists before adding it
-					if (graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
+					if (avgDegree < k && graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
 						graph.addUndirectedSimpleEdge(v.value, n.value);
+						avgDegree = graph.getAverageDegree();
 					}
 				}
 			}
@@ -186,8 +200,9 @@ public class DirectedWattsStrogatz implements IGenerator {
 			for (int i = 0; i < roundedSample2; i++) {
 				for (IntCursor n : IntCursor.fromFastUtil(leftNe)) {
 					// check if connection already exists before adding it
-					if (graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
+					if (avgDegree < k && graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
 						graph.addUndirectedSimpleEdge(v.value, n.value);
+						avgDegree = graph.getAverageDegree();
 					}
 				}
 			}
