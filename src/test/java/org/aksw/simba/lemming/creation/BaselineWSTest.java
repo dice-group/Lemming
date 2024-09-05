@@ -61,4 +61,13 @@ public class BaselineWSTest {
 		int sum =  Arrays.stream(edgeContributions).sum();
 		Assert.assertTrue(sum <= Math.floor(maxVertices*neighbours));
 	}
+	
+	@Test
+	public void testPartialRing() {
+		DirectedWattsStrogatz ws = new DirectedWattsStrogatz();
+		ws.setPRNG(new Random(123));
+		int[] edgeContributions = ws.assignEdges(maxVertices, neighbours);
+		int sum =  Arrays.stream(edgeContributions).sum();
+		Assert.assertTrue(sum <= Math.floor(maxVertices*neighbours));
+	}
 }
