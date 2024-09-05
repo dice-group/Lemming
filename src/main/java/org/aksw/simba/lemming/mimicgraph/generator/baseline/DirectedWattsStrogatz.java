@@ -151,9 +151,8 @@ public class DirectedWattsStrogatz implements IGenerator {
 
 		int noVertices = graph.getVertices().getGreatest() + 1;
 
-		// assign expected contributions of each vertex
-		// might need to assign the contributions in a more balanced way. 
-		int[] edgeContributions = assignEdges(noVertices, k);
+		double center = k / 2;
+		double sigma = Math.ceil(k/2);
 
 		// for each vertex, connect to right neighbours and then to right side
 		for (IntCursor v : IntCursor.fromFastUtil(graph.getVertices())) {
@@ -162,28 +161,57 @@ public class DirectedWattsStrogatz implements IGenerator {
 			IntSet leftNe = neighbours[0];
 			IntSet rightNe = neighbours[1];
 
-			// right side neighbours first
-			for (IntCursor n : IntCursor.fromFastUtil(rightNe)) {
-				// check if connection already exists before adding it
-				if (edgeContributions[v.value] > 0 && edgeContributions[n.value] > 0
-						&& graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
-					edgeContributions[v.value]--;
-					edgeContributions[n.value]--;
-					graph.addUndirectedSimpleEdge(v.value, n.value);
+			// no need to sample if degree is even
+			int roundedSample1;
+			int roundedSample2;
+			if (center % 2 == 0) {
+				roundedSample1 = (int) center;
+				roundedSample2 = (int) center;
+			} else {
+				double sample1 = rnd.nextGaussian(center, sigma);
+				double sample2 = rnd.nextGaussian(center, sigma);
+				roundedSample1 = stochasticRound(sample1, rnd);
+				roundedSample2 = stochasticRound(sample2, rnd);	
+			}
+
+			// connect the right
+			for (int i = 0; i < roundedSample1; i++) {
+				for (IntCursor n : IntCursor.fromFastUtil(rightNe)) {
+					// check if connection already exists before adding it
+					if (graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
+						graph.addUndirectedSimpleEdge(v.value, n.value);
+					}
 				}
 			}
 
-			// left side now
-			for (IntCursor n : IntCursor.fromFastUtil(leftNe)) {
-				// check if connection already exists before adding it
-				if (edgeContributions[v.value] > 0 && edgeContributions[n.value] > 0
-						&& graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
-					edgeContributions[v.value]--;
-					edgeContributions[n.value]--;
-					graph.addUndirectedSimpleEdge(v.value, n.value);
+			// connect the left
+			for (int i = 0; i < roundedSample2; i++) {
+				for (IntCursor n : IntCursor.fromFastUtil(leftNe)) {
+					// check if connection already exists before adding it
+					if (graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
+						graph.addUndirectedSimpleEdge(v.value, n.value);
+					}
 				}
-
 			}
+		}
+	}
+
+	/**
+	 * Stochastic rounding of a sample
+	 * 
+	 * @param x
+	 * @param random
+	 * @return
+	 */
+	public static int stochasticRound(double x, Random random) {
+		int lower = (int) Math.floor(x);
+		int upper = (int) Math.ceil(x);
+
+		double prob = x - lower;
+		if (random.nextDouble() < prob) {
+			return upper;
+		} else {
+			return lower;
 		}
 	}
 
@@ -244,16 +272,16 @@ public class DirectedWattsStrogatz implements IGenerator {
 	 * @return Array with each edge contributions expected from each vertex.
 	 */
 	public int[] assignEdges(int vertices, double k) {
-		int roundK = (int) Math.floor(k/2);
+		int roundK = (int) Math.ceil(k / 2);
 		int[] contributions = new int[vertices];
 
-		// assign floored K to each vertex
+		// assign K to each vertex
 		for (int i = 0; i < vertices; i++) {
 			contributions[i] = roundK;
 		}
 
 		// create extra edges with leftover randomly
-		int leftoverEdges = (int) Math.floor((k - roundK) * vertices);
+		int leftoverEdges = (int) Math.ceil((roundK - (k / 2)) * vertices);
 		for (int i = 0; i < leftoverEdges; i++) {
 			int vertex = rnd.nextInt(vertices);
 			contributions[vertex]++;
