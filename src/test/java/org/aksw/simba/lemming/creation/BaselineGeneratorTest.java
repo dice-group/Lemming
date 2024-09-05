@@ -9,7 +9,6 @@ import org.aksw.simba.lemming.mimicgraph.generator.baseline.DirectedWattsStrogat
 import org.aksw.simba.lemming.util.Constants;
 import org.dice_research.ldcbench.generate.GraphGenerator;
 import org.dice_research.ldcbench.generate.ParallelBarabasiRDF;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,6 +36,10 @@ public class BaselineGeneratorTest {
 		testConfigs.add(new Object[] { 7.652143359100492, 1423, 42 });
 		testConfigs.add(new Object[] { 8, 1423, 42 });
 		testConfigs.add(new Object[] { 1, 1423, 42 });
+		testConfigs.add(new Object[] { 1.2, 1423, 42 });
+		testConfigs.add(new Object[] { 1.8, 1423, 42 });
+		testConfigs.add(new Object[] { 0.8, 1423, 42 });
+		testConfigs.add(new Object[] { 10, 1423, 42 });
 		return testConfigs;
 	}
 

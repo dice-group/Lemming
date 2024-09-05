@@ -58,12 +58,9 @@ public class DirectedWattsStrogatz implements IGenerator {
 
 		// degree needs to be at least 2 to do the full WS algorithm
 		// limit it if less than that
-		if (k >= 2) {
-			g.ring();
+		generateRing(g, k);
+		if (k > 2)
 			connectToKClosestNeighbors(g, k);
-		} else {
-			partialRing(g, k);
-		}
 
 		// if the network is a clique
 		if (k < n / 2) {
@@ -103,41 +100,42 @@ public class DirectedWattsStrogatz implements IGenerator {
 	}
 
 	/**
-	 * Based on {@link RingTopologyGenerator}. It builds a ring where not all
-	 * adjacent vertices are connected for k<2.
+	 * Based on {@link RingTopologyGenerator}. Computes a normal ring for k>=2. It
+	 * builds a ring where not all adjacent vertices are connected for k<2.
 	 * 
 	 * @param graph The graph object
 	 * @param k     Desired average degree
 	 */
-	public void partialRing(Grph graph, double k) {
+	public void generateRing(Grph graph, double k) {
 
-		// only accept k smaller than 2
 		if (k >= 2) {
-			throw new IllegalArgumentException("You should use the default ring function instead.");
-		}
+			graph.ring();
+		} else {
+			// connect randomly if target edges has not been reached
+			IntSet vertices = graph.getVertices();
+			int numEdges = (int) Math.ceil(vertices.size() * k / 2);
+			if (vertices.size() > 1) {
+				IntIterator i = vertices.iterator();
+				int predecessor = i.nextInt();
+				int first = predecessor;
 
-		// connect randomly if target edges has not been reached
-		IntSet vertices = graph.getVertices();
-		int numEdges = (int) Math.floor(vertices.size() * k / 2);
-		if (vertices.size() > 1) {
-			IntIterator i = vertices.iterator();
-			int predecessor = i.nextInt();
-			int first = predecessor;
+				while (i.hasNext()) {
+					int a = i.nextInt();
 
-			while (i.hasNext()) {
-				int a = i.nextInt();
+					// if the target number of edges hasn't been reached yet
+					// add an edge randomly
+					if (graph.getNumberOfEdges() < numEdges && rnd.nextDouble() < k/2)
+						graph.addUndirectedSimpleEdge(predecessor, a);
+					predecessor = a;
+				}
 
-				// if the target number of edges hasn't been reached yet
-				// add an edge randomly
-				if (graph.getNumberOfEdges() < numEdges && rnd.nextBoolean())
-					graph.addUndirectedSimpleEdge(predecessor, a);
-				predecessor = a;
+				// if the target number of edges hasn't been reached, connect the last one
+				if (graph.getNumberOfEdges() < numEdges)
+					graph.addUndirectedSimpleEdge(predecessor, first);
 			}
-
-			// if the target number of edges hasn't been reached, connect the last one
-			if (graph.getNumberOfEdges() < numEdges)
-				graph.addUndirectedSimpleEdge(predecessor, first);
 		}
+		
+
 	}
 
 	/**
@@ -152,7 +150,7 @@ public class DirectedWattsStrogatz implements IGenerator {
 		int noVertices = graph.getVertices().getGreatest() + 1;
 
 		double center = k / 2;
-		double sigma = Math.ceil(k/2);
+		double sigma = Math.floor(k / 2);
 
 		// for each vertex, connect to right neighbours and then to right side
 		for (IntCursor v : IntCursor.fromFastUtil(graph.getVertices())) {
@@ -171,7 +169,7 @@ public class DirectedWattsStrogatz implements IGenerator {
 				double sample1 = rnd.nextGaussian(center, sigma);
 				double sample2 = rnd.nextGaussian(center, sigma);
 				roundedSample1 = stochasticRound(sample1, rnd);
-				roundedSample2 = stochasticRound(sample2, rnd);	
+				roundedSample2 = stochasticRound(sample2, rnd);
 			}
 
 			// connect the right
