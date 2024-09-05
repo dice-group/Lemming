@@ -4,7 +4,6 @@ import java.util.Random;
 import java.util.Set;
 
 import org.aksw.simba.lemming.util.Constants;
-import org.apache.commons.math3.distribution.LogNormalDistribution;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +22,7 @@ import toools.collections.primitive.IntCursor;
  * Generalization for directed Watts-Strogatz graphs.
  * 
  * It generates a directed graph based on
- * {@link RandomNewmanWattsStrogatzTopologyGenerator}. It supports odd and
+ * {@link RandomNewmanWattsStrogatzTopologyGenerator}. It approximates odd and
  * fractional degrees. We follow the below steps:
  * <ol>
  * <li>Generates a ring graph. For k<2, we connect the adjacent vertices with a
@@ -158,55 +157,40 @@ public class DirectedWattsStrogatz implements IGenerator {
 	private void connectToKClosestNeighbors(Grph graph, double k) {
 
 		int noVertices = graph.getVertices().getGreatest() + 1;
-
 		double center = k / 2;
-		double sigma = 1;
 		double avgDegree = graph.getAverageDegree();
-		LogNormalDistribution logNormal = new LogNormalDistribution(center, sigma);
-        
 
 		// for each vertex, connect to right neighbours and then to right side
 		for (IntCursor v : IntCursor.fromFastUtil(graph.getVertices())) {
 			// get right and left side neighbours, this will be of the Math.ceil of k!
 			IntSet[] neighbours = getKClosestNeighbours(noVertices, v.value, k);
 			IntSet leftNe = neighbours[0];
-			IntSet rightNe = neighbours[1];
-
+			
+			
 			// no need to sample if degree is even
 			int roundedSample1;
-			int roundedSample2;
-			if (center % 2 == 0) {
+			if (center % 1 == 0) {
 				roundedSample1 = (int) center;
-				roundedSample2 = (int) center;
 			} else {
-				double sample1 = logNormal.sample();
-				double sample2 = logNormal.sample();
+				double sample1 = sampleRandom(0, k);
 				roundedSample1 = stochasticRound(sample1, rnd);
-				roundedSample2 = stochasticRound(sample2, rnd);
 			}
 
-			// connect the right
+			// connect to the left
 			for (int i = 0; i < roundedSample1; i++) {
-				for (IntCursor n : IntCursor.fromFastUtil(rightNe)) {
+				for (int n : leftNe) {
 					// check if connection already exists before adding it
-					if (avgDegree < k && graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
-						graph.addUndirectedSimpleEdge(v.value, n.value);
-						avgDegree = graph.getAverageDegree();
-					}
-				}
-			}
-
-			// connect the left
-			for (int i = 0; i < roundedSample2; i++) {
-				for (IntCursor n : IntCursor.fromFastUtil(leftNe)) {
-					// check if connection already exists before adding it
-					if (avgDegree < k && graph.getEdgesConnecting(v.value, n.value).isEmpty()) {
-						graph.addUndirectedSimpleEdge(v.value, n.value);
+					if (avgDegree < k && graph.getEdgesConnecting(v.value, n).isEmpty()) {
+						graph.addUndirectedSimpleEdge(v.value, n);
 						avgDegree = graph.getAverageDegree();
 					}
 				}
 			}
 		}
+	}
+	
+	public double sampleRandom(double min, double max) {
+		return min + (max - min) * rnd.nextDouble();
 	}
 
 	/**
