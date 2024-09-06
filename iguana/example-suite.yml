@@ -20,6 +20,10 @@ tasks:
           path: "queries.txt"
           order: "linear"
           format: "one-per-line"  
+          pattern:
+            endpoint: "http://localhost:6666/blazegraph/sparql"
+            limit: 2000
+            caching: true
         timeout: 1h
         connection: "TSTORE"
         parseResults: false
