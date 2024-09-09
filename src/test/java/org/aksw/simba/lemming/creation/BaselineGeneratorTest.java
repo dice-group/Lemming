@@ -35,12 +35,13 @@ public class BaselineGeneratorTest {
 		List<Object[]> testConfigs = new ArrayList<Object[]>();
 		testConfigs.add(new Object[] { 7.652143359100492, 1423, 42 });
 		testConfigs.add(new Object[] { 8.25, 1423, 42 });
+		testConfigs.add(new Object[] { 3.5, 10, 42 });
 		testConfigs.add(new Object[] { 8, 1423, 42 });
-		testConfigs.add(new Object[] { 1, 1423, 42 });
-		testConfigs.add(new Object[] { 1.2, 1423, 42 });
-		testConfigs.add(new Object[] { 1.8, 1423, 42 });
-		testConfigs.add(new Object[] { 0.8, 1423, 42 });
+		testConfigs.add(new Object[] { 2, 1423, 42 });
+		testConfigs.add(new Object[] { 2.2, 1423, 42 });
 		testConfigs.add(new Object[] { 10, 1423, 42 });
+		testConfigs.add(new Object[] { 7.449170872, 1387, 42 });
+		testConfigs.add(new Object[] { 8.055910754, 45358, 42 });
 		return testConfigs;
 	}
 
@@ -49,13 +50,11 @@ public class BaselineGeneratorTest {
     	ExtGrphBasedGraph graph = new ExtGrphBasedGraph();
 		GraphGenerator generator = new ParallelBarabasiRDF(Constants.BASELINE_STRING);
 		generator.generateGraph(noVertices, degree/2, seed, graph);
-		double actualDegree = graph.getGrph().getAverageDegree();
 	}
 
 	@Test
 	public void testWS() {
 		DirectedWattsStrogatz tg = new DirectedWattsStrogatz();
-		Grph g = tg.generateGraph(noVertices, degree, seed);
-		double actualDegree = g.getAverageDegree();
+		tg.generateGraph(noVertices, degree, seed);
 	}
 }

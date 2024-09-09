@@ -46,7 +46,6 @@ public class GraphGenerationArgs {
 	
 	@Parameter(names = { "-bl" }, description = "Baseline model", required = false)
 	public String baselineModel;
-
 	/**
 	 * 
 	 * @return A String with the parameters and respective values.

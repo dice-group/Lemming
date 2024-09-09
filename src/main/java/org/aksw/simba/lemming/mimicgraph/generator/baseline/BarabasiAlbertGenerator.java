@@ -16,6 +16,7 @@ public class BarabasiAlbertGenerator implements IGenerator {
 	public Grph generateGraph(int noVertices, double avgDegree, long seed) {
 		ExtGrphBasedGraph baselineGraph = new ExtGrphBasedGraph();
 		ParallelBarabasiRDF generator = new ParallelBarabasiRDF(Constants.BASELINE_STRING);
+		avgDegree /= 2;
 		if (avgDegree < 1) {
 			avgDegree = 1;
 		}
