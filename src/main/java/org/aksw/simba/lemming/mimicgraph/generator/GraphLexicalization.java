@@ -8,6 +8,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredVDistPerDTEColour;
 import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralGenertor;
 import org.aksw.simba.lemming.util.Constants;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +115,7 @@ public class GraphLexicalization {
 		
 		Map<BitSet, IntSet> mMapColourToVertexIDs = graphInit.getmMapColourToVertexIDs();
 		Map<BitSet, Integer> mMapClassVertices = graphInit.getmMapClassVertices();
-		BitSet rdfTypeColour = graphInit.getmRdfTypePropertyColour();
+		BitSet rdfTypeColour = mimicGraph.getEdgePalette().getColour(RDF.type.getURI());
 		Map<Integer, BitSet> mReversedMapClassVertices = graphInit.getmReversedMapClassVertices();
 		
 		// filter out all coloured vertices
