@@ -280,11 +280,6 @@ public class GraphOptimization {
             String errorScoreFile = new String(savedFile);
             errorScoreFile = errorScoreFile.replace(".ttl", ".scores");
             BufferedWriter fErrorScoreWriter = new BufferedWriter(new FileWriter(errorScoreFile, true));
-            
-            // means baseline
-            if(mOptimizedTime == 0) {
-            	mOptimizedTime = System.currentTimeMillis();
-            }
 
             // number of input graphs
             fWriter.write("#----------------------------------------------------------------------#\n");

@@ -108,13 +108,7 @@ public class GraphGenerationTest {
 		List<SingleValueMetric> metrics = valuesCarrier.getMetrics();
 		GraphOptimization grphOptimizer = new GraphOptimization(graphs, mimicGraph, graphGenerator, metrics,
 				valuesCarrier, seedGenerator, pArgs.noOptimizationSteps);
-		// skip optimization if baseline
-		ColouredGraph refinedGraph = null;
-		if (pArgs.mode.toLowerCase().equals("bl")) {
-			refinedGraph = mimicGraph.clone();
-		} else {
-			refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
-		}
+		ColouredGraph refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
 		// output results to file "LemmingEx.result"
 		// before we connect the RDF.type edges
 		String savedFile = mDatasetManager.getSavedFileName("results");

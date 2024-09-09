@@ -95,6 +95,8 @@ public class BaselineGenerator extends GraphGenerator {
 		applyVertexDistribution(graphInitializer.getVertexColourDist(), baselineGraph.getNumberOfVertices());
 		mimicGraph.setEdgeColours(edgeColourMap);
 		mimicGraph.setVertexColours(vertexColourMap);
+		graphInitializer.setMapColourToEdgeIDs(colourEdgeIds);
+		graphInitializer.setMapColourToVertexIDs(colourVertexIds);
 	}
 
 	public Map<BitSet, IntSet> getColourVertexIds() {
