@@ -7,7 +7,7 @@ do
     pkill -f fuseki
     ./start-ref.sh $f
     ./start-fuseki.sh $f
-    sleep 5m
+    sleep 1m
     gn="${f%%.*}"
     echo "$gn"
     cp example-suite.yml example-suiteTMP.yml

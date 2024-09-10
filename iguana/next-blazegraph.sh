@@ -7,7 +7,7 @@ do
     pkill -f blazegraph
     ./start-ref.sh $f
     ./start-blazegraph.sh $f
-    sleep 5m
+    sleep 1m
     gn="${f%%.*}"
     echo "$gn"
     cp example-suite.yml example-suiteTMP.yml

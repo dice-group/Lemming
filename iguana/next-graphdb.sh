@@ -7,7 +7,7 @@ do
     pkill -f graphdb
     ./start-ref.sh $f
     ./start-graphdb.sh $f
-    sleep 5m
+    sleep 1m
     gn="${f%%.*}"
     echo "$gn"
     cp example-suite.yml example-suiteTMP.yml
