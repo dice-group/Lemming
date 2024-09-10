@@ -1,6 +1,7 @@
 pkill -f graphdb
 pkill -f virtuoso
 pkill -f fuseki
+pkill -f tentris
 
 filepath="/local/Lemming/iguana/tentris-storage"
 rm -rf $filepath

@@ -1,7 +1,6 @@
 pkill -f graphdb
 pkill -f fuseki
 pkill -f tentris
-#pkill -f blazegraph
 
 rm virtuoso-opensource/database/virtuoso.db
 rm virtuoso-opensource/database/virtuoso.trx
