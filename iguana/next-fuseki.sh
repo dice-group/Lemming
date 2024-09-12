@@ -8,6 +8,7 @@ do
     ./start-ref.sh $f
     ./start-fuseki.sh $f
     sleep 1m
+    ./wait_until_up.sh "http://localhost:3030/ds/sparql"
     gn="${f%%.*}"
     echo "$gn"
     cp example-suite.yml example-suiteTMP.yml

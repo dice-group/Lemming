@@ -8,6 +8,7 @@ do
     ./start-ref.sh $f
     ./start-tentris.sh $f
     sleep 1m
+    ./wait_until_up.sh "http://localhost:9080/sparql"
     gn="${f%%.*}"
     echo "$gn"
     cp example-suite.yml example-suiteTMP.yml
