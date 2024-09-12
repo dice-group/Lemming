@@ -1,10 +1,11 @@
 graphFolder=$1
-for f in "$graphFolder"/*
+for file in "$graphFolder"/*
 do
   if [ -f "$f" ]; then
     rm -rf queryCache/
     echo "executing $f"
     pkill -f fuseki
+    f=$(realpath "$file")
     ./start-ref.sh $f
     ./start-fuseki.sh $f
     sleep 1m

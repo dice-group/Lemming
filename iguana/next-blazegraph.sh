@@ -1,12 +1,13 @@
 graphFolder=$1
-for f in "$graphFolder"/*
+for file in "$graphFolder"/*
 do
   if [ -f "$f" ]; then
     rm -rf queryCache/
     echo "executing $f"
     pkill -f blazegraph
-    ./start-ref.sh $f
-    ./start-blazegraph.sh $f
+    f=$(realpath "$file")
+    ./start-ref.sh $file
+    ./start-blazegraph.sh $file
     sleep 1m
     ./wait_until_up.sh "http://localhost:9999/blazegraph/sparql"
     gn="${f%%.*}"
