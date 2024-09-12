@@ -1,6 +1,6 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/abe2f703880e4a61b44790dc2fe0a534)](https://www.codacy.com/gh/dice-group/Lemming/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dice-group/Lemming&amp;utm_campaign=Badge_Grade)
 
-<img src="https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png" height="300" />
+<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
 
 # Lemming
 LEMMING is an ExaMple MImickiNg graph Generator
@@ -110,3 +110,17 @@ Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/s
 For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by the Stanford University. It has been transformed into a simple RDF file.
 
 The [Lemming logo](https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png) has been created by [TortugaAttack](https://github.com/TortugaAttack).
+
+# How to cite
+```
+@inproceedings{roeder2021lemming,
+  author = {R{\"o}der, Michael and Nguyen, Pham Thuy Sy and Conrads, Felix and da Silva, Ana Alexandra Morim and Ngomo, Axel-Cyrille Ngonga},
+  booktitle = {Proceedings of the 15th IEEE International Conference on Semantic Computing (ICSC)},
+  doi = {10.1109/ICSC50631.2021.00015},
+  pages = {62-69},
+  publisher = {IEEE Computer Society},
+  title = {LEMMING -- Example-based Mimicking of Knowledge Graphs},
+  url = {https://doi.org/10.1109/ICSC50631.2021.00015},
+  year = 2021
+}
+```
