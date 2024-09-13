@@ -1,0 +1,43 @@
+SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/City> } 
+SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/Town> } 
+SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/Village> } 
+SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/University> } 
+SELECT  (COUNT(?vvv1) AS ?vvv0) WHERE   { ?vvv1  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT  (COUNT(?vvv1) AS ?vvv0) WHERE   { ?vvv1  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT  (count(*) AS ?vvv1) WHERE   { ?vvv0  a                     %%var0%% } 
+SELECT  (count(*) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/PlaceOfWorship> } LIMIT   1000 
+SELECT  (count(*) AS ?vvv2) WHERE   { ?vvv0  a                     ?vvv1 } 
+SELECT  (count(*) AS ?vvv2) WHERE   { ?vvv1  a                     %%var0%% ;         <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?vvv4 ;         <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?vvv3 ;         <http://www.w3.org/2000/01/rdf-schema#label>  ?vvv0   } 
+SELECT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/Farm> } 
+SELECT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/Stadium> } LIMIT   5 
+SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } 
+SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } LIMIT   10000 
+SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } 
+SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   10 
+SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100 
+SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   2 
+SELECT  ?vvv0 ?vvv1 WHERE   { ?vvv0  <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?vvv1 } 
+SELECT  ?vvv0 WHERE   { ?vvv1  a                     <http://linkedgeodata.org/ontology/School> ;              <http://www.w3.org/2000/01/rdf-schema#label>  ?vvv0   } 
+SELECT  ?vvv2 ?vvv0 ?vvv4 ?vvv1 ?vvv3 WHERE   { ?vvv2  a                     <http://linkedgeodata.org/ontology/Shop> ;           <http://www.w3.org/2000/01/rdf-schema#label>  ?vvv0 ;           <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?vvv4 ;           <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?vvv1     OPTIONAL       { ?vvv2  a                     ?vvv3 }   } 
+SELECT  ?vvv2 ?vvv1 ?vvv0 WHERE   { ?vvv2  ?vvv1  ?vvv0 }   
+SELECT DISTINCT  (COUNT(?vvv0) AS ?vvv1) WHERE   {   { ?vvv0  a                     <http://linkedgeodata.org/ontology/City> }     UNION       { ?vvv0  a                     <http://linkedgeodata.org/ontology/Suburb> }     UNION       { ?vvv0  a                     <http://linkedgeodata.org/ontology/Town> }     UNION       { ?vvv0  a                     <http://linkedgeodata.org/ontology/Village> }   } 
+SELECT DISTINCT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/City> } 
+SELECT DISTINCT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   {   { ?vvv1  a                     <http://linkedgeodata.org/ontology/City> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Suburb> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Town> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Village> }     ?vvv1  <http://www.georss.org/georss/point>  ?vvv0   } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   { ?vvv1  <http://www.georss.org/georss/point>  ?vvv0       { ?vvv1  a                     <http://linkedgeodata.org/ontology/City> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Suburb> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Town> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Village> }   } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   { ?vvv1  <http://www.georss.org/georss/point>  ?vvv0 } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   { ?vvv1  <http://www.w3.org/2003/01/geo/wgs84_pos#geometry>  ?vvv0       { ?vvv1  a                     <http://linkedgeodata.org/ontology/City> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Suburb> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Town> }     UNION       { ?vvv1  a                     <http://linkedgeodata.org/ontology/Village> }   } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   { ?vvv1  <http://www.w3.org/2003/01/geo/wgs84_pos#geometry>  ?vvv0     {   { ?vvv1  a                     <http://linkedgeodata.org/ontology/City> }       UNION         { ?vvv1  a                     <http://linkedgeodata.org/ontology/Suburb> }       UNION         { ?vvv1  a                     <http://linkedgeodata.org/ontology/Town> }       UNION         { ?vvv1  a                     <http://linkedgeodata.org/ontology/Village> }     }   } 
+SELECT DISTINCT  (COUNT(?vvv1) AS ?vvv2) WHERE   { ?vvv1  <http://www.w3.org/2003/01/geo/wgs84_pos#geometry>  ?vvv0 } 
+SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> ;         <http://www.w3.org/2003/01/geo/wgs84_pos#geometry>  ?vvv2   } 
+SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
+SELECT DISTINCT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } LIMIT   100 
+SELECT DISTINCT  * WHERE   { ?vvv2  a                     <http://linkedgeodata.org/ontology/School> ;         ?vvv1                    ?vvv0   } LIMIT   100     
+SELECT DISTINCT  ?vvv0 WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } LIMIT   100  
+SELECT DISTINCT  ?vvv1 WHERE   { ?vvv0  a                     ?vvv1 } 
+SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100 
+SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   1000 
+SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   2000 
+SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  a                     <http://linkedgeodata.org/ontology/Town> ;         ?vvv1                    ?vvv0   } LIMIT   100 
