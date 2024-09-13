@@ -6,8 +6,10 @@ do
     echo "executing $file"
     pkill -f virtuoso
     f=$(realpath "$file")
+    file_name=$(basename "$f")
+    dir_path=$(dirname "$f")
     ./start-ref.sh $f
-    ./start-virtuoso.sh $f
+    ./start-virtuoso.sh $dir_path $file_name
     sleep 1m
     ./wait_until_up.sh "http://localhost:8890/sparql"
     gn="${f%%.*}"
