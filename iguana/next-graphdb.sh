@@ -1,9 +1,9 @@
 graphFolder=$1
 for file in "$graphFolder"/*
 do
-  if [ -f "$f" ]; then
+  if [ -f "$file" ]; then
     rm -rf queryCache/
-    echo "executing $f"
+    echo "executing $file"
     pkill -f graphdb
     f=$(realpath "$file")
     ./start-ref.sh $f
