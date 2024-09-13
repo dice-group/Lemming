@@ -1,8 +1,4 @@
-SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#GeologicTimescale> }
-SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#StratigraphicPoint> }
-SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#GeochronologicEra> }
-SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#StratigraphicPoint> }
-SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#GeochronologicBoundary> }
+SELECT * { ?vvv0  a                     %%var0%% }
 SELECT  (count(*) AS ?vvv1) WHERE   { ?vvv0  a                     %%var0%% } 
 SELECT ?var0 { ?vvv1  a                     ?var0 ;           <http://resource.geosciml.org/ontology/timescale/gts#ratifiedGSSP>  ?vvv4 ;           <http://resource.geosciml.org/ontology/timescale/gts#status>  ?vvv3 ;           <http://resource.geosciml.org/ontology/timescale/gts#ratifiedGSSP>  ?vvv0  }
 SELECT * { ?vvv0  a                     <http://resource.geosciml.org/ontology/timescale/gts#NumericEraBoundary> }LIMIT   5
