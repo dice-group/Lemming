@@ -6,7 +6,7 @@ SELECT  * WHERE   { ?vvv0  a                     %%var0%% }
 SELECT  * WHERE   { ?vvv0  a                     %%var0%% } LIMIT   5 
 SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } 
 SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } LIMIT   10000 
-SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } 
+SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100000 
 SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   10 
 SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100 
 SELECT  * WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   2 
