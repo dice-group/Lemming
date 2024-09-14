@@ -17,7 +17,7 @@ do
     cp example-suite.yml example-suiteTMP.yml
     queries=$( ./get_queries.sh $f )
     echo "Queries file: $queries"
-    sed -i -e 's,QUERIES,'"$queries"',g' example-suiteTMP.yml
+    sed -i -e 's,QUERYFILE,'"$queries"',g' example-suiteTMP.yml
     sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
     sed -i -e 's,TSTORE,Virtuoso,g' example-suiteTMP.yml
     sed -i -e 's,ENDPOINT,http://localhost:8890/sparql,g' example-suiteTMP.yml

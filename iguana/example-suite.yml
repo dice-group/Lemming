@@ -13,7 +13,7 @@ tasks:
         number: 1   
         connection: "TSTORE" 
         queries:
-  	  path: "QUERIES"
+  	  path: "queries/QUERYFILE"
   	  format: "one-per-line" 
   	  template:
     	    endpoint: "http://localhost:3131/ds/sparql"
