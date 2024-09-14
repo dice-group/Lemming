@@ -4,22 +4,27 @@ datasets:
 connections:
   - name: "TSTORE"
     endpoint: "ENDPOINT"
+    dataset: "GraphName"
     
 tasks:
-  - className: "org.aksw.iguana.cc.tasks.impl.Stresstest"
-    configuration:
-      timeLimit: 3600000
-      queryHandler:
-        className: "PatternQueryHandler"
-        endpoint: "http://localhost:6666/blazegraph/sparql"
-        limit: 2000 
-      workers:
-      - threads: 1
-        className: "SPARQLWorker"
-        queriesFile: "QUERIES"
-        timeOut: 180000
-        responseType: "application/sparql-results+json"
+  - type: "stresstest"
+    workers:
+    - type: "SPARQLProtocolWorker"   
+        number: 1   
+        connection: "TSTORE" 
+        queries:
+  	  path: "QUERIES"
+  	  format: "one-per-line" 
+  	  template:
+    	    endpoint: "http://localhost:3131/ds/sparql"
+    	    limit: 2000
+    	completionTarget:
+          number: 100
+    	timeout: "3 min" 
         
 storages:
-  - className: "NTFileStorage"
+  - type: "rdf file"
+    path: "SAVEPATH.ttl"
+  - type: "csv file"
+    directory: "./results/"
 

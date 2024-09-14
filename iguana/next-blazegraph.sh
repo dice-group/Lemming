@@ -8,7 +8,7 @@ do
     f=$(realpath "$file")
     ./start-ref.sh $file
     ./start-blazegraph.sh $file
-    sleep 1m
+    sleep 5m
     ./wait_until_up.sh "http://localhost:9999/blazegraph/sparql"
     gn="${f%%.*}"
     echo "$gn"
@@ -19,6 +19,7 @@ do
     sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
     sed -i -e 's,TSTORE,Blazegraph,g' example-suiteTMP.yml
     sed -i -e 's,ENDPOINT,http://localhost:9999/blazegraph/sparql,g' example-suiteTMP.yml
+    sed -i -e 's,SAVEPATH,'"${gn}-iguana"',g' example-suiteTMP.yml
     ./start-iguana.sh example-suiteTMP.yml
 
     pkill -f blazegraph

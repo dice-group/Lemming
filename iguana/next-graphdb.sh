@@ -19,6 +19,7 @@ do
     sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
     sed -i -e 's,TSTORE,GraphDB,g' example-suiteTMP.yml
     sed -i -e 's,ENDPOINT,http://localhost:7200/repositories/repo,g' example-suiteTMP.yml
+    sed -i -e 's,SAVEPATH,'"${gn}-iguana"',g' example-suiteTMP.yml
     ./start-iguana.sh example-suiteTMP.yml
 
     pkill -f graphdb

@@ -21,6 +21,7 @@ do
     sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
     sed -i -e 's,TSTORE,Virtuoso,g' example-suiteTMP.yml
     sed -i -e 's,ENDPOINT,http://localhost:8890/sparql,g' example-suiteTMP.yml
+    sed -i -e 's,SAVEPATH,'"${gn}-iguana"',g' example-suiteTMP.yml
     ./start-iguana.sh example-suiteTMP.yml
 
     pkill -f virtuoso
