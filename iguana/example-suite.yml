@@ -21,6 +21,8 @@ tasks:
         completionTarget:
           number: 100
         timeout: "3 min" 
+        acceptHeader: "application/sparql-results+json"
+        requestType: "post url-enc query"
 
 storages:
   - type: "rdf file"
