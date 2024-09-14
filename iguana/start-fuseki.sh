@@ -1,5 +1,5 @@
 pkill -f virtuoso
-pkill -f fuseki
+pkill -f blazegraph
 pkill -f graphdb
 pkill -f tentris
 

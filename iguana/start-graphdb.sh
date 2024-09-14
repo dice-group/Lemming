@@ -1,6 +1,6 @@
 pkill -f graphdb
 pkill -f virtuoso
-pkill -f fuseki
+pkill -f blazegraph
 pkill -f tentris
 
 ./graphdb-10.7.3/bin/importrdf load --force -p -c graphdb/config.ttl -m parallel $1
