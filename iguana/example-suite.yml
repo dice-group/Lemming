@@ -9,14 +9,14 @@ connections:
 tasks:
   - type: "stresstest"
     workers:
-    - type: "SPARQLProtocolWorker"   
+      - type: "SPARQLProtocolWorker"   
         number: 1   
         connection: "TSTORE" 
         queries:
   	  path: "queries/QUERYFILE"
   	  format: "one-per-line" 
   	  template:
-    	    endpoint: "http://localhost:3131/ds/sparql"
+    	    endpoint: "http://localhost:3131/ref/sparql"
     	    limit: 2000
     	completionTarget:
           number: 100
