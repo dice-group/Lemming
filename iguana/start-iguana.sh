@@ -1,4 +1,4 @@
 rm -rf queryCache/
 
-./iguana $1
+./iguana -Xmx16g $1
 
