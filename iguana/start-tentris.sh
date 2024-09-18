@@ -8,7 +8,7 @@ filepath="/local/Lemming/iguana/tentris-storage"
 rm -rf $filepath
 
 ./tentris_loader --file $1 --storage $filepath
-./tentris_server -p 9080 --storage $filepath &
+./tentris_server -p 9080 --storage $filepath --logstdout &
 
 # Wait until it's up
 sleep 1m
