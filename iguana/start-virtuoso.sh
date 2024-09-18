@@ -3,7 +3,6 @@
 pkill -f graphdb
 pkill -f fuseki
 pkill -f tentris
-pkill -f virtuoso
 
 f=$1
 file_name=$(basename "$f")
@@ -27,3 +26,5 @@ sleep 1m
 ./wait_until_up.sh "http://localhost:8890/sparql"
 
 ./prep_iguana.sh $f "Virtuoso" "http://localhost:8890/sparql"
+
+pkill -f virtuoso

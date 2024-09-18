@@ -1,7 +1,6 @@
 #!/usr/bin/bash 
 
 pkill -f virtuoso
-pkill -f blazegraph
 pkill -f graphdb
 pkill -f tentris
 
@@ -15,3 +14,5 @@ sleep 1m
 
 # Start iguana
 ./prep_iguana.sh $1 "Blazegraph" "http://localhost:9999/blazegraph/sparql"
+
+pkill -f blazegraph

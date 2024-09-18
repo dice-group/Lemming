@@ -1,6 +1,5 @@
 #!/usr/bin/bash 
 
-pkill -f graphdb
 pkill -f virtuoso
 pkill -f blazegraph
 pkill -f tentris
@@ -16,3 +15,4 @@ sleep 1m
 # Start iguana
 ./prep_iguana.sh $1 "GraphDB" "http://localhost:7200/repositories/repo"
 
+pkill -f graphdb
