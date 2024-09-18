@@ -1,3 +1,4 @@
+#!/usr/bin/bash 
 f=$1
 queries="queries.txt"
 if [[ "$f" == *SemanticWeb* ]]; then

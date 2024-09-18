@@ -1,4 +1,4 @@
-rm -rf queryCache/
+#!/usr/bin/bash 
 
-./iguana -Xmx16g $1
+./iguana $1
 

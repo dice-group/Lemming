@@ -1,3 +1,5 @@
+#!/usr/bin/bash 
+
 pkill -f fuseki
 
 rm -rf /local/Lemming/iguana/ref/apache-jena-fuseki-5.1.0/REF/

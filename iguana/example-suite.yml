@@ -18,7 +18,7 @@ tasks:
           template:
             endpoint: "http://localhost:3131/ref/sparql"
             limit: 2000
-            save: false
+            save: true
         completionTarget:
           number: 100
         timeout: "3 min" 
@@ -27,7 +27,7 @@ tasks:
 
 storages:
   - type: "rdf file"
-    path: "SAVEPATH.ttl"
+    path: "./rdf-results/"
   - type: "csv file"
     directory: "./results/"
 
