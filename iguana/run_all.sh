@@ -8,11 +8,8 @@ do
     f=$(realpath "$file")
     echo "executing $file"
     
-    # Reset query instance cache for each query
-    # Rename it based on file name
+    # Start reference endpoint
     gn="${f%%.*}"
-    mv *instances* ${gn}_queries.txt
-    rm -rf queryCache/
     pkill -f blazegraph
     ./start-ref.sh $f
     
@@ -22,6 +19,10 @@ do
     ./start-virtuoso.sh $f
     ./start-graphdb.sh $f
     ./start-tentris.sh $f
+    
+    # Reset query instance cache for each graph
+    # Rename it based on file name
+    mv *instances* ${gn}_queries.txt
   fi
   echo "done"
 done
