@@ -10,6 +10,7 @@ for file in "$graphFolder"/*
 do
   if [ -f "$file" ]; then
     f=$(realpath "$file")
+    fileName=$(basename "$file")
     echo "executing $file"
     
     # Start reference endpoint
@@ -26,7 +27,16 @@ do
     
     # Reset query instance cache for each graph
     # Rename it based on file name
-    mv queries/*instances* queries/instances/${gn}_queries.txt
+    queryFile=${fileName%%.*}_queries.txt
+    if [[ "$f" == *"initial"* ]]; then
+      queryFile="initial_"$queryFile
+    elif [[ "$f" == *"mimic"* ]]; then
+      queryFile="mimic_"$queryFile
+    else 
+      echo "I don't know this folder, not adding prefix to $queryFile"
+    fi
+    
+    mv queries/*instances* queries/queryInstances/$queryFile
   fi
   echo "done"
 done
