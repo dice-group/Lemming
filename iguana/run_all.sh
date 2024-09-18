@@ -1,5 +1,9 @@
 #!/usr/bin/bash 
 
+mkdir -p results/
+mkdir -p rdf-results/
+mkdir -p queries/queryInstances/
+
 # For each graph in the folder, run all triplestores
 graphFolder=$1
 for file in "$graphFolder"/*
@@ -22,7 +26,7 @@ do
     
     # Reset query instance cache for each graph
     # Rename it based on file name
-    mv *instances* ${gn}_queries.txt
+    mv queries/*instances* queries/instances/${gn}_queries.txt
   fi
   echo "done"
 done
