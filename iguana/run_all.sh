@@ -20,10 +20,10 @@ do
     
     # Run all with the same query instances
     ./start-blazegraph.sh $f
-    ./start-fuseki.sh $f
     ./start-virtuoso.sh $f
     ./start-graphdb.sh $f
     ./start-tentris.sh $f
+    ./start-fuseki.sh $f
     
     # Reset query instance cache for each graph
     # Rename it based on file name
