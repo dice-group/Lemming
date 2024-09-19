@@ -15,7 +15,7 @@ do
     
     # Start reference endpoint
     gn="${f%%.*}"
-    pkill -f blazegraph
+    pkill -f fuseki
     ./start-ref.sh $f
     
     # Run all with the same query instances

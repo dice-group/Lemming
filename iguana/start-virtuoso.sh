@@ -1,7 +1,7 @@
 #!/usr/bin/bash 
 
 pkill -f graphdb
-pkill -f fuseki
+pkill -f blazegraph
 pkill -f tentris
 
 f=$1
