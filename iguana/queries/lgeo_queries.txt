@@ -25,7 +25,7 @@ SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a            
 SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
 SELECT DISTINCT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } LIMIT   100 
 SELECT DISTINCT  * WHERE   { ?vvv2  a                     <http://linkedgeodata.org/ontology/School> ;         ?vvv1                    ?vvv0   } LIMIT   100     
-SELECT DISTINCT  ?vvv1 WHERE   { ?vvv0  a                     %%var0%% } 
+SELECT DISTINCT  ?vvv0 WHERE   { ?vvv0  a                     %%var0%% } 
 SELECT DISTINCT	 ?vvv0 WHERE   { ?vvv0	a		      %%var0%% } LIMIT 100
 SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100 
 SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   1000 
