@@ -2,7 +2,7 @@ SELECT  (COUNT(?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     %%var0%% 
 SELECT  (count(*) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/PlaceOfWorship> } LIMIT   1000 
 SELECT  (count(*) AS ?vvv2) WHERE   { ?vvv0  a                     ?vvv1 } 
 SELECT  (count(*) AS ?vvv2) WHERE   { ?vvv1  a                     %%var0%% ;         <http://www.w3.org/2003/01/geo/wgs84_pos#lat>  ?vvv4 ;         <http://www.w3.org/2003/01/geo/wgs84_pos#long>  ?vvv3 ;         <http://www.w3.org/2000/01/rdf-schema#label>  ?vvv0   } 
-SELECT  * WHERE   { ?vvv0  a                     %%var0%% } 
+SELECT  * WHERE   { ?vvv0  a                     %%var0%% } LIMIT   100000 
 SELECT  * WHERE   { ?vvv0  a                     %%var0%% } LIMIT   5 
 SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } 
 SELECT  * WHERE   { ?vvv1  <http://www.w3.org/2000/01/rdf-schema#range>  ?vvv0 } LIMIT   10000 
@@ -25,7 +25,7 @@ SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a            
 SELECT DISTINCT  (COUNT(DISTINCT ?vvv0) AS ?vvv1) WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } 
 SELECT DISTINCT  * WHERE   { ?vvv0  a                     <http://linkedgeodata.org/ontology/School> } LIMIT   100 
 SELECT DISTINCT  * WHERE   { ?vvv2  a                     <http://linkedgeodata.org/ontology/School> ;         ?vvv1                    ?vvv0   } LIMIT   100     
-SELECT DISTINCT  ?vvv0 WHERE   { ?vvv0  a                     %%var0%% } 
+SELECT DISTINCT  ?vvv0 WHERE   { ?vvv0  a                     %%var0%% } LIMIT   100000 
 SELECT DISTINCT	 ?vvv0 WHERE   { ?vvv0	a		      %%var0%% } LIMIT 100
 SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   100 
 SELECT DISTINCT  ?vvv1 WHERE   { ?vvv2  ?vvv1  ?vvv0 } LIMIT   1000 
