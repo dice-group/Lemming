@@ -1,10 +1,5 @@
 #!/usr/bin/bash 
 
-pkill -f virtuoso
-pkill -f graphdb
-pkill -f blazegraph
-pkill -f tentris
-
 f=$1
 file_name=$(basename "$f")
 dir_path=$(dirname "$f")

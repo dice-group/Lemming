@@ -1,11 +1,5 @@
 #!/usr/bin/bash 
 
-pkill -f graphdb
-pkill -f virtuoso
-pkill -f blazegraph
-pkill -f tentris
-
-
 # Start GraphDB
 ./graphdb-10.7.3/bin/importrdf load --force -p -c graphdb/config.ttl -m parallel $1
 ./graphdb-10.7.3/bin/graphdb -s -d

@@ -13,9 +13,16 @@ do
     fileName=$(basename "$file")
     echo "executing $file"
     
+    # Make sure all instances are finished
+    pkill -f fuseki
+    pkill -f tentris
+    pkill -f graphdb
+    pkill -f virtuoso
+    pkill -f blazegraph
+    sleep 1m
+    
     # Start reference endpoint
     gn="${f%%.*}"
-    pkill -f fuseki
     ./start-ref.sh $f
     
     # Run all with the same query instances

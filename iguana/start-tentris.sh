@@ -1,10 +1,5 @@
 #!/usr/bin/bash 
 
-pkill -f tentris
-pkill -f graphdb
-pkill -f virtuoso
-pkill -f blazegraph
-
 filepath="/local/Lemming/iguana/tentris-storage"
 rm -rf $filepath
 

@@ -1,10 +1,5 @@
 #!/usr/bin/bash 
 
-pkill -f blazegraph
-pkill -f virtuoso
-pkill -f graphdb
-pkill -f tentris
-
 rm blazegraph.jnl
 /local/Lemming/iguana/jdk1.8.0_202/bin/java -server -jar blazegraph.jar &
 sleep 10
