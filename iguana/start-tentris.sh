@@ -1,5 +1,6 @@
 #!/usr/bin/bash 
 
+pkill -f tentris
 pkill -f graphdb
 pkill -f virtuoso
 pkill -f blazegraph
