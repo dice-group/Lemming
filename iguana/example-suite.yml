@@ -26,8 +26,6 @@ tasks:
         requestType: "post url-enc query"
 
 storages:
-  - type: "rdf file"
-    path: "./rdf-results/"
   - type: "csv file"
     directory: "./results/"
 
