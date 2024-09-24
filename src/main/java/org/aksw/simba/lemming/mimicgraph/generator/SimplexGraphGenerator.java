@@ -195,6 +195,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								// add edges among selected vertices and proposed color
 								// Note: Ideally properties should exist among them. since they were also
 								// forming a triangle in input graphs
+								simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex1Colo, proposedVertex3Colo,
+										selectedVertex1, proposedVertId, initializer.getmMapColourToEdgeIDs2Simplex(),
+										analysis.getConnTriAnalysis().getmColourMapperSimplexes(), newPossibleTriangle,
+										simplexProperty.getmPropDistConnTri());
 								simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex2Colo, proposedVertex3Colo,
 										selectedVertex2, proposedVertId, initializer.getmMapColourToEdgeIDs2Simplex(),
 										analysis.getConnTriAnalysis().getmColourMapperSimplexes(), newPossibleTriangle,
