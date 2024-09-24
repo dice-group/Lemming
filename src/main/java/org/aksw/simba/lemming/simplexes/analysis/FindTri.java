@@ -136,10 +136,11 @@ public class FindTri {
 						int vN1vN2Size = intersection2.size();
 						int vN2curSize = intersection3.size();
 						
-						// skip if vN2 and curVertex have nothing in common
-						if(vN2curSize == 0) {
-							continue;
-						}
+						int intersectionResult = curN1Size * vN1vN2Size * vN2curSize;
+                        
+                        if (intersectionResult == 0) {
+                        	continue;
+                        }
 
 						int noEdges = curN1Size + vN1vN2Size + vN2curSize;
 
@@ -317,7 +318,7 @@ public class FindTri {
 					arrCountDistTemp[3] += previousCountdist[3];
 
 				}
-				mTriColoEdgesTriCountDistAvg.put(triangleColours, arrCountDistTemp); 
+				mTriColoEdgesTriCountDistAvg.put(triangleColours, arrCountDistTemp);
 			}
 		}
 	}
