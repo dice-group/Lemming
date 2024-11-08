@@ -95,7 +95,7 @@ public class GraphCreator {
 				
 				property = statement.getPredicate();
 				// if this triple defines the class of the subject
-				if (property.equals(RDF.type)) {
+				if (property.equals(RDF.type) && object.isURIResource()) {
 					graph.setVertexColour(subjectId,
 							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
 					// skip, we don't want to add the edge to the graph
@@ -164,7 +164,7 @@ public class GraphCreator {
 		Resource resource1, resource2;
 		while (nIterator.hasNext()) {
 			node = nIterator.next();
-			if (node.isResource()) {
+			if (node.isURIResource()) {
 				resource1 = node.asResource();
 				classes.put(resource1, null);
 			}
