@@ -3,6 +3,7 @@ package org.aksw.simba.lemming.mimicgraph.colourselection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -11,6 +12,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredOEDistPerVCol
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
+import org.aksw.simba.lemming.util.BitSetComparator;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -56,7 +58,8 @@ public class BiasedClassSelector implements IClassSelector {
 		Map<BitSet, ObjectDistribution<BitSet>> avrgOutEdgeDistPerVertColo = avrgOutEdgeDistPerVertColoMetric
 				.getMapAvrgOutEdgeDist(graphInit.getAvailableEdgeColours(), graphInit.getAvailableVertexColours());
 
-		Set<BitSet> outEdgeColours = avrgOutEdgeDistPerVertColo.keySet();
+		Set<BitSet> outEdgeColours = new TreeSet<>(new BitSetComparator());
+		outEdgeColours.addAll(avrgOutEdgeDistPerVertColo.keySet());
 		for (BitSet edgeColo : outEdgeColours) {
 			ObjectDistribution<BitSet> outEdgeDistPerVertColo = avrgOutEdgeDistPerVertColo.get(edgeColo);
 			if (outEdgeDistPerVertColo != null) {
@@ -70,7 +73,8 @@ public class BiasedClassSelector implements IClassSelector {
 		AvrgColouredIEDistPerVColour avrgInEdgeDistPerVertColoMetric = new AvrgColouredIEDistPerVColour(origGrphs);
 		Map<BitSet, ObjectDistribution<BitSet>> avrgInEdgeDistPerVertColo = avrgInEdgeDistPerVertColoMetric
 				.getMapAvrgInEdgeDist(graphInit.getAvailableEdgeColours(), graphInit.getAvailableVertexColours());
-		Set<BitSet> inEdgeColours = avrgInEdgeDistPerVertColo.keySet();
+		Set<BitSet> inEdgeColours = new TreeSet<>(new BitSetComparator());
+		inEdgeColours.addAll(avrgInEdgeDistPerVertColo.keySet());
 		for (BitSet edgeColo : inEdgeColours) {
 			ObjectDistribution<BitSet> inEdgeDistPerVertColo = avrgInEdgeDistPerVertColo.get(edgeColo);
 			if (inEdgeDistPerVertColo != null) {

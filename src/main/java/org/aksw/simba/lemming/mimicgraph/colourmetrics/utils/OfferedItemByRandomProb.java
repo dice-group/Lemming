@@ -35,7 +35,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		mArrBaseItems = objDist.sampleSpace;
 		mArrBaseItemProb = objDist.values;
 		mLengthOfArr = mArrBaseItemProb.length;
-		this.seed = seed+1;
+		this.seed = seed;
 		mRandom = new Random(this.seed);
 		
 		// build the cumulative distribution array

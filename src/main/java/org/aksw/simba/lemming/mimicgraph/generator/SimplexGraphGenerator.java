@@ -33,7 +33,6 @@ import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
-import com.carrotsearch.hppc.cursors.ObjectCursor;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -1915,7 +1914,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 			// get tail and head colour proposers from edge colour with n attempts
 			Set<BitSet> availableColours = initializer.getAvailableVertexColours();
-			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, availableColours);
+			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, availableColours);
 			if (proposal == null)
 				continue;
 			BitSet tailColour = proposal.getTailColour();

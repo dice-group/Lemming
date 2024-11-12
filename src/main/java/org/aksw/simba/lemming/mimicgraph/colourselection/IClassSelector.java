@@ -17,19 +17,19 @@ public interface IClassSelector {
 //	BitSet getEdgeColourFromTailHeadColour(BitSet tailColour, BitSet headColour);
 	
 
-	default public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, int n, Set<BitSet> restrictions) {
-		return getProposal(edgeColour, n, restrictions);
+	default public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, Set<BitSet> restrictions) {
+		return getProposal(edgeColour, restrictions);
 	}
 	
-	default public ClassProposal getProposal(BitSet edgeColour, int n, Set<BitSet> restrictions) {
+	default public ClassProposal getProposal(BitSet edgeColour, Set<BitSet> restrictions) {
 		IOfferedItem<BitSet> tailColourProposer = getTailClass(edgeColour);
 		if(tailColourProposer == null)
 			return null;
 		BitSet tailColour;
-		if(restrictions == null) {
-			tailColour = tryValidColour(tailColourProposer, n);
+		if(restrictions == null || restrictions.isEmpty()) {
+			tailColour = tailColourProposer.getPotentialItem();
 		} else {
-			tailColour = tryValidColour(tailColourProposer, restrictions, n);
+			tailColour = tailColourProposer.getPotentialItem(restrictions);
 		}
 		
 		if (tailColour == null) {
@@ -40,38 +40,16 @@ public interface IClassSelector {
 		if(headColourProposer == null)
 			return null;
 		BitSet headColour;
-		if(restrictions == null) {
-			headColour = tryValidColour(headColourProposer, n);
+		if(restrictions == null || restrictions.isEmpty()) {
+			headColour = headColourProposer.getPotentialItem();
 		} else {
-			headColour = tryValidColour(headColourProposer, restrictions, n);
+			headColour = headColourProposer.getPotentialItem(restrictions);
 		}
 		if (headColour == null) {
 			return null;
 		}
 		
 		return new ClassProposal(tailColour, edgeColour, headColour);
-	}
-	
-	default public BitSet tryValidColour(IOfferedItem<BitSet> proposer, Set<BitSet> restrictions, int n) {
-		BitSet colour = null;
-		for (int i = 0; i < n; i++) {
-			colour = proposer.getPotentialItem(restrictions);
-			if(colour != null) {
-				return colour;	
-			} 					
-		}
-		return null;
-	}
-	
-	default public BitSet tryValidColour(IOfferedItem<BitSet> proposer, int n) {
-		BitSet colour = null;
-		for (int i = 0; i < n; i++) {
-			colour = proposer.getPotentialItem();
-			if(colour != null) {
-				return colour;	
-			} 					
-		}
-		return null;
 	}
 	
 	BitSet getEdgeColourProposal();

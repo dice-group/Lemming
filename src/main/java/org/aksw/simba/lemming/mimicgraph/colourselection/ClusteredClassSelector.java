@@ -86,7 +86,7 @@ public class ClusteredClassSelector implements IClassSelector {
 	}
 
 	@Override
-	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, int n, Set<BitSet> restrictions) {
+	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, Set<BitSet> restrictions) {
 		if (fakeEdgeId == -1) {
 			return getProposal(); // get from clusters dist
 		} else {

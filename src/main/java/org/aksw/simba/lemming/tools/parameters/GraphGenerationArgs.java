@@ -29,10 +29,10 @@ public class GraphGenerationArgs {
 	public String mode = "Binary";
 
 	@Parameter(names = { "-c" }, description = "Class Selector Type", required = false)
-	public String classSelector;
+	public String classSelector = "UCS";
 	
 	@Parameter(names = { "-v" }, description = "Vertex Selector Type", required = false)
-	public String vertexSelector;
+	public String vertexSelector = "UIS";
 	
 	@Parameter(names = { "-sp" }, description = "Simplex Property", required = false)
 	public String simplexProperty;

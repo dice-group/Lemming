@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
@@ -101,18 +102,28 @@ public class GraphGenerator implements IGraphGenerator{
 							j++;
 							continue;
 						}
+						
+						// add to failed colours if maximum attempts are reached
+						if (curEdgeIterations == 0) {
+							LOGGER.error("Could not create edges with the {} colour since it could not find any "
+									+ "appropriate vertices to connect.", edgeColour);
+							failedEdgeColours.add(edgeColour);
+							curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+							j++;
+							continue;
+						}
 
-						// get tail and head colour proposers from edge colour with n attempts
-						ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId, 1000,
-								setAvailableVertexColours);
+						// get tail and head colour proposers from edge colour
+						ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId, setAvailableVertexColours);
+						if (proposal == null) {
+							curEdgeIterations--;
+							continue;
+						}
+						
 						BitSet tailColour = proposal.getTailColour();
 						BitSet headColour = proposal.getHeadColour();
-
-						// if it's still invalid, skip the edge colour entirely for next times
 						if (tailColour == null || headColour == null) {
-							LOGGER.error("Could not find valid tail and head colours for {} edge colour.", edgeColour);
-							failedEdgeColours.add(edgeColour);
-							j++;
+							curEdgeIterations--;
 							continue;
 						}
 
@@ -123,9 +134,8 @@ public class GraphGenerator implements IGraphGenerator{
 								VERTEX_TYPE.HEAD);
 
 						// get instances from proposers
-						int maxAttempts = 1000;
 						boolean isFoundVerticesConnected = false;
-						for (int i = 0; i < maxAttempts; i++) {
+						for (int i = 0; i < Constants.MAX_EXPLORING_TIME; i++) {
 							// get candidate tail, skip if null
 							Integer tailId = tailProposer.getPotentialItem();
 							if (tailId == null)
@@ -152,13 +162,6 @@ public class GraphGenerator implements IGraphGenerator{
 							j++;
 						} else {
 							curEdgeIterations--;
-							if (curEdgeIterations == 0) {
-								LOGGER.error("Could not create edges with the {} colour since it could not find any "
-										+ "approriate vertices to connect.", edgeColour);
-								failedEdgeColours.add(edgeColour);
-								curEdgeIterations = Constants.MAX_EXPLORING_TIME;
-								j++;
-							}
 						}
 
 					}
@@ -257,7 +260,7 @@ public class GraphGenerator implements IGraphGenerator{
 
 			// get tail and head colour proposers from edge colour with n attempts
 			Set<BitSet> availableColours = graphInitializer.getAvailableVertexColours();
-			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, 1000, availableColours);
+			ClassProposal proposal = classSelector.getProposal(edgeColour, -1, availableColours);
 			if (proposal == null)
 				continue;
 			BitSet tailColour = proposal.getTailColour();

@@ -44,7 +44,7 @@ public class UniformClassSelector implements IClassSelector {
 	public BitSet getEdgeColourProposal() {
 		BitSet[] possibilities = graphInit.getAvailableEdgeColours().toArray(BitSet[]::new);
 		OfferedItemWrapper<BitSet> proposer = new OfferedItemWrapper<BitSet>(possibilities, seedGenerator);
-		return tryValidColour(proposer, 500);
+		return proposer.getPotentialItem();
 	}
 //
 //	@Override

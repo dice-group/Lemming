@@ -3,9 +3,11 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -23,6 +25,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.ColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
+import org.aksw.simba.lemming.util.BitSetComparator;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.apache.jena.ext.com.google.common.collect.Sets;
@@ -147,7 +150,7 @@ public class GraphInitializer {
 			ColourPalette newVertexPalette = new InMemoryPalette();
 			ColourPalette newEdgePalette = new InMemoryPalette();
 			ColourPalette newDTEdgePalette = new InMemoryPalette();
-
+	
 			// copy colour palette of all the original graphs to the new one
 			for (ColouredGraph grph : origGraphs) {
 				if (grph != null) {
@@ -181,7 +184,7 @@ public class GraphInitializer {
 	 * @param mapOfURIsAndColours the other palette's URI to colour map
 	 */
 	protected void fillColourToPalette(ColourPalette palette, Map<String, BitSet> mapOfURIsAndColours) {
-		Object[] arrObjURIs = mapOfURIsAndColours.keySet().toArray();
+		Object[] arrObjURIs = new TreeSet<String>(mapOfURIsAndColours.keySet()).toArray();
 		for (int i = 0; i < arrObjURIs.length; i++) {
 			String uri = (String) arrObjURIs[i];
 			BitSet colour = mapOfURIsAndColours.get(uri);
@@ -234,7 +237,7 @@ public class GraphInitializer {
 		 * get restricted edge's colours can exist along with these created vertex's
 		 * colours
 		 */
-		Set<BitSet> setVertColours = mapColourToVertexIDs.keySet();
+		Set<BitSet> setVertColours = getAvailableVertexColours();
 		for (BitSet tailColo : setVertColours) {
 			for (BitSet headColo : setVertColours) {
 				Set<BitSet> lstPossEdgeColours = colourMapper.getPossibleLinkingEdgeColours(tailColo, headColo);
@@ -296,7 +299,6 @@ public class GraphInitializer {
 
 					while (j < arrOfEdges.length) {
 						BitSet offeredColor = (BitSet) eColoProposer.getPotentialItem(setOfRestrictedEdgeColours, true);
-
 						if (offeredColor == null) {
 							LOGGER.warn("Skip edge " + arrOfEdges[j]);
 							j++;
@@ -325,7 +327,8 @@ public class GraphInitializer {
 			/*
 			 * copy back to global variable
 			 */
-			Set<BitSet> setEdgeColours = mapEdgeColourCounter.keySet();
+			Set<BitSet> setEdgeColours = new TreeSet<>(new BitSetComparator());
+			setEdgeColours.addAll(mapEdgeColourCounter.keySet());
 			int fakeEdgeID = 0;
 			for (BitSet eColo : setEdgeColours) {
 				int j = 0;
@@ -350,28 +353,11 @@ public class GraphInitializer {
 	}
 
 	private List<IntSet> getLstTransparenEdgesForPainting(ColouredGraph mMimicGraph, int mNumberOfThreads) {
-		/*
-		 * calculate number of [rdf:type] edges first. these edges will be used to
-		 * define classes of resources in vertices.
-		 */
-		int iNumberOfRdfTypeEdges = 0;
-		Set<BitSet> setVertexColours = mapColourToVertexIDs.keySet();
-		for (BitSet vColo : setVertexColours) {
-			Set<BitSet> definedColours = mMimicGraph.getClassColour(vColo);
-			IntSet setOfVertices = mapColourToVertexIDs.get(vColo);
-			if (definedColours != null) {
-				iNumberOfRdfTypeEdges += definedColours.size() * setOfVertices.size();
-			}
-		}
-
-		LOGGER.info("There are " + iNumberOfRdfTypeEdges + " edges of rdf:type!");
 
 		/*
 		 * process normal edges
 		 */
 		int iNumberOfOtherEdges = desiredNoOfEdges;
-		desiredNoOfEdges += iNumberOfRdfTypeEdges;
-
 		LOGGER.info("Assigning colours to " + iNumberOfOtherEdges + " .......");
 
 		int iNoOfEdgesPerThread = 0;
@@ -476,12 +462,15 @@ public class GraphInitializer {
 		return colourMapper;
 	}
 
-	public Set<BitSet> getAvailableVertexColours() {
-		return mapColourToVertexIDs.keySet();
+	public Set<BitSet> getAvailableVertexColours() { 
+		Set<BitSet> vertColours = new TreeSet<>(new BitSetComparator());
+		vertColours.addAll(mapColourToVertexIDs.keySet());
+		return vertColours;
 	}
 
 	public Set<BitSet> getAvailableEdgeColours() {
-		Set<BitSet> temp = mapColourToEdgeIDs.keySet();
+		Set<BitSet> temp = new TreeSet<>(new BitSetComparator());
+		temp.addAll(mapColourToEdgeIDs.keySet());
 		temp.remove(rdfTypePropertyColour);
 		return temp;
 	}
