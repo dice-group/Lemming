@@ -125,6 +125,8 @@ public class GraphCreator {
 		sortedKeys.addAll(bNodes.keySet());
 		for(Resource curBNode: sortedKeys) {
 			Set<Statement> bStmts = bNodeStmts.get(curBNode);
+			if(bStmts == null)
+				continue;
 			for(Statement curStmt: bStmts) {
 				processStatement(curStmt, resourceIdMapping, graph);
 			}
