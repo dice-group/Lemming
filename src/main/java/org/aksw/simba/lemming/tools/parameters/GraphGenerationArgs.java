@@ -12,6 +12,9 @@ public class GraphGenerationArgs {
 
 	@Parameter(names = { "-ds" }, description = "Dataset name.", required = true)
 	public String dataset;
+	
+	@Parameter(names = { "-dp" }, description = "Dataset path.", required = false)
+	public String datasetPath;
 
 	@Parameter(names = { "-nv" }, description = "Number of vertices", required = true)
 	public int noVertices;
@@ -41,8 +44,8 @@ public class GraphGenerationArgs {
 	public String simplexClass;
 
 	@Parameter(names = {
-			"-op" }, description = "Number of iterations during the graph optimization phase", required = true)
-	public int noOptimizationSteps;
+			"-op" }, description = "Number of iterations during the graph optimization phase", required = false)
+	public int noOptimizationSteps = 0;
 	
 	@Parameter(names = { "-bl" }, description = "Baseline model", required = false)
 	public String baselineModel;
