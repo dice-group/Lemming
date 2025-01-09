@@ -48,7 +48,7 @@ public class PrecomputingValues {
 	/** Logging object */ 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PrecomputingValues.class);
 
-	public static void main(String[] args) {
+	public static void main(String... args) {
 
 		// Start spring
 		ConfigurableApplicationContext application = new SpringApplicationBuilder(PrecomputingValues.class)

@@ -43,32 +43,45 @@ public class BiasedInstanceSelector implements IVertexSelector {
 	/** Map of tail vertices proposers per edge */
 	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleODegreePerOEColo;
 
-	private GraphInitializer graphInit;
-
 	/**
+	 * Constructor.
 	 * 
-	 * @param graphInit
+	 * @param graphInit The {@link GraphInitializer} object
 	 */
 	public BiasedInstanceSelector(GraphInitializer graphInit) {
-		this.graphInit = graphInit;
 		mapPossibleIDegreePerIEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
 		mapPossibleODegreePerOEColo = new ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>>();
+
+		// computes in and out degree distribution based on input graphs
 		computePotentialIODegreePerVert(graphInit.getOriginalGraphs(), graphInit.getmMapColourToEdgeIDs(),
 				graphInit.getmMapColourToVertexIDs(), graphInit.getColourMapper(), graphInit.getSeedGenerator());
 	}
 
+	/**
+	 * Retrieves a vertex instance according to the corresponding degree
+	 * distribution
+	 */
 	@Override
 	public IOfferedItem<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type) {
 		ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> proposers = getProposers(edgecolour, type);
 		return proposers.get(vertexColour);
 	}
 
+	/**
+	 * Computes in and out degree distribution based on input graphs
+	 * 
+	 * @param origGrphs             The input graphs
+	 * @param mMapColourToEdgeIDs   The colour to edge IDs mapping
+	 * @param mMapColourToVertexIDs The colour to vertex IDs mapping
+	 * @param mColourMapper         The {@link ColourMapper} object
+	 * @param seedGenerator         The seed generator
+	 */
 	private void computePotentialIODegreePerVert(ColouredGraph[] origGrphs, Map<BitSet, IntSet> mMapColourToEdgeIDs,
 			Map<BitSet, IntSet> mMapColourToVertexIDs, IColourMappingRules mColourMapper, SeedGenerator seedGenerator) {
-		// compute for each vertex's colour, the average out-degree associated with a
+		// compute for each vertex's colour, the average in-degree associated with a
 		// specific edge's colour
 		AvrgDegreeDistBaseVEColour avrgInDegreeAnalyzer = new AvrgInDegreeDistBaseVEColo(origGrphs);
-		// compute for each vertex's colour, the average in-degree associated with a
+		// compute for each vertex's colour, the average out-degree associated with a
 		// specific edge's colour
 		AvrgDegreeDistBaseVEColour avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrphs);
 
@@ -96,20 +109,31 @@ public class BiasedInstanceSelector implements IVertexSelector {
 		}
 	}
 
-	private void computeProposedColours(AvrgDegreeDistBaseVEColour avrgOutDegreeAnalyzer,
+	/**
+	 * Computes degrees for each vertex based on the average colour degree
+	 * {@link AvrgDegreeDistBaseVEColour}
+	 * 
+	 * @param avrgDegreeAnalyzer
+	 * @param mapPossibleDegreePerEColour
+	 * @param vertexColour
+	 * @param edgeColour
+	 * @param mMapColourToVertexIDs
+	 * @param seed
+	 */
+	private void computeProposedColours(AvrgDegreeDistBaseVEColour avrgDegreeAnalyzer,
 			ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>>> mapPossibleDegreePerEColour,
 			BitSet vertexColour, BitSet edgeColour, Map<BitSet, IntSet> mMapColourToVertexIDs, long seed) {
 
-		double avrgDegree = avrgOutDegreeAnalyzer.getAverageDegreeOf(vertexColour, edgeColour);
+		double avrgDegree = avrgDegreeAnalyzer.getAverageDegreeOf(vertexColour, edgeColour);
 
 		// get list tailIDs
 		int[] arrVertexIDs = mMapColourToVertexIDs.get(vertexColour).toIntArray();
 		double[] possDegreePerVertexIDs = new double[arrVertexIDs.length];
-		Integer[] objTailIDs = new Integer[arrVertexIDs.length];
+		Integer[] objIDs = new Integer[arrVertexIDs.length];
 		// for each tail id, we compute the potential out degree for it
 		Random random = new Random(seed);
 		for (int i = 0; i < arrVertexIDs.length; i++) {
-			objTailIDs[i] = arrVertexIDs[i];
+			objIDs[i] = arrVertexIDs[i];
 			// generate a random out degree for each vertex in its set based on the computed
 			// average out-degree
 			int possDeg = PoissonDistribution.randomXJunhao(avrgDegree, random);
@@ -119,7 +143,7 @@ public class BiasedInstanceSelector implements IVertexSelector {
 			possDegreePerVertexIDs[i] = (double) possDeg;
 		}
 
-		ObjectDistribution<Integer> potentialDegree = new ObjectDistribution<Integer>(objTailIDs,
+		ObjectDistribution<Integer> potentialDegree = new ObjectDistribution<Integer>(objIDs,
 				possDegreePerVertexIDs);
 		OfferedItemByRandomProb<Integer> potentialDegreeProposer = new OfferedItemByRandomProb<Integer>(potentialDegree,
 				random);
@@ -151,17 +175,5 @@ public class BiasedInstanceSelector implements IVertexSelector {
 		default:
 			throw new IllegalArgumentException("Unknown vertex type " + type);
 		}
-	}
-
-	@Override
-	public Integer selectTailFromColour(BitSet tailColour) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public Integer selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId) {
-		// TODO Auto-generated method stub
-		return 0;
 	}
 }

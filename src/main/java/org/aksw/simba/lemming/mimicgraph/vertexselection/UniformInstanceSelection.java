@@ -1,8 +1,5 @@
 package org.aksw.simba.lemming.mimicgraph.vertexselection;
 
-import java.util.Set;
-
-import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.springframework.context.annotation.Scope;
@@ -36,24 +33,17 @@ public class UniformInstanceSelection implements IVertexSelector {
 		return getProposedVertex(vertexColour);
 	}
 
+	/**
+	 * Retrieves a random vertex instance from the set of vertices of a given
+	 * colour.
+	 * 
+	 * @param vertexColour The desired vertex colour
+	 * @return The vertex instance
+	 */
 	public OfferedItemWrapper<Integer> getProposedVertex(BitSet vertexColour) {
 		Integer[] arrIDs = graphInit.getmMapColourToVertexIDs().get(vertexColour).toArray(Integer[]::new);
-		OfferedItemWrapper<Integer> item = new OfferedItemWrapper<Integer>(arrIDs,
-				graphInit.getSeedGenerator());
+		OfferedItemWrapper<Integer> item = new OfferedItemWrapper<Integer>(arrIDs, graphInit.getSeedGenerator());
 		return item;
-	}
-
-	@Override
-	public Integer selectTailFromColour(BitSet tailColour) {
-		IOfferedItem<Integer> tailIdProposer = getProposedVertex(tailColour);
-		return tailIdProposer.getPotentialItem();
-	}
-
-	@Override
-	public Integer selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId) {
-		OfferedItemWrapper<Integer> headIdProposer = getProposedVertex(headColour);
-		Set<Integer> tmpSetOfConnectedHeads = graphInit.getConnectedHeadsSet(candidateTailId, edgeColour);
-		return headIdProposer.getPotentialItemRemove(tmpSetOfConnectedHeads);
 	}
 
 }

@@ -12,6 +12,9 @@ import com.carrotsearch.hppc.BitSet;
  */
 public interface IVertexSelector {
 
+	/**
+	 * Vertex type of the link we want to create, it can only be head or tail.
+	 */
 	public enum VERTEX_TYPE {
 		HEAD, TAIL
 	}
@@ -26,8 +29,4 @@ public interface IVertexSelector {
 	 */
 	public IOfferedItem<Integer> getProposedVertex(BitSet edgeColour, BitSet vertexColour, VERTEX_TYPE type);
 
-	public Integer selectTailFromColour(BitSet tailColour);
-
-	public Integer selectHeadFromColour(BitSet headColour, BitSet edgeColour, int candidateTailId);
-	
 }
