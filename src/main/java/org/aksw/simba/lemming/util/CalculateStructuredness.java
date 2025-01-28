@@ -21,6 +21,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 
 /**
  * Calculates the structuredness
+ * 
  * @see https://github.com/dice-group/triplestore-benchmarks/blob/master/src/main/java/org/aksw/simba/dataset/stats/Structuredness.java
  */
 public class CalculateStructuredness {
@@ -64,14 +65,7 @@ public class CalculateStructuredness {
 	/**
 	 * Get the structuredness/coherence value [0,1] of a dataset
 	 * 
-	 * @param model      SPARQL endpoint URL
-	 * @param namedGraph Named Graph of dataset. Can be null, in that case all named
-	 *                   graphs will be considered
-	 * @param types
-	 * @return structuredness Structuredness or coherence value
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
-	 * @throws QueryEvaluationException
+	 * @param model model
 	 */
 	public static double getStructurednessValue(Model model) {
 
@@ -84,22 +78,15 @@ public class CalculateStructuredness {
 			long occurenceSum = 0;
 			Set<String> typePredicates = getTypePredicates(type, model);
 			long typeInstancesSize = getTypeInstancesSize(type, model);
-			// System.out.println(typeInstancesSize);
-			// System.out.println(type+" predicates: "+typePredicates);
-			// System.out.println(type+" : "+typeInstancesSize+" x " +
-			// typePredicates.size());
+			;
 			for (String predicate : typePredicates) {
 				long predicateOccurences = getOccurences(predicate, type, model);
 				occurenceSum = (occurenceSum + predicateOccurences);
-				// System.out.println(predicate+ " occurences: "+predicateOccurences);
-				// System.out.println(occurenceSum);
 			}
 
 			double denom = typePredicates.size() * typeInstancesSize;
 			if (typePredicates.size() == 0)
 				denom = 1;
-			// System.out.println("Occurence sum = " + occurenceSum);
-			// System.out.println("Denom = " + denom);
 			double coverage = occurenceSum / denom;
 			System.out.println("\n" + count + " : Type: " + type);
 			System.out.println("Coverage : " + coverage);
@@ -116,12 +103,8 @@ public class CalculateStructuredness {
 	 * Get the denominator of weighted sum all types. Please see Duan et. all paper
 	 * apple oranges
 	 * 
-	 * @param types      Set of rdf:types
-	 * @param namedGraph Named graph
+	 * @param types Set of rdf:types
 	 * @return sum Sum of weighted denominator
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
-	 * @throws QueryEvaluationException
 	 */
 	public static double getTypesWeightedDenomSum(Set<String> types, Model model) {
 		double sum = 0;
@@ -136,65 +119,36 @@ public class CalculateStructuredness {
 	/**
 	 * Get occurences of a predicate within a type
 	 * 
-	 * @param predicate  Predicate
-	 * @param type       Type
-	 * @param namedGraph Named Graph
-	 * @return predicateOccurences Predicate occurence value
-	 * @throws NumberFormatException
-	 * @throws QueryEvaluationException
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
+	 * @param predicate Predicate
+	 * @param type      Type
+	 * @return model model
 	 */
 	public static long getOccurences(String predicate, String type, Model model) {
-		long predicateOccurences = 0;
-		String queryString;
-		queryString = "SELECT (Count(Distinct ?s) as ?occurences) \n" + "			WHERE { \n" + "            ?s a <"
+		String queryString = "SELECT (Count(Distinct ?s) as ?total) \n" + "			WHERE { \n" + "            ?s a <"
 				+ type + "> . " + "            ?s <" + predicate + "> ?o" + "           }";
-
-		// System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
-		QueryExecution qExe = QueryExecutionFactory.create(query, model);
-		ResultSet res = qExe.execSelect();
-		while (res.hasNext()) {
-			predicateOccurences = Long.parseLong(res.next().get("occurences").asLiteral().getString());
-		}
-		return predicateOccurences;
+		return queryModel(queryString, model);
 
 	}
 
 	/**
 	 * Get the number of distinct instances of a specfici type
 	 * 
-	 * @param type       Type or class name
-	 * @param namedGraph Named graph
+	 * @param type  Type or class name
+	 * @param model model
 	 * @return typeInstancesSize No of instances of type
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
-	 * @throws QueryEvaluationException
 	 */
 	public static long getTypeInstancesSize(String type, Model model) {
-		long typeInstancesSize = 0;
-		String queryString = "SELECT (Count(DISTINCT ?s)  as ?cnt ) \n" + "			WHERE { \n" + "            ?s a <"
+		String queryString = "SELECT (Count(DISTINCT ?s)  as ?total ) \n" + "			WHERE { \n" + "            ?s a <"
 				+ type + "> . " + "            ?s ?p ?o" + "           }";
-		// System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
-		QueryExecution qExe = QueryExecutionFactory.create(query, model);
-		ResultSet res = qExe.execSelect();
-		while (res.hasNext()) {
-			typeInstancesSize = Long.parseLong(res.next().get("cnt").asLiteral().getString());
-		}
-		return typeInstancesSize;
+		return queryModel(queryString, model);
 	}
 
 	/**
 	 * Get all distinct predicates of a specific type
 	 * 
-	 * @param type       Type of class
-	 * @param namedGraph Named Graph can be null
+	 * @param type  Type of class
+	 * @param model model
 	 * @return typePredicates Set of predicates of type
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
-	 * @throws QueryEvaluationException
 	 */
 	public static Set<String> getTypePredicates(String type, Model model) {
 		Set<String> typePredicates = new HashSet<String>();
@@ -216,20 +170,13 @@ public class CalculateStructuredness {
 	/**
 	 * Get distinct set of rdf:type
 	 * 
-	 * @param namedGraph Named Graph of dataset can be null in that case all
-	 *                   namedgraphs will be considered
-	 * @param endpoint
+	 * @param model model
 	 * @return types Set of rdf:types
-	 * @throws RepositoryException
-	 * @throws MalformedQueryException
-	 * @throws QueryEvaluationException
 	 */
 	public static Set<String> getRDFTypes(Model model) {
 		Set<String> types = new HashSet<String>();
 		String queryString = "SELECT DISTINCT ?type  \n" + "			WHERE { \n" + "            ?s a ?type"
 				+ "           }";
-
-		// System.out.println(queryString);
 		Query query = QueryFactory.create(queryString);
 		QueryExecution qExe = QueryExecutionFactory.create(query, model);
 		ResultSet res = qExe.execSelect();
@@ -240,55 +187,30 @@ public class CalculateStructuredness {
 	}
 
 	public static long totalSubjects(Model model) {
-		long count = 0;
-		String queryString = "SELECT (Count(DISTINCT ?s) as ?total) \n" + "			WHERE { \n" + "            ?s ?p ?o"
-				+ "           }";
-		// System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
-		QueryExecution qExe = QueryExecutionFactory.create(query, model);
-		ResultSet res = qExe.execSelect();
-		while (res.hasNext()) {
-			count = Long.parseLong(res.next().get("total").asLiteral().getString());
-		}
-		return count;
+		String queryString = "SELECT (Count(DISTINCT ?s) as ?total) \n" + "			WHERE { \n"
+				+ "            ?s ?p ?o }";
+		return queryModel(queryString, model);
 	}
 
 	public static long totalTriples(Model model) {
-		long count = 0;
-		String queryString = "SELECT (Count(*) as ?total) \n" + "			WHERE { \n" + "            ?s ?p ?o"
-				+ "           }";
-
-		// System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
-		QueryExecution qExe = QueryExecutionFactory.create(query, model);
-		ResultSet res = qExe.execSelect();
-		while (res.hasNext()) {
-			count = Long.parseLong(res.next().get("total").asLiteral().getString());
-		}
-		return count;
+		String queryString = "SELECT (Count(*) as ?total) \n" + "			WHERE { \n" + "            ?s ?p ?o }";
+		return queryModel(queryString, model);
 	}
 
 	public static long totalPredicates(Model model) {
-		long count = 0;
-		String queryString = "SELECT (Count(DISTINCT ?p) as ?total) \n" + "			WHERE { \n" + "            ?s ?p ?o"
-				+ "           }";
-
-		// System.out.println(queryString);
-		Query query = QueryFactory.create(queryString);
-		QueryExecution qExe = QueryExecutionFactory.create(query, model);
-		ResultSet res = qExe.execSelect();
-		while (res.hasNext()) {
-			count = Long.parseLong(res.next().get("total").asLiteral().getString());
-		}
-		return count;
+		String queryString = "SELECT (Count(DISTINCT ?p) as ?total) \n" + "			WHERE { \n"
+				+ "            ?s ?p ?o }";
+		return queryModel(queryString, model);
 	}
 
 	public static long totalObjeects(Model model) {
-		long count = 0;
-		String queryString = "SELECT (Count(DISTINCT ?o) as ?total) \n" + "			WHERE { \n" + "            ?s ?p ?o"
-				+ "           }";
+		String queryString = "SELECT (Count(DISTINCT ?o) as ?total) \n" + "			WHERE { \n"
+				+ "            ?s ?p ?o }";
+		return queryModel(queryString, model);
+	}
 
-		// System.out.println(queryString);
+	public static long queryModel(String queryString, Model model) {
+		long count = 0;
 		Query query = QueryFactory.create(queryString);
 		QueryExecution qExe = QueryExecutionFactory.create(query, model);
 		ResultSet res = qExe.execSelect();
