@@ -9,10 +9,10 @@ import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.apache.jena.ext.com.google.common.collect.Sets;
-import org.apache.jena.ext.com.google.common.collect.Sets.SetView;
 
 import com.carrotsearch.hppc.BitSet;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 

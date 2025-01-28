@@ -3,7 +3,8 @@ package org.aksw.simba.lemming.mimicgraph.colourmetrics.utils;
 import java.util.Random;
 
 import org.aksw.simba.lemming.util.Constants;
-import org.apache.jena.ext.com.google.common.math.BigIntegerMath;
+
+import com.google.common.math.BigIntegerMath;
 
 public class PoissonDistribution {
 

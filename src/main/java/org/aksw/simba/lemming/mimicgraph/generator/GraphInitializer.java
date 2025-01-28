@@ -3,7 +3,6 @@ package org.aksw.simba.lemming.mimicgraph.generator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,7 +27,7 @@ import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.util.BitSetComparator;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-import org.apache.jena.ext.com.google.common.collect.Sets;
+//import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +35,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
+import com.google.common.collect.Sets;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;

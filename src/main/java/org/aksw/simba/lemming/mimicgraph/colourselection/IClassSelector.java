@@ -11,11 +11,6 @@ public interface IClassSelector {
 	IOfferedItem<BitSet> getTailClass(BitSet edgeColour);
 	
 	IOfferedItem<BitSet> getHeadClass(BitSet tailColour, BitSet edgeColour);
-	
-//	BitSet getTailClass();
-//	BitSet getHeadClassFromTailColour(BitSet tailColour);
-//	BitSet getEdgeColourFromTailHeadColour(BitSet tailColour, BitSet headColour);
-	
 
 	default public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId, Set<BitSet> restrictions) {
 		return getProposal(edgeColour, restrictions);
