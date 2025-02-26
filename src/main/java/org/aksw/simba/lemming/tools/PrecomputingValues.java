@@ -248,8 +248,14 @@ public class PrecomputingValues {
 			/*------------------
 			 *  Bipartite
 			 ------------------*/
-			// partSize = numberOfNodes / 2;
-			partSize = numberOfNodes > 100000 ? numberOfNodes / 128 : numberOfNodes / 8;
+			// partSize = numberOfNodes / 2;			
+			if(numberOfNodes > 5_000_000) {
+				partSize = numberOfNodes / 512;
+			} else if (numberOfNodes > 100_000) {
+				partSize = numberOfNodes / 128;
+			} else {
+				partSize = numberOfNodes / 8;
+			}
 
 			ColouredGraph bipartiteColouredGraph = new ColouredGraph(
 					ClassicalGraphs.completeBipartiteGraph(partSize, partSize), null, null);
