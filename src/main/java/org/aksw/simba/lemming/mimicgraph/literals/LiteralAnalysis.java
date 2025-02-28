@@ -184,7 +184,7 @@ public class LiteralAnalysis {
 						
 						for(String literal: setOfLiterals){
 							
-							if(literal.isEmpty())
+							if(literal.isBlank())
 								continue;
 							
 							// remove postfix of literal if any
