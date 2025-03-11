@@ -19,11 +19,7 @@ public class MetricTester {
 		int ith = 1;
 		for(ColouredGraph grph: grphs){
 			System.out.println("Graph " + ith + " has metric values: ");
-			for(SingleValueMetric metric: metrics){
-				UpdatableMetricResult metricResultTemp = metric.applyUpdatable(grph);
-                double metVal = metricResultTemp.getResult();
-                System.out.println("Value of " + metric.getName() + " is " + metVal);
-			}
+			printMetricInformation(metrics, grph);
 			ith++;
 		}
 	}

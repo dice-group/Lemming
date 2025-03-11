@@ -8,7 +8,6 @@ import java.util.List;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.util.FileManager;
 
 /**
  * Interface responsible for the graph reading and saving methods
@@ -86,11 +85,10 @@ public interface IDatasetManager {
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
 			Collections.sort(lstSortedFilesByName);
 			Model model = ModelFactory.createDefaultModel();
-			FileManager fm = FileManager.get();
 			for (String fileName : lstSortedFilesByName) {
 				System.out.println("Reading file: " + fileName);
 				File file = new File(dataFolderPath + "/" + fileName);
-				fm.readModel(model, file.getAbsolutePath());
+				model.read(file.getAbsolutePath());
 			}
 			graph = creator.processModel(model);
 		}

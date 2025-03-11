@@ -72,108 +72,100 @@ public class GraphGenerator implements IGraphGenerator{
 	@Override
 	public void initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads) {
 		// get set of edges each thread will process
-		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(noOfThreads);
+		int noTasks = noOfThreads*10;
+		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(noTasks);
 		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
-		LOGGER.info("Creating {} threads for processing graph generation!", lstAssignedEdges.size());
+		LOGGER.info("Creating {} threads for processing graph generation!", noOfThreads);
 
 		// keep track of failed colours for all threads
 		Set<BitSet> failedEdgeColours = ConcurrentHashMap.newKeySet();
 
 		// iterate each set of edges and assign to a thread
 		Set<BitSet> setAvailableVertexColours = graphInitializer.getAvailableVertexColours();
-		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-		for (int i = 0; i < lstAssignedEdges.size(); i++) {
-			final IntSet setOfEdges = lstAssignedEdges.get(i);
-			Runnable worker = new Runnable() {
-				@Override
-				public void run() {
-					int curEdgeIterations = Constants.MAX_EXPLORING_TIME;
-					int[] arrOfEdges = setOfEdges.toIntArray();
+		for(IntSet setOfEdges:lstAssignedEdges) {
+			final int[] arrOfEdges = setOfEdges.toIntArray();
+			service.submit(() -> {
+				int curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+				// iterate through assigned edges
+				for (int j = 0; j < arrOfEdges.length;) {
+					// get an edge id
+					int fakeEdgeId = arrOfEdges[j];
 
-					// iterate through assigned edges
-					for (int j = 0; j < arrOfEdges.length;) {
-						// get an edge id
-						int fakeEdgeId = arrOfEdges[j];
+					// skip if we previously failed to find a triple for this edge colour
+					BitSet edgeColour = graphInitializer.getEdgeColour(fakeEdgeId);
+					if (edgeColour == null || failedEdgeColours.contains(edgeColour)) {
+						j++;
+						continue;
+					}
+					
+					// add to failed colours if maximum attempts are reached
+					if (curEdgeIterations == 0) {
+						LOGGER.error("Could not create edges with the {} colour since it could not find any "
+								+ "appropriate vertices to connect.", edgeColour);
+						failedEdgeColours.add(edgeColour);
+						curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+						j++;
+						continue;
+					}
 
-						// skip if we previously failed to find a triple for this edge colour
-						BitSet edgeColour = graphInitializer.getEdgeColour(fakeEdgeId);
-						if (edgeColour == null || failedEdgeColours.contains(edgeColour)) {
-							j++;
+					// get tail and head colour proposers from edge colour
+					ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId, setAvailableVertexColours);
+					if (proposal == null) {
+						curEdgeIterations--;
+						continue;
+					}
+					
+					BitSet tailColour = proposal.getTailColour();
+					BitSet headColour = proposal.getHeadColour();
+					if (tailColour == null || headColour == null) {
+						curEdgeIterations--;
+						continue;
+					}
+
+					// get instance proposers
+					IOfferedItem<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
+							VERTEX_TYPE.TAIL);
+					IOfferedItem<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
+							VERTEX_TYPE.HEAD);
+
+					// get instances from proposers
+					boolean isFoundVerticesConnected = false;
+					for (int i = 0; i < Constants.MAX_EXPLORING_TIME; i++) {
+						// get candidate tail, skip if null
+						Integer tailId = tailProposer.getPotentialItem();
+						if (tailId == null)
 							continue;
-						}
-						
-						// add to failed colours if maximum attempts are reached
-						if (curEdgeIterations == 0) {
-							LOGGER.error("Could not create edges with the {} colour since it could not find any "
-									+ "appropriate vertices to connect.", edgeColour);
-							failedEdgeColours.add(edgeColour);
-							curEdgeIterations = Constants.MAX_EXPLORING_TIME;
-							j++;
+
+						// get candidate head filtered by the existing connections, skip if null
+						Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
+						Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
+						if (headId == null)
 							continue;
-						}
 
-						// get tail and head colour proposers from edge colour
-						ClassProposal proposal = classSelector.getProposal(edgeColour, fakeEdgeId, setAvailableVertexColours);
-						if (proposal == null) {
-							curEdgeIterations--;
-							continue;
-						}
-						
-						BitSet tailColour = proposal.getTailColour();
-						BitSet headColour = proposal.getHeadColour();
-						if (tailColour == null || headColour == null) {
-							curEdgeIterations--;
-							continue;
-						}
-
-						// get instance proposers
-						IOfferedItem<Integer> tailProposer = vertexSelector.getProposedVertex(edgeColour, tailColour,
-								VERTEX_TYPE.TAIL);
-						IOfferedItem<Integer> headProposer = vertexSelector.getProposedVertex(edgeColour, headColour,
-								VERTEX_TYPE.HEAD);
-
-						// get instances from proposers
-						boolean isFoundVerticesConnected = false;
-						for (int i = 0; i < Constants.MAX_EXPLORING_TIME; i++) {
-							// get candidate tail, skip if null
-							Integer tailId = tailProposer.getPotentialItem();
-							if (tailId == null)
-								continue;
-
-							// get candidate head filtered by the existing connections, skip if null
-							Set<Integer> connectedHeads = graphInitializer.getConnectedHeadsSet(tailId, edgeColour);
-							Integer headId = headProposer.getPotentialItemRemove(connectedHeads);
-							if (headId == null)
-								continue;
-
-							// connect instances if possible and break from it
-							isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColour, mimicGraph);
-							if (isFoundVerticesConnected) {
-								break;
-							}
-						}
-
-						// if it failed to connect, and we ran out of iterations, add to failed colours
-						// and move on
+						// connect instances if possible and break from it
+						isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColour, mimicGraph);
 						if (isFoundVerticesConnected) {
-							// reset iterations and advance
-							curEdgeIterations = Constants.MAX_EXPLORING_TIME;
-							j++;
-						} else {
-							curEdgeIterations--;
+							break;
 						}
+					}
 
+					// if it failed to connect, and we ran out of iterations, add to failed colours
+					// and move on
+					if (isFoundVerticesConnected) {
+						// reset iterations and advance
+						curEdgeIterations = Constants.MAX_EXPLORING_TIME;
+						j++;
+					} else {
+						curEdgeIterations--;
 					}
 				}
-			};
-			tasks.add(Executors.callable(worker));
+			});
 		}
 
 		// start
 		try {
-			service.invokeAll(tasks);
 			service.shutdown();
-			service.awaitTermination(48, TimeUnit.HOURS);
+			service.awaitTermination(120, TimeUnit.HOURS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Could not shutdown the service executor! Be careful.");
 			e.printStackTrace();
