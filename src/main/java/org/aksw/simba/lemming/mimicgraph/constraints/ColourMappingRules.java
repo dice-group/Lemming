@@ -344,60 +344,54 @@ public class ColourMappingRules implements IColourMappingRules{
 	}
 	
 	@Override
-	public Set<BitSet> getPossibleLinkingEdgeColours(BitSet tailColour, BitSet headColour
-			) {
-		
+	public Set<BitSet> getPossibleLinkingEdgeColours(BitSet tailColour, BitSet headColour) {
+
 		Set<BitSet> setColours = new HashSet<BitSet>();
 
-		if(headColour == null && tailColour == null){
+		if (headColour == null && tailColour == null) {
 			return setColours;
 		}
-		
+
 		Object[] arrEdgeColours = mMapEdgeColoToHeadAndTailColo.keys;
 		int iNoOfEdgeColours = arrEdgeColours.length;
-		for(int i = 0 ; i < iNoOfEdgeColours; i++){
-			if(headColour != null && tailColour != null){
-				if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-					BitSet edgeColo = (BitSet) arrEdgeColours[i];
-					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-					if(mapHeadToTail != null){
-						Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
-						if(setTailColours != null && setTailColours.contains(tailColour)){
-							setColours.add(edgeColo);
-						}
+		for (int i = 0; i < iNoOfEdgeColours; i++) {
+			if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+				BitSet edgeColo = (BitSet) arrEdgeColours[i];
+				ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+						.get(edgeColo);
+				if (mapHeadToTail != null) {
+					Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
+					if (setTailColours != null && setTailColours.contains(tailColour)) {
+						setColours.add(edgeColo);
 					}
 				}
-			}// end if of the case when both headColour and tailColour are not null
-			else{
-				if(headColour != null && tailColour == null){
-					if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-						BitSet edgeColo = (BitSet) arrEdgeColours[i];
-						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-						if(mapHeadToTail != null && mapHeadToTail.containsKey(headColour)){
-							setColours.add(edgeColo);
-						}
+			} else {
+				if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+					BitSet edgeColo = (BitSet) arrEdgeColours[i];
+					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+							.get(edgeColo);
+					if (mapHeadToTail != null && mapHeadToTail.containsKey(headColour)) {
+						setColours.add(edgeColo);
 					}
-				} // end if of the case when headColour is not null and tailColour is null
-				else{
-					if(headColour == null && tailColour != null){
-						if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-							BitSet edgeColo = (BitSet) arrEdgeColours[i];
-							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-							if(mapHeadToTail != null){
-								Object[] arrHeadColours = mapHeadToTail.keys;
-								int iNoOfHeadColours = arrHeadColours.length;
-								for(int j = 0 ;j < iNoOfHeadColours ; j++){
-									if(mapHeadToTail.allocated[j]){
-										BitSet headColo = (BitSet) arrHeadColours[j];
-										Set<BitSet> setTailColours = mapHeadToTail.get(headColo);
-										if(setTailColours != null && setTailColours.contains(tailColour)){
-											setColours.add(edgeColo);
-										}
+				} else {
+					if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+						BitSet edgeColo = (BitSet) arrEdgeColours[i];
+						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+								.get(edgeColo);
+						if (mapHeadToTail != null) {
+							Object[] arrHeadColours = mapHeadToTail.keys;
+							int iNoOfHeadColours = arrHeadColours.length;
+							for (int j = 0; j < iNoOfHeadColours; j++) {
+								if (mapHeadToTail.allocated[j]) {
+									BitSet headColo = (BitSet) arrHeadColours[j];
+									Set<BitSet> setTailColours = mapHeadToTail.get(headColo);
+									if (setTailColours != null && setTailColours.contains(tailColour)) {
+										setColours.add(edgeColo);
 									}
 								}
 							}
 						}
-					}// end if of case when headColour is null and tailColour is not null
+					}
 				}
 			}
 		}

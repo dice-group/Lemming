@@ -15,14 +15,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * ICC dataset manager.
+ *
+ * This class is responsible for reading graphs from files related to the
+ * ICC dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
+ */
 @Component("geology") 
-//@Scope(value = "prototype")
-public class GeologyDataset extends AbstractDatasetManager implements IDatasetManager {
+public class GeologyDataset extends AbstractDatasetManager {
+	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeologyDataset.class);
-	
+	/** Default path and link to configuration */
 	@Value("${datasets.geology.filepath}")
-	String dataFolderPath;
+	String dataFolderPath="GeologyGraphs/";
 
+	/**
+	 * Empty constructor.
+	 */
 	public GeologyDataset() {
 		super("Geology");
 	}
@@ -46,7 +57,7 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 			ontModel.read("rdf-schema", "TTL");
 			File ontFolder = new File("geology");
 			for(File file : ontFolder.listFiles()){
-				ontModel.read(file.getAbsolutePath(), "ttl");
+				ontModel.read(file.getAbsolutePath(), "TTL");
 			}
 			// sort files'name ascendently
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
@@ -75,8 +86,7 @@ public class GeologyDataset extends AbstractDatasetManager implements IDatasetMa
 	}
 
 
-//	public static void main(String[] args) {
-//		String DATA_FOLDER_PATH = "GeologyGraphs/";
-//		new GeologyDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-//	}
+	public static void main(String[] args) {
+		new GeologyDataset().readGraphsFromFiles();
+	}
 }

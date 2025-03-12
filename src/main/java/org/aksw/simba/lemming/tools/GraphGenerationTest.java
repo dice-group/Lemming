@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -35,7 +36,7 @@ import com.beust.jcommander.JCommander;
  * by PrecomputingValues.java.
  *
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
 @ComponentScan(basePackages = "org.aksw.simba.lemming")
 public class GraphGenerationTest {
 
@@ -58,16 +59,22 @@ public class GraphGenerationTest {
 		pArgs.noThreads = val.validateThreads(pArgs.noThreads); // TODO
 		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
-		// Load RDF graphs into ColouredGraph models
-		LOGGER.info("Loading the input graphs...");
+		// Load and verify store
+		LOGGER.info("Verifying store...");
 		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
-		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles();
-
-		// Load and verify metric values and constant expressions
 		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class,
 				mDatasetManager.getDatasetPath());
-		valuesCarrier.getMetricsOfExpressions();
+		// only recomputing the store if the dataset is missing entirely to prevent accidental overwrites
+		if (!valuesCarrier.havingData()) {
+			LOGGER.info("Current store does not have data for this dataset, computing store.");
+			PrecomputingValues.main("-ds", pArgs.dataset);
+			valuesCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
+		}
 		valuesCarrier.isComputableMetrics();
+
+		// Load graphs
+		LOGGER.info("Loading the input graphs...");
+		ColouredGraph[] graphs = mDatasetManager.readGraphsFromFiles();
 
 		// Generation of a draft graph or loads it from file
 		long startTime = System.currentTimeMillis();
@@ -95,6 +102,7 @@ public class GraphGenerationTest {
 			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, baseline);
 		}
 		graphGenerator.initializeMimicGraph(mimicGraph, pArgs.noThreads);
+//		EdgeModifier mEdgeModifier = new EdgeModifier(mimicGraph, valuesCarrier.getMetrics());
 //		graphGenerator.loadOrGenerateGraph(mDatasetManager, pArgs.loadMimicGraph); TODO
 
 		// finish initial mimic graph and save it for comparison

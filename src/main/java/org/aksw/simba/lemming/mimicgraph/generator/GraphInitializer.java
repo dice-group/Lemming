@@ -27,7 +27,6 @@ import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.util.BitSetComparator;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
-//import org.apache.jena.ext.com.google.common.collect.Sets;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +101,7 @@ public class GraphInitializer {
 		mapColourToVertexIDs = new ConcurrentHashMap<BitSet, IntSet>();
 		mapColourToEdgeIDs = new ConcurrentHashMap<BitSet, IntSet>();
 		colourMapper = new ColourMappingRules();
-		setOfRestrictedEdgeColours = new HashSet<BitSet>();
+		setOfRestrictedEdgeColours = ConcurrentHashMap.newKeySet();
 	}
 
 	/**
@@ -119,7 +118,9 @@ public class GraphInitializer {
 		ColouredGraph mimicGraph = init(origGrphs, noOfVertices);
 
 		// assign colors to vertices
-		paintVertices(mimicGraph, noOfVertices);
+//		paintVertices(mimicGraph, noOfVertices);
+		paintVerticesMultiThreaded(mimicGraph, noOfVertices, noOfThreads);
+
 
 		// assign colors to edges
 		paintEdges(mimicGraph, noOfThreads);
@@ -249,6 +250,57 @@ public class GraphInitializer {
 			}
 		}
 	}
+	
+	private void paintVerticesMultiThreaded(ColouredGraph mimicGraph, int noVertices, int noOfThreads) {
+		LOGGER.info("Assign colors to vertices.");
+		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist,
+				seedGenerator.getNextSeed());
+		
+		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
+		int chunkSize = (int) Math.ceil((double) noVertices / noOfThreads);
+        for (int i = 0; i < noVertices; i += chunkSize) {
+            final int start = i;
+            final int end = Math.min(i + chunkSize, noVertices);
+            service.submit(() -> {
+                for (int vertexId = start; vertexId < end; vertexId++) {
+                	BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
+        			int vertId = addVertex(offeredColor,mimicGraph);
+        			IntSet setVertIDs = mapColourToVertexIDs.get(offeredColor);
+        			if (setVertIDs == null) {
+        				setVertIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
+        				mapColourToVertexIDs.put(offeredColor, setVertIDs);
+        			}
+        			setVertIDs.add(vertId);
+                }
+            });
+        }
+        service.shutdown();
+        try {
+			service.awaitTermination(12, TimeUnit.HOURS);
+		} catch (InterruptedException e) {
+			LOGGER.info("Problem waiting for termination.");
+			e.printStackTrace();
+		}
+        
+		/*
+		 * get restricted edge's colours can exist along with these created vertex's
+		 * colours
+		 */
+        Set<BitSet> setVertColours = getAvailableVertexColours();
+        setVertColours.parallelStream().forEach(tailColo -> {
+            setVertColours.forEach(headColo -> {
+                Set<BitSet> lstPossEdgeColours = colourMapper.getPossibleLinkingEdgeColours(tailColo, headColo);
+                if (lstPossEdgeColours != null && !lstPossEdgeColours.isEmpty()) {
+                    setOfRestrictedEdgeColours.addAll(lstPossEdgeColours);
+                }
+            });
+        });
+        
+	}
+	
+	private synchronized int addVertex(BitSet offeredColor, ColouredGraph mimicGraph) {
+		return mimicGraph.addVertex(offeredColor);
+	}
 
 	private void paintEdges(ColouredGraph mimicGraph, int mNumberOfThreads) {
 
@@ -264,10 +316,12 @@ public class GraphInitializer {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(this.setOfRestrictedEdgeColours);
+		LOGGER.info("There are "+setOfRestrictedEdgeColours.size()+ " restricted edge colours.");
 		setOfRestrictedEdgeColours.remove(rdfTypePropertyColour);
+		LOGGER.info("There are "+setOfRestrictedEdgeColours.size()+ " restricted edge colours.");
 
 		if (setOfRestrictedEdgeColours.size() == 0) {
-			LOGGER.error("Cound not find any edge colour except rdf:type edges!");
+			LOGGER.error("Could not find any edge colour except rdf:type edges!");
 			return;
 		}
 

@@ -18,18 +18,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-
-@Component("dbp")
 /**
- * TODO fix this
+ * DBpedia dataset manager.
+ *
+ * This class is responsible for reading graphs from files related to the
+ * DBpedia dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
  */
-public class DBpediaDataset extends AbstractDatasetManager implements IDatasetManager {
-
+@Component("dbp")
+public class DBpediaDataset extends AbstractDatasetManager {
+	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBpediaDataset.class);
-
+	/** Default path and link to configuration */
 	@Value("${datasets.dbp.filepath}")
-	private String dataFolderPath;
+	private String dataFolderPath="DBpedia";
 
+	/**
+	 * Empty constructor.
+	 */
 	public DBpediaDataset() {
 		super("DBpedia");
 	}
@@ -41,10 +48,8 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 
 	@Override
 	public ColouredGraph[] readGraphsFromFiles() {
-
 		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
 		GraphCreator creator = new GraphCreator();
-
 		File folder = new File(dataFolderPath);
 		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
@@ -68,6 +73,7 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 					Model model = ModelFactory.createDefaultModel();
 					for (File subFile : file.listFiles()) {
 						// read file to model
+						LOGGER.info("Reading - " + subFile);
 						model.read(subFile.getAbsolutePath(), "TTL");
 					}
 					LOGGER.info("Read data to model - " + model.size() + " triples");
@@ -92,15 +98,8 @@ public class DBpediaDataset extends AbstractDatasetManager implements IDatasetMa
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
-	
-	public void setDataFolderPath(String dataFolderPath) {
-		this.dataFolderPath = dataFolderPath;
-	}
-	
-	
+
 	public static void main(String[] args) {
-		DBpediaDataset pg = new DBpediaDataset();
-		pg.setDataFolderPath("DBpedia");
-		pg.readGraphsFromFiles();
+		new DBpediaDataset().readGraphsFromFiles();
 	}
 }

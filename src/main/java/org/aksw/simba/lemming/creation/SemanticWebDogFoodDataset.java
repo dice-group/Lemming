@@ -14,21 +14,30 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Semantic Web Dog Food Dataset Manager
+ * Semantic Web Dog Food dataset manager.
  *
+ * This class is responsible for reading graphs from files related to the
+ * Semantic Web Dog Food dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
  */
 @Component("swdf")
-//@Scope(value = "prototype")
-public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements IDatasetManager {
+public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 
+	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodDataset.class);
-
+	/** Start year folder */
 	private static final int START_YEAR = 2001;
+	/** End year folder */
 	private static final int END_YEAR = 2015;
 
+	/** Default path and link to configuration */
 	@Value("${datasets.swdf.filepath}")
-	private String dataFolderPath;
+	private String dataFolderPath = "SemanticWebDogFood/";
 
+	/**
+	 * Empty constructor.
+	 */
 	public SemanticWebDogFoodDataset() {
 		super("SemanticWebDogFood");
 	}
@@ -52,10 +61,9 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
 		for (File file : ontFolder.listFiles()) {
 			ontModel.read(file.getAbsolutePath(), "TTL");
 		}
+
 		Inferer inferer = new Inferer(true, ontModel);
-
 		for (int y = START_YEAR; y <= END_YEAR; ++y) {
-
 			LOGGER.info("Adding year {}...", y);
 			folder = new File(dataFolderPath + Integer.toString(y));
 			if (folder.exists()) {
@@ -79,16 +87,17 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
 			} else {
 				LOGGER.error("The folder {} does not exist.", folder.toString());
 			}
-
 		}
-		// try-and-error analysis of data typed literals in the current dataset.
-		// LiteralDatatypeAnalyser literalAnalyser = new
-		// LiteralDatatypeAnalyser(SemanticWebDogFoodReader.class.getName());
-		// literalAnalyser.analyzeDatatype(dogFoodModel);
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
 
+	/**
+	 * Helper method to add all files in a folder to the given model.
+	 *
+	 * @param folder       The folder containing the RDF files.
+	 * @param dogFoodModel The model to which the files will be added.
+	 */
 	private static void addToModel(File folder, Model dogFoodModel) {
 		for (File file : folder.listFiles()) {
 			try {
@@ -97,16 +106,16 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager implements
 				LOGGER.error("Exception while reading file \"" + file.toString() + "\". Aborting.", e);
 				System.exit(1);
 			}
+
 		}
 	}
-
+	
 	@Override
 	public String getDatasetPath() {
 		return dataFolderPath;
 	}
 
-//    public static void main(String[] args) {
-//        String DATA_FOLDER_PATH = "SemanticWebDogFood/";
-//        new SemanticWebDogFoodDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-//    }
+	public static void main(String[] args) {
+		new SemanticWebDogFoodDataset().readGraphsFromFiles();
+	}
 }

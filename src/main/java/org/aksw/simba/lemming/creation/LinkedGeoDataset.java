@@ -15,15 +15,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Linked Geo Data dataset manager.
+ *
+ * This class is responsible for reading graphs from files related to the
+ * Linked Geo Data dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
+ */
 @Component("lgeo")
-//@Scope(value = "prototype")
-public class LinkedGeoDataset extends AbstractDatasetManager implements IDatasetManager {
-
+public class LinkedGeoDataset extends AbstractDatasetManager {
+	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedGeoDataset.class);
-
+	/** Default path and link to configuration */
 	@Value("${datasets.lgeo.filepath}")
-	String dataFolderPath;
+	String dataFolderPath="LinkedGeoGraphs/";
 
+	/**
+	 * Empty constructor.
+	 */
 	public LinkedGeoDataset() {
 		super("LinkedGeo");
 	}
@@ -88,12 +98,11 @@ public class LinkedGeoDataset extends AbstractDatasetManager implements IDataset
 			LOGGER.error("Find no files in \"" + folder.getAbsolutePath() + "\". Aborting.");
 			System.exit(1);
 		}
-
+		
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
 
-//	public static void main(String[] args) {
-//		String DATA_FOLDER_PATH = "LinkedGeoGraphs/";
-//		new LinkedGeoDataset().readGraphsFromFiles(DATA_FOLDER_PATH);
-//	}	
+	public static void main(String[] args) {
+		new LinkedGeoDataset().readGraphsFromFiles();
+	}	
 }

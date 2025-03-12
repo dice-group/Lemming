@@ -22,13 +22,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.beust.jcommander.JCommander;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = "org.aksw.simba.lemming")
 public class SingleGraphGeneration {
 
@@ -46,14 +47,12 @@ public class SingleGraphGeneration {
 		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
 		// Load RDF graphs into ColouredGraph model
-		
 		IDatasetManager mDatasetManager = new AbstractDatasetManager(pArgs.dataset) {
 			@Override
 			public String getDatasetPath() {
 				return pArgs.datasetPath;
 			}
 		};
-
 		ColouredGraph[] graph = { mDatasetManager.readGraphsFromFolder(pArgs.datasetPath) };
 		
 		// Generation of a draft graph or loads it from file
@@ -87,7 +86,7 @@ public class SingleGraphGeneration {
 
 		// Compute metrics of generated graph
 		List<SingleValueMetric> metrics = (List<SingleValueMetric>) application.getBean("metrics");
-//		MetricTester.printMetricInformation(metrics, graph);
+		MetricTester.printMetricInformation(metrics, graph);
 		MetricTester.printMetricInformation(metrics, mimicGraph);
 		LOGGER.info("Lexicalize the mimic graph ...");
 		GraphLexicalization lexicalizer = new GraphLexicalization(graph);
@@ -95,7 +94,7 @@ public class SingleGraphGeneration {
 		lexicalizer.connectVerticesWithRDFTypeEdges(mimicGraph, initializer);
 		lexicalizer.lexicalizeGraph(mimicGraph, initializer.getmMapColourToVertexIDs());
 		mDatasetManager.writeGraphsToFile(mimicGraph, savedFile);
-		
+//		
 		LOGGER.info("Graph generation took {} seconds", elapsedTime);
 
 	}
