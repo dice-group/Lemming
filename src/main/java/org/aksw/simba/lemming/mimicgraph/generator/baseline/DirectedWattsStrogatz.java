@@ -269,7 +269,7 @@ public class DirectedWattsStrogatz implements IGenerator {
 	 * @return Array with each edge contributions expected from each vertex.
 	 */
 	public int[] assignEdges(int vertices, double k) {
-		int roundK = (int) Math.ceil(k / 2);
+		int roundK = (int) Math.floor(k / 2);
 		int[] contributions = new int[vertices];
 
 		// assign K to each vertex
@@ -278,7 +278,7 @@ public class DirectedWattsStrogatz implements IGenerator {
 		}
 
 		// create extra edges with leftover randomly
-		int leftoverEdges = (int) Math.ceil((roundK - (k / 2)) * vertices);
+		int leftoverEdges = (int) Math.floor((roundK - (k / 2)) * vertices);
 		for (int i = 0; i < leftoverEdges; i++) {
 			int vertex = rnd.nextInt(vertices);
 			contributions[vertex]++;
