@@ -59,6 +59,16 @@ LEMMING includes a preprocessing stage where invariant arithmetic expressions ar
  ```
  java -jar lemming.jar store -ds <dataset>
  ```
+ 
+ **Parameters**
+ 
+<table>
+  <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
+  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">--min-fitness</th><td>False</td><td>100000.0</td><td>Minimum Fitness</td></tr>
+  <tr><th align="left">---max-iterations</th><td>False</td><td>50</td><td>Maximum number of iterations</td></tr>
+</table>
+ 
 
 ## Approach overview
 

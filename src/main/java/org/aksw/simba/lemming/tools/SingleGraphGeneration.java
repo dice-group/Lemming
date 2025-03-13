@@ -6,14 +6,11 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.AbstractDatasetManager;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.baseline.IGenerator;
-import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
-import org.aksw.simba.lemming.simplexes.distribution.ISimplexClass;
-import org.aksw.simba.lemming.simplexes.distribution.ISimplexProperty;
+import org.aksw.simba.lemming.mimicgraph.generator.factory.GraphGeneratorFactoryRegistry;
+import org.aksw.simba.lemming.mimicgraph.generator.factory.IGraphGeneratorFactory;
 import org.aksw.simba.lemming.tools.parameters.GraphGenerationArgs;
 import org.aksw.simba.lemming.util.MetricTester;
 import org.dice_research.ldcbench.generate.SeedGenerator;
@@ -58,32 +55,13 @@ public class SingleGraphGeneration {
 		// Generation of a draft graph or loads it from file
 		long startTime = System.currentTimeMillis();
 		LOGGER.info("Generating the mimic graph...");
-		IGraphGenerator graphGenerator;
 		GraphInitializer initializer = (GraphInitializer) application.getBean(pArgs.mode.toLowerCase(), seedGenerator);
 		ColouredGraph mimicGraph = initializer.initialize(graph, pArgs.noVertices, pArgs.noThreads);
-
-		// FIXME
-		if (pArgs.mode.toLowerCase().equals("binary")) {
-			IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
-			IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
-			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, classSelector,
-					vertexSelector);
-		} else if (pArgs.mode.toLowerCase().equals("simplex")) {
-			IClassSelector classSelector = (IClassSelector) application.getBean(pArgs.classSelector, initializer);
-			IVertexSelector vertexSelector = (IVertexSelector) application.getBean(pArgs.vertexSelector, initializer);
-			ISimplexClass simplexClass = (ISimplexClass) application.getBean(pArgs.simplexClass, initializer);
-			ISimplexProperty simplexProperty = (ISimplexProperty) application.getBean(pArgs.simplexProperty,
-					initializer);
-			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, simplexClass,
-					simplexProperty, classSelector, vertexSelector);
-		} else {
-			IGenerator baseline = (IGenerator) application.getBean(pArgs.baselineModel);
-			graphGenerator = (IGraphGenerator) application.getBean(pArgs.mode, initializer, baseline);
-		}
+		IGraphGeneratorFactory factory = GraphGeneratorFactoryRegistry.getFactory(pArgs.mode);
+	    IGraphGenerator graphGenerator = factory.createGraphGenerator(initializer, application, pArgs);
 		graphGenerator.initializeMimicGraph(mimicGraph, pArgs.noThreads);
 		long elapsedTime = (System.currentTimeMillis() - startTime)/1000;
 		
-
 		// Compute metrics of generated graph
 		List<SingleValueMetric> metrics = (List<SingleValueMetric>) application.getBean("metrics");
 		MetricTester.printMetricInformation(metrics, graph);
@@ -94,7 +72,7 @@ public class SingleGraphGeneration {
 		lexicalizer.connectVerticesWithRDFTypeEdges(mimicGraph, initializer);
 		lexicalizer.lexicalizeGraph(mimicGraph, initializer.getmMapColourToVertexIDs());
 		mDatasetManager.writeGraphsToFile(mimicGraph, savedFile);
-//		
+		
 		LOGGER.info("Graph generation took {} seconds", elapsedTime);
 
 	}

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 /**
  * 
  */
-@Component("bl")
+@Component("baseline")
 @Scope(value = "prototype")
 public class BaselineInitializer extends GraphInitializer {
 

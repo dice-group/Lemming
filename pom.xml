@@ -168,6 +168,7 @@
 							<goal>shade</goal>
 						</goals>
 						<configuration>
+							<finalName>lemming</finalName>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
 							<transformers>
 								<transformer

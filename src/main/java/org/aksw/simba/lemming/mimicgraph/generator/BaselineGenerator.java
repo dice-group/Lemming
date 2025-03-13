@@ -12,8 +12,6 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.mimicgraph.generator.baseline.IGenerator;
 import org.aksw.simba.lemming.util.MapUtil;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -27,8 +25,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author Alexandra Silva
  *
  */
-@Component("Bl")
-@Scope(value = "prototype")
 public class BaselineGenerator extends GraphGenerator {
 
 	/** 
@@ -89,7 +85,7 @@ public class BaselineGenerator extends GraphGenerator {
 		// convert it to a ColouredGraph object
 		mimicGraph.setGraph(baselineGraph);
 		graphInitializer.copyColourPalette(graphInitializer.getOriginalGraphs(), mimicGraph);
-
+		
 		// assign colours
 		applyEdgeDistribution(graphInitializer.getEdgeColourDist(), baselineGraph.getNumberOfEdges());
 		applyVertexDistribution(graphInitializer.getVertexColourDist(), baselineGraph.getNumberOfVertices());

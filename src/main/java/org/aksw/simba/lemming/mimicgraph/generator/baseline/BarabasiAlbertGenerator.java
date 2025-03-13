@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import grph.Grph;
 
-@Component("BA")
+@Component("ba")
 @Scope(value = "prototype")
 public class BarabasiAlbertGenerator implements IGenerator {
 

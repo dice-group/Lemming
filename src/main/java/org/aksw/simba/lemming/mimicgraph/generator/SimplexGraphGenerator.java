@@ -28,8 +28,6 @@ import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
@@ -45,8 +43,6 @@ import me.tongfei.progressbar.ProgressBarBuilder;
  * simplex-based approaches.
  *
  */
-@Component("Simplex")
-@Scope(value = "prototype")
 public class SimplexGraphGenerator implements IGraphGenerator {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimplexGraphGenerator.class);
 

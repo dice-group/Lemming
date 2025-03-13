@@ -37,7 +37,7 @@ import toools.collections.primitive.IntCursor;
  * 
  * @author Alexandra Silva
  */
-@Component("WS")
+@Component("ws")
 @Scope(value = "prototype")
 public class DirectedWattsStrogatz implements IGenerator {
 

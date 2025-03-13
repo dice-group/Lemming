@@ -18,8 +18,6 @@ import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_
 import org.aksw.simba.lemming.util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -33,8 +31,6 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * @author Ana Silva
  *
  */
-@Component("Binary")
-@Scope(value = "prototype")
 public class GraphGenerator implements IGraphGenerator{
 
 	/** Logging object */

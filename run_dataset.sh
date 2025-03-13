@@ -1,6 +1,8 @@
 #!/bin/bash
 
 dataset=$1
+thrs=$2
+mode='graph'
 opt_iterations=100000
 if [ $dataset = 'pg' ]
 then 
@@ -14,20 +16,29 @@ then
 elif [ $dataset = 'geology' ]
 then 
 	nv=1423
+elif [ $dataset = 'dbp' ]
+then 
+	nv=7942015
 else
 	echo "Invalid dataset"
 	exit
 fi
 
 mkdir -p initial
-mvn clean install
 count=3
 for i in $(seq $count); do
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c UCS -v UIS -op $opt_iterations"
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c UCS -v BIS -op $opt_iterations"
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c BCS -v UIS -op $opt_iterations"
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c BCS -v BIS -op $opt_iterations"
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c CCS -v UIS -op $opt_iterations"
-  mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds $dataset -nv $nv -thrs 4 -c CCS -v BIS -op $opt_iterations"
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c UCS -v UIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c UCS -v BIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c BCS -v UIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c BCS -v BIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c CCS -v UIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -c CCS -v BIS -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc BCSI -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc UCSI -op $opt_iterations 
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc BCSI -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc UCSI -op $opt_iterations
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl BA
+  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl WS
+
 done
 
