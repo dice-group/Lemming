@@ -36,14 +36,14 @@ public class BeanFactory {
 
 	@Autowired
 	private ApplicationContext applicationContext;
-	
-	@Value("${metrics.store}") 
+
+	@Value("${metrics.store}")
 	private String cacheName;
-	
+
 	@Value("#{PropertySplitter.toList('${metrics}')}")
 	private List<String> metrics;
-	
-	@Value("${refinement.operator}") 
+
+	@Value("${refinement.operator}")
 	private String refinementOperator;
 
 	@Bean
@@ -74,13 +74,15 @@ public class BeanFactory {
 	public StdDevVertexDegree createStdDevVertexDegreeOut() {
 		return new StdDevVertexDegree(DIRECTION.out);
 	}
-	
+
 	@Bean(name = "refOperator")
 	@Scope(value = "prototype")
 	public RefinementOperator createRefinementOperator(List<SingleValueMetric> metrics) {
 		return (RefinementOperator) applicationContext.getBean(refinementOperator, metrics);
 	}
 
+	@Bean(name="metrics")
+	@Scope(value = "prototype")
 	public List<SingleValueMetric> getMetrics() {
 		List<SingleValueMetric> finalMetrics = new ArrayList<>();
 		for (String metric : metrics) {
@@ -96,7 +98,6 @@ public class BeanFactory {
 		List<SingleValueMetric> finalMetrics = getMetrics();
 		return new ConstantValueStorage(cacheName, datasetPath, finalMetrics);
 	}
-
 }
 
 /**

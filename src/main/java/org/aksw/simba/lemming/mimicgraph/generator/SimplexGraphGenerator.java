@@ -113,6 +113,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		int numOfIterationAddingEdgesToGraph = 0;
 
 		int desiredVertices = initializer.getDesiredNoOfVertices();
+		double tolerance = 1e-2;
 
 		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb = initializer
 				.getmTriColosCountsAvgProb();
@@ -175,89 +176,110 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							BitSet proposedVertex3Colo = simplexClass.proposeVertex3Colour(selectedVertex1Colo,
 									selectedVertex2Colo);
 							
-							boolean isValidColours = initializer.getmMapColourToVertexIDs2Simplex().get(selectedVertex1Colo) != null;
-							isValidColours = isValidColours && initializer.getmMapColourToVertexIDs2Simplex().get(selectedVertex2Colo) != null;
-							isValidColours = isValidColours && initializer.getmMapColourToVertexIDs2Simplex().get(proposedVertex3Colo) != null;
-
 							// Add new Triangle for the selected vertices
 							boolean newEdgesNotAddedToTriangle = true;
-							if (proposedVertex3Colo != null && isValidColours) {
+							if (proposedVertex3Colo != null) {
 								// If third vertex color is proposed, create a triangle with it
 								TriColours newPossibleTriangle = new TriColours(selectedVertex1Colo,
 										selectedVertex2Colo, proposedVertex3Colo);
-
-								double[] arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA())
-										.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());
-
+								
+								double[] arrNewPossTriProbCount = new double[5];
+								var mapA = mTriColosCountsAvgProb.get(newPossibleTriangle.getA());
+								if (mapA != null) {
+								    var mapB = mapA.get(newPossibleTriangle.getB());
+								    if (mapB != null) {
+								        var value = mapB.get(newPossibleTriangle.getC());
+								        if (value != null) {
+								            arrNewPossTriProbCount = value;
+								        } 
+								    } 
+								}
+								
 								// temporary variable to track count of loops
 								int numOfLoopsTri = 0;
 								
 								
 								// try to propose a color for third vertex multiple times if it is not possible
 								// to create a triangle
-								while ((arrNewPossTriProbCount[3] < 1) && (numOfLoopsTri < 500)) {
+								while ((arrNewPossTriProbCount[3]+tolerance < 1) && (numOfLoopsTri < 500)) {
 									
 									proposedVertex3Colo = simplexClass.proposeVertex3Colour(selectedVertex1Colo,
 											selectedVertex2Colo);
-									newPossibleTriangle = new TriColours(selectedVertex1Colo, selectedVertex2Colo,
-											proposedVertex3Colo);
-									arrNewPossTriProbCount = mTriColosCountsAvgProb.get(newPossibleTriangle.getA())
-											.get(newPossibleTriangle.getB()).get(newPossibleTriangle.getC());
+									if (proposedVertex3Colo != null) {
+										newPossibleTriangle = new TriColours(selectedVertex1Colo, selectedVertex2Colo,
+												proposedVertex3Colo);
+										arrNewPossTriProbCount = new double[5];
+										mapA = mTriColosCountsAvgProb.get(newPossibleTriangle.getA());
+										if (mapA != null) {
+										    var mapB = mapA.get(newPossibleTriangle.getB());
+										    if (mapB != null) {
+										        var value = mapB.get(newPossibleTriangle.getC());
+										        if (value != null) {
+										            arrNewPossTriProbCount = value;
+										        }
+										    } 
+										} 
+									}
 									numOfLoopsTri++;
+									
 								}
 
-								if (arrNewPossTriProbCount[3] >= 1) {
+								if (arrNewPossTriProbCount[3]+tolerance >= 1) {
 									arrNewPossTriProbCount[3] = arrNewPossTriProbCount[3] - 1;
 									// select vertex instances
 									// TODO change this to UIS methods
-									int selectedVertex1 = getProposedVertex(
+									Integer selectedVertex1 = getProposedVertex(
 											initializer.getmMapColourToVertexIDs2Simplex(), selectedVertex1Colo);
-									int selectedVertex2 = getProposedVertex(
+									Integer selectedVertex2 = getProposedVertex(
 											initializer.getmMapColourToVertexIDs2Simplex(), selectedVertex2Colo);
+									if (selectedVertex1 != null && selectedVertex2 != null) {
 
-									// create vertex for the proposed color
-									int proposedVertId = addVertexToMimicGraph(mimicGraph, proposedVertex3Colo,
-											initializer.getmMapColourToVertexIDs2Simplex());
-									
-									// add edges among selected vertices and proposed color
-									// Note: Ideally properties should exist among them. since they were also
-									// forming a triangle in input graphs
-									simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex1Colo,
-											proposedVertex3Colo, selectedVertex1, proposedVertId,
-											initializer.getmMapColourToEdgeIDs2Simplex(),
-											analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
-											newPossibleTriangle, simplexProperty.getmPropDistConnTri());
-									simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex2Colo,
-											proposedVertex3Colo, selectedVertex2, proposedVertId,
-											initializer.getmMapColourToEdgeIDs2Simplex(),
-											analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
-											newPossibleTriangle, simplexProperty.getmPropDistConnTri());
+										// create vertex for the proposed color
+										int proposedVertId = addVertexToMimicGraph(mimicGraph, proposedVertex3Colo,
+												initializer.getmMapColourToVertexIDs2Simplex());
 
-									// increment number of vertices and edges added in the mimic graph for triangles
-									actualVerticesInTriangles++;
-									actualEdgesInTriangles = actualEdgesInTriangles + 2;
-									vertsPB.stepBy(1);
+										// add edges among selected vertices and proposed color
+										// Note: Ideally properties should exist among them. since they were also
+										// forming a triangle in input graphs
+										simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex1Colo,
+												proposedVertex3Colo, selectedVertex1, proposedVertId,
+												initializer.getmMapColourToEdgeIDs2Simplex(),
+												analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
+												newPossibleTriangle, simplexProperty.getmPropDistConnTri());
+										simplexProperty.addEdgeToMimicGraph(mimicGraph, selectedVertex2Colo,
+												proposedVertex3Colo, selectedVertex2, proposedVertId,
+												initializer.getmMapColourToEdgeIDs2Simplex(),
+												analysis.getConnTriAnalysis().getmColourMapperSimplexes(),
+												newPossibleTriangle, simplexProperty.getmPropDistConnTri());
 
-									// Add the created triangle Colors to set
-									setTriangleColorsMimicGraph.add(newPossibleTriangle);
+										// increment number of vertices and edges added in the mimic graph for triangles
+										actualVerticesInTriangles++;
+										actualEdgesInTriangles = actualEdgesInTriangles + 2;
+										vertsPB.stepBy(1);
 
-									edgeColosSet.add(new EdgeColorsSorted(selectedVertex1Colo, proposedVertex3Colo));
-									edgeColosSet.add(new EdgeColorsSorted(selectedVertex2Colo, proposedVertex3Colo));
+										// Add the created triangle Colors to set
+										setTriangleColorsMimicGraph.add(newPossibleTriangle);
 
-									// Track the triangle colors along with vertex ids
-									updateMapTriangleColorsVertices(selectedVertex1, selectedVertex2, proposedVertId,
-											newPossibleTriangle, initializer.getmTriangleColorsVertexIds());
+										edgeColosSet
+												.add(new EdgeColorsSorted(selectedVertex1Colo, proposedVertex3Colo));
+										edgeColosSet
+												.add(new EdgeColorsSorted(selectedVertex2Colo, proposedVertex3Colo));
 
-									// update the boolean variable
-									newEdgesNotAddedToTriangle = false;
+										// Track the triangle colors along with vertex ids
+										updateMapTriangleColorsVertices(selectedVertex1, selectedVertex2,
+												proposedVertId, newPossibleTriangle,
+												initializer.getmTriangleColorsVertexIds());
 
-									numOfIterationAddingEdgesToGraph = 0;
+										// update the boolean variable
+										newEdgesNotAddedToTriangle = false;
+
+										numOfIterationAddingEdgesToGraph = 0;
+									}
 								}
-
 							}
 							if (newEdgesNotAddedToTriangle) {
 								numOfIterationAddingEdgesToGraph++;
-								if (numOfIterationAddingEdgesToGraph == 100) { 
+								if (numOfIterationAddingEdgesToGraph == maximumIteration) { 
 									edgeColosSet.remove(potentialItem);
 									numOfIterationAddingEdgesToGraph = 0;
 								}
@@ -275,22 +297,40 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								continue;
 							}
 							TriColours randomTriangle = randomProposer.getPotentialItem();
-							double[] arrNewTriProbCount = mTriColosCountsAvgProb.get(randomTriangle.getA())
-									.get(randomTriangle.getB()).get(randomTriangle.getC());// get count of triangle for
+							double[] arrNewTriProbCount = new double[5];
+							var mapA = mTriColosCountsAvgProb.get(randomTriangle.getA());
+							if (mapA != null) {
+							    var mapB = mapA.get(randomTriangle.getB());
+							    if (mapB != null) {
+							        var value = mapB.get(randomTriangle.getC());
+							        if (value != null) {
+							        	arrNewTriProbCount = value;
+							        }
+							    } 
+							} // get count of triangle for
 																							// the proposed new triangle
 
 							// variable to track number of times a random triangle was selected
 							int numOfIterationRandomTri = 0;
 
 							// check if it is possible to add new triangle
-							while ((arrNewTriProbCount[3] < 1) && (numOfIterationRandomTri < 500)) { 
+							while ((arrNewTriProbCount[3]+tolerance < 1) && (numOfIterationRandomTri < 500)) { 
 								randomTriangle = randomProposer.getPotentialItem();
-								arrNewTriProbCount = mTriColosCountsAvgProb.get(randomTriangle.getA())
-										.get(randomTriangle.getB()).get(randomTriangle.getC());
+								mapA = mTriColosCountsAvgProb.get(randomTriangle.getA());
+								arrNewTriProbCount = new double[5];
+								if (mapA != null) {
+								    var mapB = mapA.get(randomTriangle.getB());
+								    if (mapB != null) {
+								        var value = mapB.get(randomTriangle.getC());
+								        if (value != null) {
+								        	arrNewTriProbCount = value;
+								        }
+								    }
+								}
 								numOfIterationRandomTri++;
 							}
 
-							if (arrNewTriProbCount[3] > 1) {
+							if (arrNewTriProbCount[3]+tolerance >= 1) {
 								// Update the triangle count
 								arrNewTriProbCount[3] = arrNewTriProbCount[3] - 1;
 								// Add the triangle to mimic graph
@@ -389,6 +429,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								actualEdgesInTriangles = actualEdgesInTriangles + 1;
 								numOfIterationAddingEdgesToGraph = 0;// update count to 0 since edge was added
 																		// successfully
+								LOGGER.debug("Current edges: "+actualEdgesInTriangles+" out of estimated "+estimatedEdgesTriangle);
 								// break iterating over pair of vertices, since an edge is found
 								break;
 							} else {
@@ -1716,7 +1757,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			LOGGER.info("Number of vertices in the mimic graph: " + mimicGraph.getVertices().size());
 
 		}
-
 		// Update mMapColourToVertexIDs used for adding edges when improving the graph
 		// in next phase
 		updateVertexColoMap(initializer.getmMapColourToVertexIDs1Simplex()); // isolated 1-simplexes

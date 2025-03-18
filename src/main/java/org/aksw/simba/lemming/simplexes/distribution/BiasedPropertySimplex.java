@@ -162,7 +162,7 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 			isEdgeFromFirstToSecondVertex = false;
 		}
 
-		if (!propColor.isEmpty()) { // Add edge if edge color is found for the vertices
+		if (propColor != null && !propColor.isEmpty()) { // Add edge if edge color is found for the vertices
 
 			// randomly select edge colo
 			BitSet randomEdgeColov1v2 = propColor;
@@ -234,6 +234,10 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 
 		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
 		BitSet propColor = mPropDistInput.proposePropColor(edgeColors);
+		if(propColor == null) {
+			return false;
+		}
+		
 		if (mColourMapperToUse.isTailColourOf(inputVertex1Colo, inputVertex2Colo)) {
 			isEdgeFromSecondToFirstVertex = false;
 		}
