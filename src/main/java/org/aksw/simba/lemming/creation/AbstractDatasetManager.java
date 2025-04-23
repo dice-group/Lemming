@@ -65,6 +65,7 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 	@Override
 	public void writeGraphsToFile(ColouredGraph grph, String filePath) {
 		Model datasetModel = ModelFactory.createDefaultModel();
+		LOGGER.info("Converting and writing graph to file: "+filePath);
 		try (Writer writerforOutModel = new FileWriter(filePath);) {
 			// graph reverter: generate a new model from a coloured graph
 			GraphReverter reverter = new GraphReverter(grph, datasetModel);

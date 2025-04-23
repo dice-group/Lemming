@@ -48,7 +48,7 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 
 		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
 		ColouredGraph graph;
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		long oldModelSize;
 		File folder;
 

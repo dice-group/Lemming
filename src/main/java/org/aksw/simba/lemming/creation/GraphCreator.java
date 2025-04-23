@@ -17,7 +17,6 @@ import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -42,8 +41,9 @@ public class GraphCreator {
 
 	protected Map<Resource, Set<RDFDatatype>> dataTypedProperties;
 	protected ColourPalette datatypedEdgePalette;
+	protected boolean includeType;
 
-	public GraphCreator() {
+	public GraphCreator(boolean includeType) {
 		// Initialize the classes, OWL.class and RDF.class has the same color
 		classes = new ObjectObjectOpenHashMap<>();
 		classes.put(RDFS.Class, new HierarchyNode());
@@ -62,6 +62,7 @@ public class GraphCreator {
 		// data type edge connected literal
 		dataTypedProperties = new HashMap<>();
 		datatypedEdgePalette = new InMemoryPalette();
+		this.includeType = includeType;
 	}
 
 	public ColouredGraph processModel(Model model) {
@@ -168,7 +169,8 @@ public class GraphCreator {
 					graph.setVertexColour(subjectId,
 							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
 				// skip, we don't want to add the edge to the graph
-				return;
+				if(!includeType)
+					return;
 			}
 
 			if (resourceIdMapping.containsKey(objectStr)) {
@@ -217,7 +219,7 @@ public class GraphCreator {
 			}
 		}
 	}
-
+	
 	protected ColourPalette createVertexPalette(Model model) {
 		// list all classes, put them into classes hierarchyNode map
 		NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);

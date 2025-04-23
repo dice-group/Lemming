@@ -24,7 +24,7 @@ public class HITSTest {
         model.read(is, null, "N3");
         IOUtils.closeQuietly(is);
 
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         ColouredGraph graph = creator.processModel(model);
         
         //System.out.println("matrix: " +graph.getGraph().getAdjacencyMatrix());

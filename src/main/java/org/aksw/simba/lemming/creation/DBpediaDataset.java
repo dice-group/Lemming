@@ -1,6 +1,8 @@
 package org.aksw.simba.lemming.creation;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,7 +34,7 @@ public class DBpediaDataset extends AbstractDatasetManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBpediaDataset.class);
 	/** Default path and link to configuration */
 	@Value("${datasets.dbp.filepath}")
-	private String dataFolderPath="DBpedia";
+	private String dataFolderPath="DBpedia-target-fixed/";
 
 	/**
 	 * Empty constructor.
@@ -49,7 +51,7 @@ public class DBpediaDataset extends AbstractDatasetManager {
 	@Override
 	public ColouredGraph[] readGraphsFromFiles() {
 		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		File folder = new File(dataFolderPath);
 		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
 			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
@@ -60,11 +62,11 @@ public class DBpediaDataset extends AbstractDatasetManager {
 			// corresponding Ontology
 			Map<String, String> modelOntMap = new HashMap<>();
 			modelOntMap.put("2022-12-01", "2022-12-01-194003-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2022-03-01", "2022-03-04-070002-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2021-12-01", "2021-12-01-180002-ontology_type=parsed.owl");
-			modelOntMap.put("2021-03-01", "2021-03-12-142000-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2020-10-01", "2020-10-01-031000-ontology--DEV_type=parsed.owl");
-			modelOntMap.put("2020-05-01", "2020-06-10-181610-ontology_type=parsed.owl");
+//			modelOntMap.put("2022-03-01", "2022-03-04-070002-ontology--DEV_type=parsed.owl");
+//			modelOntMap.put("2021-12-01", "2021-12-01-180002-ontology_type=parsed.owl");
+//			modelOntMap.put("2021-03-01", "2021-03-12-142000-ontology--DEV_type=parsed.owl");
+//			modelOntMap.put("2020-10-01", "2020-10-01-031000-ontology--DEV_type=parsed.owl");
+//			modelOntMap.put("2020-05-01", "2020-06-10-181610-ontology_type=parsed.owl");
 
 			for (String fileName : lstSortedFilesByName) {
 				File file = new File(dataFolderPath + "/" + fileName);
@@ -84,6 +86,11 @@ public class DBpediaDataset extends AbstractDatasetManager {
 					ontModel.read("rdf-schema", "TTL");
 					Inferer inferer = new Inferer(true, ontModel);
 					model = inferer.process(model);
+					try (OutputStream out = new FileOutputStream("DBpedia-target-fixed/dbpedia-2022-12-01-target-fixed.nt")) {
+			            model.write(out, "NT");
+			        } catch (Exception e) {
+			            e.printStackTrace();
+			        }
 					ColouredGraph graph = creator.processModel(model);
 					if (graph != null) {
 						LOGGER.info("Generated graph of " + model.size() + " triples");

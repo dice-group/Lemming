@@ -24,7 +24,7 @@ public class ColouredGraphConverter {
        }catch (Exception e){
            throw new RuntimeException("Couldn't find file from resource \"" + fileName + "\".", e);
        }
-       GraphCreator creator = new GraphCreator();
+       GraphCreator creator = new GraphCreator(false);
        ColouredGraph graph = creator.processModel(model);
        return graph;
     }

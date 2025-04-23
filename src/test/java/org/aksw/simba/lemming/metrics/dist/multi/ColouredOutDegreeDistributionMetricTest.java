@@ -34,7 +34,7 @@ public class ColouredOutDegreeDistributionMetricTest {
         model.read(is, null, "N3");
         IOUtils.closeQuietly(is);
 
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         ColouredGraph graph = creator.processModel(model);
 
         MultipleIntDistributionMetric<BitSet> metric = new ColouredOutDegreeDistributionMetric();

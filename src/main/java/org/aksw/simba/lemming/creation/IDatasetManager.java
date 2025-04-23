@@ -65,7 +65,7 @@ public interface IDatasetManager {
 	 * @return {@link ColouredGraph} instance of the graph
 	 */
 	default public ColouredGraph readGraphFromFile(String file) {
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		Model model = ModelFactory.createDefaultModel();
 		model.read(file);
 		return creator.processModel(model);
@@ -78,7 +78,7 @@ public interface IDatasetManager {
 	 * @return {@link ColouredGraph} instance of the graph
 	 */
 	default public ColouredGraph readGraphsFromFolder(String dataFolderPath) {
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		ColouredGraph graph = null;
 		File folder = new File(dataFolderPath);
 		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {

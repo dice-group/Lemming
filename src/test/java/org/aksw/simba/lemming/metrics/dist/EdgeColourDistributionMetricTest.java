@@ -28,7 +28,7 @@ public class EdgeColourDistributionMetricTest {
         model.read(is, null, "N3");
         IOUtils.closeQuietly(is);
 
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         ColouredGraph graph = creator.processModel(model);
 
         EdgeColourDistributionMetric metric = new EdgeColourDistributionMetric();

@@ -40,7 +40,7 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 	public ColouredGraph[] readGraphsFromFiles() {
 		
 		 List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
-		 GraphCreator creator = new GraphCreator();		
+		 GraphCreator creator = new GraphCreator(false);		
 		 
 		 File folder = new File(dataFolderPath);
 		 if(folder != null && folder.isDirectory() && folder.listFiles().length > 0){

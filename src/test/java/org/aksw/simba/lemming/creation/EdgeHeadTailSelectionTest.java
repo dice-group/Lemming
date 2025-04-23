@@ -29,7 +29,7 @@ public class EdgeHeadTailSelectionTest {
             model.read(is, null, "N3");
         }
 
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         ColouredGraph graph = creator.processModel(model);
 
         int numberOfVertices = graph.getVertices().size();
