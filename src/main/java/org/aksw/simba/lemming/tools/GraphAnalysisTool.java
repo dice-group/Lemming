@@ -48,7 +48,7 @@ public class GraphAnalysisTool {
 
 		// read the model and create the internal graph object
 		Model model = ModelFactory.createDefaultModel();
-		model.read("/home/aams/Desktop/lemming/src/test/resources/graph1.n3");
+		model.read(args[0]);
 		GraphCreator creator = new GraphCreator(true);
 		ColouredGraph graph = creator.processModel(model);
 		
