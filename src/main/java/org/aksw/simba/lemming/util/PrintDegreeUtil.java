@@ -35,7 +35,7 @@ public class PrintDegreeUtil {
 	 * @param dataset
 	 */
 	public static void printInOutDegrees(Model model, String dataset) {
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		ColouredGraph colouredGraph = creator.processModel(model);
 		GraphReverter reverter = new GraphReverter(colouredGraph, ModelFactory.createDefaultModel());
 		Model revertedGraph = reverter.processGraph();
