@@ -14,6 +14,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import grph.Grph;
+import grph.in_memory.InMemoryGrph;
+
 @RunWith(Parameterized.class)
 public class BaselineGeneratorTest {
 
@@ -48,11 +51,14 @@ public class BaselineGeneratorTest {
     	ExtGrphBasedGraph graph = new ExtGrphBasedGraph();
 		GraphGenerator generator = new ParallelBarabasiRDF(Constants.BASELINE_STRING);
 		generator.generateGraph(noVertices, degree/2, seed, graph);
+		double avgDegree = graph.getGrph().getAverageDegree();
 	}
 
 	@Test
 	public void testWS() {
-		DirectedWattsStrogatz tg = new DirectedWattsStrogatz();
-		tg.generateGraph(noVertices, degree, seed);
+		Grph g = new InMemoryGrph();
+		g.addNVertices(noVertices);
+		DirectedWattsStrogatz.compute(g, degree, 0.5, seed);
+		double avgDegree = g.getAverageDegree();
 	}
 }

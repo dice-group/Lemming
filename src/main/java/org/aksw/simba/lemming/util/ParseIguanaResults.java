@@ -1,7 +1,6 @@
 package org.aksw.simba.lemming.util;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -9,41 +8,84 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ParseIguanaResults {
 
 	public static void main(String[] args) throws IOException {
 
-		String folder = "v410-iguana-limit10/";
+		String folder = args[0];
 
+
+		// UCS-UIS1 UCS-UIS2 UCS-UIS3 UCS-BIS1 UCS-BIS2 UCS-BIS3
+		// CCS-UIS1 CCS-UIS2 CCS-UIS3 CCS-BIS1 CCS-BIS2 CCS-BIS3
+		// BCS-UIS1 BCS-UIS2 BCS-UIS3 BCS-BIS1 BCS-BIS2 BCS-BIS3
+		// BPBC1 BPBC2 BPBC3 BPUC1 BPUC2 BPUC3
+		// UPBC1 UPBC2 UPBC3 UPUC1 UPUC2 UPUC3
+
+		// initial or optimized
 		String subfolder = "initial";
-//		String subfolder = "mimic";
-
-		// linked geo
+//		String subfolder = "results";
+		
+		// dataset
 		String dataset = "LinkedGeo";
-		int[] order = { 1, 7, 13, 2, 8, 14, 3, 9, 15, 4, 10, 16, 5, 11, 17, 6, 12, 18, 19, 23, 27, 20, 24, 28, 21, 25,
-				29, 22, 26, 30 };
-		int queryCount = 33;
-
-//		 swdf
-//		String dataset = "SemanticWeb";
-//		int[] order = { 1, 7, 13, 2, 8, 14, 3, 9, 15, 4, 10, 16, 5, 11, 17, 6, 12, 18, 19, 23, 27, 20, 24, 28, 21, 25,
-//				29, 22, 26, 30 };
-//		int queryCount = 15;
-
-		// icc
+//		String dataset = "SemanticWebDogFood";
 //		String dataset = "Geology";
-//		int[] order = { 1, 11, 21, 2, 12, 22, 5, 15, 25, 6, 16, 26, 3, 13, 23, 4, 14, 24, 7, 17, 27, 8, 18, 28, 9, 19, 29, 10, 20, 30 };
-//		int queryCount = 23;
-//
-		int[] blOrder = { 1, 3, 5, 2, 4, 6 };
+		int queryCount = 0;
+		int[] order = null;
+		if(dataset.contentEquals("LinkedGeo")) {
+			queryCount = 83;
+			int[] order2 = { 1,	7,	13,
+			2,	8,	14,
+			5,	11,	17,
+			6,	12,	18,
+			3,	9,	15,
+			4,	10,	16,
+			1,	5,	9, // simplex and baseline
+			2,	6,	10,
+			3,	7,	11,
+			4,	8,	12,
+			19,	21,	23,
+			20,	22,	24 
+			};
+			order = order2;
+		} else if (dataset.contentEquals("SemanticWebDogFood")) {
+			queryCount = 83;
+			int[] order2 = { 1,	11,	21,
+			2,	12,	22,
+			5,	15,	25,
+			6,	16,	26,
+			3,	13,	23,
+			4,	14,	24,
+			7,	17,	27,
+			8,	18,	28,
+			9,	19,	29,
+			10,	20,	30,
+			37,	39,	41,
+			38,	40,	42};
+			order = order2;
+		} else if (dataset.contentEquals("Geology")) {
+			queryCount = 83;
+			int[] order2 = { 1,	11,	21,
+			2,	12,	22,
+			5,	15,	25,
+			6,	16,	26,
+			3,	13,	23,
+			4,	14,	24,
+			7,	17,	27,
+			8,	18,	28,
+			9,	19,	29,
+			10,	20,	30,
+			37,	39,	41,
+			38,	40,	42};
+			order = order2;
+		} else {
+			System.out.println("Dataset Unknown.");
+			System.exit(0);
+		}
 
 		double[][] qmphTable = new double[37][5];
 		double[][] noqphTable = new double[37][5];
@@ -55,9 +97,9 @@ public class ParseIguanaResults {
 
 		// list all suite folders
 		List<Path> subfolders = listSubfolders(folder);
+		
 		// read each experiment
 		for (Path entry : subfolders) {
-			String prefix = "";
 			// read task configuration
 			Map<String, String> config = readCsvHeaderAsKeys(entry.toString() + "/" + taskConfig);
 			String triplestore = config.get("connection");
@@ -66,153 +108,200 @@ public class ParseIguanaResults {
 			// likely a running experiment
 			if (inputFile == null)
 				continue;
-
-			if (!inputFile.contains(dataset)) {
-				continue;
+			
+			if (!inputFile.contains("target-10-09-2025")) {
+				if (!inputFile.contains(dataset) && !inputFile.contains(dataset.toLowerCase())) {
+					continue;
+				}
 			}
-
 			int column = getColumnIndex(triplestore);
 			Integer rowIndex;
 
-			// check if baseline before hand
-			if (inputFile.contains("baseline")) {
-				rowIndex = findOrderIndex(inputFile, blOrder, 31);
-				if (rowIndex == null) {
-					if (inputFile.contains("bl_Mimic_" + dataset)) {
-						rowIndex = 31;
-					}
-				}
-			} else {
-				// find row index, if no integer, might mean it's the first one
-				rowIndex = findOrderIndex(inputFile, order, 1);
-				if (rowIndex == null) {
-					if (inputFile.contains("Mimic_" + dataset)) {
+			// find row index, if no integer, might mean it's either the target or the first one
+			int displacement = 0;
+			if(inputFile.contains("simplex")) {
+				displacement = 18;
+			} 
+			
+			rowIndex = findOrderIndex(inputFile, order, displacement);
+			
+			if (rowIndex == null) {
+				if (inputFile.contains("target-10-09-2025")) {
+					rowIndex = 0;
+				} else if (inputFile.substring(inputFile.length() - 6 - dataset.length()).contains("Mimic_" + dataset)) {
+					if(inputFile.contains("simplex")) {
+						rowIndex = 19;
+					} else {
 						rowIndex = 1;
-						if (!inputFile.contains(subfolder))
-							continue;
-						prefix = subfolder;
 					}
-					if (inputFile.contains("Target_" + dataset)) {
-						rowIndex = 0;
-					}
-				} else {
-					if (!inputFile.contains(subfolder))
-						continue;
-					prefix = subfolder;
 				}
-
-			}
-
+			} 
+			
 			// if it's still not assigned, then something is wrong
 			if (rowIndex == null) {
-				System.err.println("Something went wrong, skipping");
+				System.err.println("Something went wrong, skipping: " + inputFile);
 				continue;
 			}
+			
+			// except the target graph, does it match initial or optimized?
+			if (rowIndex != 0 && !inputFile.contains(subfolder))
+				continue;
+			
 
-			// read metrics from single csvs
+			// read metrics from single csv files
 			Map<String, String> summary = readCsvHeaderAsKeys(entry.toString() + "/" + suiteSummary);
 			double avgQPS = Double.valueOf(summary.get("AvgQPS"));
 			double noQPH = Double.valueOf(summary.get("NoQPH"));
 			double qmph = Double.valueOf(summary.get("QMPH"));
 
 			// assign metrics to corresponding table cell
+			if (qmphTable[rowIndex][column] != 0 && qmphTable[rowIndex][column] != qmph) {
+				System.out.println("Current value: " + qmphTable[rowIndex][column]);
+				System.out.println("New value: " + qmph);
+			}
 			qmphTable[rowIndex][column] = qmph;
 			noqphTable[rowIndex][column] = noQPH;
 			avgQPSTable[rowIndex][column] = avgQPS;
-			
 
 			// read queries
 			Path path = Paths.get(folder + getQueryFile(dataset));
 			List<String> linesQueries = Files.readAllLines(path);
-
-			// read query instances
-			String instance;
-			if (prefix.isEmpty()) {
-				instance = inputFile.substring(inputFile.lastIndexOf('/') + 1) + "_queries.txt";
-			} else {
-				instance = prefix + "_" + inputFile.substring(inputFile.lastIndexOf('/') + 1) + "_queries.txt";
-			}
-			
-			String filePath = folder + "queries/" + instance;
-			File file = new File(filePath);
-			if (!file.exists())
-				continue;
-			List<String> linesInstances = Files.readAllLines(Paths.get(filePath));
-
-			Map<Integer, Set<Integer>> queries2Instances = new HashMap<>();
-
-			// map instances to queries
-			Set<String> procQueries = new HashSet<>();
-			for (int j = 0; j < linesQueries.size(); j++) {
-				String query = linesQueries.get(j);
-				Set<Integer> instances = new HashSet<>();
-
-				// create regex for query pattern
-				String regexTemplate = escapeRegexSpecialChars(query);
-				regexTemplate = regexTemplate.replaceAll(Pattern.quote("%%var") + "\\d+" + Pattern.quote("%%"),
-						"(.*?)");
-				Pattern pattern = Pattern.compile(regexTemplate, Pattern.DOTALL);
-
-				for (int i = 0; i < linesInstances.size(); i++) {
-					String candidateInstance = linesInstances.get(i);
-					// if exactly the same, we found it, no need to search more
-					if (query.contentEquals(candidateInstance)&& !procQueries.contains(candidateInstance)) {
-						procQueries.add(candidateInstance);
-						instances.add(i);
-						break;
-					}
-					// then it's a pattern
-					else {
-						Matcher matcher = pattern.matcher(candidateInstance);
-						if (matcher.matches() && !procQueries.contains(candidateInstance)) {
-							procQueries.add(candidateInstance);
-							instances.add(i);
-						}
-					}
-					
-				}
-				
-				queries2Instances.put(j, instances);
-			}
-
-			// sanity check
-			// sum of map keys should be the same as length of instances
-			int totalElements = queries2Instances.values().stream().mapToInt(Set::size) // Get the size of each set
-					.sum();
-			if (totalElements != linesInstances.size())
-				System.out.println("Something wrong happened.");
-
-			// read query-level metrics
 			String q = entry + "/task-0/query-summary-worker-0.csv";
 			Map<Integer, Double> resultMap = readFileAndCreateMap(q);
-
-			// compute average of instances
-			Set<Integer> keys = queries2Instances.keySet();
-			for (int qID : keys) {
-				Set<Integer> instances = queries2Instances.get(qID);
-				double avg = 0;
-				if (!instances.isEmpty()) {
-					for (int qInst : instances) {
-						double queryQPS = resultMap.get(qInst);
-						avg += queryQPS;
-					}
-					avg /= instances.size();
-				}
-				qpsTables[qID][rowIndex][column] = avg;
+			for (int j = 0; j < linesQueries.size(); j++) {
+				double queryQPS = resultMap.get(j);
+				qpsTables[j][rowIndex][column] = queryQPS;
 			}
-
 		}
-
+		
+		// calculate RMSE on single query qps values
+		double[][] rmseTable = new double[queryCount][12];
+		double[][] rmsreTable = new double[queryCount][12];
+		double[][] nrmseTable = new double[queryCount][12];
+		for(int qID = 0; qID<rmseTable.length;qID++) {
+			 rmseTable[qID]=calculateApproachRMSE(qpsTables[qID]);
+			 rmsreTable[qID]=calculateApproachRMSRE(qpsTables[qID]);
+			 nrmseTable[qID]=calculateApproachNRMSE(qpsTables[qID]);
+		}
+		
 		System.out.println("QMPH Table:");
 		printArrayAsTable(qmphTable);
 		System.out.println("NoQPH Table:");
 		printArrayAsTable(noqphTable);
 		System.out.println("AvgQPS Table:");
 		printArrayAsTable(avgQPSTable);
-		System.out.println("QPS Tables:");
-		printArrayAsTable(qpsTables);
+		System.out.println("RMSE QPS Tables:");
+		printArrayAsTable(rmseTable);
+		System.out.println("NRMSE QPS Tables:");
+		printArrayAsTable(nrmseTable);
+		System.out.println("RMSRE QPS Tables:");
+		printArrayAsTable(rmsreTable);
+
+//		System.out.println("QPS Tables:");
+//		printArrayAsTable(qpsTables);
 
 	}
+	
+	public static double[] calculateApproachRMSRE(double[][] qps) {
+        int numApproaches = 12;
+        int numRuns = 3;
+        int numMetrics = 5;
+        double[] rmse = new double[numApproaches];
+
+        // Calculate average QPS for each approach across 3 runs
+        for (int approach = 0; approach < numApproaches; approach++) {
+            double[] approachSum = new double[numMetrics];
+            for (int run = 0; run < numRuns; run++) {
+            	int rowIndex = 1 + approach * numRuns + run;
+                for (int j = 0; j < numMetrics; j++) {
+                    approachSum[j] += qps[rowIndex][j];
+                }
+            }
+            for (int j = 0; j < numMetrics; j++) {
+                approachSum[j] /= numRuns;
+            }
+
+            // Calculate RMSE against target (row 0)
+            double sumSquaredError = 0.0;
+            for (int j = 0; j < numMetrics; j++) {
+            	if(approachSum[j]==0) {
+            		continue;
+            	}
+                double error = (approachSum[j] - qps[0][j])/qps[0][j];
+                sumSquaredError += error * error;
+            }
+            rmse[approach] = Math.sqrt(sumSquaredError / numMetrics);
+        }
+        return rmse;
+    }
+	
+	public static double[] calculateApproachRMSE(double[][] qps) {
+        int numApproaches = 12;
+        int numRuns = 3;
+        int numMetrics = 5;
+        double[] rmse = new double[numApproaches];
+
+        // Calculate average QPS for each approach across 3 runs
+        for (int approach = 0; approach < numApproaches; approach++) {
+            double[] approachSum = new double[numMetrics];
+            for (int run = 0; run < numRuns; run++) {
+            	int rowIndex = 1 + approach * numRuns + run;
+                for (int j = 0; j < numMetrics; j++) {
+                    approachSum[j] += qps[rowIndex][j];
+                }
+            }
+            for (int j = 0; j < numMetrics; j++) {
+                approachSum[j] /= numRuns;
+            }
+
+            // Calculate RMSE against target (row 0)
+            double sumSquaredError = 0.0;
+            for (int j = 0; j < numMetrics; j++) {
+            	if(approachSum[j]==0) {
+            		continue;
+            	}
+                double error = approachSum[j] - qps[0][j];
+                sumSquaredError += error * error;
+            }
+            rmse[approach] = Math.sqrt(sumSquaredError / numMetrics);
+        }
+        return rmse;
+    }
+	
+	public static double[] calculateApproachNRMSE(double[][] qps) {
+        int numApproaches = 12;
+        int numRuns = 3;
+        int numMetrics = 5;
+        double[] rmse = new double[numApproaches];
+
+        // Calculate average QPS for each approach across 3 runs
+        for (int approach = 0; approach < numApproaches; approach++) {
+            double[] approachSum = new double[numMetrics];
+            for (int run = 0; run < numRuns; run++) {
+            	int rowIndex = 1 + approach * numRuns + run;
+                for (int j = 0; j < numMetrics; j++) {
+                    approachSum[j] += qps[rowIndex][j];
+                }
+            }
+            for (int j = 0; j < numMetrics; j++) {
+                approachSum[j] /= numRuns;
+            }
+
+            // Calculate RMSE against target (row 0)
+            double sumSquaredError = 0.0;
+            for (int j = 0; j < numMetrics; j++) {
+            	if(approachSum[j]==0) {
+            		continue;
+            	}
+                double error = approachSum[j] - qps[0][j];
+                sumSquaredError += error * error;
+            }
+            rmse[approach] = Math.sqrt(sumSquaredError / numMetrics);
+            rmse[approach] /= (Arrays.stream(qps[0]).max().getAsDouble()-Arrays.stream(qps[0]).min().getAsDouble());
+        }
+        return rmse;
+    }
+
 
 	public static Map<Integer, Double> readFileAndCreateMap(String filePath) {
 		Map<Integer, Double> queryIDToQPS = new HashMap<>();
@@ -256,11 +345,11 @@ public class ParseIguanaResults {
 	private static String getQueryFile(String dataset) {
 		switch (dataset) {
 		case "LinkedGeo":
-			return "queries/lgeo_queries.txt";
-		case "SemanticWeb":
-			return "queries/swdf_queries.txt";
+			return "queries/lgeo.benchmark-no.txt";
+		case "SemanticWebDogFood":
+			return "queries/swdf.benchmark-no.txt";
 		case "Geology":
-			return "queries/icc_queries.txt";
+			return "queries/icc.benchmark-no.txt";
 		default:
 			return null;
 		}
@@ -325,13 +414,13 @@ public class ParseIguanaResults {
 			System.out.println();
 		}
 	}
-
+	
 	private static Integer findOrderIndex(String input, int[] integers, int displacement) {
-		for (int i = 0; i < integers.length; i++) {
+		for (int i = displacement; i < integers.length; i++) {
 			int num = integers[i];
 			String numStr = "(" + String.valueOf(num) + ")";
 			if (input.contains(numStr)) {
-				return i + displacement;
+				return i+1;
 			}
 		}
 		return null;
