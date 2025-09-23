@@ -1,7 +1,6 @@
 #!/usr/bin/bash 
 
 mkdir -p results/
-mkdir -p rdf-results/
 mkdir -p queries/queryInstances/
 
 # For each graph in the folder, run all triplestores
@@ -23,7 +22,7 @@ do
     
     # Start reference endpoint
     gn="${f%%.*}"
-    ./start-ref.sh $f
+    #./start-ref.sh $f
     
     # Run all with the same query instances
     ./start-blazegraph.sh $f
@@ -34,16 +33,16 @@ do
     
     # Reset query instance cache for each graph
     # Rename it based on file name
-    queryFile=${fileName%%.*}_queries.txt
-    if [[ "$f" == *"initial"* ]]; then
-      queryFile="initial_"$queryFile
-    elif [[ "$f" == *"mimic"* ]]; then
-      queryFile="mimic_"$queryFile
-    else 
-      echo "I don't know this folder, not adding prefix to $queryFile"
-    fi
+    #queryFile=${fileName%%.*}_queries.txt
+    #if [[ "$f" == *"initial"* ]]; then
+    #  queryFile="initial_"$queryFile
+    #elif [[ "$f" == *"mimic"* ]]; then
+    #  queryFile="mimic_"$queryFile
+    #else 
+    #  echo "I don't know this folder, not adding prefix to $queryFile"
+    #fi
     
-    mv queries/*instances* queries/queryInstances/$queryFile
+    #mv queries/*instances* queries/queryInstances/$queryFile
   fi
   echo "done"
 done

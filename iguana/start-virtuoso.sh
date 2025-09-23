@@ -13,10 +13,10 @@ rm virtuoso-opensource/database/virtuoso.log
 cd virtuoso-opensource/bin/ && ./virtuoso-t +configfile ../database/virtuoso.ini
 echo $@
 sleep 1m
-/local/Lemming/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="sparql WITH <http://example.com> DELETE {?s ?p ?o} WHERE {?s ?p ?o};checkpoint;"
-/local/Lemming/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="ld_dir('$dir_path','$file_name','http://example.com');"
-/local/Lemming/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="rdf_loader_run();checkpoint;"
-cd /local/Lemming/iguana
+/local/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="sparql WITH <http://example.com> DELETE {?s ?p ?o} WHERE {?s ?p ?o};checkpoint;"
+/local/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="ld_dir('$dir_path','$file_name','http://example.com');"
+/local/iguana/virtuoso-opensource/bin/isql 1111 dba dba exec="rdf_loader_run();checkpoint;"
+cd /local/iguana
 
 sleep 1m
 ./wait_until_up.sh "http://localhost:8890/sparql"
