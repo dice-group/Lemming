@@ -29,26 +29,33 @@ public class CalculateStructuredness {
 	public static void main(String[] args) {
 		String folderPath = args[0];
 		Path startPath = Paths.get(folderPath);
-		Path outputFile = Paths.get("structuredness.csv");
+		Path outputFile = Paths.get(folderPath+"/structuredness.tsv");
 
 		try (BufferedWriter writer = Files.newBufferedWriter(outputFile)) {
-			writer.write("File,Subject,Predicates,Objects,Triples,Structuredness\n");
+			writer.write("File\tSubject\tPredicates\tObjects\tTriples\tStructuredness\n");
 
 			Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
 				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					String path = file.toAbsolutePath().toString();
-					Model model = ModelFactory.createDefaultModel();
-					model.read(path);
-					double coherence = getStructurednessValue(model);
-					StringBuilder builder = new StringBuilder();
-					builder.append(path).append("\t");
-					builder.append(totalSubjects(model)).append("\t");
-					builder.append(totalPredicates(model)).append("\t");
-					builder.append(totalObjeects(model)).append("\t");
-					builder.append(totalTriples(model)).append("\t");
-					builder.append(coherence).append("\n");
-					writer.write(builder.toString());
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+					try {
+						String path = file.toAbsolutePath().toString();
+						Model model = ModelFactory.createDefaultModel();
+						model.read(path);
+						double coherence = getStructurednessValue(model);
+						StringBuilder builder = new StringBuilder();
+						builder.append(path).append("\t");
+						builder.append(totalSubjects(model)).append("\t");
+						builder.append(totalPredicates(model)).append("\t");
+						builder.append(totalObjeects(model)).append("\t");
+						builder.append(totalTriples(model)).append("\t");
+						builder.append(coherence).append("\n");
+						writer.write(builder.toString());
+						writer.flush();
+						System.out.println(path+"\t"+coherence);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					
 					return FileVisitResult.CONTINUE;
 				}
 
