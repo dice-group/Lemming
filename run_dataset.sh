@@ -3,7 +3,7 @@
 dataset=$1
 thrs=$2
 mode='graph'
-opt_iterations=100000
+opt_iterations=50000
 
 if [ $dataset = 'swdf' ]
 then 
