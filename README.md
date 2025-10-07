@@ -1,6 +1,3 @@
-# Lemming
-This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator.
-
 ## Prerequisites and Project Build
 ### Prerequisites
 - **Java Development Kit (JDK)**: Version 17 or later.
@@ -15,14 +12,13 @@ mvn clean package
 The JAR file will be located in the target directory after the build process is complete.
 
 ## How to run
-LEMMING currently supports 2 graph generation processes.
 
-### 1. Versioned graph generation
+### 1. Versioned graph input
 
- The first as presented in [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015) requires a versioned dataset as input.
+We require a versioned dataset as input.
 
 ```
-java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
+java -jar jarfile.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -m Simplex -sc <simplex_class_sample> -sp <simplex_property_sample>
 
 ```
 
@@ -30,45 +26,17 @@ java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c 
 
 <table>
   <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
-  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {swdf, lgeo, geology}</td></tr>
   <tr><th align="left">-nv</th><td>True</td><td>NA</td><td>Desired number of vertices in the generated graph (number of vertices of the target graph)</td></tr>
   <tr><th align="left">-thrs</th><td>False</td><td>1</td><td>Number of threads</td></tr>
   <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
   <tr><th align="left">-m</th><td>False</td><td>Binary</td><td>Generation type {Binary, Simplex, Bl}</td></tr>
-  <tr><th align="left">-c</th><td>False</td><td>UCS</td><td>Type of class selector {UCS, BCS, CCS}</td></tr>
-  <tr><th align="left">-v</th><td>False</td><td>UCS</td><td>Type of vertex selector {UIS, BIS}</td></tr>
   <tr><th align="left">-sp</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex property sampling scheme {BPSI, UPSI}</td></tr>
   <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex class sampling scheme {BCSI, UCSI}</td></tr>
   <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used for baseline generators {BA, WS}</td></tr>
   <tr><th align="left">-op</th><td>False</td><td>0</td><td>Number of optimization iterations</td></tr>
 </table>
 
-### 2. Single-version graph generation
-
-This mode requires only one graph version as input and skips the preprocessing and the optimization stage as a result.
-
-```
-java -jar lemming.jar single-graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
-
-```
-
-### Preprocessing stage 
-
-LEMMING includes a preprocessing stage where invariant arithmetic expressions are learned for a given dataset. This stage runs by default if LEMMING does not find the path to the preprocessed data. The expressions are saved in ``value_store.val``. However, you can explicitly run it using:
-
- ```
- java -jar lemming.jar store -ds <dataset>
- ```
- 
- **Parameters**
- 
-<table>
-  <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
-  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
-  <tr><th align="left">--min-fitness</th><td>False</td><td>100000.0</td><td>Minimum Fitness</td></tr>
-  <tr><th align="left">---max-iterations</th><td>False</td><td>50</td><td>Maximum number of iterations</td></tr>
-</table>
- 
 
 ## Approach overview
 
@@ -89,20 +57,8 @@ In `GraphOptimization.java`, two graphs are created by adding and removing an ed
 The optimized graph is finalized as a real-world RDF graph in `GraphLexicalization.java` by rendering all the resources' IRIs.
 
 
-<!-- commented
-Below is a table with the currently accepted datasets and the number of vertices of its target graph.
-
-<table>
-  <tr><th align="left">Dataset</th><th align="center">No. vertices</th><th>Folder</th><th>Description</th><th>Target graph</th></tr>
-  <tr><th align="left">pg</th><td align="center">792 923</td><td>PersonGraph/</td><td>Person Graph (subset of DBpedia)</td><td align="center">2016-10</td></tr>
-  <tr><th align="left">swdf</th><td align="center">45 420</td><td>SemanticWebDogFood/</td><td>Semantic Web Dog Food</td><td align="center">2015</td></tr>
-  <tr><th align="left">lgeo</th><td align="center">591 649</td><td>LinkedGeoGraphs/</td><td>Linked Geo Data</td><td align="center">2015</td></tr>
-  <tr><th align="left">geology</th><td align="center">1 281</td><td>GeologyGraphs/</td><td> International Chronostratigraphic Chart</td><td align="center">2018-1</td></tr>
-</table>
--->
-
 ### Reproducing experiments
-You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
+You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh swdf``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
 
 The metrics and constant expressions values can be found in ``LemmingEx.result``. 
 
@@ -121,17 +77,17 @@ These can be collected through the results file:
 -->
 
 
-We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
+We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and start IGUANA. The scripts may need changes depending on the location of the triple stores binary files/installation. 
 To use them, you need to specify the folder where the graphs are located: 
 
 ```
-./exec_all.sh /home/lemming/generated_graphs/
+./exec_all.sh /home/generated_graphs/
 ```
 
 ### Used data and software
 
-Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/software/index.php).
+Internally, we use [Grph library](http://www.i3s.unice.fr/~hogie/software/index.php).
 
-For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by the Stanford University. It has been transformed into a simple RDF file.
+For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by Stanford University. It has been transformed into a simple RDF file.
 
 
