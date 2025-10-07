@@ -15,10 +15,6 @@ tasks:
         queries:
           path: "queries/QUERYFILE"
           format: "one-per-line" 
-          template:
-            endpoint: "http://localhost:3131/ref/sparql"
-            limit: 10
-            save: true
         completionTarget:
           number: 100
         timeout: "3 min" 

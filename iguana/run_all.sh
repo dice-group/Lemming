@@ -18,11 +18,9 @@ do
     pkill -f graphdb
     pkill -f virtuoso
     pkill -f blazegraph
-    sleep 1m
+    #sleep 1m
     
-    # Start reference endpoint
     gn="${f%%.*}"
-    #./start-ref.sh $f
     
     # Run all with the same query instances
     ./start-blazegraph.sh $f
@@ -30,19 +28,6 @@ do
     ./start-graphdb.sh $f
     ./start-tentris.sh $f
     ./start-fuseki.sh $f
-    
-    # Reset query instance cache for each graph
-    # Rename it based on file name
-    #queryFile=${fileName%%.*}_queries.txt
-    #if [[ "$f" == *"initial"* ]]; then
-    #  queryFile="initial_"$queryFile
-    #elif [[ "$f" == *"mimic"* ]]; then
-    #  queryFile="mimic_"$queryFile
-    #else 
-    #  echo "I don't know this folder, not adding prefix to $queryFile"
-    #fi
-    
-    #mv queries/*instances* queries/queryInstances/$queryFile
   fi
   echo "done"
 done
