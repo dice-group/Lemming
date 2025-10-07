@@ -22,11 +22,11 @@ fi
 mkdir -p initial
 count=3
 for i in $(seq $count); do
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc BCSI -op $opt_iterations
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc UCSI -op $opt_iterations 
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc BCSI -op $opt_iterations
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc UCSI -op $opt_iterations
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl BA
-  java -jar lemming.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl WS
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc BCSI -op $opt_iterations
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp BPSI -sc UCSI -op $opt_iterations 
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc BCSI -op $opt_iterations
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Simplex -sp UPSI -sc UCSI -op $opt_iterations
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl BA
+  java -jar jarfile.jar $mode -ds $dataset -nv $nv -thrs $thrs -m Bl -bl WS
 done
 
