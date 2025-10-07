@@ -1,8 +1,8 @@
 #!/usr/bin/bash 
 
 # Start GraphDB
-./graphdb-11.1.0/bin/importrdf load --force -p -c graphdb-11.1.0/config.ttl -m parallel $1
-./graphdb-11.1.0/bin/graphdb -s -d
+./graphdb/bin/importrdf load --force -p -c graphdb/config.ttl -m parallel $1
+./graphdb/bin/graphdb -s -d
 
 # Wait until it's up
 sleep 1m
