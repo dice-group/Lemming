@@ -1,3 +1,7 @@
+# SimplexKG
+Source code repository of SimplexKG.
+We extend LEMMING with our simplex-based generators.
+
 ## Prerequisites and Project Build
 ### Prerequisites
 - **Java Development Kit (JDK)**: Version 17 or later.
@@ -62,20 +66,7 @@ You can use our script to generate the graphs for all generator types by specify
 
 The metrics and constant expressions values can be found in ``LemmingEx.result``. 
 
-The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. You can find the queries used for each dataset under ``Experiments_data/IGUANA experiments/queries``. The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after type inference and materialization).
-
-IGUANA produces a N-Triple file with the metrics of interest: Query Mixes Per Hour (QMPH), No. Queries Per Hour (NoQPH) and Queries Per Second (QPS). 
-
-<!-- commented
-These can be collected through the results file:
-
-```
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> "2854.432211867693"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/queryMixes> "135.92534342227108"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669/sparql0>  <http://iguana-benchmark.eu/properties/queriesPerSecond> "70.97457627118645"^^<http://www.w3.org/2001/XMLSchema#double> . 
-```
--->
-
+The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB, and Blazegraph triple stores. 
 
 We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and start IGUANA. The scripts may need changes depending on the location of the triple stores binary files/installation. 
 To use them, you need to specify the folder where the graphs are located: 
