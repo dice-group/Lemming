@@ -64,8 +64,6 @@ The optimized graph is finalized as a real-world RDF graph in `GraphLexicalizati
 ### Reproducing experiments
 You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh swdf``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
 
-The metrics and constant expressions values can be found in ``LemmingEx.result``. 
-
 The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB, and Blazegraph triple stores. 
 
 We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and start IGUANA. The scripts may need changes depending on the location of the triple stores binary files/installation. 
