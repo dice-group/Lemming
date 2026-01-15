@@ -35,6 +35,17 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class RedberryBasedFactoryTest {
+	
+	private Expression expression1;
+	private Expression expression2;
+	private boolean expectExpressionsToBeEqual;
+
+	public RedberryBasedFactoryTest(Expression expression1, Expression expression2,
+			boolean expectExpressionsToBeEqual) {
+		this.expression1 = expression1;
+		this.expression2 = expression2;
+		this.expectExpressionsToBeEqual = expectExpressionsToBeEqual;
+	}
 
     @Parameters
     public static List<Object[]> data() {
@@ -78,17 +89,6 @@ public class RedberryBasedFactoryTest {
         // x/x == null (because it is a constant)
         tests.add(new Object[] { new Operation(x, x, Operator.DIV), null, true });
         return tests;
-    }
-
-    private Expression expression1;
-    private Expression expression2;
-    private boolean expectExpressionsToBeEqual;
-
-    public RedberryBasedFactoryTest(Expression expression1, Expression expression2,
-            boolean expectExpressionsToBeEqual) {
-        this.expression1 = expression1;
-        this.expression2 = expression2;
-        this.expectExpressionsToBeEqual = expectExpressionsToBeEqual;
     }
 
     @Test

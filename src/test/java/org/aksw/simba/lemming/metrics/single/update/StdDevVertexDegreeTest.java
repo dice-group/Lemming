@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.update;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;
@@ -50,7 +50,8 @@ public class StdDevVertexDegreeTest extends UpdateMetricTest {
         IntArrayList degrees = dir == DIRECTION.in ? graph.getGraph().getAllInEdgeDegrees()
                 : graph.getGraph().getAllOutEdgeDegrees();
         double avg = calculateAvg(degrees);
-        double temp, sum = 0;
+        double temp;
+        double sum = 0;
         for (int i = 0; i < degrees.size(); ++i) {
             temp = avg - degrees.getInt(i);
             temp *= temp;

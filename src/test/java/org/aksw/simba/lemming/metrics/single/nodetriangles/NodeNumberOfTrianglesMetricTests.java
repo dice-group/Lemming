@@ -31,7 +31,7 @@ public class NodeNumberOfTrianglesMetricTests extends NumberOfTrianglesMetricTes
     }
 
     @Test
-    public void ListingAyzMetric() {
+    public void listingAyzMetric() {
         this.metric = new ListingAyzMetric();
         test();
     }

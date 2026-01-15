@@ -1,10 +1,9 @@
-package org.aksw.simba.lemming.creation.PrecomputingValues;
+package org.aksw.simba.lemming.creation;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.aksw.simba.lemming.creation.Inferer;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;

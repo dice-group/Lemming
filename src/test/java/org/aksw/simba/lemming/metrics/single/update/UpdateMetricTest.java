@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.update;
 
 import grph.Grph;
 import grph.in_memory.InMemoryGrph;

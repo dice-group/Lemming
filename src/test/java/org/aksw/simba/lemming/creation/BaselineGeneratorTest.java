@@ -9,6 +9,7 @@ import org.aksw.simba.lemming.mimicgraph.generator.baseline.DirectedWattsStrogat
 import org.aksw.simba.lemming.util.Constants;
 import org.dice_research.ldcbench.generate.GraphGenerator;
 import org.dice_research.ldcbench.generate.ParallelBarabasiRDF;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -52,6 +53,7 @@ public class BaselineGeneratorTest {
 		GraphGenerator generator = new ParallelBarabasiRDF(Constants.BASELINE_STRING);
 		generator.generateGraph(noVertices, degree/2, seed, graph);
 		double avgDegree = graph.getGrph().getAverageDegree();
+		Assert.assertTrue(avgDegree > 0);
 	}
 
 	@Test
@@ -60,5 +62,6 @@ public class BaselineGeneratorTest {
 		g.addNVertices(noVertices);
 		DirectedWattsStrogatz.compute(g, degree, 0.5, seed);
 		double avgDegree = g.getAverageDegree();
+		Assert.assertTrue(avgDegree > 0);
 	}
 }

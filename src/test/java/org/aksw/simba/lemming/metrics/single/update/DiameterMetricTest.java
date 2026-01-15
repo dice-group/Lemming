@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.aksw.simba.lemming.metrics.single.updateDegree;
+package org.aksw.simba.lemming.metrics.single.update;
 
 import org.aksw.simba.lemming.AddEdgeDecorator;
 import org.aksw.simba.lemming.ColouredGraph;

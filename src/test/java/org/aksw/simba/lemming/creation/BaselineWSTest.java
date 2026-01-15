@@ -17,20 +17,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 
 @RunWith(Parameterized.class)
 public class BaselineWSTest {
-
-	@Parameters
-	public static Collection<Object[]> data() {
-		List<Object[]> testConfigs = new ArrayList<Object[]>();
-		testConfigs.add(new Object[] { 7, 0, 4, new int[] { 5, 6 }, new int[] { 1, 2 } });
-		testConfigs.add(new Object[] { 7, 2, 4, new int[] { 0, 1 }, new int[] { 3, 4 } });
-		testConfigs.add(new Object[] { 7, 6, 4, new int[] { 4, 5 }, new int[] { 0, 1 } });
-		testConfigs.add(new Object[] { 7, 6, 5, new int[] { 3, 4, 5 }, new int[] { 0, 1, 2 } });
-		testConfigs.add(new Object[] { 2, 0, 2, new int[] { 1 }, new int[] { 1 } });
-		testConfigs.add(new Object[] { 7, 6, 2.32, new int[] { 4, 5 }, new int[] { 0, 1 } });
-		testConfigs.add(new Object[] { 7, 6, 1.32, new int[] { 5 }, new int[] { 0 } });
-		return testConfigs;
-	}
-
+	
 	private int maxVertices;
 	private int vertex;
 	private double neighbours;
@@ -43,6 +30,19 @@ public class BaselineWSTest {
 		this.neighbours = neighbours;
 		this.expectedLeft = expectedLeft;
 		this.expectedRight = expectedRight;
+	}
+
+	@Parameters
+	public static Collection<Object[]> data() {
+		List<Object[]> testConfigs = new ArrayList<Object[]>();
+		testConfigs.add(new Object[] { 7, 0, 4, new int[] { 5, 6 }, new int[] { 1, 2 } });
+		testConfigs.add(new Object[] { 7, 2, 4, new int[] { 0, 1 }, new int[] { 3, 4 } });
+		testConfigs.add(new Object[] { 7, 6, 4, new int[] { 4, 5 }, new int[] { 0, 1 } });
+		testConfigs.add(new Object[] { 7, 6, 5, new int[] { 3, 4, 5 }, new int[] { 0, 1, 2 } });
+		testConfigs.add(new Object[] { 2, 0, 2, new int[] { 1 }, new int[] { 1 } });
+		testConfigs.add(new Object[] { 7, 6, 2.32, new int[] { 4, 5 }, new int[] { 0, 1 } });
+		testConfigs.add(new Object[] { 7, 6, 1.32, new int[] { 5 }, new int[] { 0 } });
+		return testConfigs;
 	}
 
 	@Test

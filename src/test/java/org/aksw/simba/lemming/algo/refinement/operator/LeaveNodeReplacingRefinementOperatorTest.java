@@ -25,6 +25,14 @@ public class LeaveNodeReplacingRefinementOperatorTest {
 
     private static final AtomicVariable VARIABLES[] = new AtomicVariable[] { new AtomicVariable(new SimpleMetric("a")),
             new AtomicVariable(new SimpleMetric("b")), new AtomicVariable(new SimpleMetric("c")) };
+    
+    private Expression expression;
+    private Set<Expression> expectedExpressions;
+
+    public LeaveNodeReplacingRefinementOperatorTest(Expression expression, Expression expectedExpressions[]) {
+        this.expression = expression;
+        this.expectedExpressions = new HashSet<Expression>(Arrays.asList(expectedExpressions));
+    }
 
     @Parameters
     public static List<Object[]> data() {
@@ -237,13 +245,6 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         return tests;
     }
 
-    private Expression expression;
-    private Set<Expression> expectedExpressions;
-
-    public LeaveNodeReplacingRefinementOperatorTest(Expression expression, Expression expectedExpressions[]) {
-        this.expression = expression;
-        this.expectedExpressions = new HashSet<Expression>(Arrays.asList(expectedExpressions));
-    }
 
     @Test
     public void test() {
