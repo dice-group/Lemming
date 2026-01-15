@@ -13,7 +13,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.PoissonDistribution;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +55,8 @@ public class BiasedInstanceSelector implements IVertexSelector {
 		// computes in and out degree distribution based on input graphs
 		computePotentialIODegreePerVert(graphInit.getOriginalGraphs(), graphInit.getmMapColourToEdgeIDs(),
 				graphInit.getmMapColourToVertexIDs(), graphInit.getColourMapper(), graphInit.getSeedGenerator());
+//		computePotentialIODegreePerVertMT(graphInit.getOriginalGraphs(), graphInit.getmMapColourToEdgeIDs(),
+//				graphInit.getmMapColourToVertexIDs(), graphInit.getColourMapper(), graphInit.getSeedGenerator());
 	}
 
 	/**
@@ -63,10 +65,9 @@ public class BiasedInstanceSelector implements IVertexSelector {
 	 */
 	@Override
 	public IOfferedItem<Integer> getProposedVertex(BitSet edgecolour, BitSet vertexColour, VERTEX_TYPE type) {
-		ObjectObjectOpenHashMap<BitSet, IOfferedItem<Integer>> proposers = getProposers(edgecolour, type);
-		return proposers.get(vertexColour);
+		return getProposers(edgecolour, type).get(vertexColour);
 	}
-
+	
 	/**
 	 * Computes in and out degree distribution based on input graphs
 	 * 
@@ -107,6 +108,66 @@ public class BiasedInstanceSelector implements IVertexSelector {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Computes in and out degree distribution based on input graphs
+	 * 
+	 * @param origGrphs             The input graphs
+	 * @param mMapColourToEdgeIDs   The colour to edge IDs mapping
+	 * @param mMapColourToVertexIDs The colour to vertex IDs mapping
+	 * @param mColourMapper         The {@link ColourMapper} object
+	 * @param seedGenerator         The seed generator
+	 */
+	private void computePotentialIODegreePerVertMT(ColouredGraph[] origGrphs, Map<BitSet, IntSet> mMapColourToEdgeIDs,
+			Map<BitSet, IntSet> mMapColourToVertexIDs, IColourMappingRules mColourMapper, SeedGenerator seedGenerator) {
+		// compute for each vertex's colour, the average in-degree associated with a
+		// specific edge's colour
+		LOGGER.debug("Computing average in-degree distribution");
+		AvrgDegreeDistBaseVEColour avrgInDegreeAnalyzer = new AvrgInDegreeDistBaseVEColo(origGrphs);
+		// compute for each vertex's colour, the average out-degree associated with a
+		// specific edge's colour
+		LOGGER.debug("Computing average out-degree distribution");
+		AvrgDegreeDistBaseVEColour avrgOutDegreeAnalyzer = new AvrgOutDegreeDistBaseVEColo(origGrphs);
+
+		Set<BitSet> setEdgeColours = mMapColourToEdgeIDs.keySet();
+		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
+
+		// for each edge colour, compute possible tails and heads
+		for (BitSet edgeColo : setEdgeColours) {
+			final BitSet finalEdgeColo = edgeColo;
+			Set<BitSet> setTailColours = mColourMapper.getTailColoursFromEdgeColour(edgeColo);
+			Set<BitSet> setHeadColours = mColourMapper.getHeadColoursFromEdgeColour(edgeColo);
+
+			Thread tailThread = new Thread(() -> {
+                for (BitSet tailColo : setTailColours) {
+                    if (setVertexColours.contains(tailColo)) {
+                        computeProposedColours(avrgOutDegreeAnalyzer, mapPossibleODegreePerOEColo, tailColo, finalEdgeColo,
+                                mMapColourToVertexIDs, seedGenerator.getNextSeed());
+                    }
+                }
+            });
+
+            Thread headThread = new Thread(() -> {
+                for (BitSet headColo : setHeadColours) {
+                    if (setVertexColours.contains(headColo)) {
+                        computeProposedColours(avrgInDegreeAnalyzer, mapPossibleIDegreePerIEColo, headColo, finalEdgeColo,
+                                mMapColourToVertexIDs, seedGenerator.getNextSeed());
+                    }
+                }
+            });
+
+            tailThread.start();
+            headThread.start();
+
+            try {
+                tailThread.join();
+                headThread.join();
+            } catch (InterruptedException e) {
+                LOGGER.error("Thread interrupted", e);
+            }
+        }
+		
 	}
 
 	/**

@@ -75,10 +75,17 @@ public class ConstantValueStorage implements Serializable {
 
 	/**
 	 * 
-	 * @return true if the store contains the dataset's data
+	 * @return true if the store doesn't contain the dataset's data
 	 */
-	public boolean havingData() {
-		return mMapValueStorage.containsKey(mDataSetPath);
+	public boolean isEmpty() {
+		
+		// unlikely, but sanity check
+		if(!mMapValueStorage.containsKey(mDataSetPath)) {
+			return false;
+		}
+		
+		// empty if both inner maps are empty
+		return mMapValueStorage.get(mDataSetPath).isEmpty();
 	}
 
 	/**

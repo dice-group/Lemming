@@ -10,8 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.SimplexAnalysisResult;
-import org.aksw.simba.lemming.mimicgraph.metricstorage.SimplexService;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.simplexes.analysis.FindTri;
@@ -20,7 +18,6 @@ import org.aksw.simba.lemming.util.Constants;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -42,9 +39,6 @@ public class SimplexGraphInitializer extends GraphInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimplexGraphInitializer.class);
 
 	private int noOfIterations = 10000; // FIXME
-
-	@Autowired
-	private SimplexService service;
 
 	/** Analyzes the different types of simplexes */
 	private SimplexAnalysis simplexAnalysis;
@@ -183,24 +177,6 @@ public class SimplexGraphInitializer extends GraphInitializer {
 
 		// compute distinct edge colors for random pick
 		createSetForEdgeColours(simplexAnalysis.getConnS1Analysis().getmColoEdgesCountDistAvg());
-
-//		// Compute triangles for input graphs
-//		LOGGER.info("Finding triangles in input graphs");
-////		SimplexAnalysisResult result = service.obtainSimplexAnalysis(clonedInput, noOfVertices, noOfThreads);
-////		simplexAnalysis = result.getSimplex();
-////		FindTri computedTriangles = result.getFindTri();
-//		
-//		// Get all triangles found in input graphs. Note:- metric is invoked by above
-//		// function call, thus set of colors for different triangle vertices are already
-//		// computed.
-//		mTriangleColoursTriangleEdgeCounts = computedTriangles.getmTriColoEdgesTriCountDistAvg();
-//
-//		// Create HashSet of Triangle Colours. This set is used to randomly select an
-//		// object of TriangleColours while generating mimic graph.
-//		createSetForTriangleColours();
-//					
-//		// compute distinct edge colors for random pick
-//		createSetForEdgeColours(simplexAnalysis.getConnS1Analysis().getmColoEdgesCountDistAvg());
 
 		return mimicGraph;
 	}

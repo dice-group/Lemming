@@ -24,6 +24,14 @@ public class ValueStorage implements Serializable{
 		mMapMetricValues = new HashMap<String, Map<String, Double>>();
 	}
 	
+	/**
+	 * 
+	 * @return false if both maps are empty
+	 */
+	public boolean isEmpty() {
+		return mMapConstantValues.isEmpty() && mMapMetricValues.isEmpty();
+	}
+	
 	public void setConstantValues(Map<Expression, Map<String, Double>> mapConstantValues){
 		mMapConstantValues = mapConstantValues;
 	}

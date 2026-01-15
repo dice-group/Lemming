@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
@@ -13,7 +14,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.TripleColourDistributionM
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSetOfIDs;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.RandomUtil;
 import org.dice_research.ldcbench.generate.SeedGenerator;
@@ -44,24 +45,31 @@ public class ClusteredClassSelector implements IClassSelector {
 	public ClusteredClassSelector(GraphInitializer graphInit) {
 		this.graphInit = graphInit;
 		this.seedGenerator = graphInit.getSeedGenerator();
-		tripleMapTailHeadEdgeRates = new HashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
+		tripleMapTailHeadEdgeRates = new ConcurrentHashMap<BitSet, Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>>>();
 		mLstEVColorMapping = new ArrayList<TripleColourDistributionMetric>();
-		mMapEdgeIdsToTripleColours = new HashMap<Integer, List<BitSet>>();
+		mMapEdgeIdsToTripleColours = new ConcurrentHashMap<Integer, List<BitSet>>();
 
+		LOGGER.debug("computeEVColoDist...");
 		// compute edges and vertices distribution over each triple's colour
 		computeEVColoDist(graphInit.getOriginalGraphs());
 
+		LOGGER.debug("computeAverageEVColoDistributionMT...");
 		// compute average distribution of edges/ vertices of each triple's colour
 		computeAverageEVColoDistribution();
+//		computeAverageEVColoDistributionMT();
 
+		LOGGER.debug("computeNoOfEdgesInTriples...");
 		// assign specific number of edges to each grouped triple
 		computeNoOfEdgesInTriples();
 
+		LOGGER.debug("computeNoOfVerticesInTriplesMT...");
 		// assign specific number of vertices to each grouped triple
 		computeNoOfVerticesInTriples();
+//		computeNoOfVerticesInTriplesMT();
 
+		LOGGER.debug("assignVerticesToTriples...");
 		assignVerticesToTriples();
-		
+
 		currentProposal = getProposal();
 	}
 
@@ -92,7 +100,7 @@ public class ClusteredClassSelector implements IClassSelector {
 		} else {
 			return getProposal(edgeColour, fakeEdgeId); // get from edge grouped clusters
 		}
-		
+
 	}
 
 	public ClassProposal getProposal(BitSet edgeColour, int fakeEdgeId) {
@@ -115,7 +123,7 @@ public class ClusteredClassSelector implements IClassSelector {
 			mLstEVColorMapping.add(colorMapping);
 		}
 	}
-	
+
 	public ClassProposal getProposal() {
 		return currentProposal;
 	}
@@ -174,6 +182,63 @@ public class ClusteredClassSelector implements IClassSelector {
 	}
 
 	/**
+	 * compute average distribution of edges/ vertices of each triple's colour in
+	 * threads
+	 */
+	private void computeAverageEVColoDistributionMT() {
+		Set<BitSet> vertColors = graphInit.getAvailableVertexColours();
+		Set<BitSet> edgeColors = graphInit.getAvailableEdgeColours();
+		LOGGER.debug("Vertex colours {} Edge colours {}", vertColors.size(), edgeColors.size());
+		vertColors.parallelStream().forEach(tailColo -> {
+			for (BitSet headColo : vertColors) {
+				for (BitSet edgeColo : edgeColors) {
+					compute(tailColo, headColo, edgeColo);
+				}
+			}
+		});
+	}
+
+	private void compute(BitSet tailColo, BitSet headColo, BitSet edgeColo) {
+		int avrgDenominator = 0;
+		double totalTailPercentage = 0;
+		double totalEdgePercentage = 0;
+		double totalHeadPercentage = 0;
+		int iNoOfSamples = mLstEVColorMapping.size();
+
+		for (int i = 0; i < iNoOfSamples; i++) {
+			TripleColourDistributionMetric tripleColourMapper = mLstEVColorMapping.get(i);
+			double noOfHeads = tripleColourMapper.getNoOfIncidentHeads(tailColo, edgeColo, headColo);
+			double noOfTails = tripleColourMapper.getNoOfIncidentTails(tailColo, edgeColo, headColo);
+			double noOfEdges = tripleColourMapper.getNoOfIncidentEdges(tailColo, edgeColo, headColo);
+
+			if (noOfHeads != 0 && noOfTails != 0 && noOfEdges != 0) {
+				avrgDenominator++;
+				totalHeadPercentage += (noOfHeads / tripleColourMapper.getTotalNoOfVerticesIn(headColo));
+				totalTailPercentage += (noOfTails / tripleColourMapper.getTotalNoOfVerticesIn(tailColo));
+				totalEdgePercentage += (noOfEdges / tripleColourMapper.getTotalNoOfEdgesIn(edgeColo));
+			} else {
+				// for testing only
+				if ((noOfHeads + noOfTails + noOfHeads) != 0) {
+					LOGGER.error("Found a triple missing of either tail, head or edges!");
+				}
+			}
+		}
+
+		if (avrgDenominator != 0) {
+			avrgDenominator = mLstEVColorMapping.size();
+			totalTailPercentage = totalTailPercentage / avrgDenominator;
+			totalEdgePercentage = totalEdgePercentage / avrgDenominator;
+			totalHeadPercentage = totalHeadPercentage / avrgDenominator;
+			
+			TripleBaseSetOfIDs trippleForEdge = new TripleBaseSetOfIDs(tailColo, totalTailPercentage, edgeColo,
+					totalEdgePercentage, headColo, totalHeadPercentage);
+			synchronized (tripleMapTailHeadEdgeRates) {
+				putToMap(tailColo, headColo, edgeColo, trippleForEdge, tripleMapTailHeadEdgeRates);
+			}
+		}
+	}
+
+	/**
 	 * put information of tail, head, and edge into triple
 	 * 
 	 * @param firstKey
@@ -206,7 +271,6 @@ public class ClusteredClassSelector implements IClassSelector {
 			mapThird.put(thirdKey, val);
 		} else {
 			LOGGER.error("[putToMap] Something is wrong!");
-			System.err.println("[putToMap] Something is wrong!");
 		}
 	}
 
@@ -305,8 +369,8 @@ public class ClusteredClassSelector implements IClassSelector {
 					// get all heads
 					IntSet setHeads = graphInit.getmMapColourToVertexIDs().get(headColo);
 
+					Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
 					for (BitSet edgeColo : setEdgeColo) {
-						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
 						TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
 						if (triple != null && triple.edgeIDs.size() > 0) {
 
@@ -337,8 +401,69 @@ public class ClusteredClassSelector implements IClassSelector {
 						}
 					}
 				}
+
 			}
 		}
+	}
+
+	/**
+	 * compute possible number of vertices in triples
+	 */
+	private void computeNoOfVerticesInTriplesMT() {
+		Set<BitSet> setVertColo = graphInit.getAvailableVertexColours();
+		Set<BitSet> setEdgeColo = graphInit.getAvailableEdgeColours();
+
+		setVertColo.parallelStream().forEach(tailColo -> {
+			// get all tails
+			IntSet setTails = graphInit.getmMapColourToVertexIDs().get(tailColo);
+			// tail distribution
+			Map<BitSet, Map<BitSet, TripleBaseSetOfIDs>> mapHeadEdgeToGrpTriples = tripleMapTailHeadEdgeRates
+					.get(tailColo);
+
+			if (mapHeadEdgeToGrpTriples == null)
+				return;
+
+			for (BitSet headColo : setVertColo) {
+
+				if (mapHeadEdgeToGrpTriples.containsKey(headColo)) {
+
+					// get all heads
+					IntSet setHeads = graphInit.getmMapColourToVertexIDs().get(headColo);
+
+					for (BitSet edgeColo : setEdgeColo) {
+						Map<BitSet, TripleBaseSetOfIDs> mapEdgeToGrpTriples = mapHeadEdgeToGrpTriples.get(headColo);
+						TripleBaseSetOfIDs triple = mapEdgeToGrpTriples.get(edgeColo);
+						if (triple != null && triple.edgeIDs.size() > 0) {
+
+							/// tails
+							double noOfTails = Math.round(triple.noOfTails * setTails.size() + 0.1);
+							if (noOfTails > triple.edgeIDs.size()) {
+								noOfTails = triple.edgeIDs.size();
+							}
+
+							if (noOfTails == 0)
+								noOfTails = 1;
+
+							/// heads
+							double noOfHeads = Math.round(triple.noOfHeads * setHeads.size() + 0.1);
+							if (noOfHeads > triple.edgeIDs.size()) {
+								noOfHeads = triple.edgeIDs.size();
+							}
+
+							if (noOfHeads == 0)
+								noOfHeads = 1;
+
+							synchronized (triple) {
+								triple.noOfTails = noOfTails;
+								triple.noOfHeads = noOfHeads;
+								triple.noOfEdges = triple.edgeIDs.size();
+							}
+						}
+
+					}
+				}
+			}
+		});
 	}
 
 	/**
@@ -394,7 +519,7 @@ public class ClusteredClassSelector implements IClassSelector {
 						double totalEdges = (double) (setOfRandomTailIds.size() * setOfRandomHeadIds.size());
 
 						if (totalEdges < noOfEdges) {
-							LOGGER.warn("Not generate " + (noOfEdges - totalEdges) + " edges in " + edgeColo);
+							LOGGER.warn("Gap of " + (noOfEdges - totalEdges) + " edges in colour " + edgeColo);
 							noOfEdges = totalEdges;
 						}
 
@@ -432,7 +557,7 @@ public class ClusteredClassSelector implements IClassSelector {
 			}
 
 			while (iNoOfVertices > 0) {
-				
+
 				int vertId = RandomUtil.getRandomWithExclusion(random, setVertices.size(), exclusionSet);
 				if (!res.contains(vertId)) {
 					res.add(vertId);
