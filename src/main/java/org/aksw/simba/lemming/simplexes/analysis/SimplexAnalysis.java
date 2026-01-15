@@ -1,5 +1,10 @@
 package org.aksw.simba.lemming.simplexes.analysis;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.util.IntSetUtil;
 
@@ -45,38 +50,70 @@ public class SimplexAnalysis {
 	 */
 	public SimplexAnalysis(ColouredGraph[] origGrphs, int noOfVertices, int iNoOfVersions, FindTri computedTriangles) {
 		connTriAnalysis = new ConnS2(origGrphs, noOfVertices, iNoOfVersions, computedTriangles);
-		connTriAnalysis.computePropertyProbabilities();
-
 		isoTriAnalysis = new IsoS2(origGrphs, noOfVertices, iNoOfVersions, computedTriangles);
-		isoTriAnalysis.computePropertyProbabilities();
-
 		s1ConnToTri = new S1ConnToS2C(origGrphs, noOfVertices, iNoOfVersions, computedTriangles);
-		s1ConnToTri.computePropertyProbabilities();
-
 		s1ConnectingTri = new S1ConnectingS2C(origGrphs, noOfVertices, iNoOfVersions, computedTriangles);
-		s1ConnectingTri.computePropertyProbabilities();
-
-		selfLoopIsoTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions, isoTriAnalysis.getmGraphsVertIds());
-		selfLoopIsoTri.computePropertyProbabilities();
-
-		selfLoopConnTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions,
-				connTriAnalysis.getmGraphsVertIds());
-		selfLoopConnTri.computePropertyProbabilities();
-
-		selfLoops1ConnToTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions,
-				s1ConnToTri.getmGraphsVertIds());
-		selfLoops1ConnToTri.computePropertyProbabilities();
-
 		isoS1Analysis = new IsoS1C(origGrphs, noOfVertices, iNoOfVersions);
-		isoS1Analysis.computePropertyProbabilities();
-
 		isoS1SelfLoopAnalysis = new IsolatedSelfLoops(origGrphs, noOfVertices, iNoOfVersions);
-		isoS1SelfLoopAnalysis.computePropertyProbabilities();
-
-		selfLoopsInIsoS1 = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions, isoS1Analysis.getmGraphsVertIds());
-		selfLoopsInIsoS1.computePropertyProbabilities();
-
 		s0Analysis = new S0C(origGrphs, noOfVertices, iNoOfVersions);
+		
+		ExecutorService executor = Executors.newFixedThreadPool(6);
+		Future<?> connTriFuture = executor.submit(connTriAnalysis);
+		Future<?> isoTriFuture = executor.submit(isoTriAnalysis);
+		Future<?> s1ConnToTriFuture = executor.submit(s1ConnToTri);
+        executor.submit(s1ConnectingTri);
+        Future<?> isoS1Future = executor.submit(isoS1Analysis);
+        executor.submit(isoS1SelfLoopAnalysis);
+        
+        executor.submit(() -> {
+            try {
+            	isoTriFuture.get(); 
+            	selfLoopIsoTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions, isoTriAnalysis.getmGraphsVertIds());
+        		selfLoopIsoTri.computePropertyProbabilities();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        
+        executor.submit(() -> {
+            try {
+            	connTriFuture.get(); 
+            	selfLoopConnTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions,
+        				connTriAnalysis.getmGraphsVertIds());
+        		selfLoopConnTri.computePropertyProbabilities();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        
+        executor.submit(() -> {
+            try {
+            	s1ConnToTriFuture.get(); 
+            	selfLoops1ConnToTri = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions,
+        				s1ConnToTri.getmGraphsVertIds());
+        		selfLoops1ConnToTri.computePropertyProbabilities();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        
+        executor.submit(() -> {
+            try {
+            	isoS1Future.get(); 
+            	selfLoopsInIsoS1 = new FindSelfLoops(origGrphs, noOfVertices, iNoOfVersions, isoS1Analysis.getmGraphsVertIds());
+        		selfLoopsInIsoS1.computePropertyProbabilities();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        
+        executor.shutdown();
+        try {
+        	executor.awaitTermination(5, TimeUnit.DAYS);
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+        }
+        
 		ObjectObjectOpenHashMap<Integer, IntSet> edgeIdsUnionMap = addEdgeIdsForDifferentSimplexes(
 				connTriAnalysis.getmGraphsEdgesIds(), isoTriAnalysis.getmGraphsEdgesIds(),
 				s1ConnToTri.getmGraphsEdgesIds(), s1ConnectingTri.getmGraphsEdgesIds(),
@@ -182,5 +219,7 @@ public class SimplexAnalysis {
 	public S0C getS0Analysis() {
 		return s0Analysis;
 	}
+	
+	
 
 }

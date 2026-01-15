@@ -20,7 +20,8 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 /**
  * This class is based on NodeIteratorMetric that counts number of triangles.
  */
-public class FindTri {
+public class FindTri{
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FindTri.class);
 
 	/**

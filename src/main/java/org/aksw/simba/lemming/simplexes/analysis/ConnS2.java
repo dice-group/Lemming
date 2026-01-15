@@ -45,6 +45,6 @@ public class ConnS2 extends AbstractFindSimplexes{
 	public ObjectObjectOpenHashMap<TriColours, double[]> getmTriColoEdgesTriCountDistAvg() {
 		return mTriColoEdgesTriCountDistAvg;
 	}
-	
+
 	
 }

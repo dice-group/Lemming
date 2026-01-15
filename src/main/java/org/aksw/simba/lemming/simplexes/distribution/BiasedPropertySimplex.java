@@ -8,11 +8,13 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.simplex.SimplexGraphInitializer;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.simplexes.analysis.SimplexAnalysis;
 import org.aksw.simba.lemming.util.Constants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +29,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 @Component("BPSI")
 @Scope(value = "prototype")
 public class BiasedPropertySimplex implements ISimplexProperty {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(BiasedPropertySimplex.class);
 	private SimplexGraphInitializer initializer;
 
 	private IPropertyDist mPropDistConnTri;
@@ -50,7 +52,6 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 		SimplexAnalysis simplexAnalysis = initializer.getSimplexAnalysis();
 		int iNoOfVersions = initializer.getiNoOfVersions();
 		mRandom = new Random(initializer.getSeedGenerator().getNextSeed());
-		int noOfVertices = initializer.getDesiredNoOfVertices();
 		mPropDistConnTri = new PropertyDistI(simplexAnalysis.getConnTriAnalysis().getmVertColosPropDist(),
 				iNoOfVersions, mRandom);
 		mPropDistIsoTri = new PropertyDistI(simplexAnalysis.getIsoTriAnalysis().getmVertColosPropDist(), iNoOfVersions,
@@ -234,9 +235,6 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 
 		EdgeColorsSorted edgeColors = new EdgeColorsSorted(inputVertex1Colo, inputVertex2Colo);
 		BitSet propColor = mPropDistInput.proposePropColor(edgeColors);
-		if(propColor == null) {
-			return false;
-		}
 		
 		if (mColourMapperToUse.isTailColourOf(inputVertex1Colo, inputVertex2Colo)) {
 			isEdgeFromSecondToFirstVertex = false;
@@ -340,7 +338,7 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 		// time or a edge is created between vertices for the first time
 		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, tailID, headID, possEdgeColov1tailv2head);
 
-		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
+		if (possEdgeColov1tailv2head.size() != 0 && (mColourMapperToUse.canConnect(headColo, tailColo, propertyColo))) { // Add edge if edge color is found for the vertices
 
 			// check the head id and tail id does not have a vertex in common. Adding an
 			// edge could form a triangle
@@ -357,7 +355,6 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 			// add the edge to mimic graph
 			int edgeIdTemp;
 			edgeIdTemp = mimicGraph.addEdge(tailID, headID, randomEdgeColov1v2);
-
 			// update the map of edge colors and tail, head IDs
 			initializer.updateMappingOfEdgeColoHeadTailColo(randomEdgeColov1v2, headID, tailID);
 
@@ -375,6 +372,49 @@ public class BiasedPropertySimplex implements ISimplexProperty {
 			return true;
 
 		} else {
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph,BitSet headColo, BitSet tailColo, int headID, int tailID, Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse, boolean triangleCheck) {
+		// Get edge between head and tail, assuming vertex 1 is tail and vertex 2 is head
+		Set<BitSet> possEdgeColov1tailv2head = mColourMapperToUse.getPossibleLinkingEdgeColours(tailColo, headColo);
+		
+		// Check for duplicate edge color if it is essential
+		// Note: This check is not required when a triangle is created for the first time or a edge is created between vertices for the first time
+		possEdgeColov1tailv2head = removeDuplicateEdgeColors(mimicGraph, tailID, headID, possEdgeColov1tailv2head);	
+		
+		if (possEdgeColov1tailv2head.size() != 0) { // Add edge if edge color is found for the vertices
+			
+			// check the head id and tail id does not have a vertex in common. Adding an edge could form a triangle
+			if (triangleCheck) {
+				if (initializer.commonVertices(mimicGraph, headID, tailID))
+					return false;//do not add an edge and return false. if input vertices have a vertex in common.
+			}
+			
+			// randomly select edge colo
+			BitSet randomEdgeColov1v2 = possEdgeColov1tailv2head.toArray(new BitSet[possEdgeColov1tailv2head.size()])[mRandom.nextInt(possEdgeColov1tailv2head.size())];
+			
+			// add the edge to mimic graph
+			int edgeIdTemp;
+			edgeIdTemp = mimicGraph.addEdge(tailID, headID, randomEdgeColov1v2);
+			
+			// update the map of edge colors and tail, head IDs
+			initializer.updateMappingOfEdgeColoHeadTailColo(randomEdgeColov1v2, headID, tailID);
+			
+			// Update or Add to the mapping of edge color and edge Id
+			// Note: This generator does uses Real Edge IDs instead of fake IDs, as compared to previously developed generators. 
+			IntSet setOfEdgeIds = mMapColourToEdgeIDsToUpdate.get(randomEdgeColov1v2);//mMapColourToEdgeIDs.get(randomEdgeColov1v2);
+			if (setOfEdgeIds == null) {
+				setOfEdgeIds = new DefaultIntSet(Constants.DEFAULT_SIZE);
+				mMapColourToEdgeIDsToUpdate.put(randomEdgeColov1v2, setOfEdgeIds); //mMapColourToEdgeIDs.put(randomEdgeColov1v2, setOfEdgeIds);
+			}
+			setOfEdgeIds.add(edgeIdTemp);
+			
+			return true;
+		
+		}else {
 			return false;
 		}
 	}

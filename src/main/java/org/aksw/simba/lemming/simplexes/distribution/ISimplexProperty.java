@@ -2,6 +2,7 @@ package org.aksw.simba.lemming.simplexes.distribution;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
@@ -139,15 +140,21 @@ public interface ISimplexProperty {
 
 		Set<BitSet> existingEdgeColours = new HashSet<BitSet>();
 		for (int existingEdgeId : edgesIncidentExistingVertices) {
-			existingEdgeColours.add(mimicGraph.getEdgeColour(existingEdgeId));
+			BitSet edgeColour = mimicGraph.getEdgeColour(existingEdgeId);
+			if(edgeColour != null)
+				existingEdgeColours.add(edgeColour);
 		}
 
 		// Difference between possible colors and existing colors
 		SetView<BitSet> differenceSet = Sets.difference(possEdgeColov1tailv2head, existingEdgeColours);
 		possEdgeColov1tailv2head = new HashSet<BitSet>();
 		possEdgeColov1tailv2head.addAll(differenceSet);
-
+		possEdgeColov1tailv2head.removeIf(Objects::isNull);
 		return possEdgeColov1tailv2head;
 	}
+
+	boolean addEdgeWithTriangleCheck(ColouredGraph mimicGraph, BitSet headColo, BitSet tailColo, int headID, int tailID,
+			Map<BitSet, IntSet> mMapColourToEdgeIDsToUpdate, IColourMappingRules mColourMapperToUse,
+			boolean triangleCheck);
 
 }

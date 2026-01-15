@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
-import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.simplex.SimplexGraphInitializer;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColours;

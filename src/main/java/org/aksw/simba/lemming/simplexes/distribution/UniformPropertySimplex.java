@@ -8,7 +8,7 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
-import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.simplex.SimplexGraphInitializer;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.util.Constants;

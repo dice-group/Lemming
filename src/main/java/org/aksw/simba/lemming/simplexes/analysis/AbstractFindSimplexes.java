@@ -19,7 +19,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  * 		 While extending this class, the implementation of findSimplexes method needs to defined that 
  * 		 finds edges and verts for the simplexes in input graph and updates the map.
  */
-public abstract class AbstractFindSimplexes implements ISimplexesAnalysis{
+public abstract class AbstractFindSimplexes implements ISimplexesAnalysis, Runnable{
 	
 	/**
 	 * Variable storing estimated number of edges
@@ -388,5 +388,8 @@ public abstract class AbstractFindSimplexes implements ISimplexesAnalysis{
 		return mGraphsVertIds;
 	}
 	
-	
+	@Override
+	public void run() {
+		computePropertyProbabilities();
+	}
 }
