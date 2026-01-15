@@ -26,7 +26,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 /**
  * 
  */
-@Component("BPSI")
+@Component("BP")
 @Scope(value = "prototype")
 public class BiasedPropertySimplex implements ISimplexProperty {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BiasedPropertySimplex.class);

@@ -32,7 +32,7 @@ fi
 # run each 3 times
 mkdir -p initial
 count=3
-for i in $(seq $count); do
+for _ in $(seq $count); do
   java -jar lemming.jar "$mode" -ds "$dataset" -nv "$nv" -thrs "$thrs" -c UCS -v UIS -op "$opt_iterations"
   java -jar lemming.jar "$mode" -ds "$dataset" -nv "$nv" -thrs "$thrs" -c UCS -v BIS -op "$opt_iterations"
   java -jar lemming.jar "$mode" -ds "$dataset" -nv "$nv" -thrs "$thrs" -c BCS -v UIS -op "$opt_iterations"

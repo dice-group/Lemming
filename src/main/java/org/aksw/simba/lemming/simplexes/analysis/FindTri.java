@@ -417,11 +417,7 @@ public class FindTri{
 
 		differenceResult = IntSetUtil.difference(differenceResult, inputVertexIDs);
 
-		if (differenceResult.size() == 0)
-			return true;
-
-		return false;
-
+		return differenceResult.size() == 0;
 	}
 
 	private Grph getUndirectedGraph(Grph graph) {

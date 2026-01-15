@@ -20,7 +20,7 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 /**
  * 
  */
-@Component("UCSI")
+@Component("UC")
 @Scope(value = "prototype")
 public class UniformClassSimplex implements ISimplexClass {
 	/** Distribution of vertices connected to triangles */

@@ -277,8 +277,7 @@ public class GraphOptimization {
             LOGGER.info("Output results to file!");
 
             // Save error scores from optimization phase
-            String errorScoreFile = new String(savedFile);
-            errorScoreFile = errorScoreFile.replace(".ttl", ".scores");
+            String errorScoreFile = savedFile.replace(".ttl", ".scores");
             BufferedWriter fErrorScoreWriter = new BufferedWriter(new FileWriter(errorScoreFile, true));
 
             // number of input graphs

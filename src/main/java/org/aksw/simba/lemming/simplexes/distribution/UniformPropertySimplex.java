@@ -23,7 +23,7 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 /**
  * Sample all colours randomly
  */
-@Component("UPSI")
+@Component("UP")
 @Scope(value = "prototype")
 public class UniformPropertySimplex implements ISimplexProperty {
 

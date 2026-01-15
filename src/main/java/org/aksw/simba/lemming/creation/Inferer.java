@@ -244,9 +244,8 @@ public class Inferer {
 			}
 			
 			
-			if (object.isResource()) {
+			if (object.isResource() && !ontClasses.contains(object.asResource())) {
 				// ignore if object is a Class
-				if (!ontClasses.contains(object.asResource())) {
 					for (OntResource range : representation.listRange().toList()) {
 						if (object.asResource().equals(range)) {
 							continue;
@@ -254,7 +253,6 @@ public class Inferer {
 						Statement objNewStmt = ResourceFactory.createStatement(object.asResource(), RDF.type, range);
 						newStmts.add(objNewStmt);
 					}
-				}
 			}
 		}
 		return newStmts;

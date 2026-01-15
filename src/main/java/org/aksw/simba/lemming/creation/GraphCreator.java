@@ -148,7 +148,9 @@ public class GraphCreator {
 
 		String subjectStr = subject.toString();
 		String objectStr = objO.toString();
-		int subjectId, propertyId, objectId;
+		int subjectId;
+		int propertyId;
+		int objectId;
 
 		// Add the subject if it is not existing
 		if (resourceIdMapping.containsKey(subjectStr)) {
@@ -224,7 +226,8 @@ public class GraphCreator {
 		// list all classes, put them into classes hierarchyNode map
 		NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
 		RDFNode node;
-		Resource resource1, resource2;
+		Resource resource1;
+		Resource resource2;
 		while (nIterator.hasNext()) {
 			node = nIterator.next();
 			if (node.isURIResource()) {
@@ -235,7 +238,8 @@ public class GraphCreator {
 		// list all statements with property RDFS.subClassOf
 		StmtIterator sIterator = model.listStatements(null, RDFS.subClassOf, (RDFNode) null);
 		Statement statement;
-		HierarchyNode hNode1, hNode2;
+		HierarchyNode hNode1;
+		HierarchyNode hNode2;
 		// Iterate over the class hierarchy triples
 		while (sIterator.hasNext()) {
 			statement = sIterator.next();

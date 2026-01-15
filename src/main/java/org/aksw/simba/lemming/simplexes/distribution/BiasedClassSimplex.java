@@ -18,7 +18,7 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
 /**
  * 
  */
-@Component("BCSI")
+@Component("BC")
 @Scope(value = "prototype")
 public class BiasedClassSimplex implements ISimplexClass {
 

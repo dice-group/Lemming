@@ -9,7 +9,6 @@ import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.baseline.BaselineGenerator;
 import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.GraphGeneratorFactoryRegistry;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.IGraphGeneratorFactory;

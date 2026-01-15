@@ -89,7 +89,7 @@ public abstract class AbstractFindSimplexes implements ISimplexesAnalysis, Runna
 	 * This implementation will vary based on the dimension of the simplexes considered. Thus, the default implementation does not do anything.
 	 */
 	public void findSimplexes() {
-		
+		// FIXME		
 	}
 	
 	

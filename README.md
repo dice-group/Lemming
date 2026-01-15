@@ -4,6 +4,7 @@
 
 # Lemming
 This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator.
+LEMMING has been extended with SimplexKG (Link to be added).
 
 ## Prerequisites and Project Build
 ### Prerequisites
@@ -40,12 +41,12 @@ java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c 
   <tr><th align="left">-nv</th><td>True</td><td>NA</td><td>Desired number of vertices in the generated graph (number of vertices of the target graph)</td></tr>
   <tr><th align="left">-thrs</th><td>False</td><td>1</td><td>Number of threads</td></tr>
   <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
-  <tr><th align="left">-m</th><td>False</td><td>Binary</td><td>Generation type {Binary, Simplex, Bl}</td></tr>
+  <tr><th align="left">-m</th><td>False</td><td>Binary</td><td>Generation type {Binary, Simplex, Baseline}</td></tr>
   <tr><th align="left">-c</th><td>False</td><td>UCS</td><td>Type of class selector {UCS, BCS, CCS}</td></tr>
   <tr><th align="left">-v</th><td>False</td><td>UCS</td><td>Type of vertex selector {UIS, BIS}</td></tr>
-  <tr><th align="left">-sp</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex property sampling scheme {BPSI, UPSI}</td></tr>
-  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex class sampling scheme {BCSI, UCSI}</td></tr>
-  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used for baseline generators {BA, WS}</td></tr>
+  <tr><th align="left">-sp</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex property sampling scheme, either biased or uniform. {BP, UP}</td></tr>
+  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex class sampling scheme, either biased or uniform. {BC, UC}</td></tr>
+  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used for baseline generators. Barabási–Albert and Watts–Strogatz. {BA, WS}</td></tr>
   <tr><th align="left">-op</th><td>False</td><td>0</td><td>Number of optimization iterations</td></tr>
 </table>
 
