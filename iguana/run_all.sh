@@ -1,7 +1,6 @@
 #!/usr/bin/bash 
 
 mkdir -p results/
-mkdir -p queries/queryInstances/
 
 # For each graph in the folder, run all triplestores
 graphFolder=$1

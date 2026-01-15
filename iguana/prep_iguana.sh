@@ -13,4 +13,4 @@ sed -i -e 's,QUERYFILE,'"$queries"',g' example-suiteTMP.yml
 sed -i -e 's,GraphName,'"$gn"',g' example-suiteTMP.yml
 sed -i -e 's,TSTORE,'"$tstore"',g' example-suiteTMP.yml
 sed -i -e 's,ENDPOINT,'"$endpoint"',g' example-suiteTMP.yml
-./start-iguana.sh example-suiteTMP.yml
+./iguana -Xmx16g example-suiteTMP.yml
