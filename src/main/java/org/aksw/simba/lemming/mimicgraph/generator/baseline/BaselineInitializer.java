@@ -1,8 +1,9 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.baseline;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgEdgeColoDistMetric;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgVertColoDistMetric;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;

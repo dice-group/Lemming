@@ -1,10 +1,10 @@
 package org.aksw.simba.lemming.mimicgraph.generator.factory;
 
-import org.aksw.simba.lemming.mimicgraph.generator.BaselineGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.BaselineInitializer;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.baseline.BaselineGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.baseline.BaselineInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.baseline.IGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.tools.parameters.GraphGenerationArgs;
 import org.springframework.context.ApplicationContext;
 

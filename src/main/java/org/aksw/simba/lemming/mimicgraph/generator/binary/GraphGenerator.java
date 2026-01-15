@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.binary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
 import org.aksw.simba.lemming.util.Constants;
@@ -60,14 +61,19 @@ public class GraphGenerator implements IGraphGenerator{
 	}
 
 	/**
+	 * Generates the synthetic graph by sampling a node class for the head and tail entities,
+	 * and then sample an instance from the respective classes.
+	 * It attempts to create the number of edges needed to maintain the average degree.
+	 * However, it is not guaranteed that it will be successful in creating all the edges.
 	 * 
-	 * @param noOfThreads
-	 * @return
+	 * @param mimicGraph  Initialized mimic graph
+	 * @param noOfThreads Number of threads to be used in the process
 	 */
 	@Override
 	public void initializeMimicGraph(ColouredGraph mimicGraph, int noOfThreads) {
 		// get set of edges each thread will process
-		int noTasks = noOfThreads*10;
+		int noTasks = noOfThreads*3;
+		LOGGER.info("Getting coloured edges to connect...");
 		List<IntSet> lstAssignedEdges = getColouredEdgesForConnecting(noTasks);
 		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
 		LOGGER.info("Creating {} threads for processing graph generation!", noOfThreads);
@@ -141,7 +147,7 @@ public class GraphGenerator implements IGraphGenerator{
 						isFoundVerticesConnected = connectIfPossible(tailId, headId, edgeColour, mimicGraph);
 						if (isFoundVerticesConnected) {
 							break;
-						}
+						} 
 					}
 
 					// if it failed to connect, and we ran out of iterations, add to failed colours

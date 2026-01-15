@@ -1,7 +1,7 @@
 package org.aksw.simba.lemming.mimicgraph.vertexselection;
 
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemWrapper;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

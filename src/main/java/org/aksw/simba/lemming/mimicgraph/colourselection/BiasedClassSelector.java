@@ -11,7 +11,7 @@ import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredIEDistPerVCol
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredOEDistPerVColour;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.OfferedItemByRandomProb;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.util.BitSetComparator;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.springframework.context.annotation.Scope;

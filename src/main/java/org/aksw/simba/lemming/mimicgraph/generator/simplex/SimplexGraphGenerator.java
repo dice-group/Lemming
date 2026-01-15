@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.simplex;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,6 +15,7 @@ import org.aksw.simba.lemming.mimicgraph.colourselection.ClassProposal;
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
 import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector.VERTEX_TYPE;
 import org.aksw.simba.lemming.simplexes.EdgeColorsSorted;
@@ -117,6 +118,8 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb = initializer
 				.getmTriColosCountsAvgProb();
+		ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>> mEdgeColosv1v2Dist = simplexClass.getEdgeColoursV1V2Dist();
+		ObjectObjectOpenHashMap<EdgeColos, double[]> mEdgesColorsCountDistAvg = initializer.getSimplexAnalysis().getConnS1Analysis().getmColoEdgesCountDistAvg();
 
 		try (ProgressBar vertsPB = new ProgressBarBuilder().setTaskName("#vertices").setInitialMax(desiredVertices)
 				.setConsumer(new DelegatingProgressBarConsumer(LOGGER::info)).build()) {
@@ -156,7 +159,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 				numOfIterationAddingEdgesToGraph = 0;
 				while (actualEdgesInTriangles < estimatedEdgesTriangle) {
-					if ((actualVerticesInTriangles < estimatedVerticesTriangle)
+					if ((mimicGraph.getNumberOfVertices() < estimatedVerticesTriangle)
 							&& (numOfIterationAddingEdgesToGraph < maximumIteration)) {
 						// If we can add more triangles when we are allowed to include additional
 						// vertices otherwise edges need to be added to existing triangles
@@ -195,13 +198,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								    } 
 								}
 								
-								// temporary variable to track count of loops
-								int numOfLoopsTri = 0;
-								
-								
 								// try to propose a color for third vertex multiple times if it is not possible
 								// to create a triangle
-								while ((arrNewPossTriProbCount[3]+tolerance < 1) && (numOfLoopsTri < 500)) {
+								int iterations = 0;
+								while (arrNewPossTriProbCount[3]+tolerance < 1 && iterations < 100) {
 									
 									proposedVertex3Colo = simplexClass.proposeVertex3Colour(selectedVertex1Colo,
 											selectedVertex2Colo);
@@ -220,8 +220,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 										    } 
 										} 
 									}
-									numOfLoopsTri++;
-									
+									iterations++;
 								}
 
 								if (arrNewPossTriProbCount[3]+tolerance >= 1) {
@@ -314,7 +313,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							int numOfIterationRandomTri = 0;
 
 							// check if it is possible to add new triangle
-							while ((arrNewTriProbCount[3]+tolerance < 1) && (numOfIterationRandomTri < 500)) { 
+							while ((arrNewTriProbCount[3]+tolerance < 1) && (numOfIterationRandomTri < 100)) { 
 								randomTriangle = randomProposer.getPotentialItem();
 								mapA = mTriColosCountsAvgProb.get(randomTriangle.getA());
 								arrNewTriProbCount = new double[5];
@@ -366,6 +365,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				LOGGER.debug("Growing 2-simplexes phase completed");
 				LOGGER.debug("Added Edges: " + actualEdgesInTriangles);
 				LOGGER.debug("Added Vertices: " + actualVerticesInTriangles);
+				LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 				vertsPB.setExtraMessage("Adding additional Edges to created 2-simplexes");
 
@@ -453,8 +453,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				} // end else condition adding edges to existing triangles
 			} // end if condition - initial random triangle is not null
 			LOGGER.debug("Case 1 completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + mimicGraph.getEdges().size());
 			LOGGER.debug("Added Vertices: " + mimicGraph.getVertices().size());
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// ************************ Logic for isolated 1-simplexes
 			// ***********************************//
@@ -572,8 +574,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 			}
 			LOGGER.debug("Case 2a completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + actualEdgesSimplexes);
 			LOGGER.debug("Added Vertices: " + actualVerticesSimplexes);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// ****************************** Logic for isolated self loop (i.e. 1-simplexes
 			// with same source and target node)
@@ -650,8 +654,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			}
 
 			LOGGER.debug("Case 2b completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + actualEdgesSimplexes);
 			LOGGER.debug("Added Vertices: " + actualVerticesSimplexes);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// ************************ Logic for 0-simplexes
 			// ***********************************//
@@ -675,7 +681,9 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				vertsPB.stepBy(1);
 			}
 			LOGGER.debug("Case 3 completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Vertices: " + actualVerticesSimplexes);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// *********************** Logic for connecting triangles using 1-simplexes
 			// *********************//
@@ -1036,7 +1044,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 									simplexProperty.getmPropDistS1ConnectingTri());
 							if (edgeAdded) {
 								actualEdgesSimplexes++;
-								LOGGER.debug("Successfully connected triangles using 1-simplex (Case 4b)");
+//								LOGGER.debug("Successfully connected triangles using 1-simplex (Case 4b)");
 								numOfIterationAddingEdgesToGraph = 0;
 
 								break;// terminate while loop trying to add edge for the found head and tail color
@@ -1056,6 +1064,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			}
 
 			LOGGER.debug("Case 4 completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + actualEdgesSimplexes);
 
 			// ******************* Logic for creating isolated 2-simplexes
@@ -1167,8 +1176,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			}
 
 			LOGGER.debug("Case 5 completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + actualEdgesSimplexes);
 			LOGGER.debug("Added Vertices: " + actualVerticesSimplexes);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// ********************** Growing 1-simplexes (connected 1-simplexes)
 			// ****************************************//
@@ -1202,7 +1213,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 				BitSet potentialHeadColo = initialRandomEdge.getA();
 				BitSet potentialTailColo = initialRandomEdge.getB();
-
+				
 				Set<BitSet> setOfColosInGraph = new HashSet<BitSet>();
 				setOfColosInGraph.add(potentialHeadColo);
 				setOfColosInGraph.add(potentialTailColo);
@@ -1221,10 +1232,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				updateMapEdgeColorsVertices(vertexIDHead, vertexIDTail, initialRandomEdge);
 
 				// increment no of vertices in triangle
-				actualVerticesInConnS1 = actualVerticesInConnS1 + 2;
+				actualVerticesInConnS1 += 2;
 
 				// increment no. of edges in triangle
-				actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
+				actualEdgesInConnS1++;
 
 				vertsPB.stepBy(2);
 
@@ -1237,7 +1248,6 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				numOfIterationAddingEdgesToGraph = 0; // initialize iteration count
 				while (actualVerticesInConnS1 < estVerticesConnected1Simplexes) {
 
-					// if(actualVerticesInConnS1 < estVerticesConnected1Simplexes) {
 					if ((actualVerticesInConnS1 < estVerticesConnected1Simplexes)
 							&& (numOfIterationAddingEdgesToGraph < maximumIteration)) {
 						// If we can add more edges when we are allowed to include additional vertices
@@ -1247,7 +1257,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							// Propose a head color from existing colors in the mimic graph
 							BitSet proposedHeadColo = potentialHeadColoProposerConnS1
 									.getPotentialItem(setOfColosInGraph);
-
+								
 							IntSet verticesWithProposedColor = initializer.getmMapColourToVertexIDs1SimplexConnected()
 									.get(proposedHeadColo);
 							if (verticesWithProposedColor == null) {// Propose a new head color when none present
@@ -1278,51 +1288,52 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								// tail color
 								BitSet proposePropColor = simplexProperty
 										.proposeConnPropColour(new EdgeColorsSorted(proposedHeadColo, proposedTail));
+								
+								Integer proposedVertId = null;
 
-								if (actualVerticesInConnS1 < estVerticesConnected1Simplexes
+								if ((actualVerticesInConnS1 < estVerticesConnected1Simplexes
 										&& (analysis.getConnS1Analysis().getmColourMapperSimplexes()
-												.canConnect(proposedHeadColo, proposedTail, proposePropColor))) {
-
+												.canConnect(proposedHeadColo, proposedTail, proposePropColor)))) {
 									// create vertex for the proposed color
-									int proposedVertId = addVertexToMimicGraph(mimicGraph, proposedTail,
+									proposedVertId = addVertexToMimicGraph(mimicGraph, proposedTail,
 											initializer.getmMapColourToVertexIDs1SimplexConnected());
 
 									setOfColosInGraph.add(proposedTail);
 
 									// add edges among selected vertices and proposed color
 									// Note: Ideally properties should exist among them. since they were also
-									// forming an edge in input graphs
+									// forming an edge in input graphs									
 									newEdgesNotAddedToTriangle = !simplexProperty.addEdgeWithTriangleCheck(mimicGraph,
 											proposedHeadColo, proposedTail, randomVertexID, proposedVertId,
 											initializer.getmMapColourToEdgeIDs1Simplex(),
 											analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
 											proposePropColor);
-
-									// try max tries, and then remove colour from set
-									if (newEdgesNotAddedToTriangle) {
-										if (numOfIterationAddingEdgesToGraph < (int) (maximumIteration / 2)) {
-											numOfIterationAddingEdgesToGraph++;
-											continue;
-										} else {
-											setOfColosInGraph.remove(proposedHeadColo);
-											continue;
-										}
+								}
+								
+								// try max tries, and then remove colour from set
+								if (newEdgesNotAddedToTriangle) {
+									if (numOfIterationAddingEdgesToGraph < (int) (maximumIteration / 2)) {
+										numOfIterationAddingEdgesToGraph++;
+										continue;
 									} else {
-										// increment number of vertices and edges added in the mimic graph for triangles
-										actualVerticesInConnS1 = actualVerticesInConnS1 + 1;
-										actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
-										vertsPB.stepBy(1);
-
-										EdgeColos tempEdgeColors = new EdgeColos(proposedHeadColo, proposedTail);
-
-										// Add the created triangle Colors to set
-										setEdgeColorsMimicGraph.add(tempEdgeColors);
-
-										// update the map to track edges along with vertices added
-										updateMapEdgeColorsVertices(randomVertexID, proposedVertId, tempEdgeColors);
-
-										numOfIterationAddingEdgesToGraph = 0;
+										setOfColosInGraph.remove(proposedHeadColo);
+										continue;
 									}
+								} else {
+									// increment number of vertices and edges added in the mimic graph for triangles
+									actualVerticesInConnS1 = actualVerticesInConnS1 + 1;
+									actualEdgesInConnS1 = actualEdgesInConnS1 + 1;
+									vertsPB.stepBy(1);
+
+									EdgeColos tempEdgeColors = new EdgeColos(proposedHeadColo, proposedTail);
+
+									// Add the created triangle Colors to set
+									setEdgeColorsMimicGraph.add(tempEdgeColors);
+
+									// update the map to track edges along with vertices added
+									updateMapEdgeColorsVertices(randomVertexID, proposedVertId, tempEdgeColors);
+
+									numOfIterationAddingEdgesToGraph = 0;
 								}
 							}
 
@@ -1339,7 +1350,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 							int numOfIterationRandomTri = 1;
 
 							// check if it is possible to add new triangle
-							while (numOfIterationRandomTri < 500
+							while (numOfIterationRandomTri < 100
 									&& actualVerticesInConnS1 < estVerticesConnected1Simplexes) {
 								randomEdge = simplexClass.proposeConnEdge();
 								numOfIterationRandomTri++;
@@ -1367,8 +1378,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 								simplexProperty.addEdgeWithTriangleCheck(mimicGraph, potentialHeadColo,
 										potentialTailColo, vertexIDHead, vertexIDTail,
 										initializer.getmMapColourToEdgeIDs1Simplex(),
-										analysis.getConnS1Analysis().getmColourMapperSimplexes(), false,
-										(IPropertyDist) null);
+										analysis.getConnS1Analysis().getmColourMapperSimplexes(), false);
 
 								// increment no of vertices in triangle
 								actualVerticesInConnS1 = actualVerticesInConnS1 + 2;
@@ -1399,6 +1409,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				LOGGER.debug("Growing 1-simplexes phase completed");
 				LOGGER.debug("Added Edges: " + actualEdgesInConnS1);
 				LOGGER.debug("Added Vertices: " + actualVerticesInConnS1);
+				LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 				vertsPB.setExtraMessage("Case 6: Adding additional Edges to created 1-simplexes");
 
@@ -1478,8 +1489,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 			} // end if condition - initial random triangle is not null
 			LOGGER.debug("Case 6 completed!");
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 			LOGGER.debug("Added Edges: " + actualEdgesInConnS1);
 			LOGGER.debug("Added Vertices: " + actualVerticesInConnS1);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// **********************End Growing 1-simplexes (connected 1-simplexes)
 			// ************************************//
@@ -1493,7 +1506,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 			actualVerticesMimicGraph = mimicGraph.getVertices().size();
 
 			// compute remaining vertices and edges
-			// int remainingVertices = mIDesiredNoOfVertices - actualVerticesMimicGraph;
+			int remainingVertices = desiredVertices - actualVerticesMimicGraph;
 
 			// update the estimated counts for "2-simplexes connected" if remaining counts
 			// is greater than estimated counts
@@ -1501,44 +1514,25 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 			vertsPB.setExtraMessage("Case 7: Connect 2-simplexes to other vertices");
 			LOGGER.debug("Estimated Vertices: " + estimatedVerticesCommon);
+			LOGGER.debug("Remaining Vertices: " + remainingVertices);
 
 			// get proposer of Vertex color (to create vertices connected to triangles)
 			IOfferedItem<BitSet> potentialColoProposerForVertConnectedToTriangle = simplexClass
 					.getColourProposerVertConnTriangle();
 
-			// set to track class colors. New vertices need to be created for them later
-//		Set<BitSet> vertexClassColoSet = new HashSet<BitSet>();
-
 			// Add vertices if not enough vertices
-			while ((actualVerticesSimplexes < estimatedVerticesCommon)
-					&& (potentialColoProposerForVertConnectedToTriangle != null)) {
+			while (actualVerticesSimplexes < remainingVertices
+					&& potentialColoProposerForVertConnectedToTriangle != null && potentialColoProposerForVertConnectedToTriangle.getLength() > 0) {
 				BitSet potentialvertexColo = potentialColoProposerForVertConnectedToTriangle.getPotentialItem();
-
-				// check class node exists for the proposed color
-//			Set<BitSet> classColourSet = mimicGraph.getClassColour(potentialvertexColo);
-//			int numberOfClassVertices = 0;
-//			for (BitSet classColour : classColourSet) {
-//				Integer vertexIdClass = initializer.getmMapClassColourToVertexIDSimplexes().get(classColour);
-//				if ((vertexIdClass == null) && (!vertexClassColoSet.contains(classColour))) {
-//					numberOfClassVertices++;
-//					vertexClassColoSet.add(classColour);
-//				}
-//			}
-
-				// create a new vertex only if we can add class nodes
-//			if ((actualVerticesSimplexes + numberOfClassVertices) < estimatedVerticesCommon) {
 				addVertexToMimicGraph(mimicGraph, potentialvertexColo,
 						initializer.getmMapColourToVertexIDsConnectedTo2Simplex());
 				actualVerticesSimplexes++;
 				vertsPB.stepBy(1);
-				// updating estimated vertices for this case. Note: class nodes are created in
-				// next step
-//				estimatedVerticesCommon = estimatedVerticesCommon - numberOfClassVertices;
-//			}
 			}
 
 			LOGGER.debug("Vertex addition completed");
 			LOGGER.debug("Added Vertices: " + actualVerticesSimplexes);
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 
 			// get actual edges count and update temporary variable
 			actualEdgesSimplexes = 0;
@@ -1710,8 +1704,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				}
 
 			}
+			LOGGER.debug("Actual Vertices: " + mimicGraph.getVertices().size());
 			LOGGER.debug("Case 7 completed!");
 			LOGGER.debug("Added Edges: " + actualEdgesSimplexes);
+			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
 
 			// ************************* Logic to add self loops for simplexes created for
 			// different cases *********************************//
@@ -1723,7 +1719,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 					initializer.getmMapColourToVertexIDs1Simplex(),
 					analysis.getSelfLoopsInIsoS1().getmColourMapperSimplexes(),
 					initializer.getmMapColourToEdgeIDs1Simplex(), simplexProperty.getmPropDistselfLoopsInIsoS1());
-			vertsPB.stepTo((long) mimicGraph.getNumberOfVertices());
+			
 
 			// Isolated 2-simplexes
 			LOGGER.debug("Isolated 2-simplexes");
@@ -1758,19 +1754,14 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 
 		}
 		// Update mMapColourToVertexIDs used for adding edges when improving the graph
-		// in next phase
-		updateVertexColoMap(initializer.getmMapColourToVertexIDs1Simplex()); // isolated 1-simplexes
-		updateVertexColoMap(initializer.getmMapColourToVertexIDs2Simplex()); // connected 2-simplexes
-		updateVertexColoMap(initializer.getmMapColourToVertexIDsIsoSelfLoop()); // isolated self loop
-		updateVertexColoMap(initializer.getmMapColourToVertexIDs2SimplexIsolated()); // isolated 2-simplexes
-		updateVertexColoMap(initializer.getmMapColourToVertexIDs1SimplexConnected()); // connected 1-simplexes
-		updateVertexColoMap(initializer.getmMapColourToVertexIDsConnectedTo2Simplex()); // 1-simplexes connected to
-
-		// update maps to use during optimization
-//		Map<BitSet, IntSet> mergedMap = new HashMap<>(initializer.getmMapColourToEdgeIDs2Simplex());
-//		mergedMap.putAll(initializer.getmMapColourToEdgeIDs2SimplexIsolated());
-//		mergedMap.putAll(initializer.getmMapColourToEdgeIDs1Simplex());
-//		initializer.setMapColourToEdgeIDs(mergedMap);
+		// in next phase and rdf triples
+		updateVertexColoMap(initializer.getmMapColourToVertexIDs0Simplex());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDs1Simplex());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDs1SimplexConnected());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDs2Simplex());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDs2SimplexIsolated());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDsIsoSelfLoop());
+		updateVertexColoMap(initializer.getmMapColourToVertexIDsConnectedTo2Simplex());
 	}
 
 	/**
@@ -1841,7 +1832,7 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 				&& (distColoProposerSelfLoopInput != null)) {
 			BitSet proposedVertexColor = distColoProposerSelfLoopInput.getPotentialItem();
 			IntSet possVertices = mMapColourToVertexIDsInput.get(proposedVertexColor);
-			if (possVertices != null) {
+			if (possVertices != null && !possVertices.isEmpty()) {
 				Integer vertexID = possVertices.toArray(new Integer[possVertices.size()])[mRandom
 						.nextInt(possVertices.size())];
 				boolean edgeAdded = simplexProperty.addEdgeInAnyDirection(mimicGraph, proposedVertexColor,
@@ -1864,8 +1855,10 @@ public class SimplexGraphGenerator implements IGraphGenerator {
 		Set<BitSet> keySetIso1Simplexes = mMapColourToVertexIDsinput.keySet();
 		for (BitSet vertexColo : keySetIso1Simplexes) {
 			IntSet tempSet = initializer.getmMapColourToVertexIDs().get(vertexColo);
-			if (tempSet == null)
+			if (tempSet == null) {
 				tempSet = new DefaultIntSet(Constants.DEFAULT_SIZE);
+				initializer.getmMapColourToVertexIDs().put(vertexColo, tempSet);
+			}
 			tempSet.addAll(mMapColourToVertexIDsinput.get(vertexColo));
 		}
 	}

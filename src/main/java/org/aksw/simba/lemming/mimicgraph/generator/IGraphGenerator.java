@@ -6,6 +6,7 @@ import java.util.Map;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.IDatasetManager;
 import org.aksw.simba.lemming.mimicgraph.constraints.TripleBaseSingleID;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.util.Constants;
 

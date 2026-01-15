@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.simplex;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.SimplexAnalysisResult;
+import org.aksw.simba.lemming.mimicgraph.metricstorage.SimplexService;
 import org.aksw.simba.lemming.simplexes.EdgeColos;
 import org.aksw.simba.lemming.simplexes.TriColours;
 import org.aksw.simba.lemming.simplexes.analysis.FindTri;
@@ -17,6 +20,7 @@ import org.aksw.simba.lemming.util.Constants;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +40,11 @@ import it.unimi.dsi.fastutil.ints.IntSet;
 @Scope(value = "prototype")
 public class SimplexGraphInitializer extends GraphInitializer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimplexGraphInitializer.class);
-	
+
 	private int noOfIterations = 10000; // FIXME
+
+	@Autowired
+	private SimplexService service;
 
 	/** Analyzes the different types of simplexes */
 	private SimplexAnalysis simplexAnalysis;
@@ -177,7 +184,35 @@ public class SimplexGraphInitializer extends GraphInitializer {
 		// compute distinct edge colors for random pick
 		createSetForEdgeColours(simplexAnalysis.getConnS1Analysis().getmColoEdgesCountDistAvg());
 
+//		// Compute triangles for input graphs
+//		LOGGER.info("Finding triangles in input graphs");
+////		SimplexAnalysisResult result = service.obtainSimplexAnalysis(clonedInput, noOfVertices, noOfThreads);
+////		simplexAnalysis = result.getSimplex();
+////		FindTri computedTriangles = result.getFindTri();
+//		
+//		// Get all triangles found in input graphs. Note:- metric is invoked by above
+//		// function call, thus set of colors for different triangle vertices are already
+//		// computed.
+//		mTriangleColoursTriangleEdgeCounts = computedTriangles.getmTriColoEdgesTriCountDistAvg();
+//
+//		// Create HashSet of Triangle Colours. This set is used to randomly select an
+//		// object of TriangleColours while generating mimic graph.
+//		createSetForTriangleColours();
+//					
+//		// compute distinct edge colors for random pick
+//		createSetForEdgeColours(simplexAnalysis.getConnS1Analysis().getmColoEdgesCountDistAvg());
+
 		return mimicGraph;
+	}
+
+	private FindTri callMetricToGetTriangleInformation(ColouredGraph[] origGrphs) {
+		FindTri findTriObj = new FindTri();
+		for (ColouredGraph graph : origGrphs) {
+			if (graph != null) {
+				findTriObj.computeTriangles(graph);
+			}
+		}
+		return findTriObj;
 	}
 
 	/**
@@ -194,21 +229,21 @@ public class SimplexGraphInitializer extends GraphInitializer {
 		}
 	}
 
-	/**
-	 * Collects triangles found in the input graphs
-	 * 
-	 * @param origGrphs Input graphs
-	 * @return Triangle information of the input graphs
-	 */
-	private FindTri callMetricToGetTriangleInformation(ColouredGraph[] origGrphs) {
-		FindTri findTriObj = new FindTri();
-		for (ColouredGraph graph : origGrphs) {
-			if (graph != null) {
-				findTriObj.computeTriangles(graph);
-			}
-		}
-		return findTriObj;
-	}
+//	/**
+//	 * Collects triangles found in the input graphs
+//	 * 
+//	 * @param origGrphs Input graphs
+//	 * @return Triangle information of the input graphs
+//	 */
+//	private FindTri callMetricToGetTriangleInformation(ColouredGraph[] origGrphs) {
+//		FindTri findTriObj = new FindTri();
+//		for (ColouredGraph graph : origGrphs) {
+//			if (graph != null) {
+//				findTriObj.computeTriangles(graph);
+//			}
+//		}
+//		return findTriObj;
+//	}
 
 	/**
 	 * Computes the distinct triangles colors
@@ -273,7 +308,7 @@ public class SimplexGraphInitializer extends GraphInitializer {
 	public Set<EdgeColos> getSetAllEdgeColours() {
 		return setAllEdgeColours;
 	}
-	
+
 	public Set<BitSet> getAvailableEdgeColours() {
 		return getmMapEdgeColoursToConnectedVertices().keySet();
 	}
@@ -318,7 +353,7 @@ public class SimplexGraphInitializer extends GraphInitializer {
 			ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, double[]>>> mTriColosCountsAvgProb) {
 		this.mTriColosCountsAvgProb = mTriColosCountsAvgProb;
 	}
-	
+
 	/**
 	 * This method updates the global map for Edge color => tail ID => head IDs
 	 * 
@@ -345,4 +380,55 @@ public class SimplexGraphInitializer extends GraphInitializer {
 
 		mapEdgeColoursToConnectedVertices.put(possEdgeColo, mTailHead);
 	}
+
+//	@Override
+//	public void connectVerticesWithRDFTypeEdges(ColouredGraph mimicGraph) {
+//		generateRDFTypeEdges(mimicGraph, mMapColourToVertexIDs2Simplex); 
+//		generateRDFTypeEdges(mimicGraph, mMapColourToVertexIDs1Simplex);
+//		generateRDFTypeEdges(mimicGraph, mMapColourToVertexIDs0Simplex); 
+//		generateRDFTypeEdges(mimicGraph, mMapColourToVertexIDs1SimplexConnected);
+//		generateRDFTypeEdges(mimicGraph, mMapColourToVertexIDsConnectedTo2Simplex);
+//
+//	}
+//
+//	private void generateRDFTypeEdges(ColouredGraph mimicGraph, Map<BitSet, IntSet> mMapColourToVertexIDsForTypeEdges) {
+//		// temporary variable to track colors
+//		Set<BitSet> classColorsCreateVertices = new HashSet<BitSet>();
+//
+//		// create a set for vertex ids for which the type edges need to be added
+//		IntSet vertexIdsTypeEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
+//
+//		// iterate over every vertex colour and get all class colors
+//		for (BitSet vertexColor : mMapColourToVertexIDsForTypeEdges.keySet()) {
+//			Set<BitSet> classColours = mimicGraph.getClassColour(vertexColor);
+//			classColorsCreateVertices.addAll(classColours);
+//			vertexIdsTypeEdges.addAll(mMapColourToVertexIDsForTypeEdges.get(vertexColor));
+//		}
+//
+//		// Remove existing found class colors
+//		classColorsCreateVertices.removeAll(mMapClassColourToVertexIDSimplexes.keySet());
+//
+//		// create vertex for each class color and store the in the map
+//		for (BitSet classColor : classColorsCreateVertices) {
+//			int classVertex = mimicGraph.addVertex();
+//			mMapClassColourToVertexIDSimplexes.put(classColor, classVertex);
+//			reversedMapClassVertices.put(classVertex, classColor); // reverse map of class color and vertex ids
+//		}
+//
+//		// iterate over every vertex and connect it to vertices for class
+//		for (int vertexIdMimicGraph : vertexIdsTypeEdges) {
+//			// get colors for vertex id
+//			BitSet vertexColor = mimicGraph.getVertexColour(vertexIdMimicGraph);
+//
+//			// get class colors for vertex color
+//			Set<BitSet> classColoursForVertex = mimicGraph.getClassColour(vertexColor);
+//
+//			// Add Type edge for every class color
+//			for (BitSet classColor : classColoursForVertex) {
+//				int classVertexId = mMapClassColourToVertexIDSimplexes.get(classColor);
+//				mimicGraph.addEdge(vertexIdMimicGraph, classVertexId, rdfTypePropertyColour);
+//			}
+//		}
+//	}
+
 }

@@ -1,10 +1,10 @@
 package org.aksw.simba.lemming.mimicgraph.generator.factory;
 
 import org.aksw.simba.lemming.mimicgraph.colourselection.IClassSelector;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphGenerator;
-import org.aksw.simba.lemming.mimicgraph.generator.SimplexGraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
+import org.aksw.simba.lemming.mimicgraph.generator.simplex.SimplexGraphGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.simplex.SimplexGraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.vertexselection.IVertexSelector;
 import org.aksw.simba.lemming.simplexes.distribution.ISimplexClass;
 import org.aksw.simba.lemming.simplexes.distribution.ISimplexProperty;

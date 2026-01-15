@@ -6,16 +6,14 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredVDistPerDTEColour;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralGenertor;
-import org.aksw.simba.lemming.util.Constants;
-import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 
-import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
 public class GraphLexicalization {
@@ -51,7 +49,7 @@ public class GraphLexicalization {
 		Set<BitSet> setOfDTEColours = mapVColoDistPerDTEColo.keySet();
 
 //		LOGGER.info("Generate "+ setOfDTEColours.size()+ " datatype edge colours (datatype properties)");
-		int iCounter = 0;
+//		int iCounter = 0;
 		/*
 		 * accordingly to each data typed edge's colour, we get an average
 		 * number of vertices in a particular vertex's colour
@@ -61,7 +59,7 @@ public class GraphLexicalization {
 			
 //			LOGGER.info("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
 			//System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
-			iCounter++;
+//			iCounter++;
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
 				for (int i = 0; i < arrOfProcessedVColours.length; ++i) {
@@ -112,45 +110,7 @@ public class GraphLexicalization {
 	 * the number of connected heads is dependent on the number of colour the target has
 	 */
 	public void connectVerticesWithRDFTypeEdges(ColouredGraph mimicGraph, GraphInitializer graphInit){
+		graphInit.connectVerticesWithRDFTypeEdges(mimicGraph);
 		
-		Map<BitSet, IntSet> mMapColourToVertexIDs = graphInit.getmMapColourToVertexIDs();
-		Map<BitSet, Integer> mMapClassVertices = graphInit.getmMapClassVertices();
-		BitSet rdfTypeColour = mimicGraph.getEdgePalette().getColour(RDF.type.getURI());
-		Map<Integer, BitSet> mReversedMapClassVertices = graphInit.getmReversedMapClassVertices();
-		
-		// filter out all coloured vertices
-		Set<BitSet> setVertexColours = mMapColourToVertexIDs.keySet();
-		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
-		int count = 0;
-		for(BitSet vColo: setVertexColours){
-			IntSet setVertices = mMapColourToVertexIDs.get(vColo);
-			if(!vColo.isEmpty()){
-				//get vertices with non-empty colour
-				colourVertices.addAll(setVertices);
-			} else {
-				count++;
-			}
-		}
-		
-		// get difference between number of colours and number of uncoloured vertices
-		
-		// traverse through coloured vertices and add classes to them
-		for(int vId : colourVertices){
-			BitSet vColo = mimicGraph.getVertexColour(vId);
-			Set<BitSet> setClassColours = mimicGraph.getClassColour(vColo);
-			for(BitSet classColo: setClassColours){	
-				// check if the class vertex is tracked
-				int hId;
-				if(mMapClassVertices.containsKey(classColo)) {
-					hId = mMapClassVertices.get(classColo);
-				} else {
-					// otherwise just add the vertex
-					hId = mimicGraph.addVertex();
-					mMapClassVertices.put(classColo, hId);
-					mReversedMapClassVertices.put(hId, classColo);
-				}
-				mimicGraph.addEdge(vId, hId, rdfTypeColour);
-			}
-		}
 	}
 }

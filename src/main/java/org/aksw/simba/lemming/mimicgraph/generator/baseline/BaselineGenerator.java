@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.baseline;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
-import org.aksw.simba.lemming.mimicgraph.generator.baseline.IGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphGenerator;
 import org.aksw.simba.lemming.util.MapUtil;
 
 import com.carrotsearch.hppc.BitSet;
@@ -79,7 +79,8 @@ public class BaselineGenerator extends GraphGenerator {
 		double avgDegree = (double) graphInitializer.getDesiredNoOfEdges() / noNodes;
 
 		// generate the baseline graph
-		Grph baselineGraph = baseline.generateGraph(noNodes, avgDegree,
+		// *2 since the generator takes the undirected average degree
+		Grph baselineGraph = baseline.generateGraph(noNodes, avgDegree*2,
 				graphInitializer.getSeedGenerator().getNextSeed());
 
 		// convert it to a ColouredGraph object

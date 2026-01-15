@@ -7,7 +7,7 @@ public interface IOfferedItem <T>{
 	public T getPotentialItem(Set<T> setOfRestrictedItems );
 	public T getPotentialItem(Set<T> setOfRestrictedItems , boolean reusedProbability);
 	public T getPotentialItemRemove(Set<T> setOfRemoval);
-	
+	public int getLength();
 	//public double getPotentialProb();
 	//public int getPotentialIndex();
 }

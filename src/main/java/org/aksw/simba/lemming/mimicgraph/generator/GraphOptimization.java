@@ -394,4 +394,8 @@ public class GraphOptimization {
         if (iNumberOfOptimizations > 0)
             mMaxIteration = iNumberOfOptimizations;
     }
+
+	public double getmOptimizedTime() {
+		return mOptimizedTime;
+	}
 }

@@ -42,6 +42,10 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		buildSimulatedArray();
 	}
 	
+	@Override
+	public int getLength() {
+		return mArrBaseItems.length;
+	}
 	
 	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, Set<T> setOfFilteredItems, long seed){
 			
@@ -247,7 +251,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	@Override
 	public T getPotentialItem(Set<T> setOfFilteredItems) {
 		
-		if(setOfFilteredItems != null || !setOfFilteredItems.isEmpty()){
+		if(setOfFilteredItems != null && !setOfFilteredItems.isEmpty()){
 			
 			// find the intersection of 2 set
 			

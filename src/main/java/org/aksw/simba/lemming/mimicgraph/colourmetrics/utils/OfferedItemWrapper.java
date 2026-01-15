@@ -21,6 +21,11 @@ public class OfferedItemWrapper<T> implements IOfferedItem<T> {
 		this.arrBaseItems = arrBaseItems;
 		this.random = random;
 	}
+	
+	@Override
+	public int getLength() {
+		return arrBaseItems.length;
+	}
 
 	public T[] findIntersection(Set<T> setOfRestrictedItems) {
         return Arrays.stream(arrBaseItems)

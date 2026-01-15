@@ -1,10 +1,11 @@
-package org.aksw.simba.lemming.mimicgraph.generator;
+package org.aksw.simba.lemming.mimicgraph.generator.binary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Callable;
@@ -27,6 +28,7 @@ import org.aksw.simba.lemming.mimicgraph.constraints.IColourMappingRules;
 import org.aksw.simba.lemming.util.BitSetComparator;
 import org.aksw.simba.lemming.util.Constants;
 import org.aksw.simba.lemming.util.IntSetUtil;
+import org.apache.jena.vocabulary.RDF;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,8 +120,8 @@ public class GraphInitializer {
 		ColouredGraph mimicGraph = init(origGrphs, noOfVertices);
 
 		// assign colors to vertices
-//		paintVertices(mimicGraph, noOfVertices);
-		paintVerticesMultiThreaded(mimicGraph, noOfVertices, noOfThreads);
+		paintVertices(mimicGraph, noOfVertices);
+		//paintVerticesMultiThreaded(mimicGraph, noOfVertices, noOfThreads);
 
 
 		// assign colors to edges
@@ -146,7 +148,7 @@ public class GraphInitializer {
 		return mimicGraph;
 	}
 
-	protected void copyColourPalette(ColouredGraph[] origGraphs, ColouredGraph mimicGraph) {
+	public void copyColourPalette(ColouredGraph[] origGraphs, ColouredGraph mimicGraph) {
 		if (Constants.IS_EVALUATION_MODE) {
 			ColourPalette newVertexPalette = new InMemoryPalette();
 			ColourPalette newEdgePalette = new InMemoryPalette();
@@ -239,71 +241,22 @@ public class GraphInitializer {
 		 * colours
 		 */
 		Set<BitSet> setVertColours = getAvailableVertexColours();
-		for (BitSet tailColo : setVertColours) {
-			for (BitSet headColo : setVertColours) {
-				Set<BitSet> lstPossEdgeColours = colourMapper.getPossibleLinkingEdgeColours(tailColo, headColo);
-				if (lstPossEdgeColours != null && lstPossEdgeColours.size() > 0) {
-					for (BitSet edgeColo : lstPossEdgeColours) {
-						setOfRestrictedEdgeColours.add(edgeColo);
-					}
-				}
-			}
-		}
-	}
-	
-	private void paintVerticesMultiThreaded(ColouredGraph mimicGraph, int noVertices, int noOfThreads) {
-		LOGGER.info("Assign colors to vertices.");
-		IOfferedItem<BitSet> colorProposer = new OfferedItemByRandomProb<BitSet>(vertexColourDist,
-				seedGenerator.getNextSeed());
-		
-		ExecutorService service = Executors.newFixedThreadPool(noOfThreads);
-		int chunkSize = (int) Math.ceil((double) noVertices / noOfThreads);
-        for (int i = 0; i < noVertices; i += chunkSize) {
-            final int start = i;
-            final int end = Math.min(i + chunkSize, noVertices);
-            service.submit(() -> {
-                for (int vertexId = start; vertexId < end; vertexId++) {
-                	BitSet offeredColor = (BitSet) colorProposer.getPotentialItem();
-        			int vertId = addVertex(offeredColor,mimicGraph);
-        			IntSet setVertIDs = mapColourToVertexIDs.get(offeredColor);
-        			if (setVertIDs == null) {
-        				setVertIDs = new DefaultIntSet(Constants.DEFAULT_SIZE);
-        				mapColourToVertexIDs.put(offeredColor, setVertIDs);
-        			}
-        			setVertIDs.add(vertId);
-                }
-            });
-        }
-        service.shutdown();
-        try {
-			service.awaitTermination(12, TimeUnit.HOURS);
-		} catch (InterruptedException e) {
-			LOGGER.info("Problem waiting for termination.");
-			e.printStackTrace();
-		}
-        
-		/*
-		 * get restricted edge's colours can exist along with these created vertex's
-		 * colours
-		 */
-        Set<BitSet> setVertColours = getAvailableVertexColours();
         setVertColours.parallelStream().forEach(tailColo -> {
             setVertColours.forEach(headColo -> {
                 Set<BitSet> lstPossEdgeColours = colourMapper.getPossibleLinkingEdgeColours(tailColo, headColo);
                 if (lstPossEdgeColours != null && !lstPossEdgeColours.isEmpty()) {
-                    setOfRestrictedEdgeColours.addAll(lstPossEdgeColours);
+                	synchronized (setOfRestrictedEdgeColours) {
+                        setOfRestrictedEdgeColours.addAll(lstPossEdgeColours);
+                    }
                 }
             });
         });
-        
-	}
-	
-	private synchronized int addVertex(BitSet offeredColor, ColouredGraph mimicGraph) {
-		return mimicGraph.addVertex(offeredColor);
+        LOGGER.debug("Vertices painting finished.");
+		
 	}
 
 	private void paintEdges(ColouredGraph mimicGraph, int mNumberOfThreads) {
-
+		LOGGER.debug("Painting edges now.");
 		List<IntSet> lstAssignedEdges = getLstTransparenEdgesForPainting(mimicGraph, mNumberOfThreads);
 
 		/*
@@ -316,7 +269,6 @@ public class GraphInitializer {
 
 		List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
 		final Set<BitSet> setOfRestrictedEdgeColours = new HashSet<BitSet>(this.setOfRestrictedEdgeColours);
-		LOGGER.info("There are "+setOfRestrictedEdgeColours.size()+ " restricted edge colours.");
 		setOfRestrictedEdgeColours.remove(rdfTypePropertyColour);
 		LOGGER.info("There are "+setOfRestrictedEdgeColours.size()+ " restricted edge colours.");
 
@@ -377,33 +329,33 @@ public class GraphInitializer {
 			service.shutdown();
 			service.awaitTermination(48, TimeUnit.HOURS);
 			LOGGER.info("All threads are finished --> Copy result back to map");
-
-			/*
-			 * copy back to global variable
-			 */
-			Set<BitSet> setEdgeColours = new TreeSet<>(new BitSetComparator());
-			setEdgeColours.addAll(mapEdgeColourCounter.keySet());
-			int fakeEdgeID = 0;
-			for (BitSet eColo : setEdgeColours) {
-				int j = 0;
-				AtomicInteger counter = mapEdgeColourCounter.get(eColo);
-				while (j < counter.get()) {
-					mapEdgeIdsToColour.put(fakeEdgeID, eColo);
-					IntSet setEdges = mapColourToEdgeIDs.get(eColo);
-					if (setEdges == null) {
-						setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
-						mapColourToEdgeIDs.put(eColo, setEdges);
-					}
-					setEdges.add(fakeEdgeID);
-					j++;
-					fakeEdgeID++;
-				}
-			}
-
 		} catch (InterruptedException e) {
 			LOGGER.error("Could not shutdown the service executor!");
 			e.printStackTrace();
 		}
+		/*
+		 * copy back to global variable
+		 */
+		LOGGER.info("Copying to map");
+		Set<BitSet> setEdgeColours = new TreeSet<>(new BitSetComparator());
+		setEdgeColours.addAll(mapEdgeColourCounter.keySet());
+		int fakeEdgeID = 0;
+		for (BitSet eColo : setEdgeColours) {
+			int j = 0;
+			AtomicInteger counter = mapEdgeColourCounter.get(eColo);
+			while (j < counter.get()) {
+				mapEdgeIdsToColour.put(fakeEdgeID, eColo);
+				IntSet setEdges = mapColourToEdgeIDs.get(eColo);
+				if (setEdges == null) {
+					setEdges = new DefaultIntSet(Constants.DEFAULT_SIZE);
+					mapColourToEdgeIDs.put(eColo, setEdges);
+				}
+				setEdges.add(fakeEdgeID);
+				j++;
+				fakeEdgeID++;
+			}
+		}
+
 	}
 
 	private List<IntSet> getLstTransparenEdgesForPainting(ColouredGraph mMimicGraph, int mNumberOfThreads) {
@@ -594,5 +546,48 @@ public class GraphInitializer {
 		if (commonVerticesSet.size() > 0)
 			return true;
 		return false;
+	}
+	
+	/**
+	 * connection typed resource vertices to its class with edge of rdf:type
+	 * if a vertex has a colour, then it connect to some vertices with rdf:type edges.
+	 * the number of connected heads is dependent on the number of colour the target has
+	 */
+	public void connectVerticesWithRDFTypeEdges(ColouredGraph mimicGraph){
+		BitSet rdfTypeColour = mimicGraph.getEdgePalette().getColour(RDF.type.getURI());
+		
+		// filter out all coloured vertices
+		Set<BitSet> setVertexColours = mapColourToVertexIDs.keySet();
+		IntSet colourVertices = new DefaultIntSet(Constants.DEFAULT_SIZE);
+		for(BitSet vColo: setVertexColours){
+			IntSet setVertices = mapColourToVertexIDs.get(vColo);
+			
+			if(!vColo.isEmpty() && setVertices != null){
+				//get vertices with non-empty colour
+				setVertices.removeIf(Objects::isNull);
+				colourVertices.addAll(setVertices);
+			}
+		}
+		
+		// get difference between number of colours and number of uncoloured vertices
+		
+		// traverse through coloured vertices and add classes to them
+		for(int vId : colourVertices){
+			BitSet vColo = mimicGraph.getVertexColour(vId);
+			Set<BitSet> setClassColours = mimicGraph.getClassColour(vColo);
+			for(BitSet classColo: setClassColours){	
+				// check if the class vertex is tracked
+				int hId;
+				if(mapClassVertices.containsKey(classColo)) {
+					hId = mapClassVertices.get(classColo);
+				} else {
+					// otherwise just add the vertex
+					hId = mimicGraph.addVertex();
+					mapClassVertices.put(classColo, hId);
+					reversedMapClassVertices.put(hId, classColo);
+				}
+				mimicGraph.addEdge(vId, hId, rdfTypeColour);
+			}
+		}
 	}
 }

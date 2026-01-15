@@ -34,6 +34,11 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 		buildSimulatedArray();
 	}
 	
+	@Override
+	public int getLength() {
+		return mArrBaseItems.length;
+	}
+	
 	private void copyData(ObjectDistribution<T> objDist){
 		for(int i = 0 ; i < mLengthOfArr; i++){
 			mArrBaseItems[i] = objDist.sampleSpace[i];
