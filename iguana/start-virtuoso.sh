@@ -1,6 +1,6 @@
 #!/usr/bin/bash 
 
-f=$1
+f="$1"
 file_name=$(basename "$f")
 dir_path=$(dirname "$f")
 
@@ -21,6 +21,6 @@ cd /local/iguana
 sleep 1m
 ./wait_until_up.sh "http://localhost:8890/sparql"
 
-./prep_iguana.sh $f "Virtuoso" "http://localhost:8890/sparql"
+./prep_iguana.sh "$f" "Virtuoso" "http://localhost:8890/sparql"
 
 pkill -f virtuoso

@@ -9,6 +9,6 @@ sleep 1m
 ./wait_until_up.sh "http://localhost:9999/blazegraph/sparql"
 
 # Start iguana
-./prep_iguana.sh $1 "Blazegraph" "http://localhost:9999/blazegraph/sparql"
+./prep_iguana.sh "$1" "Blazegraph" "http://localhost:9999/blazegraph/sparql"
 
 pkill -f blazegraph

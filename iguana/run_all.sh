@@ -8,7 +8,6 @@ for file in "$graphFolder"/*
 do
   if [ -f "$file" ]; then
     f=$(realpath "$file")
-    fileName=$(basename "$file")
     echo "executing $file"
     
     # Make sure all instances are finished
@@ -19,14 +18,12 @@ do
     pkill -f blazegraph
     #sleep 1m
     
-    gn="${f%%.*}"
-    
     # Run all with the same query instances
-    ./start-blazegraph.sh $f
-    ./start-virtuoso.sh $f
-    ./start-graphdb.sh $f
-    ./start-tentris.sh $f
-    ./start-fuseki.sh $f
+    ./start-blazegraph.sh "$f"
+    ./start-virtuoso.sh "$f"
+    ./start-graphdb.sh "$f"
+    ./start-tentris.sh "$f"
+    ./start-fuseki.sh "$f"
   fi
   echo "done"
 done
