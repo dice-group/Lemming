@@ -1,10 +1,12 @@
-package org.aksw.simba.lemming.creation;
+package org.aksw.simba.lemming.creation.datasets;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.GraphCreator;
+import org.aksw.simba.lemming.creation.Inferer;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

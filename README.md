@@ -7,7 +7,9 @@ This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015
 
 ## Prerequisites and Project Build
 ### Prerequisites
+
 - **Java Development Kit (JDK)**: Version 17 or later.
+
 - **Apache Maven**: Version 3.6.
 
 ### Building the project
@@ -106,30 +108,21 @@ Below is a table with the currently accepted datasets and the number of vertices
 -->
 
 ### Reproducing experiments
-You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
+You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh swdf``. 
 
 The metrics and constant expressions values can be found in ``LemmingEx.result``. 
 
-The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. You can find the queries used for each dataset under ``Experiments_data/IGUANA experiments/queries``. The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after type inference and materialization).
+The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. 
+The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after materialization).
 
 IGUANA produces a N-Triple file with the metrics of interest: Query Mixes Per Hour (QMPH), No. Queries Per Hour (NoQPH) and Queries Per Second (QPS). 
-
-<!-- commented
-These can be collected through the results file:
-
-```
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> "2854.432211867693"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/queryMixes> "135.92534342227108"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669/sparql0>  <http://iguana-benchmark.eu/properties/queriesPerSecond> "70.97457627118645"^^<http://www.w3.org/2001/XMLSchema#double> . 
-```
--->
 
 
 We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
 To use them, you need to specify the folder where the graphs are located: 
 
 ```
-./exec_all.sh /home/lemming/generated_graphs/
+./run_all.sh /home/lemming/generated_graphs/
 ```
 
 ### Used data and software
@@ -139,6 +132,9 @@ Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/s
 For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by the Stanford University. It has been transformed into a simple RDF file.
 
 The [Lemming logo](https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png) has been created by [TortugaAttack](https://github.com/TortugaAttack).
+
+### Files
+You can find the original LEMMING files in [here](https://files.dice-research.org/projects/Lemming/ICSC_2021/) and the SimplexKG files [here](https://files.dice-research.org/projects/Lemming/WWW_2026/).
 
 # How to cite
 ```

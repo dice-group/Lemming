@@ -1,4 +1,4 @@
-package org.aksw.simba.lemming.creation;
+package org.aksw.simba.lemming.creation.datasets;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +17,7 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphWrapper;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.ColourPaletteWrapper;
+import org.aksw.simba.lemming.creation.GraphReverter;
 import org.aksw.simba.lemming.util.PersHelper;
 import org.aksw.simba.lemming.util.SerializationParser;
 import org.apache.jena.rdf.model.Model;

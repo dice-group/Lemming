@@ -34,6 +34,9 @@ public class EdgeModifier {
 
     private AbstractSingleEdgeManipulatingDecorator mRemoveEdgeDecorator;
     private AbstractSingleEdgeManipulatingDecorator mAddEdgeDecorator;
+    
+    public EdgeModifier() {
+    }
 
     public EdgeModifier(ColouredGraph clonedGraph, List<SingleValueMetric> lstMetrics) {
         graph = clonedGraph;
@@ -52,7 +55,7 @@ public class EdgeModifier {
         computeMetricValues(graph, lstMetrics);
     }
 
-    private void computeMetricValues(IColouredGraph graph, List<SingleValueMetric> lstMetrics) {
+    public void computeMetricValues(IColouredGraph graph, List<SingleValueMetric> lstMetrics) {
 
         LOGGER.info("Compute " + lstMetrics.size() + " metrics on the current mimic graph!");
 
