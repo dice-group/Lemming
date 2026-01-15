@@ -12,7 +12,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
-import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
+import org.aksw.simba.lemming.creation.datasets.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;

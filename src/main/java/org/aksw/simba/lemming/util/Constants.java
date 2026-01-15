@@ -19,7 +19,7 @@ public class Constants {
 	
 	public static final boolean IS_EVALUATION_MODE = true;
 	public static final boolean SINGLE_THREAD = false;
-	public static final int MAX_EXPLORING_TIME = 5000;
+	public static final int MAX_EXPLORING_TIME = 10_000;
 	
 	public static final String SIMULATED_URI= "http://dice.research.lemming.org/resource#";
 	public static final String SIMULATED_CLASS_URI = "http://dice.research.lemming.org/class#";

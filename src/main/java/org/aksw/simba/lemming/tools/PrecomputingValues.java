@@ -14,7 +14,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitness
 import org.aksw.simba.lemming.algo.refinement.operator.RefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
 import org.aksw.simba.lemming.configuration.Validator;
-import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.creation.datasets.IDatasetManager;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
@@ -111,6 +111,7 @@ public class PrecomputingValues {
 		valueCarrier.storeData();
 		LOGGER.info("Precomputation is DONE");
 	}
+	
 
 	/**
 	 * create reference graph to compute constant expressions

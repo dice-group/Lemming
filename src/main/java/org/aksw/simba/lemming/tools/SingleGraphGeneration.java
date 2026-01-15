@@ -3,13 +3,13 @@ package org.aksw.simba.lemming.tools;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.AbstractDatasetManager;
-import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.creation.datasets.AbstractDatasetManager;
+import org.aksw.simba.lemming.creation.datasets.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.UpdatableMetricResult;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.GraphGeneratorFactoryRegistry;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.IGraphGeneratorFactory;
 import org.aksw.simba.lemming.tools.parameters.GraphGenerationArgs;

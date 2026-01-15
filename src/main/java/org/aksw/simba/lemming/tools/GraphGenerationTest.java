@@ -4,12 +4,13 @@ import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.configuration.Validator;
-import org.aksw.simba.lemming.creation.IDatasetManager;
+import org.aksw.simba.lemming.creation.datasets.IDatasetManager;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
-import org.aksw.simba.lemming.mimicgraph.generator.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphLexicalization;
 import org.aksw.simba.lemming.mimicgraph.generator.GraphOptimization;
 import org.aksw.simba.lemming.mimicgraph.generator.IGraphGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.baseline.BaselineGenerator;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.GraphGeneratorFactoryRegistry;
 import org.aksw.simba.lemming.mimicgraph.generator.factory.IGraphGeneratorFactory;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
@@ -62,12 +63,11 @@ public class GraphGenerationTest {
 		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class,
 				mDatasetManager.getDatasetPath());
 		// only recomputing the store if the dataset is missing entirely to prevent accidental overwrites
-		if (!valuesCarrier.havingData()) {
+		if (valuesCarrier.isEmpty()) {
 			LOGGER.info("Current store does not have data for this dataset, computing store.");
 			PrecomputingValues.main("-ds", pArgs.dataset);
 			valuesCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
 		}
-		valuesCarrier.isComputableMetrics();
 
 		// Load graphs from file
 		LOGGER.info("Loading the input graphs...");
@@ -88,6 +88,7 @@ public class GraphGenerationTest {
 		GraphLexicalization lexicalizer = new GraphLexicalization(graphs);
 		String initialFile = graphGenerator.finishSaveMimicGraph(mimicGraph, valuesCarrier, lexicalizer, initializer,
 				mDatasetManager);
+		
 
 		// Optimization with constant expressions
 		LOGGER.info("Optimizing the mimic graph ...");
@@ -100,6 +101,11 @@ public class GraphGenerationTest {
 		String savedFile = mDatasetManager.getSavedFileName("results");
 		grphOptimizer.printResult(pArgs.getArguments(), startTime, savedFile, initialFile, pArgs.seed);
 
+		
+		if(pArgs.noOptimizationSteps==0) {
+			LOGGER.info("Skipping lexicalizing a second time...");
+			System.exit(0);
+		}
 		// Lexicalization with word2vec
 		LOGGER.info("Lexicalize the mimic graph ...");
 		lexicalizer.connectVerticesWithRDFTypeEdges(refinedGraph, initializer);

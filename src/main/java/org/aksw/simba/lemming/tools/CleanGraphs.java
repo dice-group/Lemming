@@ -13,6 +13,9 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 
+/**
+ * Removes statements with literal objects from a model.
+ */
 public class CleanGraphs {
 
 	public static void main(String[] args) {

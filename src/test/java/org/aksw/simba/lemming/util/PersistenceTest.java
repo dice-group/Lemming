@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.IOException;
 
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.IDatasetManager;
-import org.aksw.simba.lemming.creation.PersonGraphDataset;
+import org.aksw.simba.lemming.creation.datasets.IDatasetManager;
+import org.aksw.simba.lemming.creation.datasets.PersonGraphDataset;
 import org.junit.Assert;
 import org.junit.Test;
 

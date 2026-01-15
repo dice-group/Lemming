@@ -19,7 +19,6 @@ public class ParseIguanaResults {
 
 		String folder = args[0];
 
-
 		// UCS-UIS1 UCS-UIS2 UCS-UIS3 UCS-BIS1 UCS-BIS2 UCS-BIS3
 		// CCS-UIS1 CCS-UIS2 CCS-UIS3 CCS-BIS1 CCS-BIS2 CCS-BIS3
 		// BCS-UIS1 BCS-UIS2 BCS-UIS3 BCS-BIS1 BCS-BIS2 BCS-BIS3
@@ -27,8 +26,8 @@ public class ParseIguanaResults {
 		// UPBC1 UPBC2 UPBC3 UPUC1 UPUC2 UPUC3
 
 		// initial or optimized
-		String subfolder = "initial";
-//		String subfolder = "results";
+//		String subfolder = "initial";
+		String subfolder = "results";
 		
 		// dataset
 		String dataset = "LinkedGeo";
@@ -37,7 +36,7 @@ public class ParseIguanaResults {
 		int queryCount = 0;
 		int[] order = null;
 		if(dataset.contentEquals("LinkedGeo")) {
-			queryCount = 83;
+			queryCount = 69;
 			int[] order2 = { 1,	7,	13,
 			2,	8,	14,
 			5,	11,	17,
@@ -99,7 +98,7 @@ public class ParseIguanaResults {
 		List<Path> subfolders = listSubfolders(folder);
 		
 		// read each experiment
-		for (Path entry : subfolders) {
+		fileLoop: for (Path entry : subfolders) {
 			// read task configuration
 			Map<String, String> config = readCsvHeaderAsKeys(entry.toString() + "/" + taskConfig);
 			String triplestore = config.get("connection");
@@ -158,6 +157,7 @@ public class ParseIguanaResults {
 			if (qmphTable[rowIndex][column] != 0 && qmphTable[rowIndex][column] != qmph) {
 				System.out.println("Current value: " + qmphTable[rowIndex][column]);
 				System.out.println("New value: " + qmph);
+				continue fileLoop;
 			}
 			qmphTable[rowIndex][column] = qmph;
 			noqphTable[rowIndex][column] = noQPH;
@@ -302,7 +302,6 @@ public class ParseIguanaResults {
         return rmse;
     }
 
-
 	public static Map<Integer, Double> readFileAndCreateMap(String filePath) {
 		Map<Integer, Double> queryIDToQPS = new HashMap<>();
 
@@ -398,12 +397,12 @@ public class ParseIguanaResults {
 		return subfolders;
 	}
 
-	private static void printArrayAsTable(double[][][] array) {
-		for (int i = 0; i < array.length; i++) {
-			System.out.println("Query " + i);
-			printArrayAsTable(array[i]);
-		}
-	}
+//	private static void printArrayAsTable(double[][][] array) {
+//		for (int i = 0; i < array.length; i++) {
+//			System.out.println("Query " + i);
+//			printArrayAsTable(array[i]);
+//		}
+//	}
 
 	private static void printArrayAsTable(double[][] array) {
 		for (int i = 0; i < array.length; i++) {
