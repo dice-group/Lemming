@@ -28,7 +28,7 @@ public class PersistenceTest {
 		 * 3) check if the graph object retrieved is the same as the one we stored
 		 */
 		for (ColouredGraph curGraph : graphs) {
-			IDatasetManager mDatasetManager = new PersonGraphDataset();
+			IDatasetManager mDatasetManager = new PersonGraphDataset("");
 			
 			File tempFile = null;
 			try {

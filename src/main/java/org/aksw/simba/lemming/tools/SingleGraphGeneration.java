@@ -54,16 +54,9 @@ public class SingleGraphGeneration {
 		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
 		// Load RDF graphs into ColouredGraph model
-		IDatasetManager mDatasetManager = new AbstractDatasetManager(pArgs.dataset) {
-			@Override
-			public String getDatasetPath() {
-				return pArgs.datasetPath;
-			}
-		};
-		
-		// is it a file or a folder?
-		
-		ColouredGraph[] graph = { mDatasetManager.readFileOrFolder(pArgs.datasetPath) };
+		IDatasetManager mDatasetManager = new AbstractDatasetManager(pArgs.dataset, pArgs.datasetPath){};
+		// read from a file or a folder
+		ColouredGraph[] graph = { mDatasetManager.readSingleGraphFromFileOrFolder() };
 		
 		// Generation of a draft graph or loads it from file
 		long startTime = System.currentTimeMillis();

@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,18 +26,16 @@ import org.springframework.stereotype.Component;
  * 
  */
 @Component("geology") 
+@Scope(value = "prototype")
 public class GeologyDataset extends AbstractDatasetManager {
 	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(GeologyDataset.class);
-	/** Default path and link to configuration */
-	@Value("${datasets.geology.filepath}")
-	String dataFolderPath="GeologyGraphs/";
 
 	/**
 	 * Empty constructor.
 	 */
-	public GeologyDataset() {
-		super("Geology");
+	public GeologyDataset(String folderPath) {
+		super("Geology",folderPath);
 	}
 	
 	@Override
@@ -55,9 +53,9 @@ public class GeologyDataset extends AbstractDatasetManager {
 			//build ontology model for Dataset
 			OntModel ontModel = ModelFactory.createOntologyModel();
 			ontModel.getDocumentManager().setProcessImports(false);
-			ontModel.read("22-rdf-syntax-ns", "TTL");
-			ontModel.read("rdf-schema", "TTL");
-			File ontFolder = new File("geology");
+			ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+			ontModel.read("datasets/ontologies/rdf-schema", "TTL");
+			File ontFolder = new File("datasets/ontologies/geology");
 			for(File file : ontFolder.listFiles()){
 				ontModel.read(file.getAbsolutePath(), "TTL");
 			}
@@ -87,8 +85,4 @@ public class GeologyDataset extends AbstractDatasetManager {
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
 
-
-	public static void main(String[] args) {
-		new GeologyDataset().readGraphsFromFiles();
-	}
 }

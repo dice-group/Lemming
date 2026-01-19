@@ -49,22 +49,19 @@ public class GraphGenerationTest {
 		// Parse arguments
 		GraphGenerationArgs pArgs = new GraphGenerationArgs();
 		JCommander.newBuilder().addObject(pArgs).build().parse(args);
-
-		// Validate dataset
-		Validator val = (Validator) application.getBean(Validator.class);
-		val.isDatasetAllowed(pArgs.dataset);
-		pArgs.noThreads = val.validateThreads(pArgs.noThreads); // TODO
+	    Validator validator = application.getBean(Validator.class);
+		String datasetPath = validator.resolveDatasetPath(pArgs.dataset, pArgs.datasetPath);
 		SeedGenerator seedGenerator = new SequentialSeedGenerator(pArgs.seed, 0, 5000);
 
 		// Load and verify store
 		LOGGER.info("Verifying store...");
-		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
+		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset, datasetPath);
 		ConstantValueStorage valuesCarrier = application.getBean(ConstantValueStorage.class,
 				mDatasetManager.getDatasetPath());
 		// only recomputing the store if the dataset is missing entirely to prevent accidental overwrites
 		if (valuesCarrier.isEmpty()) {
 			LOGGER.info("Current store does not have data for this dataset, computing store.");
-			PrecomputingValues.main("-ds", pArgs.dataset);
+			PrecomputingValues.main("-ds", pArgs.dataset, "-dp", datasetPath);
 			valuesCarrier = application.getBean(ConstantValueStorage.class, mDatasetManager.getDatasetPath());
 		}
 
@@ -103,7 +100,7 @@ public class GraphGenerationTest {
 		
 		if(pArgs.noOptimizationSteps==0) {
 			LOGGER.info("Skipping lexicalizing a second time...");
-			System.exit(0);
+			return;
 		}
 		// Lexicalization with word2vec
 		LOGGER.info("Lexicalize the mimic graph ...");

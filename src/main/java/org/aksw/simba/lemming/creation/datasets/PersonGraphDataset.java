@@ -17,20 +17,17 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("pg") 
-//@Scope(value = "prototype")
+@Scope(value = "prototype")
 public class PersonGraphDataset extends AbstractDatasetManager implements IDatasetManager{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PersonGraphDataset.class);
 	
-	@Value("${datasets.pg.filepath}")
-	private String dataFolderPath;
-	
-	public PersonGraphDataset() {
-		super("PersonGraph");
+	public PersonGraphDataset(String folderPath) {
+		super("PersonGraph",folderPath);
 	}
 	
 	@Override
@@ -68,9 +65,9 @@ public class PersonGraphDataset extends AbstractDatasetManager implements IDatas
 
 					 OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					 ontModel.getDocumentManager().setProcessImports(false);
-					 ontModel.read(modelOntMap.get(fileName));
-					 ontModel.read("22-rdf-syntax-ns", "TTL");
-					 ontModel.read("rdf-schema", "TTL");
+					 ontModel.read(modelOntMap.get("datasets/ontologies"+fileName));
+					 ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+					 ontModel.read("datasets/ontologies/rdf-schema", "TTL");
 					 Inferer inferer = new Inferer(true, ontModel);
 					 //returns a new model with the added triples
 					 personModel = inferer.process(personModel);

@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -26,18 +26,16 @@ import org.springframework.stereotype.Component;
  * 
  */
 @Component("lgeo")
+@Scope(value = "prototype")
 public class LinkedGeoDataset extends AbstractDatasetManager {
 	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(LinkedGeoDataset.class);
-	/** Default path and link to configuration */
-	@Value("${datasets.lgeo.filepath}")
-	String dataFolderPath="LinkedGeoGraphs/";
 
 	/**
 	 * Empty constructor.
 	 */
-	public LinkedGeoDataset() {
-		super("LinkedGeo");
+	public LinkedGeoDataset(String folderPath) {
+		super("LinkedGeo",folderPath);
 	}
 
 	@Override
@@ -58,21 +56,12 @@ public class LinkedGeoDataset extends AbstractDatasetManager {
 
 			OntModel ontModel = ModelFactory.createOntologyModel();
 			ontModel.getDocumentManager().setProcessImports(false);
-			ontModel.read("22-rdf-syntax-ns", "TTL");
-			ontModel.read("rdf-schema", "TTL");
-			ontModel.read("lgeo/foaf.ttl");
-			ontModel.read("lgeo/skos.ttl");
-			ontModel.read("lgeo/purl_dcterms.ttl");
-			ontModel.read("lgeo/owl.ttl");
-			ontModel.read("lgeo/terms.ttl");
-			ontModel.read("lgeo/wgs84_pos.ttl");
-			ontModel.read("lgeo/2014-09-09-ontology.sorted.nt");
-			ontModel.read("lgeo/geosparql.ttl");
-			ontModel.read("lgeo/geovocab_geometry.ttl");
-			ontModel.read("lgeo/geovocab_spatial.ttl");
-			ontModel.read("lgeo/LGD-Dump-110406-Ontology.nt");
-			ontModel.read("lgeo/rdfs-ns-void.rdf");
-			ontModel.read("lgeo/custom_ontology.nt");
+			ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+			ontModel.read("datasets/ontologies/rdf-schema", "TTL");
+			File ontFolder = new File("datasets/ontologies/lgeo");
+			for(File file : ontFolder.listFiles()){
+				ontModel.read(file.getAbsolutePath(), "TTL");
+			}
 
 			Inferer inferer = new Inferer(true, ontModel);
 			for (String fileName : lstSortedFilesByName) {
@@ -103,8 +92,4 @@ public class LinkedGeoDataset extends AbstractDatasetManager {
 		
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
-
-	public static void main(String[] args) {
-		new LinkedGeoDataset().readGraphsFromFiles();
-	}	
 }

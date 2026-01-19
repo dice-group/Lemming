@@ -11,12 +11,16 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.ColouredGraphWrapper;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.ColourPaletteWrapper;
+import org.aksw.simba.lemming.creation.GraphCreator;
 import org.aksw.simba.lemming.creation.GraphReverter;
 import org.aksw.simba.lemming.util.PersHelper;
 import org.aksw.simba.lemming.util.SerializationParser;
@@ -31,9 +35,11 @@ import com.carrotsearch.hppc.ObjectArrayList;
 public abstract class AbstractDatasetManager implements IDatasetManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDatasetManager.class);
 	protected String mDatasetName;
+	protected String dataFolderPath;
 
-	public AbstractDatasetManager(String datasetName) {
+	public AbstractDatasetManager(String datasetName, String folderPath) {
 		mDatasetName = datasetName;
+		this.dataFolderPath = folderPath;
 	}
 
 	public String getDatasetName() {
@@ -42,6 +48,10 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 
 	public void setDatasetName(String datasetName) {
 		mDatasetName = datasetName;
+	}
+	
+	public String getDatasetPath() {
+		return dataFolderPath;
 	}
 	
 	public String getSavedFileName(String folder) {
@@ -80,7 +90,38 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 
 	@Override
 	public ColouredGraph[] readGraphsFromFiles() {
-		return null;
+		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
+		GraphCreator creator = new GraphCreator(false);
+
+		File folder = new File(dataFolderPath);
+		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
+			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
+			// sort ascendently
+			Collections.sort(lstSortedFilesByName);
+
+			for (String fileName : lstSortedFilesByName) {
+				File file = new File(dataFolderPath + "/" + fileName);
+
+				if (file != null && file.isDirectory() && file.getTotalSpace() > 0) {
+					Model model = ModelFactory.createDefaultModel();
+					for (File subFile : file.listFiles()) {
+						model.read(subFile.getAbsolutePath(), "TTL");
+					}
+					LOGGER.info("Read data to model - " + model.size() + " triples");
+
+					ColouredGraph graph = creator.processModel(model);
+					if (graph != null) {
+						LOGGER.info("Generated graph of " + model.size() + " triples");
+						graphs.add(graph);
+					}
+				}
+			}
+		} else {
+			LOGGER.error("Find no files in \"" + folder.getAbsolutePath() + "\". Aborting.");
+			System.exit(1);
+		}
+		
+		return graphs.toArray(new ColouredGraph[graphs.size()]);
 	}
 
 	@Override
@@ -155,5 +196,62 @@ public abstract class AbstractDatasetManager implements IDatasetManager {
 	@Override
 	public String toString() {
 		return mDatasetName;
+	}
+	
+	/**
+	 * Reads a single graph from file and creates the respective
+	 * {@link ColouredGraph}
+	 * 
+	 * @param file File path
+	 * @return {@link ColouredGraph} instance of the graph
+	 */
+	public ColouredGraph readSingleGraphFromFile(String file) {
+		GraphCreator creator = new GraphCreator(false);
+		Model model = ModelFactory.createDefaultModel();
+		model.read(file);
+		return creator.processModel(model);
+	}
+
+	/**
+	 * Reads all graphs from a folder into a single {@link ColouredGraph} object
+	 * 
+	 * @param dataFolderPath Path to the folder
+	 * @return {@link ColouredGraph} instance of the graph
+	 */
+	public ColouredGraph readSingleGraphFromFolder(String dataFolderPath) {
+		GraphCreator creator = new GraphCreator(false);
+		ColouredGraph graph = null;
+		File folder = new File(dataFolderPath);
+		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
+			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
+			Collections.sort(lstSortedFilesByName);
+			Model model = ModelFactory.createDefaultModel();
+			for (String fileName : lstSortedFilesByName) {
+				System.out.println("Reading file: " + fileName);
+				File file = new File(dataFolderPath + "/" + fileName);
+				model.read(file.getAbsolutePath());
+			}
+			graph = creator.processModel(model);
+		}
+		return graph;
+	}
+	
+	/**
+	 * Reads all graphs from a folder into a single object or a single file,
+	 * depending on the input data path.
+	 * 
+	 * @param filePath File path
+	 * @return {@link ColouredGraph} instance of the graph
+	 */
+	public ColouredGraph readSingleGraphFromFileOrFolder() {
+		File file = new File(dataFolderPath);
+		if (file.exists()) {
+			if (file.isFile()) {
+				return readSingleGraphFromFile(dataFolderPath);
+			} else if (file.isDirectory()) {
+				return readSingleGraphFromFolder(dataFolderPath);
+			} 
+		}
+		return null;
 	}
 }

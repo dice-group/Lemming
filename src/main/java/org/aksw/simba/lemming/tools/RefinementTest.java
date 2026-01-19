@@ -72,7 +72,7 @@ public class RefinementTest {
             graphs[i] = new ColouredGraph(temp, null, null, null);
         }
 
-        graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles();
+        graphs = new SemanticWebDogFoodDataset("").readGraphsFromFiles();
 
         // FitnessFunction fitnessFunc = new MinSquaredError();
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();

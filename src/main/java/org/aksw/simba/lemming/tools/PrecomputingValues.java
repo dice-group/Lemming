@@ -60,12 +60,8 @@ public class PrecomputingValues {
 		PrecomputingArgs pArgs = new PrecomputingArgs();
 		JCommander.newBuilder().addObject(pArgs).build().parse(args);
 
-		// Validate dataset
-		Validator val = (Validator) application.getBean(Validator.class);
-		val.isDatasetAllowed(pArgs.dataset);
-
 		// Read models from file and create corresponding coloured graphs
-		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset);
+		IDatasetManager mDatasetManager = (IDatasetManager) application.getBean(pArgs.dataset, pArgs.datasetPath);
 		ColouredGraph graphs[] = mDatasetManager.readGraphsFromFiles();
 
 		// Compute metrics for each graph

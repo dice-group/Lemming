@@ -17,7 +17,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -29,18 +29,16 @@ import org.springframework.stereotype.Component;
  * 
  */
 @Component("dbp")
+@Scope(value = "prototype")
 public class DBpediaDataset extends AbstractDatasetManager {
 	/** Logging object */
 	private static final Logger LOGGER = LoggerFactory.getLogger(DBpediaDataset.class);
-	/** Default path and link to configuration */
-	@Value("${datasets.dbp.filepath}")
-	private String dataFolderPath="DBpedia/";
 
 	/**
 	 * Empty constructor.
 	 */
-	public DBpediaDataset() {
-		super("DBpedia");
+	public DBpediaDataset(String folderPath) {
+		super("DBpedia",folderPath);
 	}
 
 	@Override
@@ -81,9 +79,9 @@ public class DBpediaDataset extends AbstractDatasetManager {
 					LOGGER.info("Read data to model - " + model.size() + " triples");
 					OntModel ontModel = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
 					ontModel.getDocumentManager().setProcessImports(false);
-					ontModel.read(modelOntMap.get(fileName));
-					ontModel.read("22-rdf-syntax-ns", "TTL");
-					ontModel.read("rdf-schema", "TTL");
+					ontModel.read(modelOntMap.get("datasets/ontologies/"+fileName));
+					ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+					ontModel.read("datasets/ontologies/rdf-schema", "TTL");
 					Inferer inferer = new Inferer(true, ontModel);
 					model = inferer.process(model);
 					ColouredGraph graph = creator.processModel(model);
@@ -99,9 +97,5 @@ public class DBpediaDataset extends AbstractDatasetManager {
 		}
 
 		return graphs.toArray(new ColouredGraph[graphs.size()]);
-	}
-
-	public static void main(String[] args) {
-		new DBpediaDataset().readGraphsFromFiles();
 	}
 }

@@ -1,14 +1,6 @@
 package org.aksw.simba.lemming.creation.datasets;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import org.aksw.simba.lemming.ColouredGraph;
-import org.aksw.simba.lemming.creation.GraphCreator;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 
 /**
  * Interface responsible for the graph reading and saving methods
@@ -19,6 +11,7 @@ public interface IDatasetManager {
 	 * @return The dataset folder path
 	 */
 	public String getDatasetPath();
+
 
 	/**
 	 * Reads all graphs from the dataset folder path and creates the respective
@@ -58,60 +51,14 @@ public interface IDatasetManager {
 	 */
 	public void persistIntResults(ColouredGraph curMimicGraph, String filePath);
 
-	/**
-	 * Reads a single graph from file and creates the respective
-	 * {@link ColouredGraph}
-	 * 
-	 * @param file File path
-	 * @return {@link ColouredGraph} instance of the graph
-	 */
-	default public ColouredGraph readGraphFromFile(String file) {
-		GraphCreator creator = new GraphCreator(false);
-		Model model = ModelFactory.createDefaultModel();
-		model.read(file);
-		return creator.processModel(model);
-	}
 
 	/**
-	 * Reads all graphs from a folder into a single {@link ColouredGraph} object
+	 * Reads a single graph from a file, or concatenates all the files in a folder 
+	 * to a single graph object.
 	 * 
-	 * @param dataFolderPath Path to the folder
-	 * @return {@link ColouredGraph} instance of the graph
+	 * @return The {@link ColouredGraph} object
 	 */
-	default public ColouredGraph readGraphsFromFolder(String dataFolderPath) {
-		GraphCreator creator = new GraphCreator(false);
-		ColouredGraph graph = null;
-		File folder = new File(dataFolderPath);
-		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
-			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
-			Collections.sort(lstSortedFilesByName);
-			Model model = ModelFactory.createDefaultModel();
-			for (String fileName : lstSortedFilesByName) {
-				System.out.println("Reading file: " + fileName);
-				File file = new File(dataFolderPath + "/" + fileName);
-				model.read(file.getAbsolutePath());
-			}
-			graph = creator.processModel(model);
-		}
-		return graph;
-	}
+	public ColouredGraph readSingleGraphFromFileOrFolder();
+
 	
-	/**
-	 * Reads all graphs from a folder into a single object or a single file,
-	 * depending on the input data path.
-	 * 
-	 * @param filePath File path
-	 * @return {@link ColouredGraph} instance of the graph
-	 */
-	default public ColouredGraph readFileOrFolder(String filePath) {
-		File file = new File(filePath);
-		if (file.exists()) {
-			if (file.isFile()) {
-				return readGraphFromFile(filePath);
-			} else if (file.isDirectory()) {
-				return readGraphsFromFolder(filePath);
-			} 
-		}
-		return null;
-	}
 }

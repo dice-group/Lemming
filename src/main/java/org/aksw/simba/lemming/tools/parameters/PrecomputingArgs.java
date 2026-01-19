@@ -10,6 +10,9 @@ public class PrecomputingArgs {
 	@Parameter(names = { "-ds" }, description = "Dataset name.", required = true)
 	public String dataset;
 	
+	@Parameter(names = { "-dp" }, description = "Dataset path.", required = false)
+	public String datasetPath;
+	
 	@Parameter(names = { "--min-fitness" }, description = "Minimum Fitness", required = false)
 	public double minFitness = 100000.0;
 	

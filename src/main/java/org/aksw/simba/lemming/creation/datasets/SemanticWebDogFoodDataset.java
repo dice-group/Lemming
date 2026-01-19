@@ -12,7 +12,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Component;
  * 
  */
 @Component("swdf")
+@Scope(value = "prototype")
 public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 
 	/** Logging object */
@@ -33,15 +34,11 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 	/** End year folder */
 	private static final int END_YEAR = 2015;
 
-	/** Default path and link to configuration */
-	@Value("${datasets.swdf.filepath}")
-	private String dataFolderPath = "SemanticWebDogFood/";
-
 	/**
 	 * Empty constructor.
 	 */
-	public SemanticWebDogFoodDataset() {
-		super("SemanticWebDogFood");
+	public SemanticWebDogFoodDataset(String folderPath) {
+		super("SemanticWebDogFood",folderPath);
 	}
 
 	@Override
@@ -57,9 +54,9 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 		// start by loading the common ontologies to all models
 		OntModel ontModel = ModelFactory.createOntologyModel();
 		ontModel.getDocumentManager().setProcessImports(false);
-		ontModel.read("22-rdf-syntax-ns", "TTL");
-		ontModel.read("rdf-schema", "TTL");
-		File ontFolder = new File("swdf-owls");
+		ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+		ontModel.read("datasets/ontologies/rdf-schema", "TTL");
+		File ontFolder = new File("datasets/ontologies/swdf-owls");
 		for (File file : ontFolder.listFiles()) {
 			ontModel.read(file.getAbsolutePath(), "TTL");
 		}
@@ -115,9 +112,5 @@ public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
 	@Override
 	public String getDatasetPath() {
 		return dataFolderPath;
-	}
-
-	public static void main(String[] args) {
-		new SemanticWebDogFoodDataset().readGraphsFromFiles();
 	}
 }
