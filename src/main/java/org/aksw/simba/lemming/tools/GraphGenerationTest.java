@@ -14,6 +14,7 @@ import org.aksw.simba.lemming.mimicgraph.generator.factory.GraphGeneratorFactory
 import org.aksw.simba.lemming.mimicgraph.generator.factory.IGraphGeneratorFactory;
 import org.aksw.simba.lemming.mimicgraph.metricstorage.ConstantValueStorage;
 import org.aksw.simba.lemming.tools.parameters.GraphGenerationArgs;
+import org.aksw.simba.lemming.tools.results.Result;
 import org.dice_research.ldcbench.generate.SeedGenerator;
 import org.dice_research.ldcbench.generate.SequentialSeedGenerator;
 import org.slf4j.Logger;
@@ -94,7 +95,7 @@ public class GraphGenerationTest {
 		ColouredGraph refinedGraph = grphOptimizer.refineGraph(pArgs.noThreads);
 		// output results to file "LemmingEx.result"
 		// before we connect the RDF.type edges
-		String savedFile = mDatasetManager.getSavedFileName("results");
+		String savedFile = mDatasetManager.getSavedFileName("output/results");
 		grphOptimizer.printResult(pArgs.getArguments(), startTime, savedFile, initialFile, pArgs.seed);
 
 		

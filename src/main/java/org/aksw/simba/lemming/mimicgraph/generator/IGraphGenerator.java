@@ -46,7 +46,7 @@ public interface IGraphGenerator {
 		ColouredGraph initial = mimicGraph.clone();
 		graphLexicalization.connectVerticesWithRDFTypeEdges(initial, graphInitializer);
 		graphLexicalization.lexicalizeGraph(initial, graphInitializer.getmMapColourToVertexIDs());
-		String initialFile = datasetManager.getSavedFileName("initial");
+		String initialFile = datasetManager.getSavedFileName("output/initial");
 		datasetManager.writeGraphsToFile(initial, initialFile);
 		return initialFile;
 

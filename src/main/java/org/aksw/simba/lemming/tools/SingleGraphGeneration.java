@@ -80,7 +80,7 @@ public class SingleGraphGeneration {
 		// Lexicalize graph, add RDF type triples, and save the graph
 		LOGGER.info("Lexicalize the mimic graph ...");
 		GraphLexicalization lexicalizer = new GraphLexicalization(graph);
-		String savedFile = mDatasetManager.getSavedFileName("single");
+		String savedFile = mDatasetManager.getSavedFileName("output/single");
 		lexicalizer.connectVerticesWithRDFTypeEdges(mimicGraph, initializer);
 		lexicalizer.lexicalizeGraph(mimicGraph, initializer.getmMapColourToVertexIDs());
 		mDatasetManager.writeGraphsToFile(mimicGraph, savedFile);		

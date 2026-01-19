@@ -273,7 +273,7 @@ public class GraphOptimization {
      * @param savedFile    the saved file's name of the mimic dataset
      */
     public void printResult(String args, double startingTime, String savedFile, String initialFile, long seed) {
-        try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("LemmingEx.result", true))) {
+        try (BufferedWriter fWriter = new BufferedWriter(new FileWriter("output/LemmingEx.result", true))) {
             LOGGER.info("Output results to file!");
 
             // Save error scores from optimization phase

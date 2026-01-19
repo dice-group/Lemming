@@ -49,7 +49,7 @@ java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c 
 <table>
   <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
   <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
-  <tr><th align="left">-dp</th><td>True</td><td>NA</td><td>Dataset path. </td></tr>
+  <tr><th align="left">-dp</th><td>True</td><td>NA</td><td>Dataset path. Only required in single-graph mode and when the dataset is not present in application.properties. </td></tr>
   <tr><th align="left">-nv</th><td>True</td><td>NA</td><td>Desired number of vertices in the generated graph (number of vertices of the target graph)</td></tr>
   <tr><th align="left">-thrs</th><td>False</td><td>1</td><td>Number of threads</td></tr>
   <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
@@ -84,6 +84,7 @@ LEMMING includes a preprocessing stage where invariant arithmetic expressions ar
 <table>
   <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
   <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">-dp</th><td>True</td><td>NA</td><td>Dataset path. Only required when the dataset is not present in application.properties. </td></tr>
   <tr><th align="left">--min-fitness</th><td>False</td><td>100000.0</td><td>Minimum Fitness</td></tr>
   <tr><th align="left">---max-iterations</th><td>False</td><td>50</td><td>Maximum number of iterations</td></tr>
 </table>
