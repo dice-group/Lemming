@@ -5,8 +5,10 @@
 </p>
 
 
-# Example Mimicking Knowledge Graph Generators
+# LEMMING: Example Mimicking Knowledge Graph Generators
 This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator, and **SimplexKG**, A Simplex Approach to Synthetic Knowledge Graph Generation (Link to be added).
+
+LEMMING contains Synthetic Knowledge Graph Generators based on instance data.
 
 ## Prerequisites and Project Build
 ### Prerequisites
