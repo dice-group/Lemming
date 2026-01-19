@@ -10,11 +10,11 @@ import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.dist.EdgeColourDistributionMetric;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 import org.aksw.simba.lemming.util.MapUtil;
-import org.apache.jena.ext.com.google.common.primitives.Doubles;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+import com.google.common.primitives.Doubles;
 
 
 /**

@@ -14,6 +14,8 @@ import org.aksw.simba.lemming.algo.expression.Operator;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.carrotsearch.hppc.BitSet;
 
@@ -26,6 +28,8 @@ import com.carrotsearch.hppc.BitSet;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
+@Component("leafNode")
+@Scope(value = "prototype")
 public class LeaveNodeReplacingRefinementOperator implements RefinementOperator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LeaveNodeReplacingRefinementOperator.class);

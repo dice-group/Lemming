@@ -14,26 +14,26 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class GraphCreatorTest {
+	
+	private String graphFile;
+	private int expectedVertices;
+	private int expectedEdges;
+
+	public GraphCreatorTest(String graphFile, int expectedVertices, int expectedEdges) {
+		super();
+		this.graphFile = graphFile;
+		this.expectedVertices = expectedVertices;
+		this.expectedEdges = expectedEdges;
+	}
 
     @Parameters
     public static Collection<Object[]> data() {
         List<Object[]> testConfigs = new ArrayList<Object[]>();
-        testConfigs.add(new Object[] { "graph1.n3", 5, 5 });
-        testConfigs.add(new Object[] { "graph_loop.n3", 3, 5 });
+        testConfigs.add(new Object[] { "graph1.n3", 3, 2 });
+        testConfigs.add(new Object[] { "graph_loop.n3", 3, 2 });
         testConfigs.add(new Object[] { "email-Eu-core.n3", 1005, 25571 });
 
         return testConfigs;
-    }
-
-    private String graphFile;
-    private int expectedVertices;
-    private int expectedEdges;
-
-    public GraphCreatorTest(String graphFile, int expectedVertices, int expectedEdges) {
-        super();
-        this.graphFile = graphFile;
-        this.expectedVertices = expectedVertices;
-        this.expectedEdges = expectedEdges;
     }
 
     @Test

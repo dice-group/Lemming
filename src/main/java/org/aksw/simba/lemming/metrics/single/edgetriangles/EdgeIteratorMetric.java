@@ -3,7 +3,7 @@ package org.aksw.simba.lemming.metrics.single.edgetriangles;
 import grph.Grph;
 import it.unimi.dsi.fastutil.ints.IntSet;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.util.IntSetUtil;
@@ -20,11 +20,11 @@ public class EdgeIteratorMetric extends AbstractMetric implements TriangleMetric
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return countTriangles(graph);
     }
 
-    protected double countTriangles(ColouredGraph graph) {
+    protected double countTriangles(IColouredGraph graph) {
         HashSet<org.aksw.simba.lemming.metrics.single.nodetriangles.EdgeIteratorMetric.Triangle> visitedV = new HashSet<>();
         IntSet[] edges = new IntSet[graph.getGraph().getNumberOfEdges()];
         IntSet[] vertexEdges = new IntSet[graph.getGraph().getNumberOfVertices()];

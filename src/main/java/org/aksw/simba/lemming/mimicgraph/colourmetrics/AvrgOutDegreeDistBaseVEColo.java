@@ -16,7 +16,7 @@ import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
  * 
  * @author nptsy
  */
-public class AvrgOutDegreeDistBaseVEColo {
+public class AvrgOutDegreeDistBaseVEColo implements AvrgDegreeDistBaseVEColour{
 	
 	/*
 	 * the keys are the vertex's colors and the values are the distribution of
@@ -32,19 +32,23 @@ public class AvrgOutDegreeDistBaseVEColo {
 		apply(origGrphs);
 	}
 	
-	public double getAvarageOutDegreeOf(BitSet tailColo, BitSet edgeColo){
+	@Override
+	public double getAverageDegreeOf(BitSet tailColo, BitSet edgeColo){
 		if(mMapAvrgOutDegreeValues.get(tailColo) != null){
 			return mMapAvrgOutDegreeValues.get(tailColo).getOrDefault(edgeColo, 0);
 		}
 		return 0;
 	}
 	
-	public double getAverageMaxOutDegreeOf(BitSet tailColo, BitSet edgeColo){
+	@Override
+	public double getMaxDegreeOf(BitSet tailColo, BitSet edgeColo){
 		if(mMapMaxOutDegreeValues.get(tailColo) != null){
 			return mMapMaxOutDegreeValues.get(tailColo).getOrDefault(edgeColo, 0);
 		}
 		return 0;
 	}
+	
+	
 	
 	private void apply(ColouredGraph[] origGrphs){
 		
@@ -126,5 +130,15 @@ public class AvrgOutDegreeDistBaseVEColo {
 				}
 			}
 		}
+	}
+
+	@Override
+	public ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> getAvrgDegree() {
+		return mMapAvrgOutDegreeValues;
+	}
+
+	@Override
+	public ObjectObjectOpenHashMap<BitSet, ObjectDoubleOpenHashMap<BitSet>> getMaxDegree() {
+		return mMapMaxOutDegreeValues;
 	}
 }	

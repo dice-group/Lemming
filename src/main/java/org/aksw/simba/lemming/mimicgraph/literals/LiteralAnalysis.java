@@ -184,11 +184,13 @@ public class LiteralAnalysis {
 						
 						for(String literal: setOfLiterals){
 							
-							if(literal.isEmpty())
+							if(literal.isBlank())
 								continue;
 							
 							// remove postfix of literal if any
 							literal = normalizeLiterals(literal);
+							if(literal.isBlank())
+								continue;
 							
 							String[] arrWords = literal.split(" ");
 							
@@ -302,7 +304,8 @@ public class LiteralAnalysis {
 		if(originalLiteral.startsWith("\"") && originalLiteral.contains("\"@")){
 			int endPos = originalLiteral.indexOf("\"@");
 			originalLiteral = originalLiteral.substring(0, endPos);
-			originalLiteral = originalLiteral.substring(1);			
+			if(!originalLiteral.isBlank())
+				originalLiteral = originalLiteral.substring(1);			
 		}
 		
 		return originalLiteral;

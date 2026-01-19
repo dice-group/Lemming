@@ -1,8 +1,5 @@
 package org.aksw.simba.lemming.mimicgraph.constraints;
 
-import grph.algo.MultiThreadProcessing;
-import it.unimi.dsi.fastutil.ints.IntSet;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -10,6 +7,9 @@ import org.aksw.simba.lemming.ColouredGraph;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+
+import grph.algo.MultiThreadProcessing;
+import it.unimi.dsi.fastutil.ints.IntSet;
 
 /**
  * The colour mapper for vertices' and edges' colours.
@@ -23,25 +23,25 @@ public class ColourMappingRules implements IColourMappingRules{
 	/*
 	 * the keys are the head's colours and the values are the set of tail's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapHeadColoToTailColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapHeadColoToTailColo;
 	/*
 	 * the keys are the tail's colours and the values are the set of head's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapTailColoToHeadColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapTailColoToHeadColo;
 	
 	/*
 	 * key1: edge's colours, key2: head's colours and the values are the set of tail's colours 
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToHeadAndTailColo;
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToHeadAndTailColo;
 	
 	/*
 	 * key1: edge's colours, key2: tail's colours and the values are the set of head's colours
 	 */
-	private ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToTailAndHeadColo;
+	protected ObjectObjectOpenHashMap<BitSet, ObjectObjectOpenHashMap<BitSet, Set<BitSet>>> mMapEdgeColoToTailAndHeadColo;
 
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapDTEColoToVColo;
 	
-	private ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
+	protected ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mMapVColoToDTEColo;
 	
 	boolean mIsMultiThreadProcessing = false;
 	
@@ -61,7 +61,7 @@ public class ColourMappingRules implements IColourMappingRules{
 		analyzeRulesWithSingleThread(origGrphs);
 	}
 	
-	private void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
+	protected void analyzeRulesWithSingleThread(ColouredGraph[] origGrphs){
 		for(ColouredGraph grph: origGrphs){
 			IntSet setofVIDs = grph.getVertices();
 			int[] arrOfVIDs = setofVIDs.toIntArray();
@@ -344,60 +344,54 @@ public class ColourMappingRules implements IColourMappingRules{
 	}
 	
 	@Override
-	public Set<BitSet> getPossibleLinkingEdgeColours(BitSet tailColour, BitSet headColour
-			) {
-		
+	public Set<BitSet> getPossibleLinkingEdgeColours(BitSet tailColour, BitSet headColour) {
+
 		Set<BitSet> setColours = new HashSet<BitSet>();
 
-		if(headColour == null && tailColour == null){
+		if (headColour == null && tailColour == null) {
 			return setColours;
 		}
-		
+
 		Object[] arrEdgeColours = mMapEdgeColoToHeadAndTailColo.keys;
 		int iNoOfEdgeColours = arrEdgeColours.length;
-		for(int i = 0 ; i < iNoOfEdgeColours; i++){
-			if(headColour != null && tailColour != null){
-				if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-					BitSet edgeColo = (BitSet) arrEdgeColours[i];
-					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-					if(mapHeadToTail != null){
-						Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
-						if(setTailColours != null && setTailColours.contains(tailColour)){
-							setColours.add(edgeColo);
-						}
+		for (int i = 0; i < iNoOfEdgeColours; i++) {
+			if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+				BitSet edgeColo = (BitSet) arrEdgeColours[i];
+				ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+						.get(edgeColo);
+				if (mapHeadToTail != null) {
+					Set<BitSet> setTailColours = mapHeadToTail.get(headColour);
+					if (setTailColours != null && setTailColours.contains(tailColour)) {
+						setColours.add(edgeColo);
 					}
 				}
-			}// end if of the case when both headColour and tailColour are not null
-			else{
-				if(headColour != null && tailColour == null){
-					if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-						BitSet edgeColo = (BitSet) arrEdgeColours[i];
-						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-						if(mapHeadToTail != null && mapHeadToTail.containsKey(headColour)){
-							setColours.add(edgeColo);
-						}
+			} else {
+				if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+					BitSet edgeColo = (BitSet) arrEdgeColours[i];
+					ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+							.get(edgeColo);
+					if (mapHeadToTail != null && mapHeadToTail.containsKey(headColour)) {
+						setColours.add(edgeColo);
 					}
-				} // end if of the case when headColour is not null and tailColour is null
-				else{
-					if(headColour == null && tailColour != null){
-						if(mMapEdgeColoToHeadAndTailColo.allocated[i]){
-							BitSet edgeColo = (BitSet) arrEdgeColours[i];
-							ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo.get(edgeColo);
-							if(mapHeadToTail != null){
-								Object[] arrHeadColours = mapHeadToTail.keys;
-								int iNoOfHeadColours = arrHeadColours.length;
-								for(int j = 0 ;j < iNoOfHeadColours ; j++){
-									if(mapHeadToTail.allocated[j]){
-										BitSet headColo = (BitSet) arrHeadColours[j];
-										Set<BitSet> setTailColours = mapHeadToTail.get(headColo);
-										if(setTailColours != null && setTailColours.contains(tailColour)){
-											setColours.add(edgeColo);
-										}
+				} else {
+					if (mMapEdgeColoToHeadAndTailColo.allocated[i]) {
+						BitSet edgeColo = (BitSet) arrEdgeColours[i];
+						ObjectObjectOpenHashMap<BitSet, Set<BitSet>> mapHeadToTail = mMapEdgeColoToHeadAndTailColo
+								.get(edgeColo);
+						if (mapHeadToTail != null) {
+							Object[] arrHeadColours = mapHeadToTail.keys;
+							int iNoOfHeadColours = arrHeadColours.length;
+							for (int j = 0; j < iNoOfHeadColours; j++) {
+								if (mapHeadToTail.allocated[j]) {
+									BitSet headColo = (BitSet) arrHeadColours[j];
+									Set<BitSet> setTailColours = mapHeadToTail.get(headColo);
+									if (setTailColours != null && setTailColours.contains(tailColour)) {
+										setColours.add(edgeColo);
 									}
 								}
 							}
 						}
-					}// end if of case when headColour is null and tailColour is not null
+					}
 				}
 			}
 		}

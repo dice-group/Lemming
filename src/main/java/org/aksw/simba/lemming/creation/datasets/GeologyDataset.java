@@ -1,0 +1,88 @@
+package org.aksw.simba.lemming.creation.datasets;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.GraphCreator;
+import org.aksw.simba.lemming.creation.Inferer;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+/**
+ * ICC dataset manager.
+ *
+ * This class is responsible for reading graphs from files related to the
+ * ICC dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
+ */
+@Component("geology") 
+@Scope(value = "prototype")
+public class GeologyDataset extends AbstractDatasetManager {
+	/** Logging object */
+	private static final Logger LOGGER = LoggerFactory.getLogger(GeologyDataset.class);
+
+	/**
+	 * Empty constructor.
+	 */
+	public GeologyDataset(String folderPath) {
+		super("Geology",folderPath);
+	}
+	
+	@Override
+	public String getDatasetPath() {
+		return dataFolderPath;
+	}
+
+	@Override
+	public ColouredGraph[] readGraphsFromFiles() {
+		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
+		GraphCreator creator = new GraphCreator(false);
+
+		File folder = new File(dataFolderPath);
+		if (folder != null && folder.isDirectory() && folder.listFiles().length > 0) {
+			//build ontology model for Dataset
+			OntModel ontModel = ModelFactory.createOntologyModel();
+			ontModel.getDocumentManager().setProcessImports(false);
+			ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+			ontModel.read("datasets/ontologies/rdf-schema", "TTL");
+			File ontFolder = new File("datasets/ontologies/geology");
+			for(File file : ontFolder.listFiles()){
+				ontModel.read(file.getAbsolutePath(), "TTL");
+			}
+			// sort files'name ascendently
+			List<String> lstSortedFilesByName = Arrays.asList(folder.list());
+			Collections.sort(lstSortedFilesByName);
+
+			Inferer inferer = new Inferer(true, ontModel);
+			for (String fileName : lstSortedFilesByName) {
+				File file = new File(dataFolderPath + "/" + fileName);
+				Model geologyModel = ModelFactory.createDefaultModel();
+				geologyModel.read(file.getAbsolutePath(), "TTL");
+				LOGGER.info("Read data to model - " + geologyModel.size() + " triples " + file.getName());
+				// returns a new model with the added triples
+				geologyModel = inferer.process(geologyModel);
+				ColouredGraph graph = creator.processModel(geologyModel);
+				if (graph != null) {
+					LOGGER.info("Generated graph of " + geologyModel.size() + " triples");
+					graphs.add(graph);
+				}
+			}
+		} else {
+			LOGGER.error("Find no files in \"" + folder.getAbsolutePath() + "\". Aborting.");
+			System.exit(1);
+		}
+
+		return graphs.toArray(new ColouredGraph[graphs.size()]);
+	}
+
+}

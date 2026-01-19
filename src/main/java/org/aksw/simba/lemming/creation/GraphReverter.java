@@ -104,7 +104,7 @@ public class GraphReverter {
 					Resource hRes = mDataModel.createResource(hDummyURI);
 					mDataModel.add(tRes, propRes, hRes);
 					//System.err.println("\t " + tDummyURI +" <"+propURI+"> " + hDummyURI);
-					Triple triple = new Triple(tRes.asNode(), propRes.asNode(), hRes.asNode());
+					Triple triple = Triple.create(tRes.asNode(), propRes.asNode(), hRes.asNode()); 
 					mDataModel.getGraph().add(triple);
 				}
 			}
@@ -125,7 +125,7 @@ public class GraphReverter {
 						Literal litObj = mDataModel.createLiteral(literal);
 						mDataModel.add(tRes, datatypedProperty, litObj);
 						
-						Triple triple = new Triple(tRes.asNode(), datatypedProperty.asNode(), litObj.asNode());
+						Triple triple = Triple.create(tRes.asNode(), datatypedProperty.asNode(), litObj.asNode());
 						mDataModel.getGraph().add(triple);
 					}
 				}

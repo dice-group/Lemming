@@ -1,6 +1,9 @@
 package org.aksw.simba.lemming.metrics.metricselection;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.TriangleMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeIteratorMetric;
@@ -9,17 +12,14 @@ import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeig
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardEdgeTriangleMetric;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author DANISH AHMED on 8/27/2018
  */
-public class EdgeTriangleMetricSelection{
+public class EdgeTriangleMetricSelection {
 
-    public SingleValueMetric getMinComplexityMetric(ColouredGraph graph) {
-        int edges = graph.getGraph().getNumberOfEdges();
-        int vertices = graph.getGraph().getNumberOfVertices();
+    public SingleValueMetric getMinComplexityMetric(IColouredGraph graph) {
+        int edges = (int) graph.getNumberOfEdges();
+        int vertices = (int) graph.getNumberOfVertices();
 
         List<TriangleMetric> edgeTriangleMetrics = new ArrayList<>();
         edgeTriangleMetrics.add(new ForwardEdgeTriangleMetric());

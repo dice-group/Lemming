@@ -40,7 +40,7 @@ public class IOHelper {
     public static ColouredGraph readGraphFromResource(InputStream is, String lang) {
         Model model = ModelFactory.createDefaultModel();
         model.read(is, null, lang);
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         return creator.processModel(model);
     }
 }

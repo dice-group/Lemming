@@ -2,7 +2,6 @@ package org.aksw.simba.lemming.algo.expression;
 
 import java.io.Serializable;
 
-import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;

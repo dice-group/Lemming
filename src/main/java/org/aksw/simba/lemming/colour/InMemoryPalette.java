@@ -132,6 +132,8 @@ public class InMemoryPalette implements ColourPalette {
 					colour.or(uriColourMap.get(uri));
 					System.err.println("Same URI but different colours");
 				}
+			} else {
+				highestColourId++;
 			}
 			uriColourMap.put(uri, colour);
 		}

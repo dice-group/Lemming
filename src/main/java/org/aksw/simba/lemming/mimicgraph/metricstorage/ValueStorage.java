@@ -24,6 +24,14 @@ public class ValueStorage implements Serializable{
 		mMapMetricValues = new HashMap<String, Map<String, Double>>();
 	}
 	
+	/**
+	 * 
+	 * @return false if both maps are empty
+	 */
+	public boolean isEmpty() {
+		return mMapConstantValues.isEmpty() && mMapMetricValues.isEmpty();
+	}
+	
 	public void setConstantValues(Map<Expression, Map<String, Double>> mapConstantValues){
 		mMapConstantValues = mapConstantValues;
 	}
@@ -36,6 +44,7 @@ public class ValueStorage implements Serializable{
 				Map<String, Double> mapMetricValues = mMapMetricValues.get(key);
 				if(mapMetricValues.containsKey(metricName)){
 					isExist = true;
+					break;
 				}
 			}
 		}
@@ -103,5 +112,26 @@ public class ValueStorage implements Serializable{
 			return;
 		}
 		mapValues.put(metricName,val);
+	}
+	
+	public String getHumanMetrics() {
+		StringBuilder builder = new StringBuilder();
+		Set<String> setOfkeyOfGraphs = mMapMetricValues.keySet();
+		for(String keyOfGraph : setOfkeyOfGraphs){
+			builder.append(keyOfGraph);
+			ObjectDoubleOpenHashMap<String> objMapValues = (ObjectDoubleOpenHashMap<String>) mMapMetricValues.get(keyOfGraph);
+			Object[] arrOfMetricNames = objMapValues.keys;
+			for(int i = 0 ; i < arrOfMetricNames.length; i++){
+				if(objMapValues.allocated[i]){
+					String metricName = (String) arrOfMetricNames[i];
+					double val = objMapValues.get(metricName);
+					builder.append(metricName);
+					builder.append(": ");
+					builder.append(val);
+					builder.append("\n");
+				}
+			}
+		}
+		return builder.toString();
 	}
 }

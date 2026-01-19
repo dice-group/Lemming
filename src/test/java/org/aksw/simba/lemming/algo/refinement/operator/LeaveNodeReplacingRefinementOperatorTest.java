@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Constant;
 import org.aksw.simba.lemming.algo.expression.Expression;
@@ -25,6 +25,14 @@ public class LeaveNodeReplacingRefinementOperatorTest {
 
     private static final AtomicVariable VARIABLES[] = new AtomicVariable[] { new AtomicVariable(new SimpleMetric("a")),
             new AtomicVariable(new SimpleMetric("b")), new AtomicVariable(new SimpleMetric("c")) };
+    
+    private Expression expression;
+    private Set<Expression> expectedExpressions;
+
+    public LeaveNodeReplacingRefinementOperatorTest(Expression expression, Expression expectedExpressions[]) {
+        this.expression = expression;
+        this.expectedExpressions = new HashSet<Expression>(Arrays.asList(expectedExpressions));
+    }
 
     @Parameters
     public static List<Object[]> data() {
@@ -237,13 +245,6 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         return tests;
     }
 
-    private Expression expression;
-    private Set<Expression> expectedExpressions;
-
-    public LeaveNodeReplacingRefinementOperatorTest(Expression expression, Expression expectedExpressions[]) {
-        this.expression = expression;
-        this.expectedExpressions = new HashSet<Expression>(Arrays.asList(expectedExpressions));
-    }
 
     @Test
     public void test() {
@@ -268,7 +269,7 @@ public class LeaveNodeReplacingRefinementOperatorTest {
         }
 
         @Override
-        public double apply(ColouredGraph graph) {
+        public double apply(IColouredGraph graph) {
             return 0;
         }
 

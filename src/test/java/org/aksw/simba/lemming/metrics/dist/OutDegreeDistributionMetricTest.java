@@ -12,8 +12,8 @@ import org.junit.Test;
 
 public class OutDegreeDistributionMetricTest {
 
-    private static final int EXPECTED_DEGREES[] = new int[] { 0, 2, 3 };
-    private static final double EXPECTED_DEGREE_VALUES[] = new double[] { 3, 1, 1 };
+    private static final int EXPECTED_DEGREES[] = new int[] { 0, 2 };
+    private static final double EXPECTED_DEGREE_VALUES[] = new double[] { 2, 1 };
     private static final String GRAPH_FILE = "graph1.n3";
     private static final double DELTA = 0.000001;
 
@@ -24,7 +24,7 @@ public class OutDegreeDistributionMetricTest {
         model.read(is, null, "N3");
         IOUtils.closeQuietly(is);
 
-        GraphCreator creator = new GraphCreator();
+        GraphCreator creator = new GraphCreator(false);
         ColouredGraph graph = creator.processModel(model);
 
         OutDegreeDistributionMetric metric = new OutDegreeDistributionMetric();

@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.metrics.dist.IntDistribution;
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
-import org.apache.jena.ext.com.google.common.primitives.Doubles;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.ObjectDoubleOpenHashMap;
 import com.carrotsearch.hppc.ObjectIntOpenHashMap;
 import com.carrotsearch.hppc.ObjectObjectOpenHashMap;
+import com.google.common.primitives.Doubles;
 
 import grph.DefaultIntSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -173,6 +173,22 @@ public class MapUtil {
     		int iNoOfSamples = keySamples.length;
     		for(int i = 0 ; i< iNoOfSamples ; ++i){
     			if(mapDoubleKeyValue.allocated[i]){
+    				BitSet key = (BitSet) keySamples[i];
+    				res.add(key);
+    			}
+    		}
+    		return res;
+    	}
+    	return null; 
+    }
+    
+    public static List<BitSet> keysToList(ObjectIntOpenHashMap<BitSet> mapIntKeyValue){
+    	if(mapIntKeyValue != null){
+    		List<BitSet> res = new ArrayList<BitSet>();
+    		Object[] keySamples = mapIntKeyValue.keys;
+    		int iNoOfSamples = keySamples.length;
+    		for(int i = 0 ; i< iNoOfSamples ; ++i){
+    			if(mapIntKeyValue.allocated[i]){
     				BitSet key = (BitSet) keySamples[i];
     				res.add(key);
     			}

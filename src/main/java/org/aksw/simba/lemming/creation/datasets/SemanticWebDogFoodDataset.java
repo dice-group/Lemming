@@ -1,0 +1,116 @@
+package org.aksw.simba.lemming.creation.datasets;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.creation.GraphCreator;
+import org.aksw.simba.lemming.creation.Inferer;
+import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+/**
+ * Semantic Web Dog Food dataset manager.
+ *
+ * This class is responsible for reading graphs from files related to the
+ * Semantic Web Dog Food dataset, inferring based on the specified ontologies
+ * and creating a {@link ColouredGraph} objects from them.
+ * 
+ */
+@Component("swdf")
+@Scope(value = "prototype")
+public class SemanticWebDogFoodDataset extends AbstractDatasetManager {
+
+	/** Logging object */
+	private static final Logger LOGGER = LoggerFactory.getLogger(SemanticWebDogFoodDataset.class);
+	/** Start year folder */
+	private static final int START_YEAR = 2001;
+	/** End year folder */
+	private static final int END_YEAR = 2015;
+
+	/**
+	 * Empty constructor.
+	 */
+	public SemanticWebDogFoodDataset(String folderPath) {
+		super("SemanticWebDogFood",folderPath);
+	}
+
+	@Override
+	public ColouredGraph[] readGraphsFromFiles() {
+		Model dogFoodModel = ModelFactory.createDefaultModel();
+
+		List<ColouredGraph> graphs = new ArrayList<ColouredGraph>();
+		ColouredGraph graph;
+		GraphCreator creator = new GraphCreator(false);
+		long oldModelSize;
+		File folder;
+
+		// start by loading the common ontologies to all models
+		OntModel ontModel = ModelFactory.createOntologyModel();
+		ontModel.getDocumentManager().setProcessImports(false);
+		ontModel.read("datasets/ontologies/22-rdf-syntax-ns", "TTL");
+		ontModel.read("datasets/ontologies/rdf-schema", "TTL");
+		File ontFolder = new File("datasets/ontologies/swdf-owls");
+		for (File file : ontFolder.listFiles()) {
+			ontModel.read(file.getAbsolutePath(), "TTL");
+		}
+
+		Inferer inferer = new Inferer(true, ontModel);
+		for (int y = START_YEAR; y <= END_YEAR; ++y) {
+			LOGGER.info("Adding year {}...", y);
+			folder = new File(dataFolderPath + Integer.toString(y));
+			if (folder.exists()) {
+				oldModelSize = dogFoodModel.size();
+				addToModel(folder, dogFoodModel);
+				if (oldModelSize < dogFoodModel.size()) {
+					LOGGER.info("Read data. Model has {} triples. Creating graph...", dogFoodModel.size());
+
+					// returns a new model with the added triples
+					dogFoodModel = inferer.process(dogFoodModel);
+					graph = creator.processModel(dogFoodModel);
+					if (graph != null) {
+						LOGGER.info("Generated graph." + dogFoodModel.size());
+						graphs.add(graph);
+					} else {
+						LOGGER.error("Couldn't generate coloured graph.");
+					}
+				} else {
+					LOGGER.error("The model hasn't been grown after reading additional files.");
+				}
+			} else {
+				LOGGER.error("The folder {} does not exist.", folder.toString());
+			}
+		}
+
+		return graphs.toArray(new ColouredGraph[graphs.size()]);
+	}
+
+	/**
+	 * Helper method to add all files in a folder to the given model.
+	 *
+	 * @param folder       The folder containing the RDF files.
+	 * @param dogFoodModel The model to which the files will be added.
+	 */
+	private static void addToModel(File folder, Model dogFoodModel) {
+		for (File file : folder.listFiles()) {
+			try {
+				dogFoodModel.read(file.getAbsolutePath());
+			} catch (Exception e) {
+				LOGGER.error("Exception while reading file \"" + file.toString() + "\". Aborting.", e);
+				System.exit(1);
+			}
+
+		}
+	}
+	
+	@Override
+	public String getDatasetPath() {
+		return dataFolderPath;
+	}
+}

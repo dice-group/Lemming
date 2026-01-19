@@ -1,0 +1,21 @@
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+rdf:PA  a                owl:ObjectProperty ;
+        owl:equivalentProperty  rdf:PB ;
+        rdfs:domain             xsd:domain ;
+        rdfs:range              xsd:range .
+
+rdf:PB  a                owl:ObjectProperty ;
+        owl:equivalentProperty  rdf:PC .
+
+rdf:PC  a                owl:ObjectProperty .
+
+rdf:A  a                owl:Class ;
+        owl:equivalentClass  rdf:B .
+
+rdf:B  a                owl:Class .
+
+rdf:C  a                owl:Class .

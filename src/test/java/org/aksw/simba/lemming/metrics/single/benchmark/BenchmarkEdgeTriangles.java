@@ -10,6 +10,7 @@ import org.aksw.simba.lemming.metrics.single.edgetriangles.EdgeNumberOfSimpleTri
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.NodeIteratorMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.forward.ForwardEdgeTriangleMetric;
+import org.aksw.simba.lemming.util.ColouredGraphConverter;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -29,7 +30,7 @@ public class BenchmarkEdgeTriangles {
     @Warmup(iterations = warmUpIterations)
     @Measurement(iterations = iterations)
     public void nodeIteratorMetric(BenchmarkGraphs.Graphs graphs) {
-        graphs.graph = NumberOfTrianglesMetricTest.getColouredGraph(graphs.fileName);
+        graphs.graph = ColouredGraphConverter.convertFileToGraph(graphs.fileName);
 
         NodeIteratorMetric metric = new NodeIteratorMetric();
         metric.apply(graphs.graph);
@@ -41,7 +42,7 @@ public class BenchmarkEdgeTriangles {
     @Warmup(iterations = warmUpIterations)
     @Measurement(iterations = iterations)
     public void edgeIteratorMetric(BenchmarkGraphs.Graphs graphs) {
-        graphs.graph = NumberOfTrianglesMetricTest.getColouredGraph(graphs.fileName);
+        graphs.graph = ColouredGraphConverter.convertFileToGraph(graphs.fileName);
 
         EdgeIteratorMetric metric = new EdgeIteratorMetric();
         metric.apply(graphs.graph);
@@ -53,7 +54,7 @@ public class BenchmarkEdgeTriangles {
     @Warmup(iterations = warmUpIterations)
     @Measurement(iterations = iterations)
     public void edgeNumberOfSimpleTriangles(BenchmarkGraphs.Graphs graphs) {
-        graphs.graph = NumberOfTrianglesMetricTest.getColouredGraph(graphs.fileName);
+        graphs.graph = ColouredGraphConverter.convertFileToGraph(graphs.fileName);
 
         EdgeNumberOfSimpleTrianglesMetric metric = new EdgeNumberOfSimpleTrianglesMetric();
         metric.apply(graphs.graph);
@@ -65,7 +66,7 @@ public class BenchmarkEdgeTriangles {
     @Warmup(iterations = warmUpIterations)
     @Measurement(iterations = iterations)
     public void multiThreadedNodeNeighborsCommonEdgesMetric(BenchmarkGraphs.Graphs graphs) {
-        graphs.graph = NumberOfTrianglesMetricTest.getColouredGraph(graphs.fileName);
+        graphs.graph = ColouredGraphConverter.convertFileToGraph(graphs.fileName);
 
         MultiThreadedNodeNeighborsCommonEdgesMetric metric = new MultiThreadedNodeNeighborsCommonEdgesMetric();
         metric.apply(graphs.graph);
@@ -77,7 +78,7 @@ public class BenchmarkEdgeTriangles {
     @Warmup(iterations = warmUpIterations)
     @Measurement(iterations = iterations)
     public void forwardMetric(BenchmarkGraphs.Graphs graphs) {
-        graphs.graph = NumberOfTrianglesMetricTest.getColouredGraph(graphs.fileName);
+        graphs.graph = ColouredGraphConverter.convertFileToGraph(graphs.fileName);
 
         ForwardEdgeTriangleMetric metric = new ForwardEdgeTriangleMetric();
         metric.apply(graphs.graph);

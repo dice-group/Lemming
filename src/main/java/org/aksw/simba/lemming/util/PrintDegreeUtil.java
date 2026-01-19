@@ -13,7 +13,6 @@ import java.util.Set;
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.creation.GraphCreator;
 import org.aksw.simba.lemming.creation.GraphReverter;
-import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.NodeIterator;
@@ -22,6 +21,8 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+
+import com.google.common.collect.Iterators;
 
 public class PrintDegreeUtil {
 	
@@ -34,7 +35,7 @@ public class PrintDegreeUtil {
 	 * @param dataset
 	 */
 	public static void printInOutDegrees(Model model, String dataset) {
-		GraphCreator creator = new GraphCreator();
+		GraphCreator creator = new GraphCreator(false);
 		ColouredGraph colouredGraph = creator.processModel(model);
 		GraphReverter reverter = new GraphReverter(colouredGraph, ModelFactory.createDefaultModel());
 		Model revertedGraph = reverter.processGraph();

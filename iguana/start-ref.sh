@@ -1,7 +1,11 @@
-pkill -f blazegraph
-rm ref/blazegraph.jnl
-cd ref && /usr/lib/jvm/java-8-oracle/bin/java -server -Djetty.port=6666 -jar blazegraph.jar  &
-sleep 10
-curl -X POST -H 'Content-Type:text/turtle' --data-binary "@$1" "http://localhost:6666/blazegraph/sparql"
+#!/usr/bin/bash 
 
+pkill -f fuseki
+
+rm -rf /local/iguana/ref/apache-jena-fuseki-5.5.0/REF/
+
+/local/iguana/ref/apache-jena-5.5.0/bin/tdb1.xloader --loc /local/iguana/ref/apache-jena-fuseki-5.5.0/REF "$1" 
+cd /local/iguana/ref/apache-jena-fuseki-5.5.0/ && ./fuseki-server --port 3131 --loc=REF /ref &
+
+sleep 1m
 

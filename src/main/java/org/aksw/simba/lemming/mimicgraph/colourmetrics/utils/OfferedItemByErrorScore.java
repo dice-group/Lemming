@@ -1,5 +1,6 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics.utils;
 
+import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 
@@ -31,6 +32,11 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 		mArrBaseItemProb = new double[mLengthOfArr];
 		copyData(objDist);
 		buildSimulatedArray();
+	}
+	
+	@Override
+	public int getLength() {
+		return mArrBaseItems.length;
 	}
 	
 	private void copyData(ObjectDistribution<T> objDist){
@@ -112,6 +118,10 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 
 	@Override
 	public T getPotentialItem() {
+		return getPotentialItem(mArrBaseItems);
+	}
+	
+	public T getPotentialItem(T[] mArrBaseItems) {
 
 		int potentialIndex = -1;
 		if(mRuntimeNoOfItems == 0){
@@ -196,12 +206,16 @@ public class OfferedItemByErrorScore<T> implements IOfferedItem<T> {
 		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.aksw.simba.lemming.mimicgraph.colourmetrics.utils.IOfferedItem#getSeed()
-	 */
-	@Override
-	public long getSeed() {
-		return 0;
+	@Override	
+	public T getPotentialItemRemove(Set<T> setOfRemoval) {
+		T[] minus = Arrays.stream(mArrBaseItems)
+                .filter(item -> !setOfRemoval.contains(item))
+                .toArray(size -> Arrays.copyOf(mArrBaseItems, size));
+		
+		if (minus.length == 0) {
+			return null;
+		}
+		return getPotentialItem(minus);
 	}
 	
 	

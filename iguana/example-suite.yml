@@ -1,0 +1,27 @@
+datasets:
+  - name: "GraphName"
+
+connections:
+  - name: "TSTORE"
+    endpoint: "ENDPOINT"
+    dataset: "GraphName"
+    
+tasks:
+  - type: "stresstest"
+    workers:
+      - type: "SPARQLProtocolWorker"   
+        number: 1   
+        connection: "TSTORE" 
+        queries:
+          path: "queries/QUERYFILE"
+          format: "one-per-line" 
+        completionTarget:
+          number: 100
+        timeout: "3 min" 
+        acceptHeader: "application/sparql-results+json"
+        requestType: "post url-enc query"
+
+storages:
+  - type: "csv file"
+    directory: "./results/"
+

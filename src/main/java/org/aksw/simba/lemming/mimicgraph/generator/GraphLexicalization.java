@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.mimicgraph.colourmetrics.AvrgColouredVDistPerDTEColour;
+import org.aksw.simba.lemming.mimicgraph.generator.binary.GraphInitializer;
 import org.aksw.simba.lemming.mimicgraph.literals.RDFLiteralGenertor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class GraphLexicalization {
 
 	public ColouredGraph lexicalizeGraph(ColouredGraph mimicGraph, Map<BitSet, IntSet> mapVColoToVertices) {
 		LOGGER.info("Start lexicalizing the mimic graph");
-
+		
 		/*
 		 * get a list of data typed edge's colours
 		 */
@@ -47,8 +48,8 @@ public class GraphLexicalization {
 		 */
 		Set<BitSet> setOfDTEColours = mapVColoDistPerDTEColo.keySet();
 
-		LOGGER.info("Generate "+ setOfDTEColours.size()+ " datatype edge colours (datatype properties)");
-		int iCounter = 0;
+//		LOGGER.info("Generate "+ setOfDTEColours.size()+ " datatype edge colours (datatype properties)");
+//		int iCounter = 0;
 		/*
 		 * accordingly to each data typed edge's colour, we get an average
 		 * number of vertices in a particular vertex's colour
@@ -56,9 +57,9 @@ public class GraphLexicalization {
 		for (BitSet dteColo : setOfDTEColours) {
 			ObjectDoubleOpenHashMap<BitSet> vColoDistPerDTEColour = mapVColoDistPerDTEColo.get(dteColo);
 			
-			LOGGER.info("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
+//			LOGGER.info("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
 			//System.err.println("-- Process datatype edge: " + dteColo +"("+iCounter+"/"+setOfDTEColours.size()+")");
-			iCounter++;
+//			iCounter++;
 			if (vColoDistPerDTEColour != null) {
 				Object[] arrOfProcessedVColours = vColoDistPerDTEColour.keys;
 				for (int i = 0; i < arrOfProcessedVColours.length; ++i) {
@@ -67,28 +68,32 @@ public class GraphLexicalization {
 						double avrgNoOfVertices = vColoDistPerDTEColour.values[i];
 
 						if (mapVColoToVertices.containsKey(vColo)) {
-							int[] arrOfVertices = mapVColoToVertices.get(vColo)
-									.toIntArray();
+							int[] arrOfVertices = mapVColoToVertices.get(vColo).toIntArray();
 
-							double numOfConsidedVertices = avrgNoOfVertices	* arrOfVertices.length;
-							if (numOfConsidedVertices == 0) {
-								numOfConsidedVertices = 1;
-							}
-							numOfConsidedVertices = Math.round(numOfConsidedVertices);
-							//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
-							Random rand = new Random();
-							int counterVertices = 0;
-							while (counterVertices < numOfConsidedVertices) {
-								
-								// get a
-								int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
-								LOGGER.info("---- Generate literals for vertex " + vId +" ("+(counterVertices+1)+"/"+numOfConsidedVertices+ ")...");
-								// get literal
-								String literal = mLiteralProposer.getValue(vColo, dteColo);
-
-								// add it to the coloured graph
-								mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
-								counterVertices++;
+							if (arrOfVertices.length > 0 ) { 
+								double numOfConsidedVertices = avrgNoOfVertices	* arrOfVertices.length;
+								if (numOfConsidedVertices == 0) {
+									numOfConsidedVertices = 1;
+								}
+								numOfConsidedVertices = Math.round(numOfConsidedVertices);
+								//System.out.println("[Test] Number of considered vertices: " + numOfConsidedVertices);
+								Random rand = new Random();
+								int counterVertices = 0;
+								while (counterVertices < numOfConsidedVertices) {
+									
+									// get a
+									int vId = arrOfVertices[rand.nextInt(arrOfVertices.length)];
+//									LOGGER.info("---- Generate literals for vertex " + vId +" ("+(counterVertices+1)+"/"+numOfConsidedVertices+ ")...");
+									// get literal
+									String literal = mLiteralProposer.getValue(vColo, dteColo);
+	
+									// add it to the coloured graph
+									mimicGraph.addLiterals(literal, vId, dteColo, mLiteralProposer.getLiteralType(dteColo) );
+									counterVertices++;
+								}
+							
+							} else {
+								LOGGER.warn("Expected a type of node: " + vColo + ", but none found");
 							}
 						}
 					}
@@ -97,5 +102,15 @@ public class GraphLexicalization {
 		}
 		LOGGER.info("End lexicalizing the mimic graph");
 		return mimicGraph;
+	}
+	
+	/**
+	 * connection typed resource vertices to its class with edge of rdf:type
+	 * if a vertex has a colour, then it connect to some vertices with rdf:type edges.
+	 * the number of connected heads is dependent on the number of colour the target has
+	 */
+	public void connectVerticesWithRDFTypeEdges(ColouredGraph mimicGraph, GraphInitializer graphInit){
+		graphInit.connectVerticesWithRDFTypeEdges(mimicGraph);
+		
 	}
 }

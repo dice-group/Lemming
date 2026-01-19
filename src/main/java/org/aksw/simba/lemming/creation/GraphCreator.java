@@ -1,15 +1,19 @@
 package org.aksw.simba.lemming.creation;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import org.aksw.simba.lemming.ColouredGraph;
 import org.aksw.simba.lemming.colour.ColourPalette;
 import org.aksw.simba.lemming.colour.InMemoryPalette;
+import org.aksw.simba.lemming.util.ModelUtil;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -35,12 +39,13 @@ public class GraphCreator {
 	protected ColourPalette vertexPalette;
 	protected ColourPalette edgePalette;
 
-	protected ColourPalette datatypedEdgePalette;
 	protected Map<Resource, Set<RDFDatatype>> dataTypedProperties;
+	protected ColourPalette datatypedEdgePalette;
+	protected boolean includeType;
 
-	public GraphCreator() {
-		// Initialize the classes
-		classes = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+	public GraphCreator(boolean includeType) {
+		// Initialize the classes, OWL.class and RDF.class has the same color
+		classes = new ObjectObjectOpenHashMap<>();
 		classes.put(RDFS.Class, new HierarchyNode());
 		classes.put(OWL.Class, new HierarchyNode());
 		classes.put(RDF.Property, new HierarchyNode());
@@ -49,118 +54,192 @@ public class GraphCreator {
 		vertexPalette.setColour(OWL.Class.getURI(), vertexPalette.getColour(RDFS.Class.getURI()));
 		vertexPalette.addColour(RDF.Property.getURI());
 		// Initialize the properties
-		properties = new ObjectObjectOpenHashMap<Resource, HierarchyNode>();
+		properties = new ObjectObjectOpenHashMap<>();
 		properties.put(RDF.type, new HierarchyNode());
 		edgePalette = new InMemoryPalette();
 		edgePalette.addColour(RDF.type.getURI());
 
-		dataTypedProperties = new HashMap<Resource, Set<RDFDatatype>>();
+		// data type edge connected literal
+		dataTypedProperties = new HashMap<>();
 		datatypedEdgePalette = new InMemoryPalette();
+		this.includeType = includeType;
 	}
 
 	public ColouredGraph processModel(Model model) {
+		Map<Resource, Integer> bNodes = new HashMap<>();
+		Map<Resource, Set<Statement>> bNodeStmts = new HashMap<>();
 		ColourPalette vertexPalette = createVertexPalette(model);
 		ColourPalette edgePalette = createEdgePalette(model);
 		ColouredGraph graph = new ColouredGraph(vertexPalette, edgePalette);
-		ObjectIntOpenHashMap<Resource> resourceIdMapping = new ObjectIntOpenHashMap<Resource>();
+		ObjectIntOpenHashMap<String> resourceIdMapping = new ObjectIntOpenHashMap<String>();
 		StmtIterator iterator = model.listStatements();
 		Statement statement;
-		Resource subject, object;
+		Resource subject;
+		RDFNode objO;
 		Property property;
-		int subjectId, propertyId, objectId;
-		String propertyUri;
 		// Iterator over all statements
 		while (iterator.hasNext()) {
 			statement = iterator.next();
 			subject = statement.getSubject();
-			// Add the subject if it is not existing
-			if (resourceIdMapping.containsKey(subject)) {
-				subjectId = resourceIdMapping.get(subject);
-			} else {
-				subjectId = graph.addVertex();
-				resourceIdMapping.put(subject, subjectId);
-			}
-			// if this statement has a resource as object
-			if (statement.getObject().isResource()) {
-				// Add the object if it is not existing
-				object = statement.getObject().asResource();
-				if (resourceIdMapping.containsKey(object)) {
-					objectId = resourceIdMapping.get(object);
-				} else {
-					objectId = graph.addVertex();
-					resourceIdMapping.put(object, objectId);
-				}
-				// Add the property if it is not existing
-				property = statement.getPredicate();
-				propertyId = graph.addEdge(subjectId, objectId);
-				// Set the colour of the edge
-				propertyUri = property.getURI();
-				if (!edgePalette.containsUri(propertyUri)) {
-					edgePalette.addColour(propertyUri);
-				}
-				graph.setEdgeColour(propertyId, edgePalette.getColour(propertyUri));
+			property = statement.getPredicate();
+			objO = statement.getObject();
 
-				// if this triple defines the class of the subject
-				if (property.equals(RDF.type)) {
-					graph.setVertexColour(subjectId,
-							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
-				}
+			// if there is a blank node combination
+			boolean hasAnon = false;
+			if (subject.isAnon() && objO.isURIResource()) {
+				hasAnon = true;
+				final Integer hash = ModelUtil.combineHash(property, objO.asResource());
+				bNodes.computeIfPresent(subject, (key, value) -> ModelUtil.combineHash(hash, value));
+				bNodes.putIfAbsent(subject, hash);
+				bNodeStmts.computeIfAbsent(subject, k -> new LinkedHashSet<>()).add(statement);
+			} else if (objO.isAnon() && subject.isURIResource()) {
+				hasAnon = true;
+				final Integer hash = ModelUtil.combineHash(property, subject);
+				bNodes.computeIfPresent(objO.asResource(), (key, value) -> ModelUtil.combineHash(hash, value));
+				bNodes.putIfAbsent(objO.asResource(), hash);
+				bNodeStmts.computeIfAbsent(objO.asResource(), k -> new LinkedHashSet<>()).add(statement);
+			} else if (subject.isAnon() && objO.isAnon()) {
+				hasAnon = true;
+				final Integer hash = property.hashCode();
+				bNodes.computeIfPresent(subject, (key, value) -> ModelUtil.combineHash(hash, value));
+				bNodes.computeIfPresent(objO.asResource(), (key, value) -> ModelUtil.combineHash(hash, value));
+				bNodes.putIfAbsent(subject, hash);
+				bNodes.putIfAbsent(objO.asResource(), hash);
+				bNodeStmts.computeIfAbsent(subject, k -> new LinkedHashSet<>()).add(statement);
+			}
+			// save triples with blank nodes for later
+			if (hasAnon) {
+				continue;
 			}
 
-			/*
-			 * ------------------------------------------------- if this statement has an
-			 * object as a literal -------------------------------------------------
-			 */
-			else {
+			// process statement otherwise
+			processStatement(statement, resourceIdMapping, graph);
+		}
 
-				// data typed property
-				property = statement.getPredicate();
-				propertyUri = property.getURI();
-
-				if (statement.getObject().isLiteral()) {
-					// literal
-					Literal literal = statement.getObject().asLiteral();
-					RDFDatatype litType = literal.getDatatype();
-
-					String datatype = litType != null ? litType.getURI() : "";
-
-					// put datatype property to the palette
-					if (!datatypedEdgePalette.containsUri(propertyUri)) {
-						datatypedEdgePalette.addColour(propertyUri);
-					}
-					BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
-					/*
-					 * a trick for semantic web dog food
-					 */
-					String defaultDataType = "http://www.w3.org/2001/XMLSchema#string";
-					if (propertyUri.contains("label"))
-						datatype = defaultDataType;
-
-					// add to the coloured graph
-					graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour, datatype);
-				}
+		// process statements involving blank nodes last
+		TreeSet<Resource> sortedKeys = new TreeSet<>(new Comparator<Resource>() {
+			@Override
+			public int compare(Resource r1, Resource r2) {
+				return bNodes.get(r1).compareTo(bNodes.get(r2));
+			}
+		});
+		sortedKeys.addAll(bNodes.keySet());
+		for(Resource curBNode: sortedKeys) {
+			Set<Statement> bStmts = bNodeStmts.get(curBNode);
+			if(bStmts == null)
+				continue;
+			for(Statement curStmt: bStmts) {
+				processStatement(curStmt, resourceIdMapping, graph);
 			}
 		}
 
 		// set the datatypedEdgePalette to the graph
 		graph.setDataTypeEdgePalette(datatypedEdgePalette);
+
+		// sort palettes
+
 		return graph;
 	}
 
+	protected void processStatement(Statement statement, ObjectIntOpenHashMap<String> resourceIdMapping, ColouredGraph graph) {
+		Resource subject = statement.getSubject();
+		Property property = statement.getPredicate();
+		RDFNode objO = statement.getObject();
+
+		String subjectStr = subject.toString();
+		String objectStr = objO.toString();
+		int subjectId;
+		int propertyId;
+		int objectId;
+
+		// Add the subject if it is not existing
+		if (resourceIdMapping.containsKey(subjectStr)) {
+			subjectId = resourceIdMapping.get(subjectStr);
+		} else {
+			subjectId = graph.addVertex();
+			resourceIdMapping.put(subjectStr, subjectId);
+		}
+
+		// if this statement has a resource as object
+		if (statement.getObject().isResource()) {
+			// Add the object if it is not existing
+			Resource object = statement.getObject().asResource();
+
+			// if this triple defines the class of the subject
+			if (property.equals(RDF.type)) {
+				if (object.isURIResource())
+					graph.setVertexColour(subjectId,
+							vertexPalette.addToColour(graph.getVertexColour(subjectId), object.getURI()));
+				// skip, we don't want to add the edge to the graph
+				if(!includeType)
+					return;
+			}
+
+			if (resourceIdMapping.containsKey(objectStr)) {
+				objectId = resourceIdMapping.get(objectStr);
+			} else {
+				objectId = graph.addVertex();
+				resourceIdMapping.put(objectStr, objectId);
+			}
+			// Add the property if it is not existing
+			propertyId = graph.addEdge(subjectId, objectId);
+			// Set the colour of the edge
+			String propertyUri = property.getURI();
+			if (!edgePalette.containsUri(propertyUri)) {
+				edgePalette.addColour(propertyUri);
+			}
+			graph.setEdgeColour(propertyId, edgePalette.getColour(propertyUri));
+		}
+
+		/*
+		 * if this statement has an object as a literal
+		 */
+		else {
+			String propertyUri = property.getURI();
+
+			if (statement.getObject().isLiteral()) {
+				// literal
+				Literal literal = statement.getObject().asLiteral();
+				RDFDatatype litType = literal.getDatatype();
+
+				String datatype = litType != null ? litType.getURI() : "";
+
+				// put datatype property to the palette
+				if (!datatypedEdgePalette.containsUri(propertyUri)) {
+					datatypedEdgePalette.addColour(propertyUri);
+				}
+				BitSet datatypedEdgeColour = datatypedEdgePalette.getColour(propertyUri);
+				/*
+				 * a trick for semantic web dog food
+				 */
+				String defaultDataType = "http://www.w3.org/2001/XMLSchema#string";
+				if (propertyUri.contains("label"))
+					datatype = defaultDataType;
+
+				// add to the coloured graph
+				graph.addLiterals(literal.toString(), subjectId, datatypedEdgeColour, datatype);
+			}
+		}
+	}
+	
 	protected ColourPalette createVertexPalette(Model model) {
+		// list all classes, put them into classes hierarchyNode map
 		NodeIterator nIterator = model.listObjectsOfProperty(RDF.type);
 		RDFNode node;
-		Resource resource1, resource2;
+		Resource resource1;
+		Resource resource2;
 		while (nIterator.hasNext()) {
 			node = nIterator.next();
-			if (node.isResource()) {
+			if (node.isURIResource()) {
 				resource1 = node.asResource();
 				classes.put(resource1, null);
 			}
 		}
+		// list all statements with property RDFS.subClassOf
 		StmtIterator sIterator = model.listStatements(null, RDFS.subClassOf, (RDFNode) null);
 		Statement statement;
-		HierarchyNode hNode1, hNode2;
+		HierarchyNode hNode1;
+		HierarchyNode hNode2;
 		// Iterate over the class hierarchy triples
 		while (sIterator.hasNext()) {
 			statement = sIterator.next();
@@ -195,19 +274,19 @@ public class GraphCreator {
 					classes.put(resource2, hNode2);
 				}
 				// add the hierarchy information
-				// if there is no list of child nodes
-				if (hNode1.childNodes == null) {
-					hNode1.childNodes = new Resource[] { resource2 };
-				} else {
-					hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
-					hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
-				}
 				// if there is no list of parent nodes
-				if (hNode2.parentNodes == null) {
-					hNode2.parentNodes = new Resource[] { resource1 };
+				if (hNode1.parentNodes == null) {
+					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
-					hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
-					hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
+					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
+				}
+				// if there is no list of child nodes
+				if (hNode2.childNodes == null) {
+					hNode2.childNodes = new Resource[] { resource1 };
+				} else {
+					hNode2.childNodes = Arrays.copyOf(hNode2.childNodes, hNode2.childNodes.length + 1);
+					hNode2.childNodes[hNode2.childNodes.length - 1] = resource1;
 				}
 			} else {
 				// this triple seems to be wrong
@@ -273,19 +352,19 @@ public class GraphCreator {
 					properties.put(resource2, hNode2);
 				}
 				// add the hierarchy information
-				// if there is no list of child nodes
-				if (hNode1.childNodes == null) {
-					hNode1.childNodes = new Resource[] { resource2 };
-				} else {
-					hNode1.childNodes = Arrays.copyOf(hNode1.childNodes, hNode1.childNodes.length + 1);
-					hNode1.childNodes[hNode1.childNodes.length - 1] = resource2;
-				}
 				// if there is no list of parent nodes
-				if (hNode2.parentNodes == null) {
-					hNode2.parentNodes = new Resource[] { resource1 };
+				if (hNode1.parentNodes == null) {
+					hNode1.parentNodes = new Resource[] { resource2 };
 				} else {
-					hNode2.parentNodes = Arrays.copyOf(hNode2.parentNodes, hNode2.parentNodes.length + 1);
-					hNode2.parentNodes[hNode2.parentNodes.length - 1] = resource1;
+					hNode1.parentNodes = Arrays.copyOf(hNode1.parentNodes, hNode1.parentNodes.length + 1);
+					hNode1.parentNodes[hNode1.parentNodes.length - 1] = resource2;
+				}
+				// if there is no list of child nodes
+				if (hNode2.childNodes == null) {
+					hNode2.childNodes = new Resource[] { resource1 };
+				} else {
+					hNode2.childNodes = Arrays.copyOf(hNode2.childNodes, hNode2.childNodes.length + 1);
+					hNode2.childNodes[hNode2.childNodes.length - 1] = resource1;
 				}
 			}
 		}
@@ -317,7 +396,7 @@ public class GraphCreator {
 			ObjectObjectOpenHashMap<Resource, HierarchyNode> classes, ColourPalette palette) {
 		// keep track of the already visited nodes
 		Set<HierarchyNode> visitedChildren = new HashSet<HierarchyNode>();
-		
+
 		// initialize with the starting node's children
 		Stack<HierarchyNode> childrenStack = new Stack<HierarchyNode>();
 		for (int i = 0; i < hNode.childNodes.length; ++i) {
@@ -328,18 +407,18 @@ public class GraphCreator {
 		// go through the stack and iteratively add every node's children
 		while (!childrenStack.isEmpty()) {
 			HierarchyNode curNode = childrenStack.pop();
-			if(curNode.childNodes == null) {
+			if (curNode.childNodes == null) {
 				continue;
 			}
 			for (int i = 0; i < curNode.childNodes.length; ++i) {
 				HierarchyNode childNode = classes.get(curNode.childNodes[i]);
 				palette.mixColour(resource.getURI(), curNode.childNodes[i].getURI());
 				visitedChildren.add(childNode);
-				if(!visitedChildren.contains(childNode)) {
+				if (!visitedChildren.contains(childNode)) {
 					childrenStack.add(childNode);
 				}
 			}
-		} 
+		}
 
 //		for (int i = 0; i < hNode.childNodes.length; ++i) {
 //			childNode = classes.get(hNode.childNodes[i]);

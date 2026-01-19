@@ -1,107 +1,93 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/abe2f703880e4a61b44790dc2fe0a534)](https://www.codacy.com/gh/dice-group/Lemming/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dice-group/Lemming&amp;utm_campaign=Badge_Grade)
 
-<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
+<p align="center">
+	<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
+</p>
 
-# Lemming
-LEMMING is an ExaMple MImickiNg graph Generator
 
-## Approach overview
+# LEMMING: Example Mimicking Knowledge Graph Generators
+This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator, and **SimplexKG**, A Simplex Approach to Synthetic Knowledge Graph Generation (Link to be added).
 
-1. **Load RDF graphs**  
+LEMMING contains Synthetic Knowledge Graph Generators based on instance data.
 
-The classes responsible to load the RDF graphs are under the package `org.aksw.simba.lemming.creation`. The graphs are first read from file and are then converted to coloured graphs by `GraphCreator.java`.
+## Prerequisites and Project Build
+### Prerequisites
 
-2. **Initialize a draft graph** 
+- **Java Development Kit (JDK)**: Version 17 or later.
 
-The mimic graph is initialized based on the target graph's metrics. All the generator types are located under `org.aksw.simba.lemming.mimicgraph.generator`.
+- **Apache Maven**: Version 3.6.
 
-3. **Optimize the graph** 
-
-In `GraphOptimization.java`, two graphs are created by adding and removing an edge from the generated graph. The error score is then computed for these two graphs and the one with the lowest error score is chosen for the next iteration until either the number of maximum iterations has been reached or no improvement is found on the graph for the past 5 000 iterations.
-
-4. **Finalize the graph with semantic data** 
-
-The optimized graph is finalized as a real-world RDF graph in `GraphLexicalization.java` by rendering all the resources' IRIs.
-
-## Process overview
-1. Run metric computation on all graphs
-2. Run graph generation without the target graph in the file path
-
-Place the files present in ``https://hobbitdata.informatik.uni-leipzig.de/lemming/resources.zip`` and in the ``Input graphs/`` folder of ``https://hobbitdata.informatik.uni-leipzig.de/lemming/Experiments_data.zip`` under lemming's directory.
-
-### Metrics pre-computation
-First, the metrics need to be computed on all available graphs of its corresponding dataset: ``Experiments_data/Input graphs``. The pre-computation can be achieved by indicating the dataset through:
+### Building the project
+You can either use the pre-built JAR file provided in this repository, or build it yourself using:
 
 ```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.PrecomputingValues" -Dexec.args="pg" 
+mvn clean package
+```
+The JAR file will be located in the target directory after the build process is complete.
+
+#### Sample run
+
+```
+mvn clean package
+java -jar target/lemming.jar single-graph -ds test -dp src/test/resources/snippet_linkedgeo.nt -nv 10
 ```
 
-This will produce a file named ``value_store.val`` to be used during graph generation. It is recommended to move/rename the previous metrics store before re-running the store generation.
 
-### Graphs generation
+## How to run
+LEMMING currently supports 2 graph generation processes.
+
+### 1. Versioned graph generation
+
+ The first as presented in [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015) requires a versioned dataset as input.
+
+```
+java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
+```
+
+**Parameters**
 
 <table>
   <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
-  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">-dp</th><td>True</td><td>NA</td><td>Dataset path. Only required in single-graph mode and when the dataset is not present in application.properties. </td></tr>
   <tr><th align="left">-nv</th><td>True</td><td>NA</td><td>Desired number of vertices in the generated graph (number of vertices of the target graph)</td></tr>
-  <tr><th align="left">-t</th><td>False</td><td>R</td><td>Type of graph generator {R, RR, C, CD, D, DD}</td></tr>
-  <tr><th align="left">-l</th><td>False</td><td>Initialized_MimicGraph.ser</td><td> File path where to save the initialized mimic graph. If a graph already exists there, the mimic graph generation will be skipped and loaded from file instead.</td></tr>
+  <tr><th align="left">-thrs</th><td>False</td><td>1</td><td>Number of threads</td></tr>
   <tr><th align="left">-s</th><td>False</td><td>System.currentTimeMillis()</td><td>Seed for results reproduction.</td></tr>
-  <tr><th align="left">-thrs</th><td>False</td><td>availableProcessors*4</td><td>Number of threads</td></tr>
-  <tr><th align="left">-op</th><td>False</td><td>50 000</td><td>Number of optimization iterations</td></tr>
+  <tr><th align="left">-m</th><td>False</td><td>Binary</td><td>Generation type {Binary, Simplex, Baseline}</td></tr>
+  <tr><th align="left">-c</th><td>False</td><td>UCS</td><td>Type of class selector {UCS, BCS, CCS}</td></tr>
+  <tr><th align="left">-v</th><td>False</td><td>UCS</td><td>Type of vertex selector {UIS, BIS}</td></tr>
+  <tr><th align="left">-sp</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex property sampling scheme, either biased or uniform. {BP, UP}</td></tr>
+  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used in Simplex mode. Simplex class sampling scheme, either biased or uniform. {BC, UC}</td></tr>
+  <tr><th align="left">-sc</th><td>False</td><td>UCS</td><td>Only used for baseline generators. Barabási–Albert and Watts–Strogatz. {BA, WS}</td></tr>
+  <tr><th align="left">-op</th><td>False</td><td>0</td><td>Number of optimization iterations</td></tr>
 </table>
 
-To run the graph generation, you can use maven's plugin:
+### 2. Single-version graph generation
+
+This mode requires only one graph version as input and skips the preprocessing and the optimization stage as a result.
 
 ```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.GraphGenerationTest" -Dexec.args="-ds pg -nv 792923 -t R -op 30000" 
+java -jar lemming.jar single-graph -ds <dataset> -dp <dataset-path> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
 ```
 
-To run the graph generation for the baseline generator, use:
+### Preprocessing stage 
 
-```
-mvn exec:java -Dexec.mainClass="org.aksw.simba.lemming.tools.BuildBaselineGraph" -Dexec.args="-ds pg -nv 792923" 
-```
+LEMMING includes a preprocessing stage where invariant arithmetic expressions are learned for a given dataset. This stage runs by default if LEMMING does not find the path to the preprocessed data. The expressions are saved in ``value_store.val``. However, you can explicitly run it using:
 
-You should move the target graph before starting the graph generation. The target graph is also called held-out graph, it's usually the latest graph of the versioned dataset.
-
-From the metrics pre-computation step, you can get the number of vertices of the target graph. This will serve as an input to the graph generation. 
-Below is a table with the currently accepted datasets and the number of vertices of its target graph.
-
+ ```
+ java -jar lemming.jar store -ds <dataset>
+ ```
+ 
+ **Parameters**
+ 
 <table>
-  <tr><th align="left">Dataset</th><th align="center">No. vertices</th><th>Folder</th><th>Description</th><th>Target graph</th></tr>
-  <tr><th align="left">pg</th><td align="center">792 923</td><td>PersonGraph/</td><td>Person Graph (subset of DBpedia)</td><td align="center">2016-10</td></tr>
-  <tr><th align="left">swdf</th><td align="center">45 420</td><td>SemanticWebDogFood/</td><td>Semantic Web Dog Food</td><td align="center">2015</td></tr>
-  <tr><th align="left">lgeo</th><td align="center">591 649</td><td>LinkedGeoGraphs/</td><td>Linked Geo Data</td><td align="center">2015</td></tr>
-  <tr><th align="left">geology</th><td align="center">1 281</td><td>GeologyGraphs/</td><td> International Chronostratigraphic Chart</td><td align="center">2018-1</td></tr>
+  <tr><th align="left">Parameter</th><th>Required</th><th>Default</th><th>Description</th></tr>
+  <tr><th align="left">-ds</th><td>True</td><td>NA</td><td>Dataset {dbp, pg, swdf, lgeo, geology}</td></tr>
+  <tr><th align="left">-dp</th><td>True</td><td>NA</td><td>Dataset path. Only required when the dataset is not present in application.properties. </td></tr>
+  <tr><th align="left">--min-fitness</th><td>False</td><td>100000.0</td><td>Minimum Fitness</td></tr>
+  <tr><th align="left">---max-iterations</th><td>False</td><td>50</td><td>Maximum number of iterations</td></tr>
 </table>
-
-### Reproducing experiments
-You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh pg``. Before starting/switching datasets, make sure you have the right ``value_store.val`` file.
-
-The metrics and constant expressions values can be found in ``LemmingEx.result``. 
-
-The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. You can find the queries used for each dataset under ``Experiments_data/IGUANA experiments/queries``. The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after type inference and materialization).
-
-IGUANA produces a N-Triple file with the metrics of interest: Query Mixes Per Hour (QMPH), No. Queries Per Hour (NoQPH) and Queries Per Second (QPS). 
-
-<!-- commented
-These can be collected through the results file:
-
-```
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/noOfQueriesPerHour> "2854.432211867693"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669>  <http://iguana-benchmark.eu/properties/queryMixes> "135.92534342227108"^^<http://www.w3.org/2001/XMLSchema#double> . 
- <http://iguana-benchmark.eu/recource/391/1/1/-395538669/sparql0>  <http://iguana-benchmark.eu/properties/queriesPerSecond> "70.97457627118645"^^<http://www.w3.org/2001/XMLSchema#double> . 
-```
--->
-
-
-We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
-To use them, you need to specify the folder where the graphs are located: 
-
-```
-./exec_all.sh /home/lemming/generated_graphs/
-```
+ 
 
 ### Used data and software
 
@@ -110,6 +96,34 @@ Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/s
 For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/data/email-Eu-core.html) published by the Stanford University. It has been transformed into a simple RDF file.
 
 The [Lemming logo](https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png) has been created by [TortugaAttack](https://github.com/TortugaAttack).
+
+
+# Reproducing experiments
+Download the datasets with:
+
+```
+wget https://files.dice-research.org/projects/Lemming/datasets.tar.gz && tar -xzf datasets.tar.gz --remove-files
+```
+
+Generate the graphs for all generator types for all datasets:
+ 
+```
+bash generate_graphs.sh swdf 32
+bash generate_graphs.sh lgeo 32
+bash generate_graphs.sh geology 32
+```
+
+The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. 
+The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after materialization).
+We have prepared scripts to manage the lifecycle of the triplestores, as well as upload the graphs to the triple store and starting IGUANA:
+
+
+```
+bash run_all.sh /home/lemming/generated_graphs/
+```
+
+## Files
+You can find the original LEMMING files in [here](https://files.dice-research.org/projects/Lemming/ICSC_2021/) and the SimplexKG files [here](https://files.dice-research.org/projects/Lemming/WWW_2026/).
 
 # How to cite
 ```

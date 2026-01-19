@@ -19,7 +19,7 @@ package org.aksw.simba.lemming.algo.refinement.redberry;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.algo.expression.AtomicVariable;
 import org.aksw.simba.lemming.algo.expression.Constant;
 import org.aksw.simba.lemming.algo.expression.Expression;
@@ -35,13 +35,24 @@ import org.junit.runners.Parameterized.Parameters;
 
 @RunWith(Parameterized.class)
 public class RedberryBasedFactoryTest {
+	
+	private Expression expression1;
+	private Expression expression2;
+	private boolean expectExpressionsToBeEqual;
+
+	public RedberryBasedFactoryTest(Expression expression1, Expression expression2,
+			boolean expectExpressionsToBeEqual) {
+		this.expression1 = expression1;
+		this.expression2 = expression2;
+		this.expectExpressionsToBeEqual = expectExpressionsToBeEqual;
+	}
 
     @Parameters
     public static List<Object[]> data() {
         AtomicVariable x = new AtomicVariable(new TestMetric("x"));
         AtomicVariable y = new AtomicVariable(new TestMetric("y"));
         List<Object[]> tests = new ArrayList<Object[]>();
-        
+
         // x+1 == x+1
         tests.add(new Object[] { new Operation(x, new Constant(1), Operator.PLUS),
                 new Operation(x, new Constant(1), Operator.PLUS), true });
@@ -78,17 +89,6 @@ public class RedberryBasedFactoryTest {
         // x/x == null (because it is a constant)
         tests.add(new Object[] { new Operation(x, x, Operator.DIV), null, true });
         return tests;
-    }
-
-    private Expression expression1;
-    private Expression expression2;
-    private boolean expectExpressionsToBeEqual;
-
-    public RedberryBasedFactoryTest(Expression expression1, Expression expression2,
-            boolean expectExpressionsToBeEqual) {
-        this.expression1 = expression1;
-        this.expression2 = expression2;
-        this.expectExpressionsToBeEqual = expectExpressionsToBeEqual;
     }
 
     @Test
@@ -128,7 +128,7 @@ public class RedberryBasedFactoryTest {
         }
 
         @Override
-        public double apply(ColouredGraph graph) {
+        public double apply(IColouredGraph graph) {
             return 0;
         }
 

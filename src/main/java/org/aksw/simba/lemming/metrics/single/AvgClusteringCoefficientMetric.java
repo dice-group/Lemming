@@ -1,7 +1,8 @@
 package org.aksw.simba.lemming.metrics.single;
 
-import org.aksw.simba.lemming.ColouredGraph;
+import org.aksw.simba.lemming.IColouredGraph;
 import org.aksw.simba.lemming.metrics.AbstractMetric;
+import org.springframework.stereotype.Component;
 
 /**
  * This metric is the average clustering coefficient of the graph.
@@ -9,6 +10,7 @@ import org.aksw.simba.lemming.metrics.AbstractMetric;
  * @author Michael R&ouml;der (roeder@informatik.uni-leipzig.de)
  *
  */
+@Component("avgClusterCoefficient")
 public class AvgClusteringCoefficientMetric extends AbstractMetric implements SingleValueMetric {
 
     public AvgClusteringCoefficientMetric() {
@@ -16,7 +18,7 @@ public class AvgClusteringCoefficientMetric extends AbstractMetric implements Si
     }
 
     @Override
-    public double apply(ColouredGraph graph) {
+    public double apply(IColouredGraph graph) {
         return graph.getGraph().getAverageClusteringCoefficient();
     }
 

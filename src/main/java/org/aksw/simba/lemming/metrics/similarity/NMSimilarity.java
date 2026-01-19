@@ -16,7 +16,8 @@ import org.aksw.simba.lemming.metrics.single.NumberOfVerticesMetric;
  * Publication: Neighbor Similarity of Graphs and their Nodes by Neighbor Matching (author: Mladen Nikolic)
  * Compute Neighbor Matching Similarity between pairs of nodes and combine them to compute a final graph similarity.
  */
-
+//This Similarity is not relevant any more!!!
+@Deprecated
 public class NMSimilarity {
     private ColouredGraph colouredGraphA;
     private ColouredGraph colouredGraphB;

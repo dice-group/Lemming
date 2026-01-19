@@ -12,7 +12,7 @@ import org.aksw.simba.lemming.algo.refinement.fitness.LengthAwareMinSquaredError
 import org.aksw.simba.lemming.algo.refinement.fitness.ReferenceGraphBasedFitnessDecorator;
 import org.aksw.simba.lemming.algo.refinement.operator.LeaveNodeReplacingRefinementOperator;
 import org.aksw.simba.lemming.algo.refinement.redberry.RedberryBasedFactory;
-import org.aksw.simba.lemming.creation.SemanticWebDogFoodDataset;
+import org.aksw.simba.lemming.creation.datasets.SemanticWebDogFoodDataset;
 import org.aksw.simba.lemming.metrics.MetricUtils;
 import org.aksw.simba.lemming.metrics.single.SingleValueMetric;
 import org.aksw.simba.lemming.metrics.single.edgetriangles.MultiThreadedNodeNeighborsCommonEdgesMetric;
@@ -35,8 +35,6 @@ public class RefinementTest {
 
     private static final double MIN_FITNESS = 100000.0;
     private static final int MAX_ITERATIONS = 50;
-    private static final boolean USE_SEMANTIC_DOG_FOOD = true;
-    private static final String SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH = "SemanticWebDogFood/";
 
     public static void main(String[] args) {
         // MultiThreadProcessing.defaultNumberOfThreads = 1;
@@ -74,9 +72,7 @@ public class RefinementTest {
             graphs[i] = new ColouredGraph(temp, null, null, null);
         }
 
-        if (USE_SEMANTIC_DOG_FOOD) {
-            graphs = new SemanticWebDogFoodDataset().readGraphsFromFiles(SEMANTIC_DOG_FOOD_DATA_FOLDER_PATH);
-        }
+        graphs = new SemanticWebDogFoodDataset("").readGraphsFromFiles();
 
         // FitnessFunction fitnessFunc = new MinSquaredError();
         FitnessFunction fitnessFunc = new LengthAwareMinSquaredError();

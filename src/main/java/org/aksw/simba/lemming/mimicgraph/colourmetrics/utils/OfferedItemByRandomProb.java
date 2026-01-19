@@ -1,8 +1,10 @@
 package org.aksw.simba.lemming.mimicgraph.colourmetrics.utils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lemming.metrics.dist.ObjectDistribution;
 
@@ -33,11 +35,16 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 		mArrBaseItems = objDist.sampleSpace;
 		mArrBaseItemProb = objDist.values;
 		mLengthOfArr = mArrBaseItemProb.length;
-		this.seed = seed+1;
+		this.seed = seed;
 		mRandom = new Random(this.seed);
 		
 		// build the cumulative distribution array
 		buildSimulatedArray();
+	}
+	
+	@Override
+	public int getLength() {
+		return mArrBaseItems.length;
 	}
 	
 	public OfferedItemByRandomProb(ObjectDistribution<T> objDist, Set<T> setOfFilteredItems, long seed){
@@ -213,6 +220,10 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 
 	@Override
 	public T getPotentialItem() {
+		return getPotentialItem(mArrBaseItems);
+	}
+	
+	public T getPotentialItem(T[] mArrBaseItems) {
 		
 		if(mArrBaseItems.length == 1)
 			return mArrBaseItems[0];
@@ -240,7 +251,7 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	@Override
 	public T getPotentialItem(Set<T> setOfFilteredItems) {
 		
-		if(setOfFilteredItems != null){
+		if(setOfFilteredItems != null && !setOfFilteredItems.isEmpty()){
 			
 			// find the intersection of 2 set
 			
@@ -413,6 +424,17 @@ public class OfferedItemByRandomProb<T> implements IOfferedItem <T>{
 	 */
 	public void setSeed(long seed) {
 		this.seed = seed;
+	}
+	
+	public T getPotentialItemRemove(Set<T> setOfRemoval) {
+		Set<T> filter = Arrays.stream(mArrBaseItems)
+                .filter(item -> !setOfRemoval.contains(item))
+                .collect(Collectors.toSet());
+		
+		if (filter.isEmpty()) {
+			return null;
+		}
+		return getPotentialItem(filter);
 	}
 	
 	

@@ -17,5 +17,21 @@ public class ModelUtil {
 		model.remove(oldStatement);
 		model.add(newStatement);
 	}
+	
+	public static int combineHash(Object... others) {
+		int hash = 1;
+	    for (Object cur : others) {
+	        hash = hash + (cur != null ? cur.toString().hashCode() : 0);
+	    }
+	    return hash;
+	}
+	
+	public static int combineHash(Integer... others) {
+		int hash = 1;
+	    for (int cur : others) {
+	        hash += cur;
+	    }
+	    return hash;
+	}
 
 }
