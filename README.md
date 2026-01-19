@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/abe2f703880e4a61b44790dc2fe0a534)](https://www.codacy.com/gh/dice-group/Lemming/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dice-group/Lemming&amp;utm_campaign=Badge_Grade)
+[![DOI](https://zenodo.org/badge/53574253.svg)](https://doi.org/10.5281/zenodo.18302827) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/abe2f703880e4a61b44790dc2fe0a534)](https://www.codacy.com/gh/dice-group/Lemming/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dice-group/Lemming&amp;utm_campaign=Badge_Grade)
 
 <p align="center">
 	<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
