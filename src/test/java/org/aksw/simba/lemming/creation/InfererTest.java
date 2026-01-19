@@ -28,8 +28,8 @@ public class InfererTest {
 		personModel.read(ttlFileName, "TTL");
 
 		Map<String, String> rdfsMap = new HashMap<>();
-		rdfsMap.put("22-rdf-syntax-ns", "TURTLE");
-		rdfsMap.put("rdf-schema", "TURTLE");
+		rdfsMap.put("src/test/22-rdf-syntax-ns", "TURTLE");
+		rdfsMap.put("src/test/rdf-schema", "TURTLE");
 		Inferer inferer = new Inferer(false, ontFilePath, null, rdfsMap);
 
 		Model actualModel = inferer.process(personModel);
