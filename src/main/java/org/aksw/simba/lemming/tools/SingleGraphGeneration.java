@@ -60,7 +60,10 @@ public class SingleGraphGeneration {
 				return pArgs.datasetPath;
 			}
 		};
-		ColouredGraph[] graph = { mDatasetManager.readGraphsFromFolder(pArgs.datasetPath) };
+		
+		// is it a file or a folder?
+		
+		ColouredGraph[] graph = { mDatasetManager.readFileOrFolder(pArgs.datasetPath) };
 		
 		// Generation of a draft graph or loads it from file
 		long startTime = System.currentTimeMillis();

@@ -95,4 +95,23 @@ public interface IDatasetManager {
 		}
 		return graph;
 	}
+	
+	/**
+	 * Reads all graphs from a folder into a single object or a single file,
+	 * depending on the input data path.
+	 * 
+	 * @param filePath File path
+	 * @return {@link ColouredGraph} instance of the graph
+	 */
+	default public ColouredGraph readFileOrFolder(String filePath) {
+		File file = new File(filePath);
+		if (file.exists()) {
+			if (file.isFile()) {
+				return readGraphFromFile(filePath);
+			} else if (file.isDirectory()) {
+				return readGraphsFromFolder(filePath);
+			} 
+		}
+		return null;
+	}
 }
