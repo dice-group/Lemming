@@ -1,10 +1,12 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/abe2f703880e4a61b44790dc2fe0a534)](https://www.codacy.com/gh/dice-group/Lemming/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dice-group/Lemming&amp;utm_campaign=Badge_Grade)
 
-<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
+<p align="center">
+	<img src="https://files.dice-research.org/projects/Lemming/logo.png" height="300" />
+</p>
 
-# Lemming
-This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator.
-LEMMING has been extended with SimplexKG (Link to be added).
+
+# Example Mimicking Knowledge Graph Generators
+This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator, and **SimplexKG**, A Simplex Approach to Synthetic Knowledge Graph Generation (Link to be added).
 
 ## Prerequisites and Project Build
 ### Prerequisites
