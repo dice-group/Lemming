@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Example usage:
-# bash run_dataset.sh swdf 32
+# bash generate_graphs.sh swdf 32
 
 dataset="$1"			# dataset name
 thrs=$2 				# number of threads

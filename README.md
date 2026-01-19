@@ -70,7 +70,6 @@ This mode requires only one graph version as input and skips the preprocessing a
 
 ```
 java -jar lemming.jar single-graph -ds <dataset> -dp <dataset-path> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
-
 ```
 
 ### Preprocessing stage 
@@ -92,22 +91,6 @@ LEMMING includes a preprocessing stage where invariant arithmetic expressions ar
 </table>
  
 
-### Reproducing experiments
-You can use our script to generate the graphs for all generator types by specifying the dataset: ``./run_dataset.sh swdf``. 
-
-The metrics and constant expressions values can be found in ``LemmingEx.result``. 
-
-The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. 
-The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after materialization).
-
-
-We also have scripts to manage the lifecycle of the triple stores, as well as upload the graphs to the triple store and starting IGUANA. The scripts may need changes depending on the location of triple stores binary files/installation. 
-To use them, you need to specify the folder where the graphs are located: 
-
-```
-./run_all.sh /home/lemming/generated_graphs/
-```
-
 ### Used data and software
 
 Internally, Lemming is using the [Grph library](http://www.i3s.unice.fr/~hogie/software/index.php).
@@ -116,11 +99,30 @@ For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/
 
 The [Lemming logo](https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png) has been created by [TortugaAttack](https://github.com/TortugaAttack).
 
-The datasets can be downloaded with:
+
+### Reproducing experiments
+Download the datasets with:
 
 ```
 wget https://files.dice-research.org/projects/Lemming/datasets.tar.gz && tar -xzf datasets.tar.gz --remove-files
 
+```
+
+Generate the graphs for all generator types for all datasets:
+ 
+```
+bash generate_graphs.sh swdf 32
+bash generate_graphs.sh lgeo 32
+bash generate_graphs.sh geology 32
+```
+
+The triple stores benchmark was done through [IGUANA](https://github.com/dice-group/IGUANA) on Tentris, Virtuoso, Apache Jena Fuseki, GraphDB and Blazegraph triple stores. 
+The benchmarking should be run for each of the generated graphs and the target graph. Please note that the target graph in this step should be the pre-processed one (after materialization).
+We have prepared scripts to manage the lifecycle of the triplestores, as well as upload the graphs to the triple store and starting IGUANA:
+
+
+```
+bash run_all.sh /home/lemming/generated_graphs/
 ```
 
 ### Files
