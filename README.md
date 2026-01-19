@@ -30,7 +30,6 @@ The JAR file will be located in the target directory after the build process is 
 ```
 mvn clean package
 java -jar target/lemming.jar single-graph -ds test -dp src/test/resources/snippet_linkedgeo.nt -nv 10
-
 ```
 
 
@@ -43,7 +42,6 @@ LEMMING currently supports 2 graph generation processes.
 
 ```
 java -jar lemming.jar graph -ds <dataset> -nv <num_vertices> -thrs <threads> -c <class_selection> -v <vertex_selection>
-
 ```
 
 **Parameters**
@@ -100,12 +98,11 @@ For testing, we are using the [email-Eu-core network](https://snap.stanford.edu/
 The [Lemming logo](https://hobbitdata.informatik.uni-leipzig.de/lemming/logo.png) has been created by [TortugaAttack](https://github.com/TortugaAttack).
 
 
-### Reproducing experiments
+# Reproducing experiments
 Download the datasets with:
 
 ```
 wget https://files.dice-research.org/projects/Lemming/datasets.tar.gz && tar -xzf datasets.tar.gz --remove-files
-
 ```
 
 Generate the graphs for all generator types for all datasets:
@@ -125,7 +122,7 @@ We have prepared scripts to manage the lifecycle of the triplestores, as well as
 bash run_all.sh /home/lemming/generated_graphs/
 ```
 
-### Files
+## Files
 You can find the original LEMMING files in [here](https://files.dice-research.org/projects/Lemming/ICSC_2021/) and the SimplexKG files [here](https://files.dice-research.org/projects/Lemming/WWW_2026/).
 
 # How to cite
