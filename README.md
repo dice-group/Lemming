@@ -6,7 +6,7 @@
 
 
 # LEMMING: Example Mimicking Knowledge Graph Generators
-This is the repository of [LEMMING](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator, and **SimplexKG**, A Simplex Approach to Synthetic Knowledge Graph Generation (Link to be added).
+This is the repository of [**LEMMING**](https://doi.org/10.1109/ICSC50631.2021.00015), an ExaMple MImickiNg graph Generator, and [**SimplexKG**](https://dl.acm.org/doi/10.1145/3774904.3792566), A Simplex Approach to Synthetic Knowledge Graph Generation.
 
 LEMMING contains Synthetic Knowledge Graph Generators based on instance data.
 
@@ -136,5 +136,24 @@ You can find the original LEMMING files in [here](https://files.dice-research.or
   title = {LEMMING -- Example-based Mimicking of Knowledge Graphs},
   url = {https://doi.org/10.1109/ICSC50631.2021.00015},
   year = 2021
+}
+```
+
+If you use our simplex-based generators, please cite:
+```
+@inproceedings{silva2026simplex,
+  author = {Morim da Silva, Ana Alexandra and Pundir, Atul Bhopalsing and R\"{o}der, Michael and Ngonga Ngomo, Axel-Cyrille},
+  title = {A Simplex Approach to Synthetic Knowledge Graph Generation},
+  year = {2026},
+  isbn = {9798400723070},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/3774904.3792566},
+  doi = {10.1145/3774904.3792566},
+  booktitle = {Proceedings of the ACM Web Conference 2026},
+  pages = {4196–4207},
+  numpages = {12},
+  location = {United Arab Emirates},
+  series = {WWW '26}
 }
 ```
